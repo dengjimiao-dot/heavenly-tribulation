@@ -767,6 +767,16 @@ class BattleCharacter extends GameComponent with AnimationStateController {
 
       opponent!.cardFlags['damage']['total'] += finalDamage;
       opponent!.turnFlags['totalDamage'] += finalDamage;
+
+      if (opponent!.isHero) {
+        final steal = SeasonLogic.lifeStealBonus;
+        if (steal > 0) {
+          final heal = (steal * finalDamage).round();
+          if (heal > 0) {
+            opponent!.changeLife(heal, isHeal: true);
+          }
+        }
+      }
     }
 
     // bool blocked = damageDetails['blocked'] ?? false;

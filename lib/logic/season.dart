@@ -94,7 +94,7 @@ final class SeasonLogic {
       currentMods = mods is Map
           ? Map<String, dynamic>.from(mods)
           : <String, dynamic>{};
-      _restorePendingFromFlags();
+      restorePendingFromFlags();
       // 同步到存档对象，供 Hetu 脚本读取（隐藏任务刷新权重等）
       try {
         final g = GameData.game;
@@ -106,8 +106,15 @@ final class SeasonLogic {
             'mods': currentMods,
             'hiddenQuestMul': _mod('hiddenQuestMul',
                 _mod('stealthEventMul', _mod('wildEncounterMul', 1.0))),
+            'lootMul': lootMul,
+            'wildEncounterMul': wildEncounterMul,
+            'cardCostJitter': cardCostJitter,
+            'lifeStealBonus': lifeStealBonus,
+            'tribulationStrictness': tribulationStrictness,
             'curseCount': curseCount,
             'pendingSettle': pendingSettlement,
+            'xianming': xianming,
+            'xianmingSeason': _jiejiFlags()?['xianmingSeason'],
           };
         }
       } catch (_) {}
@@ -115,7 +122,8 @@ final class SeasonLogic {
     }
   }
 
-  static void _restorePendingFromFlags() {
+  /// 从存档 flags 恢复季末待结算。pending 与 lastSettled 不一致才排队。
+  static void restorePendingFromFlags() {
     try {
       final jieji = _jiejiFlags();
       if (jieji == null) return;
@@ -124,6 +132,8 @@ final class SeasonLogic {
       if (pending != null && pending.isNotEmpty && pending != settled) {
         pendingEndedSeasonId = pending;
         pendingSettlement = true;
+      } else {
+        pendingSettlement = false;
       }
     } catch (_) {}
   }
@@ -140,6 +150,7 @@ final class SeasonLogic {
       if (settled == previousSeasonId) return;
       pendingEndedSeasonId = previousSeasonId;
       jieji['pendingEndedSeasonId'] = previousSeasonId;
+      jieji['endedTribulationStrictness'] = _strictnessForSeason(previousSeasonId);
       pendingSettlement = true;
       return;
     }
@@ -150,6 +161,7 @@ final class SeasonLogic {
       if (settled == newId) return;
       pendingEndedSeasonId = newId;
       jieji['pendingEndedSeasonId'] = newId;
+      jieji['endedTribulationStrictness'] = _strictnessForSeason(newId);
       pendingSettlement = true;
     }
   }
@@ -160,9 +172,56 @@ final class SeasonLogic {
     return fallback;
   }
 
+  static double _strictnessForSeason(String seasonId) {
+    for (final raw in GameData.seasons) {
+      if (raw is! Map) continue;
+      if (raw['id']?.toString() != seasonId) continue;
+      final mods = raw['mods'];
+      if (mods is Map && mods['tribulationStrictness'] is num) {
+        return (mods['tribulationStrictness'] as num).toDouble();
+      }
+    }
+    return 1.0;
+  }
+
   static double get damageDealtMul => _mod('damageDealtMul');
   static double get damageTakenMul => _mod('damageTakenMul');
-  static double get lootMul => _mod('lootMul');
+  static double get wildEncounterMul => _mod('wildEncounterMul');
+  static double get lifeStealBonus => _mod('lifeStealBonus', 0.0);
+  static double get tribulationStrictness => _mod('tribulationStrictness');
+
+  static int get cardCostJitter {
+    final v = currentMods['cardCostJitter'];
+    if (v is num) return v.round();
+    return 0;
+  }
+
+  static String? get xianming {
+    try {
+      return _jiejiFlags()?['xianming']?.toString();
+    } catch (_) {
+      return null;
+    }
+  }
+
+  static bool get xianmingActiveThisSeason {
+    try {
+      final jieji = _jiejiFlags();
+      if (jieji == null) return false;
+      final season = jieji['xianmingSeason']?.toString();
+      return season != null && season.isNotEmpty && season == currentId;
+    } catch (_) {
+      return false;
+    }
+  }
+
+  static double get lootMul {
+    var m = _mod('lootMul');
+    if (xianmingActiveThisSeason && xianming == 'xianming_nurture') {
+      m += 0.15;
+    }
+    return m < 0 ? 0.0 : m;
+  }
 
   /// 对伤害详情写入乘区3（正气/戾气旁路的额外乘区），保持与原公式兼容。
   /// 诅咒槽额外提高英雄承伤：每层 +0.05。
@@ -177,6 +236,14 @@ final class SeasonLogic {
     }
     if (selfIsHero && curseCount > 0) {
       damageDetails['percentageChange3'] += curseCount * 0.05;
+    }
+    if (xianmingActiveThisSeason) {
+      if (selfIsHero && xianming == 'xianming_guard') {
+        damageDetails['percentageChange3'] -= 0.08;
+      }
+      if (!selfIsHero && xianming == 'xianming_break') {
+        damageDetails['percentageChange3'] += 0.10;
+      }
     }
   }
 

@@ -10,7 +10,8 @@ function ensureHomeCardforge() {
     if (home != null) city = game.locations[home.atCityId]
   }
   if (city == null) return
-  for (final siteId in city.siteIds) {
+  final siteIds = city.siteIds ?? []
+  for (final siteId in siteIds) {
     final site = game.locations[siteId]
     if (site != null && site.kind == kLocationKindCardforge) return
   }

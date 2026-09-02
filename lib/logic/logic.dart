@@ -1528,6 +1528,7 @@ final class GameLogic {
 
   /// 时间流逝结束后弹出季末结算。时间流内只排队，不打断每一 tick。
   static void scheduleJiejiSettlement() {
+    SeasonLogic.restorePendingFromFlags();
     if (!SeasonLogic.pendingSettlement) return;
     if (SeasonLogic.settlementInFlight) return;
     if (SeasonLogic.timeflowActive) return;
@@ -1535,20 +1536,36 @@ final class GameLogic {
   }
 
   static Future<void> flushJiejiSettlement() async {
+    SeasonLogic.restorePendingFromFlags();
     if (!SeasonLogic.pendingSettlement) return;
     if (SeasonLogic.settlementInFlight) return;
     if (GameData.hero == null) return;
+
+    try {
+      final jieji = GameData.flags?['jieji'];
+      if (jieji != null && jieji['fighting'] == true) {
+        if (engine.scene?.id != Scenes.battle) {
+          jieji['fighting'] = false;
+        }
+      }
+    } catch (_) {}
+
     SeasonLogic.settlementInFlight = true;
     try {
-      await engine.hetu.invoke(
+      final result = await engine.hetu.invoke(
         'trySettleJieji',
         namedArgs: {'endedSeasonId': SeasonLogic.pendingEndedSeasonId},
       );
+      if (result == 'deferred') {
+        SeasonLogic.pendingSettlement = true;
+      } else {
+        SeasonLogic.restorePendingFromFlags();
+      }
     } catch (e, st) {
       debugPrint('trySettleJieji failed: $e\n$st');
+      SeasonLogic.restorePendingFromFlags();
     } finally {
       SeasonLogic.settlementInFlight = false;
-      SeasonLogic.pendingSettlement = false;
     }
   }
 

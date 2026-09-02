@@ -101,9 +101,16 @@ function convertKarmaToCurses() {
 function migrateSect() {
   final city = getHeroHomeCity()
   if (city == null) return 0
+  var keepExtra = 0
+  var skipDevPenalty = false
+  if (ensureJiejiFlags().xianming == 'xianming_guard') {
+    keepExtra = 1
+    skipDevPenalty = true
+  }
   var removed = 0
   final siteIds = []
-  for (final id in city.siteIds) {
+  final rawSiteIds = city.siteIds ?? []
+  for (final id in rawSiteIds) {
     siteIds.add(id)
   }
   final fallbackId = hero.homeSiteId ?? city.id
@@ -112,6 +119,10 @@ function migrateSect() {
     if (site == null) continue
     if (_kJiejiKeepSiteKinds[site.kind] == true) continue
     if (site.kind == kLocationKindHome) continue
+    if (keepExtra > 0) {
+      keepExtra = keepExtra - 1
+      continue
+    }
     for (final character in game.characters.values) {
       if (character.locationId == site.id) {
         character.locationId = fallbackId
@@ -123,11 +134,13 @@ function migrateSect() {
     removeLocation(site)
     removed += 1
   }
-  var dev = city.development ?? 0
-  if (dev > 2) {
-    city.development = dev - 2
-  } else {
-    city.development = 0
+  if (!skipDevPenalty) {
+    var dev = city.development ?? 0
+    if (dev > 2) {
+      city.development = dev - 2
+    } else {
+      city.development = 0
+    }
   }
   city.maxSiteCount = calculateMaxSiteCountForCity(city)
   ensureHomeCardforge()
@@ -145,7 +158,20 @@ async function pickXianming() {
   await dialog.execute()
   final selected = dialog.checkSelected('jiejiXianming')
   if (selected != null) {
-    ensureJiejiFlags().xianming = selected
+    final jieji = ensureJiejiFlags()
+    jieji.xianming = selected
+    var nextSeasonId = null
+    if (game.jieji != null) {
+      nextSeasonId = game.jieji.seasonId
+    }
+    jieji.xianmingSeason = nextSeasonId
+    if (selected == 'xianming_nurture') {
+      await Player.collect('worker', 5)
+      await Player.collect('money', 300)
+      final blank = BattleCard(genre: null, rank: 0)
+      blank.isCardBlank = true
+      Player.acquireCard(blank)
+    }
     dialog.pushDialog('hint_jieji_xianming_picked', interpolations: [engine.locale(selected)])
     await dialog.execute()
   }
@@ -172,7 +198,18 @@ async function startTribulationBoss() {
   }
   final minLevel = minLevelForRank(rank)
   final maxLevel = maxLevelForRank(rank)
-  var level = (hero.level ?? 1) + 10
+  var bonus = 10
+  if (jieji.xianming == 'xianming_break') {
+    bonus = 0
+  }
+  var level = (hero.level ?? 1) + bonus
+  var strict = 1.0
+  if (jieji.endedTribulationStrictness != null) {
+    strict = jieji.endedTribulationStrictness
+  } else if (game.jieji != null && game.jieji.tribulationStrictness != null) {
+    strict = game.jieji.tribulationStrictness
+  }
+  level = (level * strict).round()
   level = level.clamp(minLevel, maxLevel)
 
   final bossName = engine.locale('jieji_boss_${endedId}')
@@ -206,15 +243,15 @@ async function startTribulationBoss() {
 
 /// 季末强制结算。由 Dart 在劫季切换后调用一次。
 async function trySettleJieji({ endedSeasonId }) {
-  if (hero == null) return
+  if (hero == null) return 'done'
   final jieji = ensureJiejiFlags()
-  if (jieji.fighting == true) return
+  if (jieji.fighting == true) return 'deferred'
   final endedId = jieji.pendingEndedSeasonId ?? endedSeasonId
-  if (endedId == null) return
+  if (endedId == null) return 'done'
   jieji.pendingEndedSeasonId = endedId
   if (jieji.lastSettledSeasonId == endedId) {
     jieji.pendingEndedSeasonId = null
-    return
+    return 'done'
   }
 
   final converted = convertKarmaToCurses()
@@ -235,7 +272,9 @@ async function trySettleJieji({ endedSeasonId }) {
     dialog.pushDialog('hint_jieji_migrate_done', interpolations: ['${removed}'])
     await dialog.execute()
     await finishJiejiSeason(endedId)
+    return 'done'
   } else {
     await startTribulationBoss()
+    return 'deferred'
   }
 }

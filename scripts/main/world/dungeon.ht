@@ -263,7 +263,7 @@ function addMerchant(tilePosition, {
   tile.objectId = object.id
   World.updateTerrainData(tilePosition.left, tilePosition.top, updateOverlaySprite: true)
 
-  engine.info('添加商人 [${object.id}] (merchantItemCategories: ${merchantItemCategories.join(', ')}, rank: ${rank})')
+  engine.info('添加商人 [${object.id}] (merchantItemCategories: ${(merchantItemCategories ?? []).join(', ')}, rank: ${rank})')
 }
 
 function addEnemy(tilePosition, {

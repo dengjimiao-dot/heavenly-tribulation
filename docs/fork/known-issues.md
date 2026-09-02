@@ -8,13 +8,19 @@ https://github.com/dengjimiao-dot/heavenly-tribulation/issues
 
 代码是 MIT，美术、音频、字体等非代码资产不在 MIT 范围内。当前构建仍使用上游素材，**对外分发前必须替换**。版权约束见 [FORK.md](../../FORK.md)，竖切最低替换清单见 [replace-assets.md](replace-assets.md) 与 [assets/REPLACE_ASSETS.txt](../../assets/REPLACE_ASSETS.txt)。
 
-## 仙命 3选1 是占位
+## 仙命已有当季效果，仍不是完整构筑轴
 
-季末会弹出仙命三选一，并把选项记进 `game.flags.jieji.xianming`。没有真正改构筑、被动或功法数值。功法点与弟子羁绊会随存档留下，仙命本身还没有玩法效果。
+季末三选一（守故城 / 破天劫 / 养门徒）会写入 `game.flags.jieji.xianming` 与 `xianmingSeason`，效力只在接下来这一季，下次选择会覆盖。
 
-## 战斗中存档可能跳过季末收尾
+- 守故城：下一次迁徙跳过城市规模 -2，并多留一处据点；当季英雄受伤约减 8%。
+- 破天劫：当季造成伤害约加 10%；下一次渡劫 Boss 不再额外加 10 级。
+- 养门徒：立刻给劳工、铜钱和一枚牌胚；当季掉落倍率再加 15%。
 
-渡劫 Boss 开战时会把 `jieji.fighting` 设为 true。`trySettleJieji` 见到这个标记会直接 return。若在战斗中途存档并退出，再读档时可能跳过剩余的季末结算（仙命、收尾标记清理等）。Demo 里尽量把渡劫打完再存。
+没有改功法树、弟子羁绊或永久被动槽。选项也还不是「三选一卡组轴」。
+
+## 渡劫中途存档会继续收尾
+
+渡劫 Boss 开战仍会把 `jieji.fighting` 设为 true。`trySettleJieji` 见到这个标记会返回 `deferred`，Dart 侧不再因此清掉 `pendingSettlement`。读档时如果 `pendingEndedSeasonId` 与 `lastSettledSeasonId` 不一致会重新排队；若标记着 fighting 却不在战斗场景，会清掉 fighting 再走仙命结算。仍可能漏掉的情况：战斗回调本身崩溃、或存档损坏导致 flags 丢失。
 
 ## 本机 local-exec 不稳定
 

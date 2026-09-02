@@ -15,6 +15,7 @@ import 'package:samsara/hover_info.dart';
 
 import '../../ui.dart';
 import '../../logic/logic.dart';
+import '../../logic/season.dart';
 import 'character.dart';
 import 'battledeck_zone.dart';
 import 'discard_zone.dart';
@@ -911,10 +912,26 @@ class BattleScene extends Scene {
     return drawn;
   }
 
+  int _heroPlayCost = 0;
+
+  int _jitteredHeroCardCost(int baseCost) {
+    final j = SeasonLogic.cardCostJitter;
+    if (j <= 0) {
+      return baseCost < 0 ? 0 : baseCost;
+    }
+    final delta = engine.random.nextInt(j * 2 + 1) - j;
+    var c = baseCost + delta;
+    if (c < 0) c = 0;
+    return c;
+  }
+
   void onPlayerSelectedCard(CustomGameCard? card) {
     assert(_playerCardSelection != null && !_playerCardSelection!.isCompleted);
 
-    if (card != null && card.cost > currentCharacter.energy) return;
+    if (card != null) {
+      _heroPlayCost = _jitteredHeroCardCost(card.cost);
+      if (_heroPlayCost > currentCharacter.energy) return;
+    }
 
     _playerCardSelection!.complete(card);
     _playerCardSelection = null;
@@ -1009,7 +1026,7 @@ class BattleScene extends Scene {
           final selectedCard = await _playerCardSelection!.future;
           if (selectedCard == null) break;
 
-          currentCharacter.energy -= selectedCard.cost;
+          currentCharacter.energy -= _heroPlayCost;
           handZone.energy = currentCharacter.energy;
           energyDisplay.setEnergy(currentCharacter.energy);
           handZone.clearCardInteraction(selectedCard);

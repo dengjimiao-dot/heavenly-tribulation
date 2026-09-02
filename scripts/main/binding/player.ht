@@ -365,9 +365,34 @@ namespace Player {
     characterConsumePotion(hero, potion)
   }
   
+  function jiejiLootMul() {
+    var mul = 1.0
+    if (game.jieji != null && game.jieji.lootMul != null) {
+      mul = game.jieji.lootMul
+    }
+    if (mul < 0) mul = 0
+    return mul
+  }
+
+  function scaleJiejiLootAmount(amount) {
+    var n = (amount * jiejiLootMul()).round()
+    if (n < 0) n = 0
+    return n
+  }
+
   /// 用于从一个宝箱中根据物品信息创造物品并获取
   async function loot(itemsInfo: List) {
     final items = createLoot(itemsInfo)
+    final mul = jiejiLootMul()
+    if (mul != 1.0) {
+      for (final item in items) {
+        if (item.category == kItemCategoryMaterialPack) {
+          var n = (item.stackSize * mul).round()
+          if (n < 0) n = 0
+          item.stackSize = n
+        }
+      }
+    }
     for (final item in items) {
       await acquire(item)
     }
@@ -442,7 +467,7 @@ namespace Player {
 
     for (const materialId in entity.materials.keys) {
       const amount = entity.materials[materialId]
-      await collect(materialId, amount, incurIncident: incurIncident)
+      await collect(materialId, scaleJiejiLootAmount(amount), incurIncident: incurIncident)
     }
 
     // 清空

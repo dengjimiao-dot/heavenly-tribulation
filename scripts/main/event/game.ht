@@ -337,20 +337,48 @@ async function onAfterEnterLocation(location) -> bool {
           }
           return true
         }
-        case 'hidden_ruins_explore', 'hidden_karma_shrine': {
+        case 'hidden_ruins_explore': {
           if (isLate) {
             Player.progressJournalById(journal.id, stage: 2)
             dialog.pushDialog('quest_hidden_late_failed', interpolations: [journal.title])
             await dialog.execute()
           } else {
             Player.progressJournalById(journal.id)
+            var locName = ''
+            final loc = game.locations[journal.quest.targetLocationId]
+            if (loc != null) {
+              locName = loc.name
+            }
             dialog.pushDialog('quest_hidden_complete', interpolations: [
               journal.title,
-              game.locations[journal.quest.targetLocationId].name,
+              locName,
             ])
             await dialog.execute()
             final items = await Player.loot(journal.quest.reward)
             Game.promptItems(items)
+          }
+          return true
+        }
+        case 'hidden_karma_shrine': {
+          if (isLate) {
+            Player.progressJournalById(journal.id, stage: 2)
+            dialog.pushDialog('quest_hidden_late_failed', interpolations: [journal.title])
+            await dialog.execute()
+          } else {
+            Player.progressJournalById(journal.id)
+            var locName = ''
+            final loc = game.locations[journal.quest.targetLocationId]
+            if (loc != null) {
+              locName = loc.name
+            }
+            dialog.pushDialog('quest_hidden_complete', interpolations: [
+              journal.title,
+              locName,
+            ])
+            await dialog.execute()
+            final items = await Player.loot(journal.quest.reward)
+            Game.promptItems(items)
+            await grantKarmaCard('shrine')
           }
           return true
         }
@@ -368,8 +396,13 @@ async function onAfterEnterLocation(location) -> bool {
             battleEndCallback: async function (result, roundCount) {
               if (!result) return
               Player.progressJournalById(journal.id)
+              var locName = ''
+              final loc = game.locations[journal.quest.targetLocationId]
+              if (loc != null) {
+                locName = loc.name
+              }
               dialog.pushDialog('quest_hidden_blood_omen_success', interpolations: [
-                game.locations[journal.quest.targetLocationId].name,
+                locName,
               ])
               await dialog.execute()
               final items = await Player.loot(journal.quest.reward)

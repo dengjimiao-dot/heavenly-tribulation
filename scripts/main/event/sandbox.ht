@@ -49,6 +49,24 @@ async function onNewGame() {
   }
 }
 
+function jiejiWildEncounterMul() {
+  var mul = 1.0
+  if (game.jieji != null && game.jieji.wildEncounterMul != null) {
+    mul = game.jieji.wildEncounterMul
+  }
+  if (mul < 0) mul = 0
+  return mul
+}
+
+async function tryWildEncounterOnMove(terrain) {
+  let rate = Constants.terrainKindToEnemyEncounterRate[terrain.kind] ?? kEnemyEncounterRateBase
+  let er = rate * (1 - hero.rank * kEnemyEncounterRateRankFactor) * jiejiWildEncounterMul()
+  if (er < 0) er = 0
+  if (random.nextDouble() > er) return false
+  await encounterEnemy(rank: hero.rank, terrainKind: terrain.kind)
+  return true
+}
+
 async function onAfterMove(terrain) {
   final tradeQuest = hero.journals.values.where((journal) =>
    !journal.isFinished &&
@@ -58,12 +76,13 @@ async function onAfterMove(terrain) {
   )
 
   if (tradeQuest.isEmpty) {
+    if (await tryWildEncounterOnMove(terrain)) return true
     return await trySpawnHiddenQuestOnMove(terrain)
   }
 
   final roll = random.nextDouble()
   let rate = Constants.terrainKindToEnemyEncounterRate[terrain.kind] ?? kEnemyEncounterRateBase
-  let er = rate * (1 - hero.rank * kEnemyEncounterRateRankFactor)
+  let er = rate * (1 - hero.rank * kEnemyEncounterRateRankFactor) * jiejiWildEncounterMul()
   if (roll > er) {
     return await trySpawnHiddenQuestOnMove(terrain)
   }

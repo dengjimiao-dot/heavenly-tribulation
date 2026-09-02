@@ -39,6 +39,7 @@ class GameState with ChangeNotifier {
     updateLocation();
     updateDungeon();
     updateNpcs([]);
+    GameLogic.scheduleJiejiSettlement();
   }
 
   void updateDatetime({int? timestamp, String? datetimeString}) {

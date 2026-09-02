@@ -25,6 +25,24 @@ import 'prompt.dart';
 import '../state/game_state.dart';
 import 'package:samsara/utils/safe_flame_image.dart';
 
+SpriteSheet _spriteSheetFitImage(dynamic image, double width, double height) {
+  var srcW = width;
+  var srcH = height;
+  try {
+    final imgW = (image.width as num).toDouble();
+    final imgH = (image.height as num).toDouble();
+    // 64x64 占位图不能按原表帧尺寸切片
+    if (imgW <= 64 && imgH <= 64 && (srcW > imgW || srcH > imgH)) {
+      srcW = imgW;
+      srcH = imgH;
+    }
+  } catch (_) {}
+  return SpriteSheet(
+    image: image,
+    srcSize: Vector2(srcW, srcH),
+  );
+}
+
 const _kSkinAnimationWidth = 288.0;
 const _kSkinAnimationHeight = 112.0;
 const _kSkinAnimationStepTime1 = 0.1;
@@ -436,10 +454,8 @@ final class GameData with ChangeNotifier {
           }
 
           final image = await loadFlameImage('animation/$battleAnimationSpriteSheetId');
-          final sheet = SpriteSheet(
-            image: image,
-            srcSize: Vector2(_kSkinAnimationWidth, _kSkinAnimationHeight),
-          );
+          final sheet = _spriteSheetFitImage(
+            image, _kSkinAnimationWidth, _kSkinAnimationHeight);
           spriteSheets[battleAnimationSpriteSheetId] = sheet;
         }
       } else {
@@ -451,9 +467,10 @@ final class GameData with ChangeNotifier {
             continue;
           }
           final image = await loadFlameImage('animation/$assetId');
-          final sheet = SpriteSheet(
-            image: image,
-            srcSize: Vector2(animData['width'], animData['height']),
+          final sheet = _spriteSheetFitImage(
+            image,
+            (animData['width'] as num).toDouble(),
+            (animData['height'] as num).toDouble(),
           );
           spriteSheets[assetId] = sheet;
         }
@@ -470,10 +487,7 @@ final class GameData with ChangeNotifier {
       double? srcHeight = spriteSheetData['height'];
       assert(srcWidth != null && srcHeight != null);
       final image = await loadFlameImage(assetId);
-      final sheet = SpriteSheet(
-        image: image,
-        srcSize: Vector2(srcWidth!, srcHeight!),
-      );
+      final sheet = _spriteSheetFitImage(image, srcWidth!, srcHeight!);
       spriteSheets[assetId] = sheet;
     }
 
