@@ -157,6 +157,18 @@ final class GameData with ChangeNotifier {
 
   static math.Random random = math.Random();
 
+  /// Probe the asset bundle. Missing files log a warning and return false.
+  /// Does not rewrite the Flame sprite pipeline.
+  static Future<bool> tryLoadAsset(String key) async {
+    try {
+      await rootBundle.load(key);
+      return true;
+    } catch (_) {
+      engine.warning('missing asset: $key');
+      return false;
+    }
+  }
+
   static dynamic getTerrainById(int index, {String? worldId}) {
     worldId ??= world['id'];
     final atWorld = universe[worldId];

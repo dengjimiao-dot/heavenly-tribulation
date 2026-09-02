@@ -1059,6 +1059,7 @@
   "knownIssues": "已知问题",
   "knownIssuesIntro": "这是劫季门派竖切 Demo，不是完整发行版。下列问题已知，欢迎到 GitHub Issues 反馈。",
   "knownIssuesArt": "美术与音频仍是上游资源。对外分发前必须替换，详见 FORK.md 与素材替换清单。",
+  "knownIssuesMissingArt": "缺图时主菜单用纯色占位，缺 BGM 会跳过。这不是换皮。战斗精灵等局内素材仍可能缺文件就失败。",
   "knownIssuesXianming": "仙命 3选1 目前只记下选项，没有真正改构筑或被动。属于占位。",
   "knownIssuesFightingSave": "渡劫开战时会打上 fighting 标记。若在战斗中途存档并退出，季末结算可能被跳过，留下未完成的劫季收尾。",
   "knownIssuesLocalExec": "Grok Bot 在用户本机上的 local-exec 不稳定。开发请走 GitHub 仓库，不要依赖本机直连。",

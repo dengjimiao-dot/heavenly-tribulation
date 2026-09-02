@@ -55,9 +55,16 @@ class _MainMenuWidgetsState extends State<MainMenuWidgets> {
         SizedBox(
           width: GameUI.size.x,
           height: GameUI.size.y,
-          child: const Image(
-            image: AssetImage('assets/images/title_background.gif'),
+          child: Image(
+            image: const AssetImage('assets/images/title_background.gif'),
             fit: BoxFit.cover,
+            errorBuilder: (context, error, stackTrace) {
+              return Container(
+                width: GameUI.size.x,
+                height: GameUI.size.y,
+                color: const Color(0xFF2A1C14),
+              );
+            },
           ),
         ),
         Align(
@@ -67,8 +74,15 @@ class _MainMenuWidgetsState extends State<MainMenuWidgets> {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                const Image(
-                  image: AssetImage('assets/images/title2.png'),
+                Image(
+                  image: const AssetImage('assets/images/title2.png'),
+                  errorBuilder: (context, error, stackTrace) {
+                    return Container(
+                      width: 420,
+                      height: 80,
+                      color: const Color(0xFF3A2A1A),
+                    );
+                  },
                 ),
                 Padding(
                   padding: const EdgeInsets.only(top: 12.0),

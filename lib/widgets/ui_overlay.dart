@@ -40,6 +40,7 @@ import 'location/city.dart';
 import 'location/site.dart';
 import 'common.dart';
 import 'character/item_craft.dart';
+import 'ui/safe_asset_image.dart';
 
 String? markdownWikiPath;
 
@@ -371,11 +372,10 @@ class _GameUIOverlayState extends State<GameUIOverlay> {
                                           .map(
                                             (id) => Row(
                                               children: [
-                                                Image(
+                                                SafeAssetImage(
+                                                  'assets/images/item/material/$id.png',
                                                   width: 20,
                                                   height: 20,
-                                                  image: AssetImage(
-                                                      'assets/images/item/material/$id.png'),
                                                 ),
                                                 Text('${engine.locale(id)}: '),
                                                 SizedBox(
@@ -399,11 +399,10 @@ class _GameUIOverlayState extends State<GameUIOverlay> {
                                 },
                                 child: Row(
                                   children: [
-                                    const Image(
+                                    const SafeAssetImage(
+                                        'assets/images/item/material.png',
                                         width: 20,
-                                        height: 20,
-                                        image: AssetImage(
-                                            'assets/images/item/material.png')),
+                                        height: 20),
                                   ],
                                 ),
                               ),
@@ -429,9 +428,8 @@ class _GameUIOverlayState extends State<GameUIOverlay> {
                               onExit: () {
                                 context.read<HoverContentState>().hide();
                               },
-                              child: const Image(
-                                image: AssetImage(
-                                    'assets/images/icon/information.png'),
+                              child: const SafeAssetImage(
+                                'assets/images/icon/information.png',
                               ),
                             ),
                             BorderedIconButton(
@@ -459,9 +457,8 @@ class _GameUIOverlayState extends State<GameUIOverlay> {
                               onExit: () {
                                 context.read<HoverContentState>().hide();
                               },
-                              child: const Image(
-                                image:
-                                    AssetImage('assets/images/icon/quest.png'),
+                              child: const SafeAssetImage(
+                                'assets/images/icon/quest.png',
                               ),
                             ),
                             BorderedIconButton(
@@ -491,9 +488,8 @@ class _GameUIOverlayState extends State<GameUIOverlay> {
                               onExit: () {
                                 context.read<HoverContentState>().hide();
                               },
-                              child: const Image(
-                                image: AssetImage(
-                                    'assets/images/icon/inventory.png'),
+                              child: const SafeAssetImage(
+                                'assets/images/icon/inventory.png',
                               ),
                             ),
                             BorderedIconButton(
@@ -531,9 +527,8 @@ class _GameUIOverlayState extends State<GameUIOverlay> {
                               onExit: () {
                                 context.read<HoverContentState>().hide();
                               },
-                              child: const Image(
-                                image: AssetImage(
-                                    'assets/images/icon/cultivate.png'),
+                              child: const SafeAssetImage(
+                                'assets/images/icon/cultivate.png',
                               ),
                             ),
                             BorderedIconButton(
@@ -567,9 +562,8 @@ class _GameUIOverlayState extends State<GameUIOverlay> {
                               onExit: () {
                                 context.read<HoverContentState>().hide();
                               },
-                              child: const Image(
-                                image: AssetImage(
-                                    'assets/images/icon/library.png'),
+                              child: const SafeAssetImage(
+                                'assets/images/icon/library.png',
                               ),
                             ),
                             BorderedIconButton(
@@ -602,9 +596,8 @@ class _GameUIOverlayState extends State<GameUIOverlay> {
                               onExit: () {
                                 context.read<HoverContentState>().hide();
                               },
-                              child: const Image(
-                                image:
-                                    AssetImage('assets/images/icon/wiki.png'),
+                              child: const SafeAssetImage(
+                                'assets/images/icon/wiki.png',
                               ),
                             ),
                             BorderedIconButton(
@@ -622,9 +615,8 @@ class _GameUIOverlayState extends State<GameUIOverlay> {
                               onExit: () {
                                 context.read<HoverContentState>().hide();
                               },
-                              child: const Image(
-                                image: AssetImage(
-                                    'assets/images/icon/unknown_item.png'),
+                              child: const SafeAssetImage(
+                                'assets/images/icon/unknown_item.png',
                               ),
                             ),
                           ],
