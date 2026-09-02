@@ -9,6 +9,7 @@ import 'package:hetu_script/utils/collection.dart' as utils;
 import 'package:samsara/tilemap/tile_info.dart';
 
 import '../data/common.dart';
+import 'season.dart';
 import '../data/game.dart';
 import '../global.dart';
 import '../scene/common.dart';
@@ -82,6 +83,7 @@ final class GameLogic {
     timeString = kTimeStrings[time]!; // 清晨、下午、傍晚、午夜
 
     final datetimeString = getDatetimeString();
+    SeasonLogic.refreshFromCalendar();
     return (timestamp, datetimeString);
   }
 

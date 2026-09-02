@@ -5,6 +5,7 @@ import 'package:fluent_ui/fluent_ui.dart' as fluent;
 import 'package:samsara/engine.dart';
 
 import '../logic/logic.dart';
+import '../logic/season.dart';
 import '../global.dart';
 import '../data/common.dart';
 import 'ui/responsive_view.dart';
@@ -140,6 +141,18 @@ class _TimeflowDialogState extends State<TimeflowDialog> {
                   image: AssetImage(timeOfDayImageId),
                   fit: BoxFit.contain,
                 ),
+                if (SeasonLogic.hudLine().isNotEmpty)
+                  Padding(
+                    padding: const EdgeInsets.only(top: 8.0),
+                    child: Text(
+                      SeasonLogic.hudLine(),
+                      style: const TextStyle(
+                        color: Colors.amberAccent,
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ),
                 if (widget.max != null)
                   LinearProgressIndicator(
                     value: _progress / widget.max!,
