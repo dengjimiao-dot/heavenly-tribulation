@@ -1424,8 +1424,10 @@ final class GameLogic {
     WorldMapScene? worldMap,
   }) {
     final before = getDatetimeString();
+    final prevSeasonId = SeasonLogic.currentId;
     GameData.game['timestamp'] += ticks;
     final (timestamp, after) = calculateTimestamp();
+    SeasonLogic.queueSettlementIfEnded(prevSeasonId);
 
     // 如果时间没有推进到下一个日期，则不进行任何更新，除非 force 为 true
     if (before == after && !force) return false;
@@ -1518,7 +1520,36 @@ final class GameLogic {
     }
 
     sw.stop();
+    if (!SeasonLogic.timeflowActive) {
+      scheduleJiejiSettlement();
+    }
     return true;
+  }
+
+  /// 时间流逝结束后弹出季末结算。时间流内只排队，不打断每一 tick。
+  static void scheduleJiejiSettlement() {
+    if (!SeasonLogic.pendingSettlement) return;
+    if (SeasonLogic.settlementInFlight) return;
+    if (SeasonLogic.timeflowActive) return;
+    Future.microtask(flushJiejiSettlement);
+  }
+
+  static Future<void> flushJiejiSettlement() async {
+    if (!SeasonLogic.pendingSettlement) return;
+    if (SeasonLogic.settlementInFlight) return;
+    if (GameData.hero == null) return;
+    SeasonLogic.settlementInFlight = true;
+    try {
+      await engine.hetu.invoke(
+        'trySettleJieji',
+        namedArgs: {'endedSeasonId': SeasonLogic.pendingEndedSeasonId},
+      );
+    } catch (e, st) {
+      debugPrint('trySettleJieji failed: $e\n$st');
+    } finally {
+      SeasonLogic.settlementInFlight = false;
+      SeasonLogic.pendingSettlement = false;
+    }
   }
 
   /// 角色濒死，tribulationCount += 1，返回自宅

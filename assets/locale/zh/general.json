@@ -1032,6 +1032,26 @@
   "karma_source_kill": "杀人",
   "karma_source_flee": "逃劫",
   "karma_source_blackmarket": "黑市",
-  "karma_source_gamble": "赌业"
+  "karma_source_gamble": "赌业",
+
+  "jieji_season_thunder": "雷月",
+  "jieji_season_mist": "雾月",
+  "jieji_season_blood": "血月",
+  "jieji_boss_thunder": "雷劫真身",
+  "jieji_boss_mist": "雾劫真身",
+  "jieji_boss_blood": "血劫真身",
+  "hint_jieji_season_end": "<yellow>{0}</>走到尽头。未消化的业力牌已化作诅咒（{1} 张入槽，现有 {2}/3）。门派必须渡劫或迁徙，功法与弟子仍在。",
+  "jiejiTribulation": "渡劫",
+  "jiejiMigrate": "迁徙",
+  "hint_jieji_migrate_done": "山门拆去 {0} 处据点。铸牌斋还在，人还在，规模跌了一截。",
+  "hint_jieji_boss_intro": "天劫压顶。<yellow>{0}</>拦在季门之前。",
+  "hint_jieji_boss_win": "劫云散了。诅咒淡去一层（现 {0}/3）。铜钱入袋。",
+  "hint_jieji_boss_lose": "渡劫失败，并未抹去此生。残命一线，诅咒加深（现 {0}/3）。",
+  "hint_jieji_xianming": "季间留一线仙命。功法点与弟子羁绊仍在。三选一。",
+  "jiejiXianming": "仙命",
+  "xianming_guard": "仙命·守成",
+  "xianming_break": "仙命·破劫",
+  "xianming_nurture": "仙命·养徒",
+  "hint_jieji_xianming_picked": "你选定了<yellow>{0}</>。此季门风先记在这一笔上。"
 
 }
