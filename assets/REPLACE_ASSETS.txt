@@ -1,0 +1,23 @@
+竖切最低替换清单（劫季门派 Demo）
+================================
+当前构建仍使用上游美术/音频。对外分发前必须替换。详见 docs/fork/replace-assets.md 与 FORK.md。
+
+类别              数量级     策略
+主角战斗精灵      1 套       AI 或外包像素/立绘，统一色板
+敌人              4-6        简化剪影 + 换色
+卡牌框/底色       1 套 UI    自绘九宫或 flat UI
+据点背景          1          静态插画
+Boss              1          重点投资
+BGM               3-5        免费商用库或重新生成
+SFX               3-5        免费商用库或重新生成
+
+目录约定
+- 战斗精灵 / 敌人 / Boss: assets/images/battle/ 及相关动画目录
+- 卡牌框: assets/images/battlecard/
+- 据点背景: assets/images/location/
+- BGM: assets/audio/music/
+- SFX: assets/audio/sound/
+
+未完成
+- 上述条目均未替换（M6 竖切皮肤替换仍未勾选）
+- 缺素材启动到主菜单不崩的回退尚未做

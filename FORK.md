@@ -30,3 +30,11 @@
 
 - [docs/fork/jieji-menpai.md](docs/fork/jieji-menpai.md)
 - [docs/fork/vertical-slice-tasks.md](docs/fork/vertical-slice-tasks.md)
+
+## 已知问题与素材
+
+- 已知问题：[docs/fork/known-issues.md](docs/fork/known-issues.md)
+- 竖切素材替换：[docs/fork/replace-assets.md](docs/fork/replace-assets.md)
+- 精简清单：[assets/REPLACE_ASSETS.txt](assets/REPLACE_ASSETS.txt)
+
+当前构建仍使用上游美术与音频。对外分发前必须替换。

@@ -1052,6 +1052,18 @@
   "xianming_guard": "仙命·守成",
   "xianming_break": "仙命·破劫",
   "xianming_nurture": "仙命·养徒",
-  "hint_jieji_xianming_picked": "你选定了<yellow>{0}</>。此季门风先记在这一笔上。"
+  "hint_jieji_xianming_picked": "你选定了<yellow>{0}</>。此季门风先记在这一笔上。",
+
+  "jiejiMenpaiDemo": "劫季门派 · Demo",
+  "jiejiMenpaiPitch": "带着业力赶天劫的门派肉鸽",
+  "knownIssues": "已知问题",
+  "knownIssuesIntro": "这是劫季门派竖切 Demo，不是完整发行版。下列问题已知，欢迎到 GitHub Issues 反馈。",
+  "knownIssuesArt": "美术与音频仍是上游资源。对外分发前必须替换，详见 FORK.md 与素材替换清单。",
+  "knownIssuesXianming": "仙命 3选1 目前只记下选项，没有真正改构筑或被动。属于占位。",
+  "knownIssuesFightingSave": "渡劫开战时会打上 fighting 标记。若在战斗中途存档并退出，季末结算可能被跳过，留下未完成的劫季收尾。",
+  "knownIssuesLocalExec": "Grok Bot 在用户本机上的 local-exec 不稳定。开发请走 GitHub 仓库，不要依赖本机直连。",
+  "knownIssuesSliceQuality": "业力、秘境锁卡组、劫季系统都是竖切品质。能跑通主循环，数值、事件和表现都还薄。",
+  "knownIssuesFeedback": "反馈请开 GitHub Issues。把下面地址复制到浏览器即可。",
+  "knownIssuesUrl": "https://github.com/dengjimiao-dot/heavenly-tribulation/issues"
 
 }
