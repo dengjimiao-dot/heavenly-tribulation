@@ -1,5 +1,6 @@
 
 async function onNewGame() {
+  ensureHomeCardforge()
   final xitong = game.npcs['xitong']
 
   // final itemsInfo = [

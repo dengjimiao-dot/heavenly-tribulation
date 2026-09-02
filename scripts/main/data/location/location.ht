@@ -34,6 +34,8 @@ const kLocationKindHotel = 'hotel'
 // 下面这些建筑是副职业，每种流派有两个
 // 炼器工坊
 const kLocationKindWorkshop = 'workshop'
+// 铸牌斋：药材+工时产牌胚
+const kLocationKindCardforge = 'cardforge'
 // 灌灵池
 const kLocationKindEnchantShop = 'enchantshop'
 // 丹炉
@@ -202,9 +204,11 @@ struct Location {
         }
       }
 
-      this.image = image ?? 'location/card/${kind}.png'
+      this.image = image ?? (kind == kLocationKindCardforge ? 'location/card/workshop.png' : 'location/card/${kind}.png')
       if (background != null) {
         this.background = background
+      } else if (kind == kLocationKindCardforge) {
+        this.background = 'location/site/workshop.png'
       } else if (Constants.locationSiteKinds.contains(kind)) {
         this.background = 'location/site/${kind}.png'
       }

@@ -1583,6 +1583,73 @@ Future<void> _cityhallMoveHere(
   await dialog.execute();
 }
 
+
+Future<void> _heroForgeCardBlank(dynamic location) async {
+  final isRented = await GameLogic.checkRented(location);
+  if (!isRented) return;
+
+  if ((GameData.hero['life'] as num? ?? 0) <= 1) {
+    dialog.pushDialog(
+      'hint_notEnoughStaminaToWork',
+      npcId: location['npcId'],
+    );
+    await dialog.execute();
+    return;
+  }
+
+  const herbCost = 8;
+  const moneyCost = 200;
+  final herb = (GameData.hero['materials']['herb'] as num?)?.toInt() ?? 0;
+  final money = (GameData.hero['materials']['money'] as num?)?.toInt() ?? 0;
+  if (herb < herbCost || money < moneyCost) {
+    dialog.pushDialog(
+      'hint_cardforge_notEnough',
+      npcId: location['npcId'],
+      interpolations: [herbCost, moneyCost],
+    );
+    await dialog.execute();
+    return;
+  }
+
+  final selections = <dynamic>[
+    for (final g in kCultivationGenres) g,
+    'cardforge_genre_none',
+    'cancel',
+  ];
+  dialog.pushSelection('cardforge_genre', selections);
+  await dialog.execute();
+  final selected = dialog.checkSelected('cardforge_genre');
+  if (selected == null || selected == 'cancel') return;
+
+  final genre = selected == 'cardforge_genre_none' ? 'none' : selected;
+  final card = engine.hetu.invoke(
+    'forgeCardBlank',
+    positionalArgs: [genre],
+  );
+  if (card == null) {
+    dialog.pushDialog(
+      'hint_cardforge_notEnough',
+      npcId: location['npcId'],
+      interpolations: [herbCost, moneyCost],
+    );
+    await dialog.execute();
+    return;
+  }
+
+  GameLogic.updateGame(ticks: kTicksPerDay);
+  var cardName = '牌胚';
+  try {
+    final n = card['name'];
+    if (n != null) cardName = '$n';
+  } catch (_) {}
+  dialog.pushDialog(
+    'hint_cardforge_done',
+    npcId: location['npcId'],
+    interpolations: [cardName],
+  );
+  await dialog.execute();
+}
+
 Future<void> _onInteractSite(
   dynamic location,
   String siteKind,
@@ -1611,6 +1678,11 @@ Future<void> _onInteractSite(
     siteOptions.add('tradeMaterial');
   } else if (siteKind == 'workshop') {
     siteOptions.add('workbench');
+  } else if (siteKind == 'cardforge') {
+    siteOptions.add({
+      'text': 'forgeCardBlank',
+      'description': 'hint_forgeCardBlank_description',
+    });
   } else if (siteKind == 'divinationaltar') {
     siteOptions.add('divination');
   } else if (siteKind == 'arena') {
@@ -1661,6 +1733,8 @@ Future<void> _onInteractSite(
         ViewPanels.workbench,
         arguments: {'location': location},
       );
+    case 'forgeCardBlank':
+      await _heroForgeCardBlank(location);
     case 'about_dungeon':
       dialog.pushDialog(
         'hint_dungeonEntrance',
