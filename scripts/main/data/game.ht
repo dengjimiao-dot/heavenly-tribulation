@@ -155,6 +155,8 @@ struct GameData {
       sects: {},
       // 玩家每个月是否进行了某个动作
       monthly: HeroMonthly(),
+      // 业力图鉴：已见过的业力牌 affixId
+      karmaCatalog: {},
     }
 
     this.npcs = {}

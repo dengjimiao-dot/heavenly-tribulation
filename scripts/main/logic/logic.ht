@@ -300,6 +300,10 @@ async function onInteractMapObject(object, terrain) {
       Game.showLibrary(enableCardCraft: true, enableScrollCraft: true)
     }
     kObjectCategoryMerchant: {
+      if (object.isMysterious == true && game.flags.dungeon.karmaBlackmarketGranted != true) {
+        game.flags.dungeon.karmaBlackmarketGranted = true
+        await grantKarmaCard('blackmarket')
+      }
       Game.showMerchant(
         object.merchant,
         materialMode: object.materialMode,

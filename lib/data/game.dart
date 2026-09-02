@@ -316,6 +316,10 @@ final class GameData with ChangeNotifier {
         await rootBundle.loadString('assets/data/cards.json5');
     battleCards.addAll(JSON5.parse(battleCardDataString));
 
+    final karmaCardDataString =
+        await rootBundle.loadString('assets/data/karma_cards.json5');
+    battleCards.addAll(JSON5.parse(karmaCardDataString));
+
     final battleCardAffixDataString =
         await rootBundle.loadString('assets/data/card_affixes.json5');
     battleCardAffixes.addAll(JSON5.parse(battleCardAffixDataString));
@@ -1393,7 +1397,9 @@ final class GameData with ChangeNotifier {
         overflow: ScreenTextOverflow.wordwrap,
       ),
       description: description,
-      cost: rank + 1,
+      cost: (cardData['isKarma'] == true && cardData['karmaKind'] == 'instant')
+          ? 0
+          : rank + 1,
       showCostNumber: true,
       costIconSpriteId: 'cultivation/cultivation$rank.png',
       costIconRelativePaddings:

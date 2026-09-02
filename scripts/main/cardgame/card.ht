@@ -103,10 +103,13 @@ struct BattleCard {
     this.rank = mainAffix.rank = mainAffixRank
 
     this.affixes = [mainAffix]
-    if (mainAffix.kind != null) {
-      this.name = generateSkillName(kind: mainAffix.kind)
-    } else {
+    this.isKarma = mainAffix.isKarma == true
+    this.karmaKind = mainAffix.karmaKind
+    this.isUnique = mainAffix.isUnique == true
+    if (this.isKarma || mainAffix.kind == null) {
       this.name = engine.locale(mainAffix.id)
+    } else {
+      this.name = generateSkillName(kind: mainAffix.kind)
     }
     this.image = mainAffix.image
     this.genre = mainAffix.genre
@@ -114,6 +117,9 @@ struct BattleCard {
     this.kind = mainAffix.kind
     this.equipment = mainAffix.equipment
     this.requirement = mainAffix.requirement
+    if (mainAffix.isEphemeral == true) {
+      this.isEphemeral = true
+    }
 
     final minLevel = minLevelForRank(this.rank)
     final maxLevel = maxLevelForRank(this.rank)
@@ -141,7 +147,9 @@ struct BattleCard {
 
     this.affixUniqueIds = affixUniqueIds
 
-    _addExtraAffixes(this)
+    if (!this.isKarma) {
+      _addExtraAffixes(this)
+    }
 
     _updateAffixUniqueIds(this)
   }

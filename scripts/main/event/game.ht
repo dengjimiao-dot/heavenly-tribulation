@@ -416,3 +416,10 @@ async function onAfterJoinedSect() {
     Player.progressJournalById('sandboxTutorial')
   }
 }
+
+/// 逃劫：濒死结算时记一笔业力，不打断原作回城逻辑
+async function onDying() {
+  await grantKarmaCard('flee')
+  return false
+}
+

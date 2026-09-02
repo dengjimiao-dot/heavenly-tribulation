@@ -1650,6 +1650,17 @@ Future<void> _heroForgeCardBlank(dynamic location) async {
   await dialog.execute();
 }
 
+
+Future<void> _heroShowKarmaCodex(dynamic location) async {
+  final text = engine.hetu.invoke('formatKarmaCodex');
+  dialog.pushDialog(
+    'hint_karma_codex',
+    npcId: location['npcId'],
+    interpolations: [text],
+  );
+  await dialog.execute();
+}
+
 Future<void> _onInteractSite(
   dynamic location,
   String siteKind,
@@ -1682,6 +1693,10 @@ Future<void> _onInteractSite(
     siteOptions.add({
       'text': 'forgeCardBlank',
       'description': 'hint_forgeCardBlank_description',
+    });
+    siteOptions.add({
+      'text': 'karmaCodex',
+      'description': 'hint_karmaCodex_description',
     });
   } else if (siteKind == 'divinationaltar') {
     siteOptions.add('divination');
@@ -1735,6 +1750,8 @@ Future<void> _onInteractSite(
       );
     case 'forgeCardBlank':
       await _heroForgeCardBlank(location);
+    case 'karmaCodex':
+      await _heroShowKarmaCodex(location);
     case 'about_dungeon':
       dialog.pushDialog(
         'hint_dungeonEntrance',
