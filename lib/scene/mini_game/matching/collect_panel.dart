@@ -8,6 +8,7 @@ import 'package:samsara/samsara.dart';
 import '../../../ui.dart';
 import 'matching.dart';
 import '../../../global.dart';
+import 'package:samsara/utils/safe_flame_image.dart';
 
 const _kCollectPanelPriority = 5;
 
@@ -104,12 +105,12 @@ class CollectPanel extends GameComponent with HandlesGesture {
     //   collect(objectIndex);
     // };
 
-    frame = await Sprite.load('mini_game/matching/panel.png');
+    frame = await loadFlameSprite('mini_game/matching/panel.png');
     // focusFrame = Sprite(
-    //     await Flame.images.load('mini_game/matching/panel_focus.png'));
+    //     await loadFlameImage('mini_game/matching/panel_focus.png'));
 
     if (avatar == null && avatarId != null) {
-      avatar = await Sprite.load(avatarId!);
+      avatar = await loadFlameSprite(avatarId!);
     }
 
     final materials = _kSiteKindToMaterial[matchingGame.kind]!;
@@ -131,7 +132,7 @@ class CollectPanel extends GameComponent with HandlesGesture {
     //   }
     // }
 
-    checkMark = await Sprite.load('ui/checked.png');
+    checkMark = await loadFlameSprite('ui/checked.png');
   }
 
   @override

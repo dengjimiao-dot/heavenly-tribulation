@@ -17,6 +17,7 @@ import '../../../global.dart';
 import '../../../ui.dart';
 import '../../../data/game.dart';
 import '../common.dart';
+import 'package:samsara/utils/safe_flame_image.dart';
 
 class MemoryCardGame extends Scene with HasCursorState {
   final List<CustomGameCard> cards = [];
@@ -124,13 +125,13 @@ class MemoryCardGame extends Scene with HasCursorState {
     victoryPrompt = SpriteComponent(
       anchor: Anchor.center,
       position: Vector2(center.x, center.y - 125),
-      sprite: await Sprite.load('ui/victory.png'),
+      sprite: await loadFlameSprite('ui/victory.png'),
       size: Vector2(480.0, 240.0),
     );
     defeatPrompt = SpriteComponent(
       anchor: Anchor.center,
       position: Vector2(center.x, center.y - 125),
-      sprite: await Sprite.load('ui/defeat.png'),
+      sprite: await loadFlameSprite('ui/defeat.png'),
       size: Vector2(480.0, 240.0),
     );
 
@@ -152,7 +153,7 @@ class MemoryCardGame extends Scene with HasCursorState {
     camera.viewport.add(_flipCountText);
 
     final background = SpriteComponent(
-      sprite: await Sprite.load('mini_game/background2.png'),
+      sprite: await loadFlameSprite('mini_game/background2.png'),
       size: size,
     );
     world.add(background);

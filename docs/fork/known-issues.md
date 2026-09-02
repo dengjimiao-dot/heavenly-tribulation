@@ -24,9 +24,13 @@ Grok Bot 连到用户电脑上的 local-exec 不稳定。开发、改代码、�
 
 M1 到 M5 能跑通主循环（劫季计时、铸牌斋、秘境锁卡组、12 张业力牌、季末渡劫或迁徙）。数值、事件覆盖、表现和存档边界都还薄，不应当成成品系统。
 
-## 缺素材回退只覆盖主菜单
+## 缺素材回退：主菜单与 Flame 精灵
 
-缺图时主菜单背景和标题会改用纯色占位，「劫季门派 · Demo」文案仍在。缺 BGM 会跳过，不抛错。仓库只提交了一张 `assets/images/fork/placeholder.png`，没有替换竖切美术集。战斗精灵、敌人、卡框等局内素材仍走原 Flame 加载，缺文件时仍可能在进战斗后崩溃。
+缺图时主菜单背景和标题会改用纯色占位，「劫季门派 · Demo」文案仍在。缺 BGM 会跳过，不抛错。
+
+局内 Flame 精灵加载（引擎 card/tilemap/UI 组件，以及游戏侧 `Sprite.load` / `Flame.images.load`）缺文件时会回退到占位图（优先 `assets/images/fork/placeholder.png`，否则引擎自带 64x64 PNG），并打警告日志，不再立刻崩溃。这不是换皮：缺图处仍是棕色占位，竖切美术集未替换。
+
+仍可能崩溃的路径：部分 Flutter `DecorationImage` / `AssetImage` / `Avatar` 等未包 `errorBuilder` 的 Widget（例如据点卡、时辰图、NPC 列表箭头、战前图标），以及 `Flame.images.fromCache`（富文本图标）在缓存未命中时。
 
 ## 尚未做的包装
 

@@ -1,8 +1,8 @@
 import 'dart:math' as math;
 
-import 'package:flame/flame.dart';
 import 'package:flame/components.dart';
 import 'package:samsara/samsara.dart';
+import 'package:samsara/utils/safe_flame_image.dart';
 
 const kCloudPriority = 20000;
 const kCouldKindCount = 12;
@@ -30,7 +30,7 @@ class ParticleCloud extends GameComponent {
   Future<void> onLoad() async {
     final randomIndex = random.nextInt(kCouldKindCount).toString();
     sprite = Sprite(
-        await Flame.images.load('particles/clouds/cloud$randomIndex.png'));
+        await loadFlameImage('particles/clouds/cloud$randomIndex.png'));
   }
 
   @override

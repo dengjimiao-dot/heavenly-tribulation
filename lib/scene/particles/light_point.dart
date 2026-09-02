@@ -4,6 +4,7 @@ import 'dart:ui' as ui;
 import 'package:flame/sprite.dart';
 
 import 'package:samsara/samsara.dart';
+import 'package:samsara/utils/safe_flame_image.dart';
 
 const _kLightRadius = 25.0;
 const _kDefaultLightAsset = 'sprite/light_point.png';
@@ -75,7 +76,7 @@ class LightPoint extends BorderComponent {
 
   @override
   void onLoad() async {
-    sprite = await Sprite.load(assetId);
+    sprite = await loadFlameSprite(assetId);
     if (preferredSize.isZero()) {
       size = preferredSize = sprite.srcSize;
     }

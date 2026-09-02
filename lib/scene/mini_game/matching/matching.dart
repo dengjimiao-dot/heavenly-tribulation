@@ -7,7 +7,6 @@ import 'package:samsara/components/sprite_component2.dart';
 import 'package:samsara/samsara.dart';
 import 'package:flame/components.dart';
 // import 'package:fluent_ui/fluent_ui.dart' as fluent;
-import 'package:flame/flame.dart';
 import 'package:samsara/components/ui/sprite_button.dart';
 import 'package:samsara/tilemap/tile_info.dart';
 import 'package:samsara/components/ui/hovertip.dart';
@@ -20,6 +19,7 @@ import 'collect_panel.dart';
 import '../../../data/common.dart';
 import '../../cursor_state.dart';
 import '../../common.dart';
+import 'package:samsara/utils/safe_flame_image.dart';
 
 const _kTileCoverPriority = 500;
 const _kDraggingPriority = 1000;
@@ -193,26 +193,26 @@ class MatchingGame extends Scene with HasCursorState {
     }
 
     hiddenTileSpriteSheet = SpriteSheet(
-      image: await Flame.images.load('mini_game/matching/tile_cover.png'),
+      image: await loadFlameImage('mini_game/matching/tile_cover.png'),
       srcSize: GameUI.matchingTileSize,
     );
     iconSpriteSheet = SpriteSheet(
-      image: await Flame.images.load('mini_game/matching/icon.png'),
+      image: await loadFlameImage('mini_game/matching/icon.png'),
       srcSize: GameUI.matchingTileSize,
     );
     iconHoverSpriteSheet = SpriteSheet(
-      image: await Flame.images.load('mini_game/matching/icon_hover.png'),
+      image: await loadFlameImage('mini_game/matching/icon_hover.png'),
       srcSize: GameUI.matchingTileSize,
     );
 
     final board = SpriteComponent2(
-      sprite: await Sprite.load('mini_game/matching/board.png'),
+      sprite: await loadFlameSprite('mini_game/matching/board.png'),
       size: size,
       enableGesture: true,
     );
     world.add(board);
 
-    border = await Sprite.load('mini_game/matching/border.png');
+    border = await loadFlameSprite('mini_game/matching/border.png');
 
     final sourceIndex = _kMatchingGameKindToSourceSpriteIndex[kind]!;
     sourceButton = TileObject(
