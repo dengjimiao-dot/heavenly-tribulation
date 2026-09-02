@@ -8,6 +8,7 @@ import '../ui.dart';
 import '../data/game.dart';
 import '../logic/logic.dart';
 import '../state/game_state.dart';
+import 'ui/safe_asset_image.dart';
 
 class NpcList extends StatefulWidget {
   const NpcList({super.key});
@@ -47,13 +48,28 @@ class _NpcListState extends State<NpcList> {
           .invoke('haveMet', positionalArgs: [GameData.hero, character]);
       return Padding(
         padding: const EdgeInsets.only(bottom: 5.0),
-        child: Avatar(
-          imageId: character['icon'],
-          color: GameUI.foregroundColor,
-          name: (haveMet != null) ? character['name'] : '???',
-          size: const Size(100, 100),
-          data: character,
-          onPressed: (character) => GameLogic.onInteractCharacter(character),
+        child: SizedBox(
+          width: 100,
+          height: 100,
+          child: Stack(
+            children: [
+              SafeAssetImage(
+                'assets/images/${character['icon']}',
+                width: 100,
+                height: 100,
+                fit: BoxFit.fill,
+                borderRadius: const BorderRadius.all(Radius.circular(10.0)),
+              ),
+              Avatar(
+                color: Colors.transparent,
+                name: (haveMet != null) ? character['name'] : '???',
+                size: const Size(100, 100),
+                data: character,
+                onPressed: (character) =>
+                    GameLogic.onInteractCharacter(character),
+              ),
+            ],
+          ),
         ),
       );
     }).toList();
@@ -73,7 +89,12 @@ class _NpcListState extends State<NpcList> {
             child: start > 0
                 ? InkButton(
                     size: const Size(125.0, 25.0),
-                    image: const AssetImage('assets/images/ui/arrow_up.png'),
+                    child: const SafeAssetImage(
+                      'assets/images/ui/arrow_up.png',
+                      width: 125.0,
+                      height: 25.0,
+                      fit: BoxFit.fill,
+                    ),
                     onPressed: () {
                       setState(() {
                         --start;
@@ -89,7 +110,12 @@ class _NpcListState extends State<NpcList> {
             child: end < characters.length
                 ? InkButton(
                     size: const Size(125.0, 25.0),
-                    image: const AssetImage('assets/images/ui/arrow_down.png'),
+                    child: const SafeAssetImage(
+                      'assets/images/ui/arrow_down.png',
+                      width: 125.0,
+                      height: 25.0,
+                      fit: BoxFit.fill,
+                    ),
                     onPressed: () {
                       setState(() {
                         ++start;

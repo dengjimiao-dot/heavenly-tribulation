@@ -1,10 +1,10 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
-import 'package:samsara/widgets/ui/rrect_icon.dart';
 import 'package:samsara/widgets/pointer_detector.dart';
 
 import '../../../ui.dart';
 import '../../common.dart';
+import '../../ui/safe_asset_image.dart';
 
 class ItemGrid extends StatelessWidget {
   const ItemGrid({
@@ -86,23 +86,24 @@ class ItemGrid extends StatelessWidget {
                           ? (borderColor ?? Colors.yellow)
                           : Colors.transparent,
                     ),
-                    image: DecorationImage(
-                      fit: BoxFit.contain,
-                      image:
-                          AssetImage('assets/images/item/grid_rank$rank.png'),
-                      opacity: 1,
-                    ),
                   )
                 : null,
             child: Stack(
               children: [
+                if (showBorder)
+                  Positioned.fill(
+                    child: SafeAssetImage(
+                      'assets/images/item/grid_rank$rank.png',
+                      fit: BoxFit.contain,
+                    ),
+                  ),
                 if (icon != null)
-                  RRectIcon(
-                    image: AssetImage('assets/images/$icon'),
-                    size: size,
+                  SafeAssetImage(
+                    'assets/images/$icon',
+                    width: size.width,
+                    height: size.height,
+                    fit: BoxFit.fill,
                     borderRadius: GameUI.borderRadius,
-                    borderColor: Colors.transparent,
-                    borderWidth: 0.0,
                   ),
                 if (child != null) child!,
                 if (showStackNumber && stackSize > 1)
@@ -123,12 +124,11 @@ class ItemGrid extends StatelessWidget {
                     bottom: 0,
                     child: Padding(
                       padding: const EdgeInsets.all(2),
-                      child: Image(
+                      child: SafeAssetImage(
+                        'assets/images/item/equipped.png',
                         width: size.width / 3,
                         height: size.height / 3,
                         fit: BoxFit.contain,
-                        image:
-                            const AssetImage('assets/images/item/equipped.png'),
                       ),
                     ),
                   ),

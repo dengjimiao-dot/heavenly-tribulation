@@ -7,6 +7,7 @@ import '../../../global.dart';
 import '../../../ui.dart';
 import '../../../data/game.dart';
 import '../../../widgets/common.dart';
+import '../../../widgets/ui/safe_asset_image.dart';
 
 const Size kTileSize = Size(32, 64);
 
@@ -55,7 +56,13 @@ class _ToolboxState extends State<Toolbox> {
         size: kTileSize,
         padding: const EdgeInsets.only(right: 5.0),
         borderRadius: BorderRadius.circular(5.0),
-        image: AssetImage(icon),
+        child: SafeAssetImage(
+          icon,
+          width: kTileSize.width,
+          height: kTileSize.height,
+          fit: BoxFit.fill,
+          borderRadius: BorderRadius.circular(5.0),
+        ),
         isSelected: selectedItem == toolId,
         onPressed: () {
           context.read<WorldMapState>().selectTool(toolId);
