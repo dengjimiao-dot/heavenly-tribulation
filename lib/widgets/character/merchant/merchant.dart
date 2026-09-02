@@ -1055,9 +1055,9 @@ class _MerchantDialogState extends State<MerchantDialog> {
         if (won) {
           engine.play(GameSound.pickup);
           final entries = _tradeEntries.map((e) => e.toMap());
-          engine.hetu.invoke('characterSteal',
+          await engine.hetu.invoke('characterSteal',
               positionalArgs: [GameData.hero, widget.merchantData, entries]);
-          engine.hetu.invoke('grantKarmaCard', positionalArgs: ['steal']);
+          await engine.hetu.invoke('grantKarmaCard', positionalArgs: ['steal']);
         }
         GameData.addMonthly(MonthlyActivityIds.stolen, targetId);
         dialog.pushDialog(won ? 'hint_steal_success' : 'hint_steal_fail');
