@@ -145,6 +145,7 @@ namespace Player {
   function acquireCard(card, { incurIncident = true }) {
     assert(hero != null)
     characterAcquireBattleCard(hero, card, incurIncident: incurIncident)
+    tryAddSeasonCardToLockedDeck(card)
   }
 
   function craftScroll(card, { incurIncident = true }) {

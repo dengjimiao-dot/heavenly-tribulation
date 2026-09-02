@@ -260,9 +260,11 @@ class _PreBattleDialogState extends State<PreBattleDialog> {
                         BorderedIconButton(
                           size: GameUI.buttonSizeIconSmall,
                           padding: const EdgeInsets.only(right: 10.0),
-                          onPressed: () {
-                            engine.pushScene(Scenes.library);
-                          },
+                          onPressed: GameLogic.isDungeonDeckLocked
+                              ? null
+                              : () {
+                                  engine.pushScene(Scenes.library);
+                                },
                           onEnter: (rect) {
                             context.read<HoverContentState>().show(
                                 rect: rect, data: engine.locale('cardlibrary'));
@@ -281,7 +283,9 @@ class _PreBattleDialogState extends State<PreBattleDialog> {
                           child: fluent.FlyoutTarget(
                             controller: menuController,
                             child: fluent.Button(
-                              onPressed: () {
+                              onPressed: GameLogic.isDungeonDeckLocked
+                                  ? null
+                                  : () {
                                 showFluentMenu(
                                     cursor: GameUI.cursor,
                                     controller: menuController,

@@ -18,7 +18,63 @@ struct DungeonFlags {
     this.buildCompleted = false
     this.battleResult = null
     this.selectedPortal = null
+    this.deckLocked = false
+    this.lockedDeckIndex = -1
+    this.lockedDeckTitle = ''
+    this.seasonCardIds = []
   }
+}
+
+function isDungeonDeckLocked() {
+  return game.flags.dungeon != null && game.flags.dungeon.deckLocked == true
+}
+
+function lockDungeonDeck() {
+  if (hero == null) return false
+  if (game.flags.dungeon == null) return false
+  if (hero.battleDeckIndex < 0 || hero.battleDecks.isEmpty) return false
+  final deck = hero.battleDecks[hero.battleDeckIndex]
+  if (deck == null || deck.cards == null || deck.cards.isEmpty) return false
+  game.flags.dungeon.deckLocked = true
+  game.flags.dungeon.lockedDeckIndex = hero.battleDeckIndex
+  game.flags.dungeon.lockedDeckTitle = deck.title
+  final copied = []
+  for (final id in deck.cards) {
+    copied.add(id)
+  }
+  game.flags.dungeon.lockedCardIds = copied
+  game.flags.dungeon.seasonCardIds = []
+  return true
+}
+
+function tryAddSeasonCardToLockedDeck(card) {
+  if (!isDungeonDeckLocked()) return
+  if (card == null) return
+  card.isSeasonLimited = true
+  if (game.flags.dungeon.seasonCardIds == null) {
+    game.flags.dungeon.seasonCardIds = []
+  }
+  game.flags.dungeon.seasonCardIds.add(card.id)
+  final idx = game.flags.dungeon.lockedDeckIndex
+  if (idx >= 0 && idx < hero.battleDecks.length) {
+    hero.battleDecks[idx].cards.add(card.id)
+  }
+}
+
+function unlockDungeonDeck() {
+  if (hero == null) return
+  if (game.flags.dungeon == null) return
+  final ids = game.flags.dungeon.seasonCardIds ?? []
+  for (final id in ids) {
+    for (final deck in hero.battleDecks) {
+      deck.cards.remove(id)
+    }
+    if (hero.cardLibrary.containsKey(id)) {
+      hero.cardLibrary.remove(id)
+    }
+  }
+  game.flags.dungeon.deckLocked = false
+  game.flags.dungeon.seasonCardIds = []
 }
 
 function resetDungeon({
