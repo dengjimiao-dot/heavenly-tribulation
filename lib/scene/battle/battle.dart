@@ -872,7 +872,7 @@ class BattleScene extends Scene {
       currentCharacter.changeLife(-6);
     }
     if (engine.random.nextDouble() >= 0.4) return;
-    final newData = engine.hetu.invoke(
+    final newData = await engine.hetu.invoke(
       'grantKarmaCard',
       positionalArgs: ['gamble'],
       namedArgs: {'silent': true},
