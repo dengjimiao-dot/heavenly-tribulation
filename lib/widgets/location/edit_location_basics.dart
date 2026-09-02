@@ -166,7 +166,6 @@ class _EditLocationBasicsState extends State<EditLocationBasics> {
                       child: Text('${engine.locale('category')}:'),
                     ),
                     fluent.DropDownButton(
-                      cursor: GameUI.cursor,
                       style: FluentButtonStyles.small,
                       disabled: !widget.allowEditCategory,
                       title: Text(engine.locale(_selectedCategory)),
@@ -192,7 +191,6 @@ class _EditLocationBasicsState extends State<EditLocationBasics> {
                       child: Text('${engine.locale('kind')}:'),
                     ),
                     fluent.DropDownButton(
-                      cursor: GameUI.cursor,
                       style: FluentButtonStyles.small,
                       disabled: !widget.allowEditKind,
                       title: Text(engine.locale(_selectedKind)),

@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:flutter/material.dart' hide DataCell, DataRow, DataColumn, DataTable;
 import 'package:samsara/widgets/ui/empty_placeholder.dart';
 import 'package:data_table_2/data_table_2.dart';
 import 'package:flutter/gestures.dart';
@@ -48,7 +48,6 @@ class _EntityTableState extends State<EntityTable>
         _mousePosition = details.position;
       },
       child: DataTable2(
-        cursor: GameUI.cursor,
         scrollController: ScrollController(),
         empty: EmptyPlaceholder(engine.locale('empty')),
         columns: widget.columns.entries.map((entry) {

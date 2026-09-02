@@ -392,7 +392,6 @@ class _WorkshopDialogState extends State<WorkshopDialog> {
                                       SizedBox(
                                         width: 178.0,
                                         child: fluent.DropDownButton(
-                                          cursor: GameUI.cursor,
                                           style: FluentButtonStyles.small,
                                           placement: fluent
                                               .FlyoutPlacementMode.rightTop,
@@ -417,7 +416,6 @@ class _WorkshopDialogState extends State<WorkshopDialog> {
                                       SizedBox(
                                         width: 178.0,
                                         child: fluent.DropDownButton(
-                                          cursor: GameUI.cursor,
                                           style: FluentButtonStyles.small,
                                           placement: fluent
                                               .FlyoutPlacementMode.rightTop,

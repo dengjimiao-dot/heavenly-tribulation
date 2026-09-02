@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:flutter/material.dart' hide DataCell, DataRow, DataColumn, DataTable;
 import 'package:data_table_2/data_table_2.dart';
 import 'package:samsara/widgets/ui/empty_placeholder.dart';
 import 'package:fluent_ui/fluent_ui.dart' as fluent;
@@ -57,13 +57,13 @@ class CharacterVisitDialog extends StatelessWidget {
           },
           cells: [
             DataCell(Text(engine.locale('heroHome'))),
-            const DataCell(Text('—')),
-            const DataCell(Text('—')),
-            const DataCell(Text('—')),
-            const DataCell(Text('—')),
-            const DataCell(Text('—')),
-            const DataCell(Text('—')),
-            const DataCell(Text('—')),
+            DataCell(Text('—')),
+            DataCell(Text('—')),
+            DataCell(Text('—')),
+            DataCell(Text('—')),
+            DataCell(Text('—')),
+            DataCell(Text('—')),
+            DataCell(Text('—')),
           ]));
     }
 
@@ -139,7 +139,6 @@ class CharacterVisitDialog extends StatelessWidget {
           actions: const [CloseButton2()],
         ),
         body: DataTable2(
-          cursor: GameUI.cursor,
           minWidth: 760,
           scrollController: ScrollController(),
           empty: EmptyPlaceholder(engine.locale('empty')),

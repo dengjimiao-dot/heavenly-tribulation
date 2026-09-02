@@ -210,7 +210,6 @@ class _AlchemyDialogState extends State<AlchemyDialog> {
                             SizedBox(
                               width: 178.0,
                               child: fluent.DropDownButton(
-                                cursor: GameUI.cursor,
                                 style: FluentButtonStyles.small,
                                 title: Text(
                                   '${engine.locale('kind')}: ${engine.locale('potion_$selectedMainAffixId')}',
@@ -230,7 +229,6 @@ class _AlchemyDialogState extends State<AlchemyDialog> {
                             SizedBox(
                               width: 178.0,
                               child: fluent.DropDownButton(
-                                cursor: GameUI.cursor,
                                 style: FluentButtonStyles.small,
                                 title: Text(
                                   '${engine.locale('rarity')}: ${engine.locale(kRankToRarity[selectedCraftRank])}',

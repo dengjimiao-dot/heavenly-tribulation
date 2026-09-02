@@ -150,7 +150,6 @@ class _EditSectBasicsState extends State<EditSectBasics> {
                           child: Text('${engine.locale('category')}: '),
                         ),
                         fluent.DropDownButton(
-                          cursor: GameUI.cursor,
                           style: FluentButtonStyles.small,
                           title: Text(engine.locale(selectedCategory)),
                           items: buildFluentMenuItems(
@@ -177,7 +176,6 @@ class _EditSectBasicsState extends State<EditSectBasics> {
                           child: Text('${engine.locale('genre')}: '),
                         ),
                         fluent.DropDownButton(
-                          cursor: GameUI.cursor,
                           style: FluentButtonStyles.small,
                           title: Text(engine.locale(selectedGenre)),
                           items: buildFluentMenuItems(

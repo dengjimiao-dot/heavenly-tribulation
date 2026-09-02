@@ -20,6 +20,7 @@ import '../../global.dart';
 import 'common.dart';
 import '../../state/states.dart';
 import '../../data/game.dart';
+import '../../logic/logic.dart';
 import '../common.dart';
 import '../../data/common.dart';
 import '../particles/light_point.dart';

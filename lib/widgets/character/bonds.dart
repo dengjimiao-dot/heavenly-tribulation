@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:flutter/material.dart' hide DataCell, DataRow, DataColumn, DataTable;
 import 'package:data_table_2/data_table_2.dart';
 import 'package:samsara/widgets/ui/empty_placeholder.dart';
 import 'package:fluent_ui/fluent_ui.dart' as fluent;
@@ -47,7 +47,6 @@ class CharacterBondsView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return DataTable2(
-      cursor: GameUI.cursor,
       sortColumnIndex: 0,
       empty: EmptyPlaceholder(engine.locale('empty')),
       columns: (isHero
