@@ -19,6 +19,7 @@ import '../../cursor_state.dart';
 import '../../common.dart';
 import '../../../data/game.dart';
 import '../common.dart';
+import 'package:samsara/utils/safe_flame_image.dart';
 
 const _kMaxDifferenceGames = 11;
 
@@ -313,7 +314,7 @@ class DifferenceGame extends Scene with HasCursorState {
   void onLoad() async {
     super.onLoad();
 
-    _errorIndicatorSprite = await Sprite.load(
+    _errorIndicatorSprite = await loadFlameSprite(
       'mini_game/difference/error.png',
     );
 
@@ -328,18 +329,18 @@ class DifferenceGame extends Scene with HasCursorState {
     victoryPrompt = SpriteComponent(
       anchor: Anchor.center,
       position: Vector2(center.x, center.y - 125),
-      sprite: await Sprite.load('ui/victory.png'),
+      sprite: await loadFlameSprite('ui/victory.png'),
       size: Vector2(480.0, 240.0),
     );
     defeatPrompt = SpriteComponent(
       anchor: Anchor.center,
       position: Vector2(center.x, center.y - 125),
-      sprite: await Sprite.load('ui/defeat.png'),
+      sprite: await loadFlameSprite('ui/defeat.png'),
       size: Vector2(480.0, 240.0),
     );
 
     final background = SpriteComponent(
-      sprite: await Sprite.load('mini_game/difference/background.png'),
+      sprite: await loadFlameSprite('mini_game/difference/background.png'),
       size: size,
     );
     world.add(background);
@@ -369,10 +370,10 @@ class DifferenceGame extends Scene with HasCursorState {
     };
     camera.viewport.add(exit);
 
-    hidden = await Sprite.load('mini_game/difference/question_mark.png');
-    found = await Sprite.load('mini_game/difference/check_mark.png');
-    heart = await Sprite.load('mini_game/heart.png');
-    brokenHeart = await Sprite.load('mini_game/broken_heart.png');
+    hidden = await loadFlameSprite('mini_game/difference/question_mark.png');
+    found = await loadFlameSprite('mini_game/difference/check_mark.png');
+    heart = await loadFlameSprite('mini_game/heart.png');
+    brokenHeart = await loadFlameSprite('mini_game/broken_heart.png');
 
     picLeft = SpriteComponent2(
       position: Vector2(
@@ -502,7 +503,7 @@ class DifferenceGame extends Scene with HasCursorState {
         'assets/images/mini_game/difference/library/$gameId/config.json5');
     _diffsData = json5Decode(gameDataString);
 
-    final mainSprite = await Sprite.load(
+    final mainSprite = await loadFlameSprite(
       'mini_game/difference/library/$gameId/main.png',
     );
     await picLeft.tryLoadSprite(sprite: mainSprite);

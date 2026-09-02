@@ -7,7 +7,6 @@ import 'package:flutter/material.dart';
 import 'package:samsara/gestures.dart';
 import 'package:samsara/samsara.dart';
 // import 'package:fluent_ui/fluent_ui.dart' as fluent;
-import 'package:flame/flame.dart';
 import 'package:samsara/components/ui/sprite_button.dart';
 import 'package:flame/components.dart';
 import 'package:samsara/effect/confetti.dart';
@@ -19,6 +18,7 @@ import '../../cursor_state.dart';
 import '../../common.dart';
 import '../../../data/game.dart';
 import '../common.dart';
+import 'package:samsara/utils/safe_flame_image.dart';
 
 const _kLayerPriority = [30, 20, 10];
 
@@ -314,13 +314,13 @@ class MatchingGame2 extends Scene with HasCursorState {
     victoryPrompt = SpriteComponent(
       anchor: Anchor.center,
       position: Vector2(center.x, center.y - 125),
-      sprite: await Sprite.load('ui/victory.png'),
+      sprite: await loadFlameSprite('ui/victory.png'),
       size: Vector2(480.0, 240.0),
     );
     defeatPrompt = SpriteComponent(
       anchor: Anchor.center,
       position: Vector2(center.x, center.y - 125),
-      sprite: await Sprite.load('ui/defeat.png'),
+      sprite: await loadFlameSprite('ui/defeat.png'),
       size: Vector2(480.0, 240.0),
     );
 
@@ -355,12 +355,12 @@ class MatchingGame2 extends Scene with HasCursorState {
         GameUI.matchingTileSize.y * scaleFactor.y);
 
     iconSpriteSheet = SpriteSheet(
-      image: await Flame.images.load('mini_game/matching/icon.png'),
+      image: await loadFlameImage('mini_game/matching/icon.png'),
       srcSize: Vector2(81, 81),
     );
 
     final board = SpriteComponent(
-      sprite: await Sprite.load('mini_game/matching/board2.png'),
+      sprite: await loadFlameSprite('mini_game/matching/board2.png'),
       size: size,
     );
     world.add(board);
@@ -742,7 +742,7 @@ class MatchingGame2 extends Scene with HasCursorState {
     final iconSprite = iconSpriteSheet.getSpriteById(spriteId);
 
     // 加载背景图
-    final tileSprite = await Sprite.load('mini_game/matching/tile.png');
+    final tileSprite = await loadFlameSprite('mini_game/matching/tile.png');
 
     // 计算位置
     Vector2 position = GameUI.matchingBoardOffset.clone();

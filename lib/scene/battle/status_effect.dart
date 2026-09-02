@@ -8,6 +8,7 @@ import '../../global.dart';
 import '../../data/game.dart';
 import '../../ui.dart';
 import 'common.dart';
+import 'package:samsara/utils/safe_flame_image.dart';
 
 class StatusEffect extends BorderComponent with HandlesGesture {
   static ScreenTextConfig defaultEffectCountStyle = const ScreenTextConfig(
@@ -102,10 +103,10 @@ class StatusEffect extends BorderComponent with HandlesGesture {
   @override
   Future<void> onLoad() async {
     if (spriteId != null) {
-      sprite = await Sprite.load(spriteId!);
+      sprite = await loadFlameSprite(spriteId!);
     }
     // else {
-    //   sprite = await Sprite.load('icon/status/placeholder.png'));
+    //   sprite = await loadFlameSprite('icon/status/placeholder.png'));
     // }
   }
 

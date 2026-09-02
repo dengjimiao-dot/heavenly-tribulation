@@ -1,8 +1,8 @@
 import 'dart:math' as math;
 
-import 'package:flame/flame.dart';
 import 'package:flame/components.dart';
 import 'package:samsara/samsara.dart';
+import 'package:samsara/utils/safe_flame_image.dart';
 
 const kRubblePriority = 20000;
 const kRubbleKindCount = 14;
@@ -31,7 +31,7 @@ class ParticleRubble extends GameComponent {
 
     final randomIndex = random.nextInt(kRubbleKindCount).toString();
     sprite = Sprite(
-        await Flame.images.load('particles/rubbles/rubble$randomIndex.png'));
+        await loadFlameImage('particles/rubbles/rubble$randomIndex.png'));
   }
 
   @override

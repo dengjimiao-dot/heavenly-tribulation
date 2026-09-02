@@ -33,6 +33,7 @@ import 'widgets/location_panel.dart';
 import 'widgets/drop_menu.dart';
 import '../cursor_state.dart';
 import '../../game_events.dart';
+import 'package:samsara/utils/safe_flame_image.dart';
 
 final kGridSize = Vector2(32.0, 28.0);
 final kTileSpriteSrcSize = Vector2(32.0, 64.0);
@@ -527,7 +528,7 @@ class WorldMapScene extends Scene with HasCursorState {
     camera.zoom = 4.0;
 
     if (backgroundSpriteId != null) {
-      backgroundSprite = await Sprite.load(backgroundSpriteId!);
+      backgroundSprite = await loadFlameSprite(backgroundSpriteId!);
     }
 
     GameData.loadZoneColors(map);

@@ -28,6 +28,7 @@ import 'common.dart';
 import '../../state/states.dart';
 import 'equipments_bar.dart';
 import '../../widgets/character/profile.dart';
+import 'package:samsara/utils/safe_flame_image.dart';
 
 const kBattleRoundLimit = 16;
 
@@ -415,7 +416,7 @@ class BattleScene extends Scene {
     victoryPrompt = SpriteComponent2(
       anchor: Anchor.center,
       position: Vector2(center.x, center.y - 125),
-      sprite: await Sprite.load('ui/victory.png'),
+      sprite: await loadFlameSprite('ui/victory.png'),
       size: Vector2(480.0, 240.0),
       isVisible: false,
     );
@@ -423,7 +424,7 @@ class BattleScene extends Scene {
     defeatPrompt = SpriteComponent2(
       anchor: Anchor.center,
       position: Vector2(center.x, center.y - 125),
-      sprite: await Sprite.load('ui/defeat.png'),
+      sprite: await loadFlameSprite('ui/defeat.png'),
       size: Vector2(480.0, 240.0),
       isVisible: false,
     );

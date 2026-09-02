@@ -1,9 +1,9 @@
 import 'dart:math' as math;
 
 import 'package:flame/sprite.dart';
-import 'package:flame/flame.dart';
 import 'package:samsara/samsara.dart';
 import 'package:samsara/utils/math.dart' as math;
+import 'package:samsara/utils/safe_flame_image.dart';
 
 const _kVibrateSize = 5.0;
 const _kLightRadius = 25.0;
@@ -67,8 +67,7 @@ class LightTrail extends BorderComponent {
 
   @override
   void onLoad() async {
-    sprite = Sprite(await Flame.images
-        .load('cultivation/light_trail_${radius.toInt()}.png'));
+    sprite = Sprite(await loadFlameImage('cultivation/light_trail_${radius.toInt()}.png'));
     size = preferredSize = sprite.srcSize;
   }
 

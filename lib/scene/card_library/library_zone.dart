@@ -13,6 +13,7 @@ import 'deckbuilding_zone.dart';
 import '../../global.dart';
 import 'card_library.dart';
 import '../../widgets/common.dart';
+import 'package:samsara/utils/safe_flame_image.dart';
 
 /// 卡牌收藏界面，和普通的 PiledZone 不同，
 /// 这里的卡牌是多行显示，并且带有翻页功能。
@@ -307,7 +308,7 @@ class CardLibraryZone extends GameComponent with HandlesGesture {
 
   @override
   Future<void> onLoad() async {
-    stackSprite ??= await Sprite.load('cardstack_back.png');
+    stackSprite ??= await loadFlameSprite('cardstack_back.png');
 
     container = PositionComponent(
       position: GameUI.libraryZonePosition,

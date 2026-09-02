@@ -30,6 +30,7 @@ import '../cursor_state.dart';
 import '../mini_game/common.dart';
 import '../../game_events.dart';
 import '../../widgets/common.dart';
+import 'package:samsara/utils/safe_flame_image.dart';
 
 const _kOrbMoveSpeed = 450.0;
 
@@ -1168,7 +1169,7 @@ class CultivationScene extends Scene with HasCursorState {
     newRankPrompt = SpriteComponent(
       anchor: Anchor.center,
       position: Vector2(center.x, center.y - 125),
-      sprite: await Sprite.load('rank_up.png'),
+      sprite: await loadFlameSprite('rank_up.png'),
       size: Vector2(800.0, 220.0),
       priority: _kBarrierPriority,
     );
@@ -1252,7 +1253,7 @@ class CultivationScene extends Scene with HasCursorState {
 
     backgroundSprite = SpriteComponent(
       position: Vector2(center.x, center.y - 130),
-      sprite: await Sprite.load('cultivation/cave2.png'),
+      sprite: await loadFlameSprite('cultivation/cave2.png'),
       anchor: Anchor.center,
       priority: _kBackgroundPriority,
     );

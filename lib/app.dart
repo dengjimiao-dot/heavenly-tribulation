@@ -85,6 +85,9 @@ class _GameAppState extends State<GameApp> {
 
     GameUI.init();
 
+    // Prefer game fork placeholder when engine Flame loads miss assets.
+    registerFlameImageFallback('fork/placeholder.png');
+
     await gameConfig.load();
 
     await engine.init(context);

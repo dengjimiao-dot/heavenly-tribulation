@@ -26,6 +26,7 @@ import '../particles/light_point.dart';
 import '../../widgets/dialog/input_string.dart';
 import '../../widgets/common.dart';
 import '../../game_events.dart';
+import 'package:samsara/utils/safe_flame_image.dart';
 
 const kMaxLightPointCount = 20;
 
@@ -951,7 +952,7 @@ class CardLibraryScene extends Scene {
     camera.viewport.add(barrier);
 
     background = SpriteComponent(
-      sprite: await Sprite.load('cultivation/cardlibrary_background.png'),
+      sprite: await loadFlameSprite('cultivation/cardlibrary_background.png'),
       size: size,
     );
     world.add(background);
@@ -1087,7 +1088,7 @@ class CardLibraryScene extends Scene {
     world.add(libraryZone);
 
     cardCraftZoneDecoration = SpriteComponent(
-      sprite: await Sprite.load('cultivation/cardlibrary_cardcraft.png'),
+      sprite: await loadFlameSprite('cultivation/cardlibrary_cardcraft.png'),
       size: GameUI.cardCraftZoneSize,
       position: GameUI.cardCraftZonePosition,
       priority: kTopBarPriority + 10,

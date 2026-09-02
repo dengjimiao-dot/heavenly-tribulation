@@ -4,7 +4,6 @@ import 'dart:math' as math;
 import 'dart:async';
 
 import 'package:flutter/foundation.dart';
-import 'package:flame/flame.dart';
 import 'package:flame/sprite.dart';
 import 'package:flutter/services.dart' show rootBundle;
 import 'package:hetu_script/utils/collection.dart' as utils;
@@ -24,6 +23,7 @@ import '../state/game_save.dart';
 import '../scene/world/world.dart';
 import 'prompt.dart';
 import '../state/game_state.dart';
+import 'package:samsara/utils/safe_flame_image.dart';
 
 const _kSkinAnimationWidth = 288.0;
 const _kSkinAnimationHeight = 112.0;
@@ -435,8 +435,7 @@ final class GameData with ChangeNotifier {
             animations[skinAnimId] = skinAnimData;
           }
 
-          final image = await Flame.images
-              .load('animation/$battleAnimationSpriteSheetId');
+          final image = await loadFlameImage('animation/$battleAnimationSpriteSheetId');
           final sheet = SpriteSheet(
             image: image,
             srcSize: Vector2(_kSkinAnimationWidth, _kSkinAnimationHeight),
@@ -451,7 +450,7 @@ final class GameData with ChangeNotifier {
           if (spriteSheets.containsKey(assetId)) {
             continue;
           }
-          final image = await Flame.images.load('animation/$assetId');
+          final image = await loadFlameImage('animation/$assetId');
           final sheet = SpriteSheet(
             image: image,
             srcSize: Vector2(animData['width'], animData['height']),
@@ -470,7 +469,7 @@ final class GameData with ChangeNotifier {
       double? srcWidth = spriteSheetData['width'];
       double? srcHeight = spriteSheetData['height'];
       assert(srcWidth != null && srcHeight != null);
-      final image = await Flame.images.load(assetId);
+      final image = await loadFlameImage(assetId);
       final sheet = SpriteSheet(
         image: image,
         srcSize: Vector2(srcWidth!, srcHeight!),

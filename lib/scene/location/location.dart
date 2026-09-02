@@ -18,6 +18,7 @@ import '../../state/states.dart';
 import '../world/widgets/drop_menu.dart';
 import '../cursor_state.dart';
 import 'character_visit.dart';
+import 'package:samsara/utils/safe_flame_image.dart';
 
 class LocationScene extends Scene with HasCursorState {
   LocationScene({required this.location})
@@ -270,7 +271,7 @@ class LocationScene extends Scene with HasCursorState {
     }
 
     _backgroundComponent = SpriteComponent2(
-      sprite: await Sprite.load(location['background']),
+      sprite: await loadFlameSprite(location['background']),
       size: size,
     );
     _backgroundComponent.onTapDown = (button, position) {
