@@ -6,6 +6,7 @@ import 'package:samsara/animation/animation_state_controller.dart';
 import 'package:samsara/cardgame/custom_card.dart';
 
 import '../../global.dart';
+import '../../logic/season.dart';
 import '../../data/game.dart';
 import 'battledeck_zone.dart';
 import '../../ui.dart';
@@ -690,6 +691,9 @@ class BattleCharacter extends GameComponent with AnimationStateController {
 
     // isMain 为 true 表示伤害来源来自主词条的攻击
     // 否则的话意味着是某些状态效果或者额外词条造成的伤害
+
+    // 劫季门派：天象伤害修正（乘区3）
+    SeasonLogic.applyBattleDamageMods(damageDetails, selfIsHero: isHero);
 
     // 触发自己造成伤害时的效果，可能会改变伤害值
     opponent!.handleStatusEffectCallback('self_doing_damage', damageDetails);

@@ -1,0 +1,50 @@
+{
+  // 劫季门派 M1：一年 12 月按月映射天象；每「季」= 连续同天象的月份段
+  // dayIndexInYear = (month-1)*30 + day  （month/day 均为 1-based）
+  seasonLengthDays: 30,
+  seasons: [
+    {
+      id: 'thunder',
+      name: '雷月',
+      months: [1, 2, 3, 4],
+      mods: {
+        damageTakenMul: 1.15,
+        damageDealtMul: 1.10,
+        lootMul: 1.0,
+        tribulationStrictness: 1.2,
+        wildEncounterMul: 1.25,
+      },
+      description: '雷盛利于破防与渡劫，但野遇更凶、天劫更严。',
+    },
+    {
+      id: 'mist',
+      name: '雾月',
+      months: [5, 6, 7, 8],
+      mods: {
+        damageTakenMul: 1.0,
+        damageDealtMul: 1.0,
+        lootMul: 0.95,
+        cardCostJitter: 1,
+        stealthEventMul: 1.35,
+        tribulationStrictness: 1.0,
+        wildEncounterMul: 0.9,
+      },
+      description: '雾锁山门，利于潜行与跑商；牌费用可能偏移，掉落略不稳。',
+    },
+    {
+      id: 'blood',
+      name: '血月',
+      months: [9, 10, 11, 12],
+      mods: {
+        damageTakenMul: 1.05,
+        damageDealtMul: 1.20,
+        lootMul: 1.35,
+        lifeStealBonus: 0.05,
+        tribulationStrictness: 1.1,
+        wildEncounterMul: 1.1,
+        failPenalty: 'minor_realm_or_karma',
+      },
+      description: '血月秘境爆率升高、爆发强化；失败可能掉小境界或积业力。',
+    },
+  ],
+}

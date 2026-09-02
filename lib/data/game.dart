@@ -135,6 +135,8 @@ final class GameData with ChangeNotifier {
   static final Map<String, dynamic> journals = {};
   static final Map<String, dynamic> quests = {};
   static final Map<String, dynamic> maps = {};
+  /// 劫季门派：天象/季节配置（assets/data/seasons.json5）
+  static final List seasons = [];
 
   static final Map<String, (String, String)> attributeNames = {};
   static final Map<String, String> sectCategoryNames = {};
