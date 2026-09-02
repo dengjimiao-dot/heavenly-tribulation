@@ -22,6 +22,7 @@ import '../../../widgets/character/stats.dart';
 import '../../../widgets/ui/close_button2.dart';
 import '../../../widgets/ui/responsive_view.dart';
 import '../../../game_events.dart';
+import '../../../widgets/ui/safe_asset_image.dart';
 
 class PreBattleDialog extends StatefulWidget {
   /// 显示战斗准备对话框，注意对战己方不一定是英雄，所以这里需要传入己方角色
@@ -189,21 +190,45 @@ class _PreBattleDialogState extends State<PreBattleDialog> {
                     margin: const EdgeInsets.only(right: 10.0, bottom: 10.0),
                     data: widget.hero,
                   ),
-                  Avatar(
-                    margin: const EdgeInsets.only(right: 10.0, bottom: 10.0),
-                    placeholderId: 'illustration/placeholder.png',
+                  Padding(
+                    padding: const EdgeInsets.only(right: 10.0, bottom: 10.0),
+                    child: SafeAssetImage(
+                      'assets/images/illustration/placeholder.png',
+                      width: 100,
+                      height: 100,
+                      fit: BoxFit.fill,
+                      borderRadius: const BorderRadius.all(Radius.circular(10.0)),
+                    ),
                   ),
-                  Avatar(
-                    margin: const EdgeInsets.only(right: 10.0, bottom: 10.0),
-                    placeholderId: 'illustration/placeholder.png',
+                  Padding(
+                    padding: const EdgeInsets.only(right: 10.0, bottom: 10.0),
+                    child: SafeAssetImage(
+                      'assets/images/illustration/placeholder.png',
+                      width: 100,
+                      height: 100,
+                      fit: BoxFit.fill,
+                      borderRadius: const BorderRadius.all(Radius.circular(10.0)),
+                    ),
                   ),
-                  Avatar(
-                    margin: const EdgeInsets.only(right: 10.0, bottom: 10.0),
-                    placeholderId: 'illustration/placeholder.png',
+                  Padding(
+                    padding: const EdgeInsets.only(right: 10.0, bottom: 10.0),
+                    child: SafeAssetImage(
+                      'assets/images/illustration/placeholder.png',
+                      width: 100,
+                      height: 100,
+                      fit: BoxFit.fill,
+                      borderRadius: const BorderRadius.all(Radius.circular(10.0)),
+                    ),
                   ),
-                  Avatar(
-                    margin: const EdgeInsets.only(right: 10.0, bottom: 10.0),
-                    placeholderId: 'illustration/placeholder.png',
+                  Padding(
+                    padding: const EdgeInsets.only(right: 10.0, bottom: 10.0),
+                    child: SafeAssetImage(
+                      'assets/images/illustration/placeholder.png',
+                      width: 100,
+                      height: 100,
+                      fit: BoxFit.fill,
+                      borderRadius: const BorderRadius.all(Radius.circular(10.0)),
+                    ),
                   ),
                 ],
               ),
@@ -234,9 +259,8 @@ class _PreBattleDialogState extends State<PreBattleDialog> {
                           onExit: () {
                             context.read<HoverContentState>().hide();
                           },
-                          child: const Image(
-                            image:
-                                AssetImage('assets/images/icon/inventory.png'),
+                          child: const SafeAssetImage(
+                            'assets/images/icon/inventory.png',
                           ),
                         ),
                         BorderedIconButton(
@@ -252,9 +276,8 @@ class _PreBattleDialogState extends State<PreBattleDialog> {
                           onExit: () {
                             context.read<HoverContentState>().hide();
                           },
-                          child: const Image(
-                            image:
-                                AssetImage('assets/images/icon/cultivate.png'),
+                          child: const SafeAssetImage(
+                            'assets/images/icon/cultivate.png',
                           ),
                         ),
                         BorderedIconButton(
@@ -272,8 +295,8 @@ class _PreBattleDialogState extends State<PreBattleDialog> {
                           onExit: () {
                             context.read<HoverContentState>().hide();
                           },
-                          child: const Image(
-                            image: AssetImage('assets/images/icon/library.png'),
+                          child: const SafeAssetImage(
+                            'assets/images/icon/library.png',
                           ),
                         ),
                         const Spacer(),
@@ -337,8 +360,8 @@ class _PreBattleDialogState extends State<PreBattleDialog> {
               Column(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Image(
-                    image: AssetImage('assets/images/ui/versus.png'),
+                  const SafeAssetImage(
+                    'assets/images/ui/versus.png',
                     width: 200,
                     height: 200,
                   ),
@@ -422,8 +445,8 @@ class _PreBattleDialogState extends State<PreBattleDialog> {
                           onExit: () {
                             context.read<HoverContentState>().hide();
                           },
-                          child: const Image(
-                            image: AssetImage('assets/images/icon/stats.png'),
+                          child: const SafeAssetImage(
+                            'assets/images/icon/stats.png',
                           ),
                         ),
                         const Spacer(),
@@ -527,21 +550,45 @@ class _PreBattleDialogState extends State<PreBattleDialog> {
                     margin: const EdgeInsets.only(left: 10.0, bottom: 10.0),
                     data: widget.enemy,
                   ),
-                  Avatar(
-                    margin: const EdgeInsets.only(left: 10.0, bottom: 10.0),
-                    placeholderId: 'illustration/placeholder.png',
+                  Padding(
+                    padding: const EdgeInsets.only(left: 10.0, bottom: 10.0),
+                    child: SafeAssetImage(
+                      'assets/images/illustration/placeholder.png',
+                      width: 100,
+                      height: 100,
+                      fit: BoxFit.fill,
+                      borderRadius: const BorderRadius.all(Radius.circular(10.0)),
+                    ),
                   ),
-                  Avatar(
-                    margin: const EdgeInsets.only(left: 10.0, bottom: 10.0),
-                    placeholderId: 'illustration/placeholder.png',
+                  Padding(
+                    padding: const EdgeInsets.only(left: 10.0, bottom: 10.0),
+                    child: SafeAssetImage(
+                      'assets/images/illustration/placeholder.png',
+                      width: 100,
+                      height: 100,
+                      fit: BoxFit.fill,
+                      borderRadius: const BorderRadius.all(Radius.circular(10.0)),
+                    ),
                   ),
-                  Avatar(
-                    margin: const EdgeInsets.only(left: 10.0, bottom: 10.0),
-                    placeholderId: 'illustration/placeholder.png',
+                  Padding(
+                    padding: const EdgeInsets.only(left: 10.0, bottom: 10.0),
+                    child: SafeAssetImage(
+                      'assets/images/illustration/placeholder.png',
+                      width: 100,
+                      height: 100,
+                      fit: BoxFit.fill,
+                      borderRadius: const BorderRadius.all(Radius.circular(10.0)),
+                    ),
                   ),
-                  Avatar(
-                    margin: const EdgeInsets.only(left: 10.0, bottom: 10.0),
-                    placeholderId: 'illustration/placeholder.png',
+                  Padding(
+                    padding: const EdgeInsets.only(left: 10.0, bottom: 10.0),
+                    child: SafeAssetImage(
+                      'assets/images/illustration/placeholder.png',
+                      width: 100,
+                      height: 100,
+                      fit: BoxFit.fill,
+                      borderRadius: const BorderRadius.all(Radius.circular(10.0)),
+                    ),
                   ),
                 ],
               ),

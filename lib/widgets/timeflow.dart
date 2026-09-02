@@ -9,6 +9,7 @@ import '../logic/season.dart';
 import '../global.dart';
 import '../data/common.dart';
 import 'ui/responsive_view.dart';
+import 'ui/safe_asset_image.dart';
 import '../ui.dart';
 
 class TimeflowDialog extends StatefulWidget {
@@ -155,8 +156,8 @@ class _TimeflowDialogState extends State<TimeflowDialog> {
             padding: const EdgeInsets.all(10.0),
             child: Column(
               children: [
-                Image(
-                  image: AssetImage(timeOfDayImageId),
+                SafeAssetImage(
+                  timeOfDayImageId,
                   fit: BoxFit.contain,
                 ),
                 if (SeasonLogic.hudLine().isNotEmpty)

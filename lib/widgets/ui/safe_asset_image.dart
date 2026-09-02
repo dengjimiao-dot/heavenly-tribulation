@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 
 /// Asset image that falls back to a solid color instead of throwing.
+///
+/// [DecorationImage] has no errorBuilder; use this inside a Stack /
+/// [Positioned.fill] (or as an [InkButton] child) instead of BoxDecoration.image.
 class SafeAssetImage extends StatelessWidget {
   const SafeAssetImage(
     this.asset, {
@@ -8,6 +11,7 @@ class SafeAssetImage extends StatelessWidget {
     this.fit,
     this.width,
     this.height,
+    this.borderRadius,
     this.fallbackColor = const Color(0xFF3A2A1A),
   });
 
@@ -15,11 +19,12 @@ class SafeAssetImage extends StatelessWidget {
   final BoxFit? fit;
   final double? width;
   final double? height;
+  final BorderRadius? borderRadius;
   final Color fallbackColor;
 
   @override
   Widget build(BuildContext context) {
-    return Image(
+    Widget image = Image(
       image: AssetImage(asset),
       fit: fit,
       width: width,
@@ -32,5 +37,9 @@ class SafeAssetImage extends StatelessWidget {
         );
       },
     );
+    if (borderRadius != null) {
+      image = ClipRRect(borderRadius: borderRadius!, child: image);
+    }
+    return image;
   }
 }

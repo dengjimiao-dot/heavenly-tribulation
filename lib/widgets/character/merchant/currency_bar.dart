@@ -4,6 +4,7 @@ import 'package:samsara/widgets/ui/mouse_region2.dart';
 import 'package:samsara/hover_info.dart';
 
 import '../../../global.dart';
+import '../../ui/safe_asset_image.dart';
 
 class CurrencyBar extends StatelessWidget {
   const CurrencyBar({
@@ -36,10 +37,10 @@ class CurrencyBar extends StatelessWidget {
             },
             child: Row(
               children: [
-                Image(
+                SafeAssetImage(
+                  'assets/images/item/material/money.png',
                   width: 20,
                   height: 20,
-                  image: AssetImage('assets/images/item/material/money.png'),
                 ),
                 if (showMaterialName) Text('${engine.locale('money')}:'),
                 Container(
@@ -66,10 +67,10 @@ class CurrencyBar extends StatelessWidget {
             },
             child: Row(
               children: [
-                Image(
+                SafeAssetImage(
+                  'assets/images/item/material/shard.png',
                   width: 20,
                   height: 20,
-                  image: AssetImage('assets/images/item/material/shard.png'),
                 ),
                 if (showMaterialName) Text('${engine.locale('shard')}:'),
                 Container(

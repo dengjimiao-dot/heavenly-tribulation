@@ -16,6 +16,7 @@ import '../ui/close_button2.dart';
 import '../ui/responsive_view.dart';
 import '../../ui.dart';
 import '../history_list.dart';
+import '../ui/safe_asset_image.dart';
 import 'memory_and_bond.dart';
 
 class CharacterProfile extends StatefulWidget {
@@ -272,13 +273,31 @@ class _CharacterProfileState extends State<CharacterProfile> {
                   children: [
                     Padding(
                       padding: const EdgeInsets.only(right: 15.0, top: 10.0),
-                      child: Avatar(
-                        color: GameUI.foregroundColor,
-                        name: _character['name'],
-                        size: const Size(120.0, 120.0),
-                        nameAlignment: AvatarNameAlignment.bottom,
-                        image:
-                            AssetImage('assets/images/${_character['icon']}'),
+                      child: SizedBox(
+                        width: 120.0,
+                        height: 140.0,
+                        child: Stack(
+                          children: [
+                            Align(
+                              alignment: Alignment.topCenter,
+                              child: SafeAssetImage(
+                                'assets/images/${_character['icon']}',
+                                width: 100.0,
+                                height: 100.0,
+                                fit: BoxFit.fill,
+                                borderRadius: const BorderRadius.all(
+                                  Radius.circular(10.0),
+                                ),
+                              ),
+                            ),
+                            Avatar(
+                              color: Colors.transparent,
+                              name: _character['name'],
+                              size: const Size(120.0, 120.0),
+                              nameAlignment: AvatarNameAlignment.bottom,
+                            ),
+                          ],
+                        ),
                       ),
                     ),
                     Expanded(

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../ui.dart';
+import '../ui/safe_asset_image.dart';
 
 class SiteCard extends StatelessWidget {
   const SiteCard({
@@ -24,34 +25,36 @@ class SiteCard extends StatelessWidget {
       child: Card(
         elevation: 8.0,
         shadowColor: Colors.black26,
-        child: Ink(
-          decoration: BoxDecoration(
-            borderRadius: GameUI.borderRadius,
-            image: imagePath != null
-                ? DecorationImage(
-                    image: AssetImage('assets/images/$imagePath'),
-                    fit: BoxFit.fill,
-                  )
-                : null,
-          ),
-          child: Material(
-            type: MaterialType.transparency,
-            child: InkWell(
-              mouseCursor: GameUI.cursor.resolve({WidgetState.hovered}),
-              borderRadius: GameUI.borderRadius,
-              onTap: () => onTap?.call(site),
-              onSecondaryTapUp: (details) =>
-                  onSecondaryTap?.call(site, details),
-              child: Container(
-                padding: const EdgeInsets.all(5.0),
-                color: Theme.of(context).primaryColor.withAlpha(128),
-                child: Text(
-                  site['name'],
-                  textAlign: TextAlign.center,
-                  style: TextStyles.bodySmall,
+        child: ClipRRect(
+          borderRadius: GameUI.borderRadius,
+          child: Stack(
+            fit: StackFit.expand,
+            children: [
+              if (imagePath != null)
+                SafeAssetImage(
+                  'assets/images/$imagePath',
+                  fit: BoxFit.fill,
+                ),
+              Material(
+                type: MaterialType.transparency,
+                child: InkWell(
+                  mouseCursor: GameUI.cursor.resolve({WidgetState.hovered}),
+                  borderRadius: GameUI.borderRadius,
+                  onTap: () => onTap?.call(site),
+                  onSecondaryTapUp: (details) =>
+                      onSecondaryTap?.call(site, details),
+                  child: Container(
+                    padding: const EdgeInsets.all(5.0),
+                    color: Theme.of(context).primaryColor.withAlpha(128),
+                    child: Text(
+                      site['name'],
+                      textAlign: TextAlign.center,
+                      style: TextStyles.bodySmall,
+                    ),
+                  ),
                 ),
               ),
-            ),
+            ],
           ),
         ),
       ),

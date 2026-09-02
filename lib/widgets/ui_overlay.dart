@@ -303,24 +303,48 @@ class _GameUIOverlayState extends State<GameUIOverlay> {
               Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Avatar(
-                    size: const Size.square(kUIOverlayHeight),
-                    imageId: hero['icon'],
-                    color: GameUI.foregroundColor,
-                    radius: Radius.zero,
-                    borderWidth: 0.0,
-                    showBorderImage: true,
-                    onPressed: (_) {
-                      context.read<ViewPanelState>().toogle(ViewPanels.profile);
-                    },
-                    onEnter: (rect) {
-                      context
-                          .read<HoverContentState>()
-                          .show(rect: rect, data: GameData.hero['name']);
-                    },
-                    onExit: () {
-                      context.read<HoverContentState>().hide();
-                    },
+                  SizedBox(
+                    width: kUIOverlayHeight,
+                    height: kUIOverlayHeight,
+                    child: Stack(
+                      children: [
+                        Container(
+                          width: kUIOverlayHeight,
+                          height: kUIOverlayHeight,
+                          color: GameUI.foregroundColor,
+                        ),
+                        SafeAssetImage(
+                          'assets/images/${hero['icon']}',
+                          width: kUIOverlayHeight,
+                          height: kUIOverlayHeight,
+                          fit: BoxFit.fill,
+                        ),
+                        SafeAssetImage(
+                          'assets/images/illustration/border.png',
+                          width: kUIOverlayHeight,
+                          height: kUIOverlayHeight,
+                          fit: BoxFit.fill,
+                        ),
+                        Avatar(
+                          size: const Size.square(kUIOverlayHeight),
+                          color: Colors.transparent,
+                          radius: Radius.zero,
+                          borderWidth: 0.0,
+                          onPressed: (_) {
+                            context
+                                .read<ViewPanelState>()
+                                .toogle(ViewPanels.profile);
+                          },
+                          onEnter: (rect) {
+                            context.read<HoverContentState>().show(
+                                rect: rect, data: GameData.hero['name']);
+                          },
+                          onExit: () {
+                            context.read<HoverContentState>().hide();
+                          },
+                        ),
+                      ],
+                    ),
                   ),
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,

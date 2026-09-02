@@ -20,6 +20,7 @@ import '../../../ui.dart';
 import '../../common.dart';
 import '../../../scene/common.dart';
 import '../../../scene/mini_game/common.dart';
+import '../../ui/safe_asset_image.dart';
 
 const _tempTradeGridCount = 15;
 
@@ -1188,10 +1189,10 @@ class _MerchantDialogState extends State<MerchantDialog> {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  const Image(
+                  const SafeAssetImage(
+                    'assets/images/icon/quest.png',
                     width: 24.0,
                     height: 24.0,
-                    image: AssetImage('assets/images/icon/quest.png'),
                   ),
                   Label(
                     engine.locale('priceFactor'),
@@ -1407,10 +1408,10 @@ class _MerchantDialogState extends State<MerchantDialog> {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                const Image(
+                const SafeAssetImage(
+                  'assets/images/icon/quest.png',
                   width: 24.0,
                   height: 24.0,
-                  image: AssetImage('assets/images/icon/quest.png'),
                 ),
                 Label(
                   engine.locale('priceFactor'),
@@ -1638,10 +1639,10 @@ class _MerchantDialogState extends State<MerchantDialog> {
           Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              const Image(
+              const SafeAssetImage(
+                'assets/images/item/material/money.png',
                 width: 16.0,
                 height: 16.0,
-                image: AssetImage('assets/images/item/material/money.png'),
               ),
               const SizedBox(width: 4.0),
               Text(
@@ -1654,10 +1655,10 @@ class _MerchantDialogState extends State<MerchantDialog> {
           Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              const Image(
+              const SafeAssetImage(
+                'assets/images/item/material/shard.png',
                 width: 16.0,
                 height: 16.0,
-                image: AssetImage('assets/images/item/material/shard.png'),
               ),
               const SizedBox(width: 4.0),
               Text(

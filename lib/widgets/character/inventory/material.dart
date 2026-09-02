@@ -9,6 +9,7 @@ import '../../../ui.dart';
 import '../../../logic/logic.dart';
 import '../../../global.dart';
 import '../../../data/common.dart';
+import '../../ui/safe_asset_image.dart';
 
 enum MaterialListType {
   inventory,
@@ -101,10 +102,10 @@ class MaterialList extends StatelessWidget {
             },
             child: Row(
               children: [
-                Image(
+                SafeAssetImage(
+                  'assets/images/item/material/$key.png',
                   width: 20,
                   height: 20,
-                  image: AssetImage('assets/images/item/material/$key.png'),
                 ),
                 Text(
                   engine.locale(key),

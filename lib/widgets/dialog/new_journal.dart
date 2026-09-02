@@ -9,6 +9,7 @@ import '../../ui.dart';
 import '../../global.dart';
 import '../../state/new_prompt.dart';
 import '../ui/responsive_view.dart';
+import '../ui/safe_asset_image.dart';
 
 class NewJournal extends StatelessWidget {
   const NewJournal({
@@ -40,8 +41,8 @@ class NewJournal extends StatelessWidget {
             if (journal['image'] != null)
               Padding(
                 padding: const EdgeInsets.only(top: 10.0),
-                child: Image(
-                  image: AssetImage('assets/images/${journal['image']}'),
+                child: SafeAssetImage(
+                  'assets/images/${journal['image']}',
                 ),
               ),
             ...(journal['sequence'] as List).map((index) {
