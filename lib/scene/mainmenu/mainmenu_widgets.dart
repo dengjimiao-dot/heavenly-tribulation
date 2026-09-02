@@ -56,8 +56,18 @@ class _MainMenuWidgetsState extends State<MainMenuWidgets> {
           width: GameUI.size.x,
           height: GameUI.size.y,
           child: Image(
-            image: const AssetImage('assets/images/title_background.gif'),
+            image: const AssetImage('assets/images/main_menu_bg.png'),
             fit: BoxFit.cover,
+            frameBuilder: (context, child, frame, sync) {
+              if (frame == null) {
+                return Container(
+                  width: GameUI.size.x,
+                  height: GameUI.size.y,
+                  color: const Color(0xFF2A1C14),
+                );
+              }
+              return child;
+            },
             errorBuilder: (context, error, stackTrace) {
               return Container(
                 width: GameUI.size.x,
@@ -234,8 +244,14 @@ class _MainMenuWidgetsState extends State<MainMenuWidgets> {
                               const Duration(milliseconds: 250));
                           await engine.clearAllCachedScene(
                               except: Scenes.mainmenu, triggerOnStart: false);
+                          final hero = GameData.hero;
+                          if (hero == null) {
+                            engine.setLoading(false);
+                            engine.warning('hero not ready');
+                            return;
+                          }
                           engine.hetu.invoke('resetDungeon', namedArgs: {
-                            'rank': GameData.hero['rank'],
+                            'rank': hero['rank'] ?? 0,
                           });
                           engine.pushScene(
                             'dungeon_1',

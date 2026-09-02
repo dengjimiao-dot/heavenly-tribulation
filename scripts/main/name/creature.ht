@@ -5,10 +5,10 @@ import 'creature/prefix.json5' as creaturePrefix
 import 'common/strange.json5' as strangeCreature
 
 const commonCreatureNames = [
-  ...commonNamesData.dao,
-  ...commonNamesData.place,
-  ...commonNamesData.number,
-  ...commonNamesData.action,
+  ...(commonNamesData.dao ?? []),
+  ...(commonNamesData.place ?? []),
+  ...(commonNamesData.number ?? []),
+  ...(commonNamesData.action ?? []),
 ]
 
 function generateCreatureName({category, rarity}) {

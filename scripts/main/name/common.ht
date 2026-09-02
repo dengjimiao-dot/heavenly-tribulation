@@ -4,15 +4,15 @@ import 'common/material.json5' as materialPrefix
 import 'common/spirit.json5' as spiritPrefix
 
 const commonNames = [
-  ...commonNamesData.dao,
-  ...commonNamesData.budda,
-  ...commonNamesData.emotion,
-  ...commonNamesData.creature,
-  ...commonNamesData.nature,
-  ...commonNamesData.place,
-  ...commonNamesData.number,
-  ...commonNamesData.action,
-  ...commonNamesData.fight,
+  ...(commonNamesData.dao ?? []),
+  ...(commonNamesData.budda ?? []),
+  ...(commonNamesData.emotion ?? []),
+  ...(commonNamesData.creature ?? []),
+  ...(commonNamesData.nature ?? []),
+  ...(commonNamesData.place ?? []),
+  ...(commonNamesData.number ?? []),
+  ...(commonNamesData.action ?? []),
+  ...(commonNamesData.fight ?? []),
 ];
 
 const kStrangeNameProbability = 0.1

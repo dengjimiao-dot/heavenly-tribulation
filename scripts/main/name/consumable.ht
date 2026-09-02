@@ -5,12 +5,12 @@ import 'consumable/medicine.json5' as medicineNames
 import 'consumable/beverage.json5' as beverageNames
 
 const commonConsumableNames = [
-  ...commonNamesData.dao,
-  ...commonNamesData.budda,
-  ...commonNamesData.emotion,
-  ...commonNamesData.color,
-  ...commonNamesData.number,
-  ...commonNamesData.action,
+  ...(commonNamesData.dao ?? []),
+  ...(commonNamesData.budda ?? []),
+  ...(commonNamesData.emotion ?? []),
+  ...(commonNamesData.color ?? []),
+  ...(commonNamesData.number ?? []),
+  ...(commonNamesData.action ?? []),
 ]
 
 // 生成方剂、饮品、灵丹的名字

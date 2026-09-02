@@ -66,7 +66,9 @@ function formatKarmaCodex() {
   for (final id in kKarmaCardIds) {
     final known = game.flags.karmaCatalog[id] == true
     if (known) {
-      lines.add('${engine.locale(id)}：${engine.locale('${id}_description')}')
+      final title = engine.locale(id)
+      final desc = engine.locale(id + '_description')
+      lines.add(title + '：' + desc)
     } else {
       lines.add(engine.locale('hint_karma_unknown'))
     }

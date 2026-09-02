@@ -52,10 +52,20 @@ class _GameAppState extends State<GameApp> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    // call DisplayMetrics.ensureInitialized(context) to ensure
-    // DisplayMetricsData has been loaded
-    DisplayMetrics.ensureInitialized(context)?.then((data) {
+    // DisplayMetrics 插件在部分 Windows 核显上会一直不返回，不能挡主菜单。
+    final load = DisplayMetrics.ensureInitialized(context);
+    if (load == null) {
       if (_isInitializingDisplayMetricsData) {
+        setState(() {
+          _isInitializingDisplayMetricsData = false;
+        });
+      }
+      return;
+    }
+    load
+        .timeout(const Duration(milliseconds: 800))
+        .whenComplete(() {
+      if (mounted && _isInitializingDisplayMetricsData) {
         setState(() {
           _isInitializingDisplayMetricsData = false;
         });
@@ -791,13 +801,11 @@ class _GameAppState extends State<GameApp> {
     // });
     // _videoController.setLooping(true);
 
-    engine.pushScene(
+    await engine.pushScene(
       Scenes.mainmenu,
       arguments: {'reset': true},
-      onAfterLoaded: () {
-        engine.setLoading(false);
-      },
     );
+    engine.setLoading(false);
 
     sw.stop();
   }
