@@ -50,14 +50,19 @@ function lockDungeonDeck() {
 function tryAddSeasonCardToLockedDeck(card) {
   if (!isDungeonDeckLocked()) return
   if (card == null) return
-  card.isSeasonLimited = true
-  if (game.flags.dungeon.seasonCardIds == null) {
-    game.flags.dungeon.seasonCardIds = []
+  // 业力牌留下，不随秘境出门消散
+  if (card.isKarma != true) {
+    card.isSeasonLimited = true
+    if (game.flags.dungeon.seasonCardIds == null) {
+      game.flags.dungeon.seasonCardIds = []
+    }
+    game.flags.dungeon.seasonCardIds.add(card.id)
   }
-  game.flags.dungeon.seasonCardIds.add(card.id)
   final idx = game.flags.dungeon.lockedDeckIndex
   if (idx >= 0 && idx < hero.battleDecks.length) {
-    hero.battleDecks[idx].cards.add(card.id)
+    if (!hero.battleDecks[idx].cards.contains(card.id)) {
+      hero.battleDecks[idx].cards.add(card.id)
+    }
   }
 }
 

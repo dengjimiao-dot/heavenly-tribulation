@@ -645,6 +645,19 @@ async function onInteractMapObject(object, terrain) {
         }
       }
     }
+    'merchant_mysterious': {
+      if (game.flags.dungeon.karmaBlackmarketGranted != true) {
+        game.flags.dungeon.karmaBlackmarketGranted = true
+        await grantKarmaCard('blackmarket')
+      }
+      Game.showMerchant(
+        object.merchant,
+        materialMode: object.materialMode,
+        useShard: object.useShard,
+        priceFactor: object.priceFactor,
+        filter: object.filter,
+      )
+    }
     'enemy': {
       Game.showPrebattle(
         object.battleEntity,

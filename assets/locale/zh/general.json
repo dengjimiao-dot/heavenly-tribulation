@@ -1020,4 +1020,18 @@
   "dungeonLockDeck": "确认锁卡组",
   "confirmLockDeck": "锁卡组，进门",
   "hint_dungeon_deck_locked": "秘境门已落锁。此行不能换整库、不能改构筑。拾取仍可入牌。"
+  ,
+  "karmaCodex": "业力录",
+  "hint_karmaCodex_description": "翻看天道记下的业力牌。未见过的显示为未知。",
+  "hint_karma_granted": "天道记下一笔。<yellow>{0}</>收入牌库（来源：{1}）。",
+  "hint_karma_codex": "业力录\n{0}",
+  "hint_karma_codex_empty": "业力录还是空白。借宝、杀人、逃劫、黑市都会留下一笔。",
+  "hint_karma_unknown": "尚未窥见",
+  "hint_karma_gamble_proc": "赌业反噬：又一张业力洗入牌库。",
+  "karma_source_steal": "借宝",
+  "karma_source_kill": "杀人",
+  "karma_source_flee": "逃劫",
+  "karma_source_blackmarket": "黑市",
+  "karma_source_gamble": "赌业"
+
 }

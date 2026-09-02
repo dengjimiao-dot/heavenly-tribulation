@@ -1,0 +1,75 @@
+const kKarmaCardIds = [
+  'karma_gift',
+  'karma_omen',
+  'karma_insight',
+  'karma_spark',
+  'karma_debt_heart',
+  'karma_debt_drain',
+  'karma_debt_shatter',
+  'karma_debt_gloom',
+  'karma_gamble_strike',
+  'karma_gamble_ward',
+  'karma_gamble_life',
+  'karma_gamble_void',
+]
+
+function listKarmaCatalog() {
+  game.flags.karmaCatalog ??= {}
+  return game.flags.karmaCatalog
+}
+
+function markKarmaCatalog(affixId) {
+  if (affixId == null) return
+  game.flags.karmaCatalog ??= {}
+  game.flags.karmaCatalog[affixId] = true
+}
+
+/// 随机发一张业力牌入牌库，并塞进当前出战卡组。返回卡牌数据。
+async function grantKarmaCard(source, { silent = false }) {
+  if (hero == null) return null
+  let pool = []
+  for (final id in kKarmaCardIds) {
+    if (game.battleCards[id] != null) pool.add(id)
+  }
+  if (pool.isEmpty) {
+    engine.warning('业力牌池为空，检查 karma_cards.json5 是否载入')
+    return null
+  }
+  final affixId = random.nextIterable(pool)
+  final card = BattleCard(affixId: affixId, rank: 0, isIdentified: true)
+  card.isKarma = true
+  card.karmaKind = game.battleCards[affixId].karmaKind
+  card.isEphemeral = game.battleCards[affixId].isEphemeral == true
+  card.name = engine.locale(affixId)
+
+  characterAcquireBattleCard(hero, card, incurIncident: false)
+  if (hero.battleDeckIndex >= 0 && hero.battleDecks.isNotEmpty) {
+    final deck = hero.battleDecks[hero.battleDeckIndex]
+    if (deck != null && deck.cards != null && !deck.cards.contains(card.id)) {
+      deck.cards.add(card.id)
+    }
+  }
+
+  markKarmaCatalog(affixId)
+
+  if (!silent) {
+    final sourceLabel = engine.locale('karma_source_${source}')
+    dialog.pushDialog('hint_karma_granted', interpolations: [card.name, sourceLabel])
+    await dialog.execute()
+  }
+  return card
+}
+
+function formatKarmaCodex() {
+  game.flags.karmaCatalog ??= {}
+  let lines = []
+  for (final id in kKarmaCardIds) {
+    final known = game.flags.karmaCatalog[id] == true
+    if (known) {
+      lines.add('${engine.locale(id)}：${engine.locale('${id}_description')}')
+    } else {
+      lines.add(engine.locale('hint_karma_unknown'))
+    }
+  }
+  return lines.join('\n')
+}

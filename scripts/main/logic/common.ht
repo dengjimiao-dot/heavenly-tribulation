@@ -30,6 +30,7 @@ async function encounterEnemy({ rank, terrainKind, name, battleEndCallback: func
           await Player.acquire(item)
         }
         await Game.promptItems(rewards)
+        await grantKarmaCard('kill')
       } else {
         Game.onDying()
       }

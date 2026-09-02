@@ -752,6 +752,140 @@ class BattleScene extends Scene {
     await deck.sortCards(animated: animated);
   }
 
+
+  bool _isKarmaCard(CustomGameCard card, [String? kind]) {
+    final data = card.data;
+    var isKarma = data['isKarma'] == true;
+    dynamic karmaKind = data['karmaKind'];
+    if (!isKarma) {
+      final affixes = data['affixes'];
+      if (affixes is List && affixes.isNotEmpty) {
+        final a = affixes[0];
+        isKarma = a['isKarma'] == true;
+        karmaKind ??= a['karmaKind'];
+      }
+    }
+    if (!isKarma) return false;
+    if (kind == null) return true;
+    return karmaKind == kind;
+  }
+
+  String? _karmaAffixId(CustomGameCard card) {
+    final affixes = card.data['affixes'];
+    if (affixes is! List || affixes.isEmpty) return null;
+    return affixes[0]['id'] as String?;
+  }
+
+  Future<void> _resolveInstantKarma(
+    BattleDeckZone deckZone,
+    DiscardZone discardZone,
+    HandZone handZone,
+    EnergyDisplay energyDisplay,
+  ) async {
+    if (!currentCharacter.isHero) return;
+    var resolved = 0;
+    while (resolved < 8) {
+    final instants = handZone.cards
+        .where((c) => _isKarmaCard(c as CustomGameCard, 'instant'))
+        .cast<CustomGameCard>()
+        .toList();
+    if (instants.isEmpty) break;
+    for (final card in instants) {
+      final affixId = _karmaAffixId(card);
+      switch (affixId) {
+        case 'karma_gift':
+          currentCharacter.changeLife(10, isHeal: true);
+        case 'karma_omen':
+          currentCharacter.changeLife(-8);
+        case 'karma_insight':
+          await drawCardsToHand(deckZone, discardZone, handZone, 1);
+        case 'karma_spark':
+          currentCharacter.energy += 2;
+          handZone.energy = currentCharacter.energy;
+          energyDisplay.setEnergy(currentCharacter.energy);
+          currentCharacter.addHintText(
+            engine.locale('karma_spark'),
+            color: Colors.orangeAccent,
+          );
+        default:
+          break;
+      }
+      handZone.clearCardInteraction(card);
+      card.isFlipped = true;
+      discardZone.tryAddCard(card);
+      resolved++;
+    }
+    }
+    if (resolved > 0) {
+      await discardZone.sortCards();
+      await handZone.sortCards();
+    }
+  }
+
+  Future<void> _resolveDebtKarma(
+    HandZone handZone,
+    DiscardZone discardZone,
+  ) async {
+    if (!currentCharacter.isHero) return;
+    final debts = handZone.cards
+        .where((c) => _isKarmaCard(c as CustomGameCard, 'debt'))
+        .cast<CustomGameCard>()
+        .toList();
+    for (final card in debts) {
+      final affixId = _karmaAffixId(card);
+      switch (affixId) {
+        case 'karma_debt_heart':
+          currentCharacter.changeLife(-6);
+        case 'karma_debt_drain':
+          currentCharacter.addStatusEffect('energy_negative_life', amount: 1);
+          currentCharacter.addHintText(engine.locale('karma_debt_drain'));
+        case 'karma_debt_shatter':
+          final others = handZone.cards
+              .where((c) => !_isKarmaCard(c as CustomGameCard))
+              .cast<CustomGameCard>()
+              .toList();
+          if (others.isNotEmpty) {
+            final victim = others[engine.random.nextInt(others.length)];
+            handZone.clearCardInteraction(victim);
+            victim.isFlipped = true;
+            discardZone.tryAddCard(victim);
+          }
+        case 'karma_debt_gloom':
+          currentOpponent.changeLife(8, isHeal: true);
+        default:
+          break;
+      }
+    }
+    if (debts.isNotEmpty) {
+      await discardZone.sortCards();
+      await handZone.sortCards();
+    }
+  }
+
+  Future<void> _onKarmaCardPlayed(
+    CustomGameCard card,
+    DiscardZone discardZone,
+  ) async {
+    if (!_isKarmaCard(card, 'gamble')) return;
+    if (_karmaAffixId(card) == 'karma_gamble_void') {
+      currentCharacter.changeLife(-6);
+    }
+    if (engine.random.nextDouble() >= 0.4) return;
+    final newData = engine.hetu.invoke(
+      'grantKarmaCard',
+      positionalArgs: ['gamble'],
+      namedArgs: {'silent': true},
+    );
+    if (newData == null) return;
+    currentCharacter.addHintText(engine.locale('hint_karma_gamble_proc'));
+    final newCard = GameData.createBattleCard(newData, deepCopyData: true);
+    newCard.isFlipped = true;
+    newCard.enableGesture = false;
+    world.add(newCard);
+    discardZone.tryAddCard(newCard);
+    await discardZone.sortCards();
+  }
+
   Future<int> drawCardsToHand(
     BattleDeckZone deck,
     DiscardZone discard,
@@ -839,6 +973,8 @@ class BattleScene extends Scene {
               as int;
       final drawn =
           await drawCardsToHand(deckZone, discardZone, handZone, drawCount);
+      await _resolveInstantKarma(
+          deckZone, discardZone, handZone, energyDisplay);
 
       await currentCharacter.onStartTurn(isExtra: extraTurn);
 
@@ -877,6 +1013,7 @@ class BattleScene extends Scene {
           energyDisplay.setEnergy(currentCharacter.energy);
           handZone.clearCardInteraction(selectedCard);
           await currentCharacter.onUseCard(selectedCard);
+          await _onKarmaCardPlayed(selectedCard, discardZone);
           selectedCard.isFlipped = true;
           selectedCard.showGlow = false;
           discardZone.tryAddCard(selectedCard);
@@ -900,6 +1037,7 @@ class BattleScene extends Scene {
 
           selectedCard.isFlipped = false;
           await currentCharacter.onUseCard(selectedCard);
+          await _onKarmaCardPlayed(selectedCard, discardZone);
           selectedCard.isFlipped = true;
           discardZone.tryAddCard(selectedCard);
           await discardZone.sortCards();
@@ -912,6 +1050,7 @@ class BattleScene extends Scene {
 
       if (_isRestarting) return;
 
+      await _resolveDebtKarma(handZone, discardZone);
       await currentCharacter.onEndTurn();
 
       final opponentEndStatus =

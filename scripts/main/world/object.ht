@@ -158,6 +158,7 @@ struct ObjectMerchant {
     this.isDiscovered = true
     this.useCustomLogic = useCustomLogic
     this.useShard = useShard
+    this.isMysterious = isMysterious
 
     this.merchant = BattleEntity(
       id: this.id,
