@@ -58,7 +58,7 @@ void main() {
 
     assert(Platform.isLinux || Platform.isWindows || Platform.isMacOS);
     WindowOptions windowOptions = WindowOptions(
-      title: 'Heavenly Tribulation',
+      title: '天道奇劫',
       size: defaultGameSize,
     );
     await windowManager.ensureInitialized();

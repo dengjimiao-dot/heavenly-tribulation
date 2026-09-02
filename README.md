@@ -1,10 +1,17 @@
-# 天道奇劫
+# 天道奇劫（二开）
+
+本仓库是 [hetu-script/heavenly-tribulation](https://github.com/hetu-script/heavenly-tribulation) 的二次开发 fork，维护者：**集淼**（GitHub: [dengjimiao-dot](https://github.com/dengjimiao-dot)）。
+
+- 游戏显示名仍为「天道奇劫」
+- Dart 包名仍为 `heavenly_tribulation`
+- 发行者标识已改为 fork 所有者（见 `FORK.md`）
 
 A game draws a lot of inspiration from Battlebrothers & Slay the Spire.
 
 这是一个借鉴了很多《太阁立志传》和《弈仙牌》的玩法的游戏。
 
-关于游戏玩法和设定的更多介绍，请参考**docs**目录下的文档。
+关于游戏玩法和设定的更多介绍，请参考 **docs** 目录下的文档。
+
 
 ## 关于本项目的授权协议 (License)
 
