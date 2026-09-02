@@ -257,8 +257,8 @@ flutter:
         - asset: assets/fonts/LXGWWenKaiMono-Medium.ttf
 
 msix_config:
-  display_name: Heavenly Tribulation
-  publisher_display_name: Hetu Studio
-  identity_name: hetu.dev
+  display_name: 天道奇劫
+  publisher_display_name: 集淼
+  identity_name: dengjimiao.heavenly_tribulation
   msix_version: 1.0.0.0
-  logo_path: E:\_dev\heavenly-tribulation\media\LOGO.ico
+  logo_path: assets/icon/icon.ico

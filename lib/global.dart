@@ -11,7 +11,7 @@ const defaultGameSize = Size(1440.0, 810.0);
 
 final engine = SamsaraEngine(
   config: EngineConfig(
-    name: 'Heavenly Tribulation',
+    name: '天道奇劫',
     developMode: true,
     musicVolume: 0.5,
     soundEffectVolume: 0.5,
