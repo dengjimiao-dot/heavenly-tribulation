@@ -9,6 +9,7 @@ class KnownIssuesDialog extends StatelessWidget {
 
   static const _issueKeys = [
     'knownIssuesArt',
+    'knownIssuesMissingArt',
     'knownIssuesXianming',
     'knownIssuesFightingSave',
     'knownIssuesLocalExec',

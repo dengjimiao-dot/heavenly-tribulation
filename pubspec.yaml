@@ -79,6 +79,7 @@ flutter:
     - assets/data/
 
     - assets/images/
+    - assets/images/fork/
     - assets/images/animation/
     - assets/images/animation/character/
     - assets/images/animation/overlay/

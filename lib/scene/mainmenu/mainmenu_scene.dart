@@ -8,11 +8,13 @@ import '../../data/game.dart';
 import '../../global.dart';
 
 class MainMenuScene extends Scene {
+  static const _menuBgmFile = 'chinese-oriental-tune-06-12062.mp3';
+
   MainMenuScene()
       : super(
           id: Scenes.mainmenu,
           bgm: engine.bgm,
-          bgmFile: 'chinese-oriental-tune-06-12062.mp3',
+          bgmFile: _menuBgmFile,
           bgmVolume: engine.config.musicVolume,
         );
 
@@ -23,7 +25,20 @@ class MainMenuScene extends Scene {
 
   @override
   void onStart([dynamic arguments = const {}]) async {
-    super.onStart(arguments);
+    // Scene plays BGM in onStart (before onLoad). Skip if the mp3 is gone
+    // so a slim/no-audio pack does not throw.
+    if (bgmFile != null) {
+      final ok = await GameData.tryLoadAsset('assets/audio/music/$bgmFile');
+      if (!ok) {
+        bgmFile = null;
+      }
+    }
+    try {
+      await super.onStart(arguments);
+    } catch (e) {
+      engine.warning('menu bgm skipped: $e');
+      bgmFile = null;
+    }
 
     if (arguments['reset'] == true || GameData.game['saveName'] != 'debug') {
       // 创建一个空游戏存档并初始化一些数据，这主要是为了在主菜单快速测试和debug相关功能，并不会保存
