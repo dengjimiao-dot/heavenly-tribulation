@@ -16,6 +16,7 @@ import 'create_sandbox_game.dart';
 import 'create_blank_map.dart';
 import 'game_settings.dart';
 import 'mods_list.dart';
+import 'known_issues.dart';
 import '../../state/states.dart';
 import '../common.dart';
 import '../mini_game/common.dart';
@@ -63,15 +64,42 @@ class _MainMenuWidgetsState extends State<MainMenuWidgets> {
           alignment: Alignment.topCenter,
           child: Container(
             padding: const EdgeInsets.only(top: 200.0),
-            child: Image(
-              image: AssetImage('assets/images/title2.png'),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Image(
+                  image: AssetImage('assets/images/title2.png'),
+                ),
+                Padding(
+                  padding: const EdgeInsets.only(top: 12.0),
+                  child: Label(
+                    engine.locale('jiejiMenpaiDemo'),
+                    textAlign: TextAlign.center,
+                    textStyle: TextStyles.titleSmall.copyWith(
+                      color: Colors.white,
+                      shadows: kTextShadows,
+                    ),
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.only(top: 4.0),
+                  child: Label(
+                    engine.locale('jiejiMenpaiPitch'),
+                    textAlign: TextAlign.center,
+                    textStyle: TextStyles.bodyMedium.copyWith(
+                      color: Colors.white,
+                      shadows: kTextShadows,
+                    ),
+                  ),
+                ),
+              ],
             ),
           ),
         ),
         Align(
           alignment: Alignment.bottomCenter,
           child: Container(
-            height: 360.0,
+            height: 460.0,
             width: 200.0,
             padding: const EdgeInsets.only(bottom: 20.0),
             child: Column(
@@ -127,6 +155,22 @@ class _MainMenuWidgetsState extends State<MainMenuWidgets> {
                         },
                         child: Label(
                           engine.locale('settings'),
+                          width: 150.0,
+                          textAlign: TextAlign.center,
+                        ),
+                      ),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.only(top: 20.0),
+                      child: fluent.Button(
+                        onPressed: () async {
+                          await showDialog(
+                            context: context,
+                            builder: (context) => const KnownIssuesDialog(),
+                          );
+                        },
+                        child: Label(
+                          engine.locale('knownIssues'),
                           width: 150.0,
                           textAlign: TextAlign.center,
                         ),
