@@ -1006,5 +1006,12 @@
 
   "hint_cancelDevelopment": "确定要取消扩建工程吗？取消后已消耗的物资将不会返还，且扩建进度将会全部丢失。",
 
-  "hint_relocatedHome": "你的家宅现在搬到了<yellow>{0}</>。"
+  "hint_relocatedHome": "你的家宅现在搬到了<yellow>{0}</>。",
+  "forgeCardBlank": "铸牌",
+  "hint_forgeCardBlank_description": "耗费药材与铜钱，按选定流派铸一枚牌胚。牌胚带底色，词缀坑很少，可直接入牌库。",
+  "cardforge_genre": "选择牌胚底色",
+  "cardforge_genre_none": "随缘（无流派）",
+  "hint_cardforge_notEnough": "铸一枚牌胚需要 {0} 药材和 {1} 铜钱。",
+  "hint_cardforge_done": "炉火落定。一枚<yellow>{0}</>牌胚收入牌库。",
+  "hint_cardforge_built": "故乡多了一座铸牌斋。有药材就能往牌库里填底子。"
 }

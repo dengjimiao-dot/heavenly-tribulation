@@ -1,0 +1,52 @@
+const kCardforgeHerbCost = 8
+const kCardforgeMoneyCost = 200
+const kCardforgeStaminaCost = 1
+
+function ensureHomeCardforge() {
+  if (hero == null) return
+  var city = game.locations[hero.homeLocationId]
+  if (city == null && hero.homeSiteId != null) {
+    final home = game.locations[hero.homeSiteId]
+    if (home != null) city = game.locations[home.atCityId]
+  }
+  if (city == null) return
+  for (final siteId in city.siteIds) {
+    final site = game.locations[siteId]
+    if (site != null && site.kind == kLocationKindCardforge) return
+  }
+  Location(
+    category: 'site',
+    kind: kLocationKindCardforge,
+    atCity: city,
+    sectId: city.sectId,
+    development: 0,
+    npcId: Constants.siteKindToNpcId[kLocationKindCardforge],
+  )
+}
+
+function forgeCardBlank(genre) {
+  if (hero == null) return null
+  final herbHave = hero.materials['herb'] ?? 0
+  final moneyHave = hero.materials['money'] ?? 0
+  if (herbHave < kCardforgeHerbCost || moneyHave < kCardforgeMoneyCost) {
+    return null
+  }
+  Player.exhaust('herb', kCardforgeHerbCost)
+  Player.exhaust('money', kCardforgeMoneyCost)
+
+  var nextLife = hero.life - kCardforgeStaminaCost
+  if (nextLife < 1) nextLife = 1
+  Player.setLife(nextLife)
+
+  let cardGenre = genre
+  if (genre == null || genre == 'none' || genre == '') {
+    cardGenre = null
+  }
+  final card = BattleCard(
+    genre: cardGenre,
+    rank: cardGenre == null ? 0 : 1,
+  )
+  card.isCardBlank = true
+  Player.acquireCard(card)
+  return card
+}

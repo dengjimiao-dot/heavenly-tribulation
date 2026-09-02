@@ -581,6 +581,7 @@ const kLocationSiteKinds = {
   'auctionhouse',
   'hotel',
   'workshop',
+  'cardforge',
   'enchantshop',
   'alchemylab',
   'tattooshop',
@@ -610,6 +611,7 @@ const kSiteKindToNpcId = {
   'auctionhouse': 'auctionist',
   'hotel': 'hotelManager',
   'workshop': 'smith',
+  'cardforge': 'smith',
   'enchantshop': 'enchanter',
   'alchemylab': 'alchemist',
   'tattooshop': 'tattooArtist',
@@ -751,6 +753,16 @@ const kSiteKindsManagable = {
     'developmentCost': {
       'money': 1000,
       'worker': 20,
+    },
+    'maintenanceCost': {
+      'money': 200,
+    },
+  },
+  'cardforge': {
+    'developmentCost': {
+      'money': 1200,
+      'worker': 20,
+      'herb': 10,
     },
     'maintenanceCost': {
       'money': 200,
@@ -902,6 +914,7 @@ const kSiteKindsBuildable = {
   'auctionhouse',
   'hotel',
   'workshop',
+  'cardforge',
   // 'enchantshop',
   'alchemylab',
   // 'tattooshop',
@@ -1000,6 +1013,7 @@ const kSitePriority = {
   'auctionhouse': 42,
   'hotel': 41,
   'workshop': 39,
+  'cardforge': 40,
   'enchantshop': 38,
   'alchemylab': 37,
   'tattooshop': 36,
@@ -1052,6 +1066,7 @@ final kSiteRentMoneyCostByDay = {
   'huntingground': 550,
   'mine': 850,
   'workshop': 2500,
+  'cardforge': 1500,
   'enchantshop': 2500,
   'alchemylab': 1500,
   'tattooshop': 1500,
