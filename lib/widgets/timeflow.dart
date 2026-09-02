@@ -17,17 +17,25 @@ class TimeflowDialog extends StatefulWidget {
     int? ticks,
     bool Function()? onProgress,
   }) async {
-    final result = await showDialog<int>(
-      context: context,
-      barrierColor: Colors.transparent,
-      builder: (context) {
-        return TimeflowDialog(
-          max: ticks,
-          onProgress: onProgress,
-        );
-      },
-    );
-    return result ?? 0;
+    SeasonLogic.timeflowActive = true;
+    int result = 0;
+    try {
+      result = await showDialog<int>(
+            context: context,
+            barrierColor: Colors.transparent,
+            builder: (context) {
+              return TimeflowDialog(
+                max: ticks,
+                onProgress: onProgress,
+              );
+            },
+          ) ??
+          0;
+    } finally {
+      SeasonLogic.timeflowActive = false;
+    }
+    await GameLogic.flushJiejiSettlement();
+    return result;
   }
 
   const TimeflowDialog({
@@ -72,6 +80,16 @@ class _TimeflowDialogState extends State<TimeflowDialog> {
         }
 
         final updated = GameLogic.updateGame(ticks: 1);
+
+        if (SeasonLogic.pendingSettlement) {
+          _isFinished = true;
+          _timer!.cancel();
+          if (mounted) {
+            setState(() {});
+            Navigator.of(context).pop(_progress);
+          }
+          return;
+        }
 
         if (updated) {
           final result = widget.onProgress?.call();

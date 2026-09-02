@@ -8,6 +8,18 @@ final class SeasonLogic {
   static String currentDescription = '';
   static Map<String, dynamic> currentMods = const {};
 
+  /// 季末结算待弹出（劫季刚切换，尚未走完 trySettleJieji）。
+  static bool pendingSettlement = false;
+
+  /// 刚结束的劫季 id（thunder/mist/blood），写入存档 flags 的同时留一份静态备份。
+  static String? pendingEndedSeasonId;
+
+  /// 时间流逝对话框正在推进，避免中途弹结算。
+  static bool timeflowActive = false;
+
+  /// trySettleJieji 正在执行，防止重入。
+  static bool settlementInFlight = false;
+
   static int get dayIndexInYear {
     // month/day are 1-based after calculateTimestamp
     return (GameLogic.month - 1) * 30 + GameLogic.day;
@@ -33,6 +45,38 @@ final class SeasonLogic {
     return null;
   }
 
+  static dynamic _jiejiFlags() {
+    try {
+      final flags = GameData.flags ?? GameData.game?['flags'];
+      if (flags == null) return null;
+      var jieji = flags['jieji'];
+      if (jieji == null) {
+        jieji = <String, dynamic>{
+          'curseSlots': <dynamic>[],
+        };
+        flags['jieji'] = jieji;
+      }
+      return jieji;
+    } catch (_) {
+      return null;
+    }
+  }
+
+  static int get curseCount {
+    try {
+      final jieji = _jiejiFlags();
+      if (jieji == null) return 0;
+      final slots = jieji['curseSlots'];
+      if (slots == null) return 0;
+      final n = slots.length as int;
+      if (n < 0) return 0;
+      if (n > 3) return 3;
+      return n;
+    } catch (_) {
+      return 0;
+    }
+  }
+
   /// 根据 GameLogic.month 刷新当前劫季。应在 calculateTimestamp 之后调用。
   static void refreshFromCalendar() {
     final list = GameData.seasons;
@@ -50,6 +94,7 @@ final class SeasonLogic {
       currentMods = mods is Map
           ? Map<String, dynamic>.from(mods)
           : <String, dynamic>{};
+      _restorePendingFromFlags();
       // 同步到存档对象，供 Hetu 脚本读取（隐藏任务刷新权重等）
       try {
         final g = GameData.game;
@@ -59,11 +104,53 @@ final class SeasonLogic {
             'seasonName': currentName,
             'daysRemaining': daysRemainingInSeason,
             'mods': currentMods,
-            'hiddenQuestMul': _mod('hiddenQuestMul', _mod('stealthEventMul', _mod('wildEncounterMul', 1.0))),
+            'hiddenQuestMul': _mod('hiddenQuestMul',
+                _mod('stealthEventMul', _mod('wildEncounterMul', 1.0))),
+            'curseCount': curseCount,
+            'pendingSettle': pendingSettlement,
           };
         }
       } catch (_) {}
       return;
+    }
+  }
+
+  static void _restorePendingFromFlags() {
+    try {
+      final jieji = _jiejiFlags();
+      if (jieji == null) return;
+      final pending = jieji['pendingEndedSeasonId']?.toString();
+      final settled = jieji['lastSettledSeasonId']?.toString();
+      if (pending != null && pending.isNotEmpty && pending != settled) {
+        pendingEndedSeasonId = pending;
+        pendingSettlement = true;
+      }
+    } catch (_) {}
+  }
+
+  /// 在 refreshFromCalendar 之后调用。previousSeasonId 为刷新前的 currentId。
+  static void queueSettlementIfEnded(String previousSeasonId) {
+    if (GameData.hero == null) return;
+    final jieji = _jiejiFlags();
+    if (jieji == null) return;
+
+    final newId = currentId;
+    if (previousSeasonId != newId) {
+      final settled = jieji['lastSettledSeasonId']?.toString();
+      if (settled == previousSeasonId) return;
+      pendingEndedSeasonId = previousSeasonId;
+      jieji['pendingEndedSeasonId'] = previousSeasonId;
+      pendingSettlement = true;
+      return;
+    }
+
+    // 季末最后一天余日为 0 时也结算一次（当前公式末日通常仍为 1）。
+    if (daysRemainingInSeason == 0) {
+      final settled = jieji['lastSettledSeasonId']?.toString();
+      if (settled == newId) return;
+      pendingEndedSeasonId = newId;
+      jieji['pendingEndedSeasonId'] = newId;
+      pendingSettlement = true;
     }
   }
 
@@ -78,17 +165,30 @@ final class SeasonLogic {
   static double get lootMul => _mod('lootMul');
 
   /// 对伤害详情写入乘区3（正气/戾气旁路的额外乘区），保持与原公式兼容。
-  static void applyBattleDamageMods(dynamic damageDetails, {required bool selfIsHero}) {
-    if (currentMods.isEmpty) return;
+  /// 诅咒槽额外提高英雄承伤：每层 +0.05。
+  static void applyBattleDamageMods(dynamic damageDetails,
+      {required bool selfIsHero}) {
     damageDetails['percentageChange3'] ??= 0.0;
-    // 英雄造成伤害用 dealt；英雄受伤用 taken（selfIsHero 表示受伤方是英雄）
-    final mul = selfIsHero ? damageTakenMul : damageDealtMul;
-    // mul 1.15 => +0.15 on percentageChange3
-    damageDetails['percentageChange3'] += (mul - 1.0);
+    if (currentMods.isNotEmpty) {
+      // 英雄造成伤害用 dealt；英雄受伤用 taken（selfIsHero 表示受伤方是英雄）
+      final mul = selfIsHero ? damageTakenMul : damageDealtMul;
+      // mul 1.15 => +0.15 on percentageChange3
+      damageDetails['percentageChange3'] += (mul - 1.0);
+    }
+    if (selfIsHero && curseCount > 0) {
+      damageDetails['percentageChange3'] += curseCount * 0.05;
+    }
   }
 
   static String hudLine() {
     if (GameData.seasons.isEmpty) return '';
-    return '$currentName · 余$daysRemainingInSeason日';
+    var line = '$currentName · 余$daysRemainingInSeason日';
+    if (pendingSettlement || daysRemainingInSeason <= 3) {
+      line += ' · 劫季到期';
+    }
+    if (curseCount > 0) {
+      line += ' · 咒$curseCount';
+    }
+    return line;
   }
 }

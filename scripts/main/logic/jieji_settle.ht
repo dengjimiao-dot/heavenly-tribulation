@@ -1,0 +1,241 @@
+const kJiejiCurseSlotMax = 3
+const kJiejiCurseDamageTakenPer = 0.05
+
+const _kJiejiKeepSiteKinds = {
+  'home': true,
+  'cardforge': true,
+  'cityhall': true,
+  'headquarters': true,
+  'residence': true,
+}
+
+function ensureJiejiFlags() {
+  game.flags.jieji ??= {}
+  game.flags.jieji.curseSlots ??= []
+  return game.flags.jieji
+}
+
+function jiejiCurseCount() {
+  final jieji = ensureJiejiFlags()
+  jieji.curseSlots ??= []
+  return jieji.curseSlots.length
+}
+
+function addJiejiCurse(source) {
+  final jieji = ensureJiejiFlags()
+  jieji.curseSlots ??= []
+  if (jieji.curseSlots.length >= kJiejiCurseSlotMax) return false
+  jieji.curseSlots.add({
+    id: 'curse_${jieji.curseSlots.length}',
+    source: source ?? 'unknown',
+  })
+  return true
+}
+
+function clearOneJiejiCurse() {
+  final jieji = ensureJiejiFlags()
+  jieji.curseSlots ??= []
+  if (jieji.curseSlots.isEmpty) return false
+  jieji.curseSlots.remove(jieji.curseSlots.last)
+  return true
+}
+
+function getHeroHomeCity() {
+  if (hero == null) return null
+  var city = game.locations[hero.homeLocationId]
+  if (city != null && city.category == 'site') {
+    city = game.locations[city.atCityId]
+  }
+  if (city == null && hero.homeSiteId != null) {
+    final home = game.locations[hero.homeSiteId]
+    if (home != null) city = game.locations[home.atCityId]
+  }
+  if (city != null && city.category != 'city') {
+    return null
+  }
+  return city
+}
+
+function listUndigestedKarmaCards() {
+  let cards = []
+  if (hero == null) return cards
+  if (hero.cardLibrary == null) return cards
+  for (final card in hero.cardLibrary.values) {
+    if (card.isKarma == true) {
+      cards.add(card)
+    }
+  }
+  return cards
+}
+
+/// 未消化业力牌移出牌库/卡组，并转为诅咒槽（上限 3）。
+function convertKarmaToCurses() {
+  final jieji = ensureJiejiFlags()
+  jieji.curseSlots ??= []
+  final cards = listUndigestedKarmaCards()
+  var converted = 0
+  for (final card in cards) {
+    if (jieji.curseSlots.length < kJiejiCurseSlotMax) {
+      jieji.curseSlots.add({
+        id: 'karma_curse_${jieji.curseSlots.length}',
+        source: card.affixId ?? card.id,
+      })
+      converted += 1
+    }
+    if (hero.cardLibrary.containsKey(card.id)) {
+      hero.cardLibrary.remove(card.id)
+    }
+    if (hero.battleDecks != null) {
+      for (final deck in hero.battleDecks) {
+        if (deck.cards != null) {
+          deck.cards.remove(card.id)
+        }
+      }
+    }
+  }
+  engine.info('季末业力转咒：牌 ${cards.length}，入槽 ${converted}，当前诅咒 ${jieji.curseSlots.length}')
+  return converted
+}
+
+/// 迁徙：弃多余据点，保留铸牌斋与人。
+function migrateSect() {
+  final city = getHeroHomeCity()
+  if (city == null) return 0
+  var removed = 0
+  final siteIds = []
+  for (final id in city.siteIds) {
+    siteIds.add(id)
+  }
+  final fallbackId = hero.homeSiteId ?? city.id
+  for (final siteId in siteIds) {
+    final site = game.locations[siteId]
+    if (site == null) continue
+    if (_kJiejiKeepSiteKinds[site.kind] == true) continue
+    if (site.kind == kLocationKindHome) continue
+    for (final character in game.characters.values) {
+      if (character.locationId == site.id) {
+        character.locationId = fallbackId
+      }
+      if (character.managingLocationIds != null && character.managingLocationIds.contains(site.id)) {
+        character.managingLocationIds.remove(site.id)
+      }
+    }
+    removeLocation(site)
+    removed += 1
+  }
+  var dev = city.development ?? 0
+  if (dev > 2) {
+    city.development = dev - 2
+  } else {
+    city.development = 0
+  }
+  city.maxSiteCount = calculateMaxSiteCountForCity(city)
+  ensureHomeCardforge()
+  engine.info('季末迁徙：拆除据点 ${removed}，城市规模 ${city.development}')
+  return removed
+}
+
+async function pickXianming() {
+  dialog.pushDialog('hint_jieji_xianming')
+  dialog.pushSelection('jiejiXianming', [
+    'xianming_guard',
+    'xianming_break',
+    'xianming_nurture',
+  ])
+  await dialog.execute()
+  final selected = dialog.checkSelected('jiejiXianming')
+  if (selected != null) {
+    ensureJiejiFlags().xianming = selected
+    dialog.pushDialog('hint_jieji_xianming_picked', interpolations: [engine.locale(selected)])
+    await dialog.execute()
+  }
+}
+
+async function finishJiejiSeason(endedId) {
+  final jieji = ensureJiejiFlags()
+  jieji.lastSettledSeasonId = endedId
+  jieji.pendingEndedSeasonId = null
+  jieji.fighting = false
+  await pickXianming()
+  Game.updateUI()
+}
+
+async function startTribulationBoss() {
+  if (hero == null) return
+  final jieji = ensureJiejiFlags()
+  jieji.fighting = true
+  final endedId = jieji.pendingEndedSeasonId ?? 'thunder'
+
+  var rank = hero.rank ?? 0
+  if (rank < kCultivationRankMax) {
+    rank = rank + 1
+  }
+  final minLevel = minLevelForRank(rank)
+  final maxLevel = maxLevelForRank(rank)
+  var level = (hero.level ?? 1) + 10
+  level = level.clamp(minLevel, maxLevel)
+
+  final bossName = engine.locale('jieji_boss_${endedId}')
+  final enemy = BattleEntity(name: bossName, rank: rank, level: level)
+
+  dialog.pushDialog('hint_jieji_boss_intro', interpolations: [bossName], character: enemy)
+  await dialog.execute()
+
+  Game.showPrebattle(enemy,
+    background: 'battle/scene/mountain_night.png',
+    loseOnEscape: true,
+    onBattleEnd: async function [onJiejiBossEnd] (result, roundCount) {
+      jieji.fighting = false
+      if (result) {
+        clearOneJiejiCurse()
+        final moneyPack = MaterialPack(kind: 'money', amount: 400)
+        await Player.acquire(moneyPack)
+        await Game.promptItems([moneyPack])
+        dialog.pushDialog('hint_jieji_boss_win', interpolations: ['${jiejiCurseCount()}'])
+        await dialog.execute()
+      } else {
+        Player.setLife(1)
+        addJiejiCurse('tribulation_fail')
+        dialog.pushDialog('hint_jieji_boss_lose', interpolations: ['${jiejiCurseCount()}'])
+        await dialog.execute()
+      }
+      await finishJiejiSeason(endedId)
+    }
+  )
+}
+
+/// 季末强制结算。由 Dart 在劫季切换后调用一次。
+async function trySettleJieji({ endedSeasonId }) {
+  if (hero == null) return
+  final jieji = ensureJiejiFlags()
+  if (jieji.fighting == true) return
+  final endedId = jieji.pendingEndedSeasonId ?? endedSeasonId
+  if (endedId == null) return
+  jieji.pendingEndedSeasonId = endedId
+  if (jieji.lastSettledSeasonId == endedId) {
+    jieji.pendingEndedSeasonId = null
+    return
+  }
+
+  final converted = convertKarmaToCurses()
+  final seasonName = engine.locale('jieji_season_${endedId}')
+  dialog.pushDialog('hint_jieji_season_end', interpolations: [
+    seasonName,
+    '${converted}',
+    '${jiejiCurseCount()}',
+  ])
+  dialog.pushSelection('jiejiSettle', [
+    'jiejiTribulation',
+    'jiejiMigrate',
+  ])
+  await dialog.execute()
+  final selected = dialog.checkSelected('jiejiSettle')
+  if (selected == 'jiejiMigrate') {
+    final removed = migrateSect()
+    dialog.pushDialog('hint_jieji_migrate_done', interpolations: ['${removed}'])
+    await dialog.execute()
+    await finishJiejiSeason(endedId)
+  } else {
+    await startTribulationBoss()
+  }
+}
