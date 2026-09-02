@@ -260,7 +260,15 @@ class CardLibraryScene extends Scene {
         deckPiles.length * (GameUI.deckbuildingCardSize.y + GameUI.indent);
   }
 
+  Future<bool> _guardDungeonDeckLocked() async {
+    if (!GameLogic.isDungeonDeckLocked) return false;
+    dialog.pushDialog('hint_dungeon_deck_locked');
+    await dialog.execute();
+    return true;
+  }
+
   void setBattleDeck(DeckBuildingZone zone) async {
+    if (await _guardDungeonDeckLocked()) return;
     if (!zone.isCardsEnough) {
       dialog.pushDialog('deckbuilding_cards_not_enough');
       await dialog.execute();
@@ -320,8 +328,10 @@ class CardLibraryScene extends Scene {
           case DeckMenuItems.setAsBattleDeck:
             setBattleDeck(zone);
           case DeckMenuItems.editDeck:
+            if (await _guardDungeonDeckLocked()) return;
             onEditDeck(zone);
           case DeckMenuItems.deleteDeck:
+            if (await _guardDungeonDeckLocked()) return;
             deleteDeck(zone);
         }
       },
@@ -349,7 +359,8 @@ class CardLibraryScene extends Scene {
     cardCount.text = detailedCount.toString();
   }
 
-  void onEditDeck(DeckBuildingZone zone) {
+  void onEditDeck(DeckBuildingZone zone) async {
+    if (await _guardDungeonDeckLocked()) return;
     exit.isVisible = false;
     deckPilesZone.enableGesture = false;
     deckCount.isVisible = false;
@@ -389,6 +400,7 @@ class CardLibraryScene extends Scene {
   }
 
   void deleteDeck(DeckBuildingZone zone, {bool warning = true}) async {
+    if (await _guardDungeonDeckLocked()) return;
     if (warning) {
       final value = await showDialog<bool>(
         context: engine.context,

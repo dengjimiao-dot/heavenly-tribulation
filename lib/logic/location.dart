@@ -21,6 +21,29 @@ Future<dynamic> _tryEnterLocation(dynamic location) async {
   );
 }
 
+
+Future<bool> _confirmAndLockDungeonDeck() async {
+  final hero = GameData.hero;
+  final index = (hero['battleDeckIndex'] as num?)?.toInt() ?? -1;
+  final decks = hero['battleDecks'] as List? ?? const [];
+  if (index < 0 || index >= decks.length) {
+    dialog.pushDialog('hint_dungeon_need_deck');
+    await dialog.execute();
+    return false;
+  }
+  final title = '${decks[index]['title'] ?? ''}';
+  dialog.pushDialog('hint_dungeon_lock_deck', interpolations: [title]);
+  dialog.pushSelection('dungeonLockDeck', [
+    'confirmLockDeck',
+    'forgetIt',
+  ]);
+  await dialog.execute();
+  final selected = dialog.checkSelected('dungeonLockDeck');
+  if (selected != 'confirmLockDeck') return false;
+  final locked = engine.hetu.invoke('lockDungeonDeck');
+  return locked == true;
+}
+
 void _tryEnterDungeon({
   int? rank,
   bool isBasic = false,
@@ -33,6 +56,10 @@ void _tryEnterDungeon({
       'isBasic': true,
     });
     if (!pushScene) return;
+    if (!await _confirmAndLockDungeonDeck()) {
+      GameData.flags['dungeon'] = null;
+      return;
+    }
     // 通知教程系统：进入秘境
     await engine.hetu
         .invoke('onGameEvent', positionalArgs: ['onBeforeEnterDungeon']);
@@ -63,6 +90,10 @@ void _tryEnterDungeon({
         'isBasic': false,
       });
       if (!pushScene) return;
+      if (!await _confirmAndLockDungeonDeck()) {
+        GameData.flags['dungeon'] = null;
+        return;
+      }
       // 通知教程系统：进入秘境
       await engine.hetu
           .invoke('onGameEvent', positionalArgs: ['onBeforeEnterDungeon']);

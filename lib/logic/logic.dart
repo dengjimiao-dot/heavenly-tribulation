@@ -1538,6 +1538,16 @@ final class GameLogic {
   static Future<void> onAfterEnterLocation(dynamic location) =>
       _onAfterEnterLocation(location);
 
+  static bool get isDungeonDeckLocked {
+    final dungeon = GameData.flags?['dungeon'];
+    if (dungeon == null) return false;
+    try {
+      return dungeon['deckLocked'] == true;
+    } catch (_) {
+      return false;
+    }
+  }
+
   static void tryEnterDungeon({
     int? rank,
     bool isBasic = false,

@@ -1,3 +1,4 @@
+// 竖切：非教程秘境实战房间约 8 场（含精英+Boss，见 _prepareMap 的 2/4/6/8/10/12/14）
 const kDungeonRooms = {
   '0': 'chest',
   '1': 'enemy',
@@ -541,6 +542,7 @@ async function onEnterMap() {
     Game.promptItems(reward)
   } else if (game.flags.dungeon.battleResult == false) {
     await World.promptTextBanner(engine.locale('hint_dungeon_failed'))
+    unlockDungeonDeck()
     Game.updateDungeon(null)
     Game.onDying()
     game.flags.dungeon.battleResult = null
@@ -572,6 +574,7 @@ async function promptExit() {
   final selected = dialog.checkSelected('exitDungeon')
   if (selected == 'exitDungeon') {
     engine.info('地牢已经完成，准备退出')
+    unlockDungeonDeck()
     game.flags.dungeon = null
     Game.updateDungeon(null)
     Game.popScene(clearCache: true)

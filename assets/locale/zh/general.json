@@ -1013,5 +1013,11 @@
   "cardforge_genre_none": "随缘（无流派）",
   "hint_cardforge_notEnough": "铸一枚牌胚需要 {0} 药材和 {1} 铜钱。",
   "hint_cardforge_done": "炉火落定。一枚<yellow>{0}</>牌胚收入牌库。",
-  "hint_cardforge_built": "故乡多了一座铸牌斋。有药材就能往牌库里填底子。"
+  "hint_cardforge_built": "故乡多了一座铸牌斋。有药材就能往牌库里填底子。",
+
+  "hint_dungeon_need_deck": "进秘境前先指定一套出战卡组。没有卡组，锁门也锁不住。",
+  "hint_dungeon_lock_deck": "此行将锁死出战卡组「{0}」。秘境内不能换整库、不能改构筑；拾取的季限牌离开时会消散。",
+  "dungeonLockDeck": "确认锁卡组",
+  "confirmLockDeck": "锁卡组，进门",
+  "hint_dungeon_deck_locked": "秘境门已落锁。此行不能换整库、不能改构筑。拾取仍可入牌。"
 }
