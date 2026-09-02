@@ -23,3 +23,10 @@
 - `samsara-engine`
 - `fluent_ui`
 - `data_table_2`
+
+## 二开玩法方向
+
+已定主方案：**劫季门派**。详见：
+
+- [docs/fork/jieji-menpai.md](docs/fork/jieji-menpai.md)
+- [docs/fork/vertical-slice-tasks.md](docs/fork/vertical-slice-tasks.md)

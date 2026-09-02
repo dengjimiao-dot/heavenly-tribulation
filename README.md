@@ -12,6 +12,8 @@ A game draws a lot of inspiration from Battlebrothers & Slay the Spire.
 
 关于游戏玩法和设定的更多介绍，请参考 **docs** 目录下的文档。
 
+二开玩法主方案见 [docs/fork/jieji-menpai.md](docs/fork/jieji-menpai.md)。
+
 
 ## 关于本项目的授权协议 (License)
 
