@@ -56,5 +56,32 @@
   //   id: "gather_information",
   //   policy: "consolidation",
   //   script: "gather_information",
-  // },
+  // },,
+
+  // —— 劫季门派：随机隐藏任务（不上悬赏板，行路触发）——
+  hidden_ruins_explore: {
+    id: "hidden_ruins_explore",
+    policy: null,
+    isBounty: false,
+    isHidden: true,
+    contribution: 12,
+    rank: 0,
+  },
+  hidden_karma_shrine: {
+    id: "hidden_karma_shrine",
+    policy: null,
+    isBounty: false,
+    isHidden: true,
+    contribution: 10,
+    rank: 0,
+  },
+  hidden_blood_omen: {
+    id: "hidden_blood_omen",
+    policy: null,
+    isBounty: false,
+    isHidden: true,
+    contribution: 14,
+    rank: 1,
+  },
+
 }

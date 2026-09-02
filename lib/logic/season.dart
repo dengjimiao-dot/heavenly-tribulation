@@ -50,6 +50,19 @@ final class SeasonLogic {
       currentMods = mods is Map
           ? Map<String, dynamic>.from(mods)
           : <String, dynamic>{};
+      // 同步到存档对象，供 Hetu 脚本读取（隐藏任务刷新权重等）
+      try {
+        final g = GameData.game;
+        if (g != null) {
+          g['jieji'] = {
+            'seasonId': currentId,
+            'seasonName': currentName,
+            'daysRemaining': daysRemainingInSeason,
+            'mods': currentMods,
+            'hiddenQuestMul': _mod('hiddenQuestMul', _mod('stealthEventMul', _mod('wildEncounterMul', 1.0))),
+          };
+        }
+      } catch (_) {}
       return;
     }
   }

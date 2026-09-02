@@ -56,12 +56,16 @@ async function onAfterMove(terrain) {
    !journal.hasEncounteredEnemy
   )
 
-  if (tradeQuest.isEmpty) return
+  if (tradeQuest.isEmpty) {
+    return await trySpawnHiddenQuestOnMove(terrain)
+  }
 
   final roll = random.nextDouble()
   let rate = Constants.terrainKindToEnemyEncounterRate[terrain.kind] ?? kEnemyEncounterRateBase
   let er = rate * (1 - hero.rank * kEnemyEncounterRateRankFactor)
-  if (roll > er) return
+  if (roll > er) {
+    return await trySpawnHiddenQuestOnMove(terrain)
+  }
 
   final journal = tradeQuest.first
   journal.hasEncounteredEnemy = true
