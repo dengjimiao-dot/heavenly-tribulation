@@ -34,6 +34,7 @@ import 'view/alchemy.dart';
 import 'view/workshop.dart';
 import 'ui/responsive_view.dart';
 import '../logic/logic.dart';
+import '../logic/season.dart';
 import 'character/merchant/currency_bar.dart';
 import 'sect/sect.dart';
 import 'location/city.dart';
@@ -93,7 +94,10 @@ class _GameUIOverlayState extends State<GameUIOverlay> {
     //     (GameData.game?['flags']['autoWork'] ?? false);
 
     // final hero = context.watch<HeroState>().hero;
-    final hero = context.watch<GameState>().hero;
+    final gameState = context.watch<GameState>();
+    final hero = gameState.hero;
+    // datetimeString: rebuild jieji HUD when the calendar ticks
+    final datetimeString = gameState.datetimeString;
     final showHero = widget.showHero && hero != null;
 
     // final money = (hero?['materials']['money'] ?? 0).toString();
@@ -383,6 +387,55 @@ class _GameUIOverlayState extends State<GameUIOverlay> {
                               ),
                             ),
                             CurrencyBar(entity: hero),
+                            if (SeasonLogic.hudLine().isNotEmpty)
+                              Padding(
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 8.0),
+                                  child: MouseRegion2(
+                                    onEnter: (rect) {
+                                      final desc =
+                                          SeasonLogic.currentDescription;
+                                      final hover = desc.isNotEmpty
+                                          ? desc
+                                          : engine.locale('hint_jieji_season');
+                                      context.read<HoverContentState>().show(
+                                            rect: rect,
+                                            data: hover,
+                                            textAlign: TextAlign.left,
+                                          );
+                                    },
+                                    onExit: () {
+                                      context.read<HoverContentState>().hide();
+                                    },
+                                    child: Align(
+                                      alignment: Alignment.centerLeft,
+                                      child: Container(
+                                        key: ValueKey(datetimeString),
+                                        padding: const EdgeInsets.symmetric(
+                                            horizontal: 8.0, vertical: 3.0),
+                                        decoration: BoxDecoration(
+                                          color: Colors.black.withAlpha(90),
+                                          borderRadius:
+                                              BorderRadius.circular(4),
+                                          border: Border.all(
+                                            color: Colors.amberAccent
+                                                .withAlpha(160),
+                                          ),
+                                        ),
+                                        child: Text(
+                                          SeasonLogic.hudLine(),
+                                          maxLines: 1,
+                                          overflow: TextOverflow.ellipsis,
+                                          style: const TextStyle(
+                                            color: Colors.amberAccent,
+                                            fontSize: 13,
+                                            fontWeight: FontWeight.w600,
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                              ),
                             Container(
                               padding: const EdgeInsets.only(right: 5.0),
                               child: MouseRegion2(

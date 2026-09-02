@@ -68,6 +68,9 @@ async function tryWildEncounterOnMove(terrain) {
 }
 
 async function onAfterMove(terrain) {
+  // 先尝试隐藏任务，避免开局十步保证被野遇吃掉。
+  if (await trySpawnHiddenQuestOnMove(terrain)) return true
+
   final tradeQuest = hero.journals.values.where((journal) =>
    !journal.isFinished &&
    journal.quest != null &&
@@ -76,15 +79,14 @@ async function onAfterMove(terrain) {
   )
 
   if (tradeQuest.isEmpty) {
-    if (await tryWildEncounterOnMove(terrain)) return true
-    return await trySpawnHiddenQuestOnMove(terrain)
+    return await tryWildEncounterOnMove(terrain)
   }
 
   final roll = random.nextDouble()
   let rate = Constants.terrainKindToEnemyEncounterRate[terrain.kind] ?? kEnemyEncounterRateBase
   let er = rate * (1 - hero.rank * kEnemyEncounterRateRankFactor) * jiejiWildEncounterMul()
   if (roll > er) {
-    return await trySpawnHiddenQuestOnMove(terrain)
+    return false
   }
 
   final journal = tradeQuest.first

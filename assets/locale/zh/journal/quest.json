@@ -66,6 +66,7 @@
   "quest_hidden_blood_omen_description": "血月之下，{0}方向有凶兆。去会一会，或可夺一笔横财。",
 
   "quest_hidden_rumor": "路遇一位行色匆匆的修士，压低声音说：<yellow>{0}</>……去{1}看看。说完便隐入雾里。",
+  "quest_hidden_spawned": "你察觉到一桩隐秘机缘：<yellow>{0}</>。去{1}探明虚实。",
   "quest_hidden_complete": "「{0}」有了着落。你在{1}把这件事探明白了。",
   "quest_hidden_late_failed": "「{0}」那点线索已经冷了。机缘从指缝溜走。",
   "quest_hidden_blood_omen_enemy": "血月凶修",

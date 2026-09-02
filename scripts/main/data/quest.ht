@@ -114,7 +114,15 @@ function _pickVisitCity(fromSite) {
     loc.id != fromCityId &&
     loc.worldPosition != null
   )
-  if (cities.isEmpty) return
+  if (cities.isEmpty) {
+    final fallback = game.locations.values.where((loc) =>
+      loc.category == 'city' &&
+      loc.isHidden != true &&
+      loc.worldPosition != null
+    )
+    if (fallback.isEmpty) return
+    return random.nextIterable(fallback)
+  }
   return random.nextIterable(cities)
 }
 
@@ -654,7 +662,8 @@ namespace Quests {
 
 
 const kMaxActiveHiddenQuests = 2
-const kHiddenQuestBaseRate = 0.035
+const kHiddenQuestBaseRate = 0.05
+const kHiddenQuestFirstMoveWindow = 10
 
 function _activeHiddenQuestCount() {
   var n = 0
@@ -697,21 +706,40 @@ async function trySpawnHiddenQuestOnMove(terrain) {
   if (game.enableTutorial && game.flags.tutorial.bountyQuest != true) return false
   if (_activeHiddenQuestCount() >= kMaxActiveHiddenQuests) return false
 
-  var rate = kHiddenQuestBaseRate
-  if (game.jieji != null && game.jieji.hiddenQuestMul != null) {
-    rate = rate * game.jieji.hiddenQuestMul
+  game.flags.jieji ??= {}
+  game.flags.jieji.worldMoves = (game.flags.jieji.worldMoves ?? 0) + 1
+  final moves = game.flags.jieji.worldMoves
+  final forceFirst = game.flags.jieji.firstHiddenSpawned != true && moves <= kHiddenQuestFirstMoveWindow
+
+  if (!forceFirst) {
+    var rate = kHiddenQuestBaseRate
+    if (game.jieji != null && game.jieji.hiddenQuestMul != null) {
+      rate = rate * game.jieji.hiddenQuestMul
+    }
+    if (random.nextDouble() > rate) return false
   }
-  if (random.nextDouble() > rate) return false
 
   final fromSite = game.locations[hero.homeLocationId] ?? game.locations[hero.homeSiteId]
   if (fromSite == null) return false
-  final quest = createHiddenQuest(fromSite)
+  let quest = createHiddenQuest(fromSite)
+  if (quest == null) {
+    for (var i in range(5)) {
+      quest = createHiddenQuest(fromSite)
+      if (quest != null) break
+    }
+  }
   if (quest == null) return false
 
+  game.flags.jieji.firstHiddenSpawned = true
   final journal = Player.createJournalByQuest(quest)
+  final kindKey = 'quest_' + quest.kind
+  var where = ''
+  if (quest.interpolations != null && quest.interpolations.isNotEmpty) {
+    where = quest.interpolations[0]
+  }
   dialog.pushDialog('quest_hidden_rumor', interpolations: [
-    engine.locale('quest_${quest.kind}'),
-    quest.interpolations[0],
+    engine.locale(kindKey),
+    where,
   ])
   await dialog.execute()
   if (journal != null) {
