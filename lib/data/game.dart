@@ -348,6 +348,13 @@ final class GameData with ChangeNotifier {
         await rootBundle.loadString('assets/data/quests.json5');
     quests.addAll(JSON5.parse(questsDataString));
 
+    final seasonsDataString =
+        await rootBundle.loadString('assets/data/seasons.json5');
+    final seasonsParsed = JSON5.parse(seasonsDataString);
+    seasons
+      ..clear()
+      ..addAll(List.from(seasonsParsed['seasons'] ?? const []));
+
     // 载入动画，其中皮肤动画需要特殊处理
     // 每个皮肤保存了所有的站姿，实际游戏运行时会分拆开来
     final animationsDataString =
