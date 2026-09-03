@@ -208,6 +208,8 @@ namespace debug {
       await playJiejiThunderRoadEvent3(terrain)
     } else if (kind == 'stele') {
       await playJiejiSteleRoadEvent()
+    } else if (kind == 'shrine') {
+      await playJiejiShrineRoadEvent()
     } else {
       await playJiejiThunderRoadEvent(terrain)
     }

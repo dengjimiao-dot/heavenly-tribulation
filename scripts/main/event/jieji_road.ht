@@ -1,4 +1,4 @@
-/// 劫季赶路事件：雷/雾/血三季分叉（表 A/B/C 各一套）+ 残碑稀有事件 + 行脚商人。
+/// 劫季赶路事件：雷/雾/血三季分叉（表 A/B/C 各一套）+ 残碑稀有事件 + 野庙夜宿 + 行脚商人。
 /// 由 sandbox onAfterMove 在隐藏任务与野遇都没触发时调用。
 /// 大地图野遇成功后可升格为当季具名劫纹精英（见 tryJiejiWildEliteOnWildEncounter）。
 
@@ -28,6 +28,7 @@ const kJiejiMerchant2GambleHerbGain = 1
 const kThunderTempleKarmaChance = 0.20
 const kThunderPrayBlankChance = 0.30
 const kJiejiRoadSteleRate = 0.25
+const kJiejiRoadShrineRate = 0.20
 const kJiejiRoadTableCRate = 0.33
 const kJiejiRoadTableBRate = 0.33
 const kJiejiRoadThunder3GongfaChance = 0.20
@@ -52,6 +53,14 @@ const kJiejiRoadRiteLifeLoss = 3
 const kJiejiRoadRiteHeal = 5
 const kJiejiRoadSteleHeal = 6
 const kJiejiRoadSteleKarmaChance = 0.15
+const kJiejiRoadShrineLodgeHeal = 7
+const kJiejiRoadShrineLodgeBlankChance = 0.15
+const kJiejiRoadShrineIncenseHerbCost = 2
+const kJiejiRoadShrineIncenseHeal = 4
+const kJiejiRoadShrineIncenseKarmaChance = 0.20
+const kJiejiRoadShrineLootMoney = 80
+const kJiejiRoadShrineLootGongfaChance = 0.15
+const kJiejiRoadShrineLootLifeLoss = 3
 const kJiejiWildEliteMoveCooldown = 8
 const kJiejiWildEliteChanceThunder = 0.28
 const kJiejiWildEliteChanceBlood = 0.22
@@ -112,6 +121,10 @@ async function _jiejiRoadSpendDay() {
 async function _playJiejiPickedRoadEvent(seasonId, terrain) {
   if (random.nextDouble() < kJiejiRoadSteleRate) {
     await playJiejiSteleRoadEvent()
+    return
+  }
+  if (random.nextDouble() < kJiejiRoadShrineRate) {
+    await playJiejiShrineRoadEvent()
     return
   }
   final roll = random.nextDouble()
@@ -726,6 +739,62 @@ async function playJiejiSteleRoadEvent() {
     await dialog.execute()
     if (random.nextDouble() < kJiejiRoadSteleKarmaChance + jiejiKarmaChanceBonus()) {
       await grantKarmaCard('stele')
+    }
+  }
+  Game.updateUI()
+}
+
+async function playJiejiShrineRoadEvent() {
+  dialog.pushDialog('hint_jieji_road_shrine')
+  dialog.pushSelection('jiejiShrineRoad', [
+    'jieji_shrine_lodge',
+    'jieji_shrine_incense',
+    'jieji_shrine_loot',
+  ])
+  await dialog.execute()
+  final selected = dialog.checkSelected('jiejiShrineRoad')
+
+  if (selected == 'jieji_shrine_lodge') {
+    final healed = Player.restoreLife(kJiejiRoadShrineLodgeHeal)
+    if (random.nextDouble() < kJiejiRoadShrineLodgeBlankChance) {
+      _jiejiRoadGrantBlank()
+      dialog.pushDialog('hint_jieji_road_shrine_lodge_blank', interpolations: ['${healed}'])
+      await dialog.execute()
+    } else {
+      dialog.pushDialog('hint_jieji_road_shrine_lodge', interpolations: ['${healed}'])
+      await dialog.execute()
+    }
+    await _jiejiRoadSpendDay()
+  } else if (selected == 'jieji_shrine_incense') {
+    final cost = kJiejiRoadShrineIncenseHerbCost
+    final herb = hero.materials['herb'] ?? 0
+    if (herb >= cost) {
+      Player.exhaust('herb', cost)
+      final healed = Player.restoreLife(kJiejiRoadShrineIncenseHeal)
+      dialog.pushDialog('hint_jieji_road_shrine_incense', interpolations: ['${cost}', '${healed}'])
+      await dialog.execute()
+      if (random.nextDouble() < kJiejiRoadShrineIncenseKarmaChance + jiejiKarmaChanceBonus()) {
+        await grantKarmaCard('shrine2')
+      }
+    } else {
+      dialog.pushDialog('hint_jieji_road_shrine_incense_broke', interpolations: ['${cost}'])
+      await dialog.execute()
+      await _jiejiRoadSpendDay()
+    }
+  } else {
+    if (random.nextDouble() < 0.50) {
+      final money = kJiejiRoadShrineLootMoney
+      await Player.collect('money', money, incurIncident: false)
+      dialog.pushDialog('hint_jieji_road_shrine_loot_money', interpolations: ['${money}'])
+      await dialog.execute()
+      await tryDropGongfaShard(rate: kJiejiRoadShrineLootGongfaChance)
+    } else {
+      final lost = _jiejiRoadClampLifeLoss(kJiejiRoadShrineLootLifeLoss)
+      if (lost > 0) {
+        Player.setLife(hero.life - lost)
+      }
+      dialog.pushDialog('hint_jieji_road_shrine_loot_hurt', interpolations: ['${lost}'])
+      await dialog.execute()
     }
   }
   Game.updateUI()
