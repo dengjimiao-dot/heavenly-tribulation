@@ -1,0 +1,148 @@
+/// 赶路「残锋」三选：拾锋 / 试刃 / 路过。隐藏、劫兆、野遇、赶路、行商、拾荒、扎营都没中时才滚。
+const kJiejiBladeBaseRate = 0.05
+const kJiejiBladeMoveCooldown = 10
+const kJiejiBladePickHerb = 1
+const kJiejiBladePickHerbMist = 1
+const kJiejiBladePickMoney = 40
+const kJiejiBladePickMoneyThunder = 20
+const kJiejiBladeTestGongfaRate = 0.20
+const kJiejiBladeTestLife = 2
+const kJiejiBladeTestKarmaChanceBlood = 0.40
+
+function _jiejiBladeSeasonId() {
+  if (game.jieji != null && game.jieji.seasonId != null) {
+    return game.jieji.seasonId
+  }
+  return null
+}
+
+function _jiejiBladeTutorialLocked() {
+  return game.enableTutorial && game.flags.tutorial.bountyQuest != true
+}
+
+function _jiejiBladePickHerb(seasonId) {
+  var herb = kJiejiBladePickHerb
+  if (seasonId == 'mist') {
+    herb = herb + kJiejiBladePickHerbMist
+  }
+  return herb
+}
+
+function _jiejiBladePickMoney(seasonId) {
+  var money = kJiejiBladePickMoney
+  if (seasonId == 'thunder') {
+    money = money + kJiejiBladePickMoneyThunder
+  }
+  return money
+}
+
+function _jiejiBladeCostLife(want) {
+  var lost = want
+  final life = hero.life ?? 1
+  if (life - lost < 1) lost = life - 1
+  if (lost < 0) lost = 0
+  if (lost > 0) {
+    Player.setLife(hero.life - lost)
+  }
+  return lost
+}
+
+/// 有赶路耗日辅助则耗 1 日；与 _jiejiCampSpendDay 同一套 Game.updateGame。不可见则跳过。
+async function _jiejiBladeSpendDay() {
+  if (Constants.ticksPerDay == null) return false
+  if (Constants.ticksPerDay <= 0) return false
+  await Game.updateGame(tick: Constants.ticksPerDay)
+  return true
+}
+
+function _jiejiBladeGrantBlank() {
+  final card = BattleCard(rank: 0)
+  card.isCardBlank = true
+  Player.acquireCard(card)
+  return card
+}
+
+function _jiejiBladeNormalizeKind(kind) {
+  if (kind == 'pick' || kind == 'jieji_blade_pick') return 'pick'
+  if (kind == 'test' || kind == 'jieji_blade_test') return 'test'
+  if (kind == 'pass' || kind == 'jieji_blade_pass') return 'pass'
+  return null
+}
+
+function _jiejiBladeChoices() {
+  return [
+    {
+      text: 'jieji_blade_pick',
+      description: 'hint_jieji_blade_pick',
+    },
+    {
+      text: 'jieji_blade_test',
+      description: 'hint_jieji_blade_test',
+    },
+    {
+      text: 'jieji_blade_pass',
+      description: 'hint_jieji_blade_pass',
+    },
+  ]
+}
+
+/// 赶路残锋三选。debug.forceJiejiEvent('blade') / forceBlade 直接走这里，仍弹出三选。
+async function playJiejiBladeEvent(terrain) {
+  if (hero == null) return false
+
+  dialog.pushDialog('hint_jieji_blade')
+  dialog.pushSelection('jiejiBlade', _jiejiBladeChoices())
+  await dialog.execute()
+  final picked = dialog.checkSelected('jiejiBlade')
+  var selected = _jiejiBladeNormalizeKind(picked)
+  if (selected == null) {
+    selected = 'pass'
+  }
+
+  final seasonId = _jiejiBladeSeasonId()
+  if (selected == 'pick') {
+    final herb = _jiejiBladePickHerb(seasonId)
+    final money = _jiejiBladePickMoney(seasonId)
+    await Player.collect('herb', herb, incurIncident: false)
+    await Player.collect('money', money, incurIncident: false)
+    dialog.pushDialog('hint_jieji_blade_pick_ok', interpolations: [herb, money])
+    await dialog.execute()
+  } else if (selected == 'test') {
+    await _jiejiBladeSpendDay()
+    if (random.nextDouble() < 0.50) {
+      _jiejiBladeGrantBlank()
+      dialog.pushDialog('hint_jieji_blade_test_blank')
+      await dialog.execute()
+      await tryDropGongfaShard(rate: kJiejiBladeTestGongfaRate)
+    } else {
+      final lost = _jiejiBladeCostLife(kJiejiBladeTestLife)
+      dialog.pushDialog('hint_jieji_blade_test_hurt', interpolations: [lost])
+      await dialog.execute()
+      if (seasonId == 'blood' && random.nextDouble() < kJiejiBladeTestKarmaChanceBlood) {
+        await grantKarmaCard('blade')
+      }
+    }
+  }
+
+  Game.updateUI()
+  return true
+}
+
+/// 赶路触发：教程锁与路遇相同；冷却 10 步；约 5%。出过则返回 true。
+async function tryJiejiBladeOnMove(terrain) {
+  if (hero == null) return false
+  if (_jiejiBladeTutorialLocked()) return false
+
+  final jieji = ensureJiejiFlags()
+  final moves = jieji.worldMoves ?? 0
+  final last = jieji.lastBladeMove ?? -999
+  if (moves - last < kJiejiBladeMoveCooldown) return false
+
+  var rate = kJiejiBladeBaseRate
+  if (rate < 0) rate = 0
+  if (random.nextDouble() > rate) return false
+
+  jieji.lastBladeMove = moves
+  await playJiejiBladeEvent(terrain)
+  return true
+}

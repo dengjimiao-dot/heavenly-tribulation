@@ -1,0 +1,200 @@
+/// 秘境入口「剑冢」三选：抚碑 / 拔剑 / 血祭。不替换进秘境。
+const kJiejiTombCooldownDays = 1
+const kJiejiTombWatchMoney = 30
+const kJiejiTombWatchMoneyThunder = 15
+const kJiejiTombWatchLife = 5
+const kJiejiTombDrawHerb = 1
+const kJiejiTombDrawMistMoney = 20
+const kJiejiTombDrawGongfaRate = 0.20
+const kJiejiTombBloodLife = 2
+const kJiejiTombBloodLifeBlood = 3
+const kJiejiTombBloodGongfaRate = 0.20
+
+function _jiejiTombSeasonId() {
+  if (game.jieji != null && game.jieji.seasonId != null) {
+    return game.jieji.seasonId
+  }
+  return 'thunder'
+}
+
+function _jiejiTombCurrentDay() {
+  if (game.timestamp == null) return null
+  if (Constants.ticksPerDay == null) return null
+  if (Constants.ticksPerDay <= 0) return null
+  return game.timestamp ~/ Constants.ticksPerDay
+}
+
+function _jiejiTombOnCooldown() {
+  final jieji = ensureJiejiFlags()
+  final day = _jiejiTombCurrentDay()
+  if (day == null) return false
+  if (jieji.lastTombDay == null) return false
+  if (day - jieji.lastTombDay < kJiejiTombCooldownDays) return true
+  return false
+}
+
+function _jiejiTombMark() {
+  final jieji = ensureJiejiFlags()
+  jieji.lastTombDay = _jiejiTombCurrentDay()
+}
+
+function _jiejiTombCostLife(want) {
+  var lost = want
+  final life = hero.life ?? 1
+  if (life - lost < 1) lost = life - 1
+  if (lost < 0) lost = 0
+  if (lost > 0) {
+    Player.setLife(hero.life - lost)
+  }
+  return lost
+}
+
+function _jiejiTombGrantBlank() {
+  final card = BattleCard(rank: 0)
+  card.isCardBlank = true
+  Player.acquireCard(card)
+  return card
+}
+
+function _jiejiTombWatchMoneyCost(seasonId) {
+  if (seasonId == 'thunder') return kJiejiTombWatchMoneyThunder
+  return kJiejiTombWatchMoney
+}
+
+function _jiejiTombBloodLifeCost(seasonId) {
+  if (seasonId == 'blood') return kJiejiTombBloodLifeBlood
+  return kJiejiTombBloodLife
+}
+
+function _jiejiTombNormalizeKind(kind) {
+  if (kind == 'watch' || kind == 'jieji_tomb_watch') return 'watch'
+  if (kind == 'draw' || kind == 'jieji_tomb_draw') return 'draw'
+  if (kind == 'blood' || kind == 'jieji_tomb_blood') return 'blood'
+  return null
+}
+
+function _jiejiTombChoices() {
+  return [
+    {
+      text: 'jieji_tomb_watch',
+      description: 'hint_jieji_tomb_watch',
+    },
+    {
+      text: 'jieji_tomb_draw',
+      description: 'hint_jieji_tomb_draw',
+    },
+    {
+      text: 'jieji_tomb_blood',
+      description: 'hint_jieji_tomb_blood',
+    },
+    'cancel',
+  ]
+}
+
+function _jiejiTombHerbNeed(selected) {
+  if (selected == 'draw') return kJiejiTombDrawHerb
+  return 0
+}
+
+function _jiejiTombMoneyNeed(selected, seasonId) {
+  if (selected == 'watch') return _jiejiTombWatchMoneyCost(seasonId)
+  return 0
+}
+
+/// 护身阵未挂则挂 arrayWard；已挂则挂 theurgyWard。两者都有则只回血。
+function _jiejiTombApplyWard() {
+  final jieji = ensureJiejiFlags()
+  if (jieji.arrayWard != true) {
+    jieji.arrayWard = true
+    return 'array'
+  }
+  if (jieji.theurgyWard != true) {
+    jieji.theurgyWard = true
+    return 'theurgy'
+  }
+  return null
+}
+
+/// 秘境入口剑冢三选。free 为 true 时不扣费、不检查冷却（debug），仍弹出三选。
+/// 返回 'ok' | 'cooldown' | 'poor' | 'cancel'。
+async function visitJiejiTomb({ free = false }) {
+  if (hero == null) return 'cancel'
+  if (free != true && _jiejiTombOnCooldown()) {
+    return 'cooldown'
+  }
+
+  dialog.pushDialog('hint_visitJiejiTomb')
+  dialog.pushSelection('jiejiTomb', _jiejiTombChoices())
+  await dialog.execute()
+  final picked = dialog.checkSelected('jiejiTomb')
+  var selected = null
+  if (picked == null || picked == 'cancel') {
+    if (free == true && picked == null) {
+      selected = 'watch'
+    } else {
+      return 'cancel'
+    }
+  } else {
+    selected = _jiejiTombNormalizeKind(picked)
+  }
+  if (selected == null) return 'cancel'
+
+  final seasonId = _jiejiTombSeasonId()
+  if (free != true) {
+    final herbNeed = _jiejiTombHerbNeed(selected)
+    final moneyNeed = _jiejiTombMoneyNeed(selected, seasonId)
+    final herbHave = hero.materials['herb'] ?? 0
+    final moneyHave = hero.materials['money'] ?? 0
+    if (herbHave < herbNeed || moneyHave < moneyNeed) {
+      return 'poor'
+    }
+  }
+
+  if (free != true) {
+    final herbNeed = _jiejiTombHerbNeed(selected)
+    final moneyNeed = _jiejiTombMoneyNeed(selected, seasonId)
+    if (herbNeed > 0) {
+      Player.exhaust('herb', herbNeed)
+    }
+    if (moneyNeed > 0) {
+      Player.exhaust('money', moneyNeed)
+    }
+    if (selected == 'blood') {
+      _jiejiTombCostLife(_jiejiTombBloodLifeCost(seasonId))
+    }
+    _jiejiTombMark()
+  }
+
+  if (selected == 'draw') {
+    _jiejiTombGrantBlank()
+    if (seasonId == 'mist') {
+      await Player.collect('money', kJiejiTombDrawMistMoney, incurIncident: false)
+      dialog.pushDialog('hint_visitJiejiTomb_draw_mist')
+    } else {
+      dialog.pushDialog('hint_visitJiejiTomb_draw')
+    }
+    await dialog.execute()
+    await tryDropGongfaShard(rate: kJiejiTombDrawGongfaRate)
+  } else if (selected == 'blood') {
+    dialog.pushDialog('hint_visitJiejiTomb_blood')
+    await dialog.execute()
+    await grantKarmaCard('tomb')
+    if (seasonId == 'blood') {
+      await tryDropGongfaShard(rate: kJiejiTombBloodGongfaRate)
+    }
+  } else {
+    Player.restoreLife(kJiejiTombWatchLife)
+    final ward = _jiejiTombApplyWard()
+    if (ward == 'array') {
+      dialog.pushDialog('hint_visitJiejiTomb_watch_array')
+    } else if (ward == 'theurgy') {
+      dialog.pushDialog('hint_visitJiejiTomb_watch_theurgy')
+    } else {
+      dialog.pushDialog('hint_visitJiejiTomb_watch')
+    }
+    await dialog.execute()
+  }
+
+  Game.updateUI()
+  return 'ok'
+}

@@ -1704,6 +1704,9 @@ final class GameLogic {
   static Future<void> heroDrillJiejiArena(dynamic location) =>
       _heroDrillJiejiArena(location);
 
+  static Future<void> heroVisitJiejiTomb(dynamic location) =>
+      _heroVisitJiejiTomb(location);
+
   static Future<void> heroRecruitJiejiAid(dynamic location) =>
       _heroRecruitJiejiAid(location);
 

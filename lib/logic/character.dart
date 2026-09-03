@@ -2262,6 +2262,26 @@ Future<void> _heroDrillJiejiArena(dynamic location) async {
   }
 }
 
+Future<void> _heroVisitJiejiTomb(dynamic location) async {
+  final result = await engine.hetu.invoke('visitJiejiTomb');
+  if (result == 'cooldown') {
+    dialog.pushDialog(
+      'hint_visitJiejiTomb_cooldown',
+      npcId: location['npcId'],
+    );
+    await dialog.execute();
+    return;
+  }
+  if (result == 'poor') {
+    dialog.pushDialog(
+      'hint_visitJiejiTomb_notEnough',
+      npcId: location['npcId'],
+    );
+    await dialog.execute();
+    return;
+  }
+}
+
 
 Future<void> _heroIssueJiejiEdict(dynamic location) async {
   final result = await engine.hetu.invoke('issueJiejiEdict');
@@ -2897,6 +2917,8 @@ Future<void> _onInteractSite(
         npcId: location['npcId'],
       );
       await dialog.execute();
+    case 'visitJiejiTomb':
+      await _heroVisitJiejiTomb(location);
     case 'about_arena':
       dialog.pushDialog(
         'hint_arenaEntrance',

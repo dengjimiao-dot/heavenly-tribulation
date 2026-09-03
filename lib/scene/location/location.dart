@@ -430,6 +430,17 @@ class LocationScene extends Scene with HasCursorState {
         };
         siteList.tryAddCard(siteCard);
         world.add(siteCard);
+        final tombCard = GameData.createSiteCard(
+          spriteId: 'location/card/dungeon.png',
+          title: engine.locale('visitJiejiTomb'),
+          onPreviewed: _onPreviewSiteCard,
+          onUnpreviewed: _onUnpreviewSiteCard,
+        );
+        tombCard.onTap = (button, position) async {
+          await GameLogic.heroVisitJiejiTomb(location);
+        };
+        siteList.tryAddCard(tombCard);
+        world.add(tombCard);
       case 'divinationaltar':
         final omenCard = GameData.createSiteCard(
           spriteId: 'location/card/divinationaltar.png',
