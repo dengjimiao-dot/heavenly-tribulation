@@ -195,5 +195,13 @@
     contribution: 11,
     rank: 0,
   },
+  hidden_blank_cache: {
+    id: "hidden_blank_cache",
+    policy: null,
+    isBounty: false,
+    isHidden: true,
+    contribution: 11,
+    rank: 0,
+  },
 
 }

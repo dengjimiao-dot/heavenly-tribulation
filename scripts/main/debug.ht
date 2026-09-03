@@ -181,6 +181,8 @@ namespace debug {
       questKind = 'hidden_stele_shade'
     } else if (kind == 'stall') {
       questKind = 'hidden_haggle_stall'
+    } else if (kind == 'blank') {
+      questKind = 'hidden_blank_cache'
     }
     final ctor = Quests[questKind]
     if (ctor == null) return false

@@ -809,6 +809,36 @@ async function onAfterEnterLocation(location) -> bool {
           }
           return true
         }
+        case 'hidden_blank_cache': {
+          if (isLate) {
+            Player.progressJournalById(journal.id, stage: 2)
+            dialog.pushDialog('quest_hidden_late_failed', interpolations: [journal.title])
+            await dialog.execute()
+          } else {
+            Player.progressJournalById(journal.id)
+            var locName = ''
+            final loc = game.locations[journal.quest.targetLocationId]
+            if (loc != null) {
+              locName = loc.name
+            }
+            dialog.pushDialog('quest_hidden_blank_cache_complete', interpolations: [
+              journal.title,
+              locName,
+            ])
+            await dialog.execute()
+            final items = await Player.loot(journal.quest.reward)
+            Game.promptItems(items)
+            final card = BattleCard(rank: 0)
+            card.isCardBlank = true
+            Player.acquireCard(card)
+            await Player.collect('money', 15, incurIncident: false)
+            dialog.pushDialog('hint_jieji_blank_cache_extra')
+            await dialog.execute()
+            await tryDropGongfaShard(rate: 0.25)
+            await grantJiejiHiddenQuestExtra('blank')
+          }
+          return true
+        }
       }
     }
   }
@@ -944,6 +974,13 @@ async function grantJiejiHiddenQuestExtra(kind) {
     if (seasonId == 'mist') {
       await Player.collect('herb', 2, incurIncident: false)
       dialog.pushDialog('hint_jieji_haggle_stall_extra_mist')
+      await dialog.execute()
+    }
+  }
+  if (kind == 'blank') {
+    if (seasonId == 'thunder') {
+      await Player.collect('money', 20, incurIncident: false)
+      dialog.pushDialog('hint_jieji_blank_cache_extra_thunder')
       await dialog.execute()
     }
   }
