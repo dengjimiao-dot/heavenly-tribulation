@@ -179,5 +179,13 @@
     contribution: 11,
     rank: 0,
   },
+  hidden_stele_shade: {
+    id: "hidden_stele_shade",
+    policy: null,
+    isBounty: false,
+    isHidden: true,
+    contribution: 11,
+    rank: 0,
+  },
 
 }

@@ -177,6 +177,8 @@ namespace debug {
       questKind = 'hidden_drum_mound'
     } else if (kind == 'font') {
       questKind = 'hidden_remnant_spring'
+    } else if (kind == 'shade') {
+      questKind = 'hidden_stele_shade'
     }
     final ctor = Quests[questKind]
     if (ctor == null) return false
