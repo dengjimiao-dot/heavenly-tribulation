@@ -1,0 +1,205 @@
+/// 符法所抄季限符牌。不改原符文台卷轴工坊。
+const kJiejiRuneHerbCost = 5
+const kJiejiRuneMoneyCost = 150
+const kJiejiRuneLifeCost = 1
+const kJiejiRuneHerbCostMist = 4
+const kJiejiRuneMoneyCostThunder = 100
+const kJiejiRuneLifeCostBlood = 2
+const kJiejiRuneSparkRate = 0.20
+const kJiejiRuneCooldownDays = 1
+
+function _jiejiRuneSeasonId() {
+  if (game.jieji != null && game.jieji.seasonId != null) {
+    return game.jieji.seasonId
+  }
+  return null
+}
+
+function jiejiTalismanCosts() {
+  var herb = kJiejiRuneHerbCost
+  var money = kJiejiRuneMoneyCost
+  var life = kJiejiRuneLifeCost
+  final seasonId = _jiejiRuneSeasonId()
+  if (seasonId == 'thunder') {
+    money = kJiejiRuneMoneyCostThunder
+  } else if (seasonId == 'mist') {
+    herb = kJiejiRuneHerbCostMist
+  } else if (seasonId == 'blood') {
+    life = kJiejiRuneLifeCostBlood
+  }
+  return {
+    herb: herb,
+    money: money,
+    life: life,
+  }
+}
+
+function ensureHomeRunelab() {
+  if (hero == null) return
+  final city = getHeroHomeCity()
+  if (city == null) return
+  final siteIds = city.siteIds ?? []
+  for (final siteId in siteIds) {
+    final site = game.locations[siteId]
+    if (site != null && site.kind == kLocationKindRunelab) return
+  }
+  Location(
+    category: 'site',
+    kind: kLocationKindRunelab,
+    atCity: city,
+    sectId: city.sectId,
+    development: 0,
+    npcId: Constants.siteKindToNpcId[kLocationKindRunelab],
+  )
+}
+
+function _jiejiRuneNormalizeKind(kind) {
+  if (kind == 'ward' || kind == 'spark' || kind == 'bind') return kind
+  return random.nextIterable(['ward', 'spark', 'bind'])
+}
+
+function _jiejiRuneFirstAffix(ids) {
+  if (ids == null) return null
+  for (final id in ids) {
+    if (id != null && game.battleCards[id] != null) return id
+  }
+  return null
+}
+
+/// 符牌优先护体 / 抽牌 / 省费词缀；没有则复用伤、疗、护，只改名字。
+function _jiejiRuneAffixId(kind) {
+  var id = null
+  if (kind == 'ward') {
+    id = _jiejiRuneFirstAffix(['punch_defend', 'heal'])
+  } else if (kind == 'spark') {
+    id = _jiejiRuneFirstAffix(['uniquecard_draw', 'punch_attack'])
+  } else if (kind == 'bind') {
+    id = _jiejiRuneFirstAffix(['vigor', 'punch_attack'])
+  }
+  if (id != null) return id
+  return _jiejiRuneFirstAffix(['punch_attack', 'heal', 'punch_defend'])
+}
+
+function _addJiejiTalismanToCurrentDeck(card) {
+  if (hero == null || card == null) return
+  if (hero.battleDeckIndex == null) return
+  if (hero.battleDeckIndex < 0) return
+  if (hero.battleDecks == null || hero.battleDecks.isEmpty) return
+  final deck = hero.battleDecks[hero.battleDeckIndex]
+  if (deck == null || deck.cards == null) return
+  if (!deck.cards.contains(card.id)) {
+    deck.cards.add(card.id)
+  }
+}
+
+function _createJiejiTalismanCard(kind) {
+  final affixId = _jiejiRuneAffixId(kind)
+  if (affixId == null) return null
+  final card = BattleCard(
+    affixId: affixId,
+    rank: 0,
+    isIdentified: true,
+  )
+  card.isSeasonLimited = true
+  card.jiejiTalisman = true
+  card.jiejiTalismanKind = kind
+  var nameKey = 'card_jieji_talisman_ward'
+  if (kind == 'spark') nameKey = 'card_jieji_talisman_spark'
+  if (kind == 'bind') nameKey = 'card_jieji_talisman_bind'
+  card.name = engine.locale(nameKey)
+  return card
+}
+
+function _finishJiejiTalismanCard(card) {
+  if (card == null) return
+  Player.acquireCard(card)
+  _addJiejiTalismanToCurrentDeck(card)
+}
+
+function _jiejiRuneCurrentDay() {
+  if (game.timestamp == null) return null
+  if (Constants.ticksPerDay == null) return null
+  if (Constants.ticksPerDay <= 0) return null
+  return game.timestamp ~/ Constants.ticksPerDay
+}
+
+function _jiejiRuneOnCooldown() {
+  final jieji = ensureJiejiFlags()
+  final day = _jiejiRuneCurrentDay()
+  if (day == null) return false
+  if (jieji.lastScribeDay == null) return false
+  if (day - jieji.lastScribeDay < kJiejiRuneCooldownDays) return true
+  return false
+}
+
+function _jiejiRuneMark() {
+  final jieji = ensureJiejiFlags()
+  jieji.lastScribeDay = _jiejiRuneCurrentDay()
+}
+
+/// 抄一枚季限符牌。kind: ward | spark | bind；null 则随机。
+/// free 为 true 时不扣药材/铜钱/生机、不检查冷却（debug）。
+/// 付不起或抄不出返回 null；冷却中返回 'cooldown'；成功返回卡牌。
+function scribeJiejiTalisman(kind, { free = false }) {
+  if (hero == null) return null
+  if (free != true && _jiejiRuneOnCooldown()) {
+    return 'cooldown'
+  }
+
+  final talismanKind = _jiejiRuneNormalizeKind(kind)
+  var lifeCost = kJiejiRuneLifeCost
+  if (free != true) {
+    final costs = jiejiTalismanCosts()
+    lifeCost = costs.life ?? kJiejiRuneLifeCost
+    final herbHave = hero.materials['herb'] ?? 0
+    final moneyHave = hero.materials['money'] ?? 0
+    if (herbHave < costs.herb || moneyHave < costs.money) {
+      return null
+    }
+    Player.exhaust('herb', costs.herb)
+    Player.exhaust('money', costs.money)
+    var nextLife = hero.life - lifeCost
+    if (nextLife < 1) nextLife = 1
+    Player.setLife(nextLife)
+  }
+
+  final card = _createJiejiTalismanCard(talismanKind)
+  if (card == null) return null
+  jiejiTryForgeSpark(card, kJiejiRuneSparkRate)
+  _finishJiejiTalismanCard(card)
+  if (free != true) {
+    _jiejiRuneMark()
+  }
+  return card
+}
+
+/// 季末清掉未用完的符牌，避免滚雪球。秘境出门仍会清季限牌。
+function stripJiejiTalismanCards() {
+  if (hero == null) return 0
+  if (hero.cardLibrary == null) return 0
+  let ids = []
+  for (final card in hero.cardLibrary.values) {
+    if (card == null) continue
+    if (card.jiejiTalisman == true) {
+      ids.add(card.id)
+    }
+  }
+  var removed = 0
+  for (final id in ids) {
+    if (hero.cardLibrary.containsKey(id)) {
+      hero.cardLibrary.remove(id)
+      removed += 1
+    }
+    if (hero.battleDecks != null) {
+      for (final deck in hero.battleDecks) {
+        if (deck.cards != null) {
+          deck.cards.remove(id)
+        }
+      }
+    }
+  }
+  if (removed > 0) {
+    engine.info('季末符牌消散：${removed}')
+  }
+  return removed
+}

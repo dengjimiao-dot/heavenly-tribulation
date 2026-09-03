@@ -231,6 +231,16 @@ namespace debug {
     return card
   }
 
+  async function forceScribeTalisman(kind) {
+    final card = scribeJiejiTalisman(kind, free: true)
+    if (card == null || card == 'cooldown') {
+      dialog.pushDialog("hint_jieji_rune_failed")
+      await dialog.execute()
+      return null
+    }
+    return card
+  }
+
   async function forceRecruitAid(genre) {
     final result = recruitJiejiAid(genre, free: true)
     if (result == null || result == 'cooldown') {

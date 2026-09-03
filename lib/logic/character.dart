@@ -1773,6 +1773,106 @@ Future<void> _heroBrewPotionCard(dynamic location) async {
 }
 
 
+Future<void> _heroScribeJiejiTalisman(dynamic location) async {
+  final isRented = await GameLogic.checkRented(location);
+  if (!isRented) return;
+
+  if ((GameData.hero['life'] as num? ?? 0) <= 1) {
+    dialog.pushDialog(
+      'hint_notEnoughStaminaToWork',
+      npcId: location['npcId'],
+    );
+    await dialog.execute();
+    return;
+  }
+
+  var herbCost = 5;
+  var moneyCost = 150;
+  var lifeCost = 1;
+  try {
+    final costs = engine.hetu.invoke('jiejiTalismanCosts');
+    if (costs != null) {
+      herbCost = (costs['herb'] as num?)?.toInt() ?? herbCost;
+      moneyCost = (costs['money'] as num?)?.toInt() ?? moneyCost;
+      lifeCost = (costs['life'] as num?)?.toInt() ?? lifeCost;
+    }
+  } catch (_) {}
+
+  final herb = (GameData.hero['materials']['herb'] as num?)?.toInt() ?? 0;
+  final money = (GameData.hero['materials']['money'] as num?)?.toInt() ?? 0;
+  if (herb < herbCost || money < moneyCost) {
+    dialog.pushDialog(
+      'hint_jieji_rune_notEnough',
+      npcId: location['npcId'],
+      interpolations: [herbCost, moneyCost, lifeCost],
+    );
+    await dialog.execute();
+    return;
+  }
+
+  dialog.pushSelection('jieji_talisman_kind', [
+    'jieji_talisman_ward',
+    'jieji_talisman_spark',
+    'jieji_talisman_bind',
+    'cancel',
+  ]);
+  await dialog.execute();
+  final selected = dialog.checkSelected('jieji_talisman_kind');
+  if (selected == null || selected == 'cancel') return;
+
+  var kind = 'ward';
+  if (selected == 'jieji_talisman_spark') kind = 'spark';
+  if (selected == 'jieji_talisman_bind') kind = 'bind';
+
+  final card = engine.hetu.invoke(
+    'scribeJiejiTalisman',
+    positionalArgs: [kind],
+  );
+  if (card == 'cooldown') {
+    dialog.pushDialog(
+      'hint_jieji_rune_cooldown',
+      npcId: location['npcId'],
+    );
+    await dialog.execute();
+    return;
+  }
+  if (card == null) {
+    dialog.pushDialog(
+      'hint_jieji_rune_notEnough',
+      npcId: location['npcId'],
+      interpolations: [herbCost, moneyCost, lifeCost],
+    );
+    await dialog.execute();
+    return;
+  }
+
+  var cardName = engine.locale('card_jieji_talisman_$kind');
+  try {
+    final n = card['name'];
+    if (n != null) cardName = '$n';
+  } catch (_) {}
+  dialog.pushDialog(
+    'hint_jieji_rune_done',
+    npcId: location['npcId'],
+    interpolations: [cardName],
+  );
+  await dialog.execute();
+  String? sparkName;
+  try {
+    final s = card['jiejiSparkName'];
+    if (s != null) sparkName = '$s';
+  } catch (_) {}
+  if (sparkName != null && sparkName.isNotEmpty) {
+    dialog.pushDialog(
+      'hint_jieji_forge_spark',
+      npcId: location['npcId'],
+      interpolations: [sparkName],
+    );
+    await dialog.execute();
+  }
+}
+
+
 Future<void> _heroRecruitJiejiAid(dynamic location) async {
   final isRented = await GameLogic.checkRented(location);
   if (!isRented) return;
@@ -2086,6 +2186,11 @@ Future<void> _onInteractSite(
       'text': 'brewPotionCard',
       'description': 'hint_brewPotionCard_description',
     });
+  } else if (siteKind == 'runelab') {
+    siteOptions.add({
+      'text': 'scribeJiejiTalisman',
+      'description': 'hint_scribeJiejiTalisman_description',
+    });
   } else if (siteKind == 'library') {
     siteOptions.add({
       'text': 'consultXianming',
@@ -2173,6 +2278,8 @@ Future<void> _onInteractSite(
       await _heroShowKarmaCodex(location);
     case 'brewPotionCard':
       await _heroBrewPotionCard(location);
+    case 'scribeJiejiTalisman':
+      await _heroScribeJiejiTalisman(location);
     case 'recruitJiejiAid':
       await _heroRecruitJiejiAid(location);
     case 'consultXianming':

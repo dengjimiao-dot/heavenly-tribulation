@@ -2,6 +2,7 @@
 async function onNewGame() {
   ensureHomeCardforge()
   ensureHomeAlchemylab()
+  ensureHomeRunelab()
   ensureHomeResidence()
   ensureHomeLibrary()
   ensureHomeFarmland()
