@@ -1,0 +1,204 @@
+/// 显圣殿「还愿」：清愿 / 求雷 / 血祭。不替换请神。
+const kJiejiVowCooldownDays = 1
+const kJiejiVowClearHerb = 1
+const kJiejiVowClearHerbMist = 0
+const kJiejiVowClearLife = 6
+const kJiejiVowSparkMoney = 40
+const kJiejiVowSparkMoneyThunder = 20
+const kJiejiVowSparkLife = 4
+const kJiejiVowBloodLife = 2
+const kJiejiVowBloodLifeBlood = 3
+const kJiejiVowBloodGongfaRate = 0.35
+const kJiejiVowBloodMoney = 40
+
+function _jiejiVowSeasonId() {
+  if (game.jieji != null && game.jieji.seasonId != null) {
+    return game.jieji.seasonId
+  }
+  return null
+}
+
+function _jiejiVowCurrentDay() {
+  if (game.timestamp == null) return null
+  if (Constants.ticksPerDay == null) return null
+  if (Constants.ticksPerDay <= 0) return null
+  return game.timestamp ~/ Constants.ticksPerDay
+}
+
+function _jiejiVowOnCooldown() {
+  final jieji = ensureJiejiFlags()
+  final day = _jiejiVowCurrentDay()
+  if (day == null) return false
+  if (jieji.lastVowDay == null) return false
+  if (day - jieji.lastVowDay < kJiejiVowCooldownDays) return true
+  return false
+}
+
+function _jiejiVowMark() {
+  final jieji = ensureJiejiFlags()
+  jieji.lastVowDay = _jiejiVowCurrentDay()
+}
+
+function _jiejiVowCostLife(want) {
+  var lost = want
+  final life = hero.life ?? 1
+  if (life - lost < 1) lost = life - 1
+  if (lost < 0) lost = 0
+  if (lost > 0) {
+    Player.setLife(hero.life - lost)
+  }
+  return lost
+}
+
+function _jiejiVowClearHerbCost(seasonId) {
+  if (seasonId == 'mist') return kJiejiVowClearHerbMist
+  return kJiejiVowClearHerb
+}
+
+function _jiejiVowSparkMoneyCost(seasonId) {
+  if (seasonId == 'thunder') return kJiejiVowSparkMoneyThunder
+  return kJiejiVowSparkMoney
+}
+
+function _jiejiVowBloodLifeCost(seasonId) {
+  if (seasonId == 'blood') return kJiejiVowBloodLifeBlood
+  return kJiejiVowBloodLife
+}
+
+function _jiejiVowNormalizeKind(kind) {
+  if (kind == 'clear' || kind == 'jieji_vow_clear') return 'clear'
+  if (kind == 'spark' || kind == 'jieji_vow_spark') return 'spark'
+  if (kind == 'blood' || kind == 'jieji_vow_blood') return 'blood'
+  return null
+}
+
+function _jiejiVowChoices() {
+  return [
+    {
+      text: 'jieji_vow_clear',
+      description: 'hint_jieji_vow_clear',
+    },
+    {
+      text: 'jieji_vow_spark',
+      description: 'hint_jieji_vow_spark',
+    },
+    {
+      text: 'jieji_vow_blood',
+      description: 'hint_jieji_vow_blood',
+    },
+    'cancel',
+  ]
+}
+
+function _jiejiVowHerbNeed(selected, seasonId) {
+  if (selected == 'clear') return _jiejiVowClearHerbCost(seasonId)
+  return 0
+}
+
+function _jiejiVowMoneyNeed(selected, seasonId) {
+  if (selected == 'spark') return _jiejiVowSparkMoneyCost(seasonId)
+  return 0
+}
+
+/// 未挂雷火神则挂 theurgyFury；已挂则挂 feastFury。两者都有则只回血。
+function _jiejiVowApplySpark() {
+  final jieji = ensureJiejiFlags()
+  if (jieji.theurgyFury != true) {
+    jieji.theurgyFury = true
+    return 'theurgy'
+  }
+  if (jieji.feastFury != true) {
+    jieji.feastFury = true
+    return 'feast'
+  }
+  return null
+}
+
+/// 显圣殿还愿三选。free 为 true 时不扣费、不检查冷却（debug），仍弹出三选。
+/// 返回 'ok' | 'cooldown' | 'poor' | 'cancel'。
+async function vowJiejiTheurgy({ free = false }) {
+  if (hero == null) return 'cancel'
+  if (free != true && _jiejiVowOnCooldown()) {
+    return 'cooldown'
+  }
+
+  dialog.pushDialog('hint_vowJiejiTheurgy')
+  dialog.pushSelection('jiejiVow', _jiejiVowChoices())
+  await dialog.execute()
+  final picked = dialog.checkSelected('jiejiVow')
+  var selected = null
+  if (picked == null || picked == 'cancel') {
+    if (free == true && picked == null) {
+      selected = 'clear'
+    } else {
+      return 'cancel'
+    }
+  } else {
+    selected = _jiejiVowNormalizeKind(picked)
+  }
+  if (selected == null) return 'cancel'
+
+  final seasonId = _jiejiVowSeasonId()
+  if (free != true) {
+    final herbNeed = _jiejiVowHerbNeed(selected, seasonId)
+    final moneyNeed = _jiejiVowMoneyNeed(selected, seasonId)
+    final herbHave = hero.materials['herb'] ?? 0
+    final moneyHave = hero.materials['money'] ?? 0
+    if (herbHave < herbNeed || moneyHave < moneyNeed) {
+      return 'poor'
+    }
+  }
+
+  if (free != true) {
+    final herbNeed = _jiejiVowHerbNeed(selected, seasonId)
+    final moneyNeed = _jiejiVowMoneyNeed(selected, seasonId)
+    if (herbNeed > 0) {
+      Player.exhaust('herb', herbNeed)
+    }
+    if (moneyNeed > 0) {
+      Player.exhaust('money', moneyNeed)
+    }
+    if (selected == 'blood') {
+      _jiejiVowCostLife(_jiejiVowBloodLifeCost(seasonId))
+    }
+    _jiejiVowMark()
+  }
+
+  if (selected == 'spark') {
+    final spark = _jiejiVowApplySpark()
+    if (spark == 'theurgy') {
+      dialog.pushDialog('hint_vowJiejiTheurgy_spark')
+    } else if (spark == 'feast') {
+      dialog.pushDialog('hint_vowJiejiTheurgy_spark_feast')
+    } else {
+      Player.restoreLife(kJiejiVowSparkLife)
+      dialog.pushDialog('hint_vowJiejiTheurgy_spark_life')
+    }
+    await dialog.execute()
+  } else if (selected == 'blood') {
+    final dropped = await tryDropGongfaShard(rate: kJiejiVowBloodGongfaRate)
+    if (dropped != true) {
+      await Player.collect('money', kJiejiVowBloodMoney, incurIncident: false)
+      dialog.pushDialog('hint_vowJiejiTheurgy_blood_money')
+      await dialog.execute()
+    } else {
+      dialog.pushDialog('hint_vowJiejiTheurgy_blood')
+      await dialog.execute()
+    }
+  } else {
+    Player.restoreLife(kJiejiVowClearLife)
+    final jieji = ensureJiejiFlags()
+    final hadGod = jieji.theurgyWard == true || jieji.theurgyFury == true
+    if (hadGod) {
+      jieji.theurgyWard = false
+      jieji.theurgyFury = false
+      dialog.pushDialog('hint_vowJiejiTheurgy_clear_god')
+    } else {
+      dialog.pushDialog('hint_vowJiejiTheurgy_clear')
+    }
+    await dialog.execute()
+  }
+
+  Game.updateUI()
+  return 'ok'
+}

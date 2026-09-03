@@ -473,6 +473,11 @@ namespace debug {
     return await invokeJiejiTheurgy(free: true, kind: k)
   }
 
+  /// 忽略冷却与花费，仍弹出显圣殿还愿三选。
+  async function forceVow() {
+    return await vowJiejiTheurgy(free: true)
+  }
+
   async function forceTattoo(kind) {
     var k = kind
     if (k != 'thunder' && k != 'mist' && k != 'blood') {
