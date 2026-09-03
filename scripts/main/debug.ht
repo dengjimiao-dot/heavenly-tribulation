@@ -139,4 +139,18 @@ namespace debug {
   //     }
   //   }
   // }
+
+  async function forceJiejiEvent(kind) {
+    game.flags.jieji ??= {}
+    final terrain = { kind: 'plain' }
+    if (kind == 'merchant') {
+      await playJiejiMerchantEvent()
+    } else if (kind == 'mist') {
+      await playJiejiMistRoadEvent(terrain)
+    } else if (kind == 'blood') {
+      await playJiejiBloodRoadEvent(terrain)
+    } else {
+      await playJiejiThunderRoadEvent(terrain)
+    }
+  }
 }

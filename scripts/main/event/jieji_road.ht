@@ -1,0 +1,307 @@
+/// 劫季赶路事件：雷/雾/血三季分叉 + 行脚商人。
+/// 由 sandbox onAfterMove 在隐藏任务与野遇都没触发时调用。
+
+const kJiejiRoadEventBaseRate = 0.10
+const kJiejiRoadEventMoveCooldown = 6
+const kMistRoadEventBaseRate = 0.10
+const kMistRoadEventMoveCooldown = 6
+const kMistRoadEventGuideCost = 80
+const kJiejiMerchantBaseRate = 0.04
+const kJiejiMerchantMoveCooldown = 10
+const kJiejiMerchantHerbCost = 80
+const kJiejiMerchantHerbGain = 5
+const kJiejiMerchantSellHerb = 3
+const kJiejiMerchantSellMoney = 120
+const kJiejiMerchantBoxFailCost = 50
+const kJiejiMerchantBoxKarmaChance = 0.40
+const kThunderTempleKarmaChance = 0.20
+const kThunderPrayBlankChance = 0.30
+
+function _jiejiRoadWildMul() {
+  var mul = 1.0
+  if (game.jieji != null && game.jieji.wildEncounterMul != null) {
+    mul = game.jieji.wildEncounterMul
+  }
+  if (mul < 0) mul = 0
+  return mul
+}
+
+function _jiejiRoadSeasonId() {
+  if (game.jieji == null) return null
+  return game.jieji.seasonId
+}
+
+function _jiejiRoadTerrainKind(terrain) {
+  if (terrain != null && terrain.kind != null) return terrain.kind
+  return 'plain'
+}
+
+function _jiejiRoadEnsureFlags() {
+  game.flags.jieji ??= {}
+  return game.flags.jieji
+}
+
+function _jiejiRoadTutorialLocked() {
+  return game.enableTutorial && game.flags.tutorial.bountyQuest != true
+}
+
+function _jiejiRoadClampLifeLoss(want) {
+  if (hero == null) return 0
+  var lost = want
+  if (lost < 0) lost = 0
+  final life = hero.life ?? 1
+  if (life - lost < 1) lost = life - 1
+  if (lost < 0) lost = 0
+  return lost
+}
+
+/// 雾月赶路迷雾。隐藏任务与野遇都没触发时才滚；用 wildEncounterMul，不用 hiddenQuestMul。
+async function tryMistRoadEventOnMove(terrain) {
+  if (hero == null) return false
+  if (_jiejiRoadSeasonId() != 'mist') return false
+  if (_jiejiRoadTutorialLocked()) return false
+
+  final jieji = _jiejiRoadEnsureFlags()
+  final moves = jieji.worldMoves ?? 0
+  final last = jieji.lastMistEventMove ?? -999
+  if (moves - last < kMistRoadEventMoveCooldown) return false
+
+  var rate = kMistRoadEventBaseRate * _jiejiRoadWildMul()
+  if (rate < 0) rate = 0
+  if (random.nextDouble() > rate) return false
+
+  jieji.lastMistEventMove = moves
+  jieji.lastRoadEventMove = moves
+  await playJiejiMistRoadEvent(terrain)
+  return true
+}
+
+async function tryJiejiRoadEventOnMove(terrain) {
+  if (hero == null) return false
+  if (_jiejiRoadTutorialLocked()) return false
+  final seasonId = _jiejiRoadSeasonId()
+  if (seasonId == null) return false
+
+  final jieji = _jiejiRoadEnsureFlags()
+  final moves = jieji.worldMoves ?? 0
+  final last = jieji.lastRoadEventMove ?? -999
+  if (moves - last < kJiejiRoadEventMoveCooldown) return false
+
+  var rate = kJiejiRoadEventBaseRate * _jiejiRoadWildMul()
+  if (rate < 0) rate = 0
+  if (random.nextDouble() > rate) return false
+
+  jieji.lastRoadEventMove = moves
+  if (seasonId == 'mist') {
+    jieji.lastMistEventMove = moves
+    await playJiejiMistRoadEvent(terrain)
+  } else if (seasonId == 'thunder') {
+    await playJiejiThunderRoadEvent(terrain)
+  } else if (seasonId == 'blood') {
+    await playJiejiBloodRoadEvent(terrain)
+  } else {
+    jieji.lastRoadEventMove = last
+    return false
+  }
+  return true
+}
+
+async function tryJiejiMerchantOnMove() {
+  if (hero == null) return false
+  if (_jiejiRoadTutorialLocked()) return false
+
+  final jieji = _jiejiRoadEnsureFlags()
+  final moves = jieji.worldMoves ?? 0
+  final last = jieji.lastMerchantMove ?? -999
+  if (moves - last < kJiejiMerchantMoveCooldown) return false
+
+  var rate = kJiejiMerchantBaseRate
+  if (rate < 0) rate = 0
+  if (random.nextDouble() > rate) return false
+
+  jieji.lastMerchantMove = moves
+  await playJiejiMerchantEvent()
+  return true
+}
+
+async function playJiejiMistRoadEvent(terrain) {
+  dialog.pushDialog('hint_jieji_mist_lost')
+  dialog.pushSelection('jiejiMistRoad', [
+    'jieji_mist_forage',
+    'jieji_mist_charge',
+    'jieji_mist_guide',
+  ])
+  await dialog.execute()
+  final selected = dialog.checkSelected('jiejiMistRoad')
+
+  if (selected == 'jieji_mist_forage') {
+    final herb = 2 + random.nextInt(3)
+    final money = 50 + random.nextInt(51)
+    await Player.collect('herb', herb, incurIncident: false)
+    await Player.collect('money', money, incurIncident: false)
+    dialog.pushDialog('hint_jieji_mist_forage', interpolations: ['${herb}', '${money}'])
+    await dialog.execute()
+  } else if (selected == 'jieji_mist_charge') {
+    dialog.pushDialog('hint_jieji_mist_charge')
+    await dialog.execute()
+    await encounterEnemy(rank: hero.rank, terrainKind: _jiejiRoadTerrainKind(terrain))
+  } else {
+    final cost = kMistRoadEventGuideCost
+    final money = hero.materials['money'] ?? 0
+    if (money >= cost) {
+      Player.exhaust('money', cost)
+      dialog.pushDialog('hint_jieji_mist_guide', interpolations: ['${cost}'])
+      await dialog.execute()
+    } else {
+      dialog.pushDialog('hint_jieji_mist_guide_broke')
+      await dialog.execute()
+      if (random.nextDouble() < 0.30) {
+        await grantKarmaCard('mist')
+      }
+    }
+  }
+  Game.updateUI()
+}
+
+async function playJiejiThunderRoadEvent(terrain) {
+  dialog.pushDialog('hint_jieji_road_thunder')
+  dialog.pushSelection('jiejiThunderRoad', [
+    'jieji_thunder_pray',
+    'jieji_thunder_elite',
+    'jieji_thunder_temple',
+  ])
+  await dialog.execute()
+  final selected = dialog.checkSelected('jiejiThunderRoad')
+
+  if (selected == 'jieji_thunder_pray') {
+    if (random.nextDouble() < kThunderPrayBlankChance) {
+      final card = BattleCard(rank: 0)
+      card.isCardBlank = true
+      Player.acquireCard(card)
+      dialog.pushDialog('hint_jieji_road_thunder_pray_blank')
+      await dialog.execute()
+    } else {
+      final money = 40 + random.nextInt(41)
+      await Player.collect('money', money, incurIncident: false)
+      dialog.pushDialog('hint_jieji_road_thunder_pray_money', interpolations: ['${money}'])
+      await dialog.execute()
+    }
+  } else if (selected == 'jieji_thunder_elite') {
+    dialog.pushDialog('hint_jieji_road_thunder_elite')
+    await dialog.execute()
+    var eliteRank = (hero.rank ?? 0) + 1
+    if (eliteRank > kCultivationRankMax) eliteRank = kCultivationRankMax
+    await encounterEnemy(
+      rank: eliteRank,
+      terrainKind: _jiejiRoadTerrainKind(terrain),
+      name: engine.locale('jieji_road_elite'),
+      battleEndCallback: async function (result, roundCount) {
+        if (result) {
+          final extra = 80 + random.nextInt(41)
+          await Player.collect('money', extra, incurIncident: false)
+          dialog.pushDialog('hint_jieji_road_thunder_elite_loot', interpolations: ['${extra}'])
+          await dialog.execute()
+        }
+      },
+    )
+  } else {
+    dialog.pushDialog('hint_jieji_road_thunder_temple')
+    await dialog.execute()
+    if (random.nextDouble() < kThunderTempleKarmaChance) {
+      await grantKarmaCard('temple')
+    }
+  }
+  Game.updateUI()
+}
+
+async function playJiejiBloodRoadEvent(terrain) {
+  dialog.pushDialog('hint_jieji_road_blood')
+  dialog.pushSelection('jiejiBloodRoad', [
+    'jieji_blood_rite',
+    'jieji_blood_hunt',
+    'jieji_blood_detour',
+  ])
+  await dialog.execute()
+  final selected = dialog.checkSelected('jiejiBloodRoad')
+
+  if (selected == 'jieji_blood_rite') {
+    final lost = _jiejiRoadClampLifeLoss(3)
+    if (lost > 0) {
+      Player.setLife(hero.life - lost)
+    }
+    if (random.nextDouble() < 0.50) {
+      final money = 80 + random.nextInt(71)
+      await Player.collect('money', money, incurIncident: false)
+      dialog.pushDialog('hint_jieji_road_blood_rite_money', interpolations: ['${lost}', '${money}'])
+      await dialog.execute()
+    } else {
+      dialog.pushDialog('hint_jieji_road_blood_rite_karma', interpolations: ['${lost}'])
+      await dialog.execute()
+      await grantKarmaCard('blood')
+    }
+  } else if (selected == 'jieji_blood_hunt') {
+    dialog.pushDialog('hint_jieji_road_blood_hunt')
+    await dialog.execute()
+    await encounterEnemy(rank: hero.rank, terrainKind: _jiejiRoadTerrainKind(terrain))
+  } else {
+    dialog.pushDialog('hint_jieji_road_blood_detour')
+    await dialog.execute()
+    await Game.updateGame(tick: Constants.ticksPerDay)
+  }
+  Game.updateUI()
+}
+
+async function playJiejiMerchantEvent() {
+  dialog.pushDialog('hint_jieji_road_merchant')
+  dialog.pushSelection('jiejiWanderMerchant', [
+    'jieji_merchant_buy',
+    'jieji_merchant_sell',
+    'jieji_merchant_box',
+  ])
+  await dialog.execute()
+  final selected = dialog.checkSelected('jiejiWanderMerchant')
+
+  if (selected == 'jieji_merchant_buy') {
+    final money = hero.materials['money'] ?? 0
+    if (money >= kJiejiMerchantHerbCost) {
+      Player.exhaust('money', kJiejiMerchantHerbCost)
+      await Player.collect('herb', kJiejiMerchantHerbGain, incurIncident: false)
+      dialog.pushDialog('hint_jieji_road_merchant_buy', interpolations: [
+        '${kJiejiMerchantHerbCost}',
+        '${kJiejiMerchantHerbGain}',
+      ])
+      await dialog.execute()
+    } else {
+      dialog.pushDialog('hint_jieji_road_merchant_buy_broke', interpolations: ['${kJiejiMerchantHerbCost}'])
+      await dialog.execute()
+    }
+  } else if (selected == 'jieji_merchant_sell') {
+    final herb = hero.materials['herb'] ?? 0
+    if (herb >= kJiejiMerchantSellHerb) {
+      Player.exhaust('herb', kJiejiMerchantSellHerb)
+      await Player.collect('money', kJiejiMerchantSellMoney, incurIncident: false)
+      dialog.pushDialog('hint_jieji_road_merchant_sell', interpolations: [
+        '${kJiejiMerchantSellHerb}',
+        '${kJiejiMerchantSellMoney}',
+      ])
+      await dialog.execute()
+    } else {
+      dialog.pushDialog('hint_jieji_road_merchant_sell_broke', interpolations: ['${kJiejiMerchantSellHerb}'])
+      await dialog.execute()
+    }
+  } else if (selected == 'jieji_merchant_box') {
+    if (random.nextDouble() < kJiejiMerchantBoxKarmaChance) {
+      await grantKarmaCard('blackmarket')
+    } else {
+      final money = hero.materials['money'] ?? 0
+      var lost = kJiejiMerchantBoxFailCost
+      if (lost > money) lost = money
+      if (lost > 0) {
+        Player.exhaust('money', lost)
+      }
+      dialog.pushDialog('hint_jieji_road_merchant_box_fail', interpolations: ['${lost}'])
+      await dialog.execute()
+    }
+  }
+  Game.updateUI()
+}

@@ -52,6 +52,7 @@ function forgeCardBlank(genre) {
   )
   card.isCardBlank = true
   Player.acquireCard(card)
+  jiejiTryForgeSpark(card, kForgeSparkRate)
   return card
 }
 
@@ -79,5 +80,121 @@ function forgeCardBlankAdvanced(genre) {
   )
   card.isCardBlank = true
   Player.acquireCard(card)
+  jiejiTryForgeSpark(card, kForgeSparkAdvancedRate)
   return card
+}
+
+const kForgeSparkRate = 0.25
+const kForgeSparkAdvancedRate = 0.45
+
+function jiejiCardCanTakeExtraAffix(card) {
+  if (card == null || card.affixes == null) return false
+  var rank = card.rank ?? 0
+  if (rank < 0) rank = 0
+  if (rank > kCultivationRankMax) rank = kCultivationRankMax
+  final info = getMinMaxExtraAffixCount(rank)
+  if (info == null) return false
+  final maxExtra = info.maxExtra ?? 0
+  if (maxExtra <= 0) return false
+  return card.affixes.length < maxExtra + 1
+}
+
+function jiejiPickSupportAffix(card) {
+  if (card == null) return null
+  if (game.battleCardAffixes == null) return null
+  let pool = []
+  for (final affix of game.battleCardAffixes) {
+    if (affix == null) continue
+    if (affix.uniqueId == null) continue
+    if (affix.category is! List) continue
+    if (affix.genre && affix.genre != card.genre) continue
+    if (card.category != null && !affix.category.contains(card.category)) continue
+    if (card.affixUniqueIds != null && card.affixUniqueIds.contains(affix.uniqueId)) continue
+    if (affix.rank != null && card.rank != null && affix.rank > card.rank) continue
+    pool.add(affix)
+  }
+  if (pool.isEmpty) return null
+  return Object.create(random.nextIterable(pool))
+}
+
+function jiejiFillAffixValue(affix) {
+  if (affix == null) return
+  if (affix.valueData is List) {
+    var rank = affix.rank ?? 0
+    if (rank < 0) rank = 0
+    if (rank > kCultivationRankMax) rank = kCultivationRankMax
+    var levelMin = minLevelForRank(rank)
+    var levelMax = maxLevelForRank(rank)
+    if (affix.maxLevel) {
+      if (levelMax > affix.maxLevel) levelMax = affix.maxLevel
+    }
+    if (levelMax < levelMin) levelMax = levelMin
+    affix.level = levelMin + random.nextInt(levelMax - levelMin + 1)
+    let values = []
+    for (final valueData in affix.valueData) {
+      var valueLevel = affix.level
+      if (valueData.maxLevel) {
+        if (valueLevel > valueData.maxLevel) valueLevel = valueData.maxLevel
+      }
+      final value = (valueData.base ?? 0) + (valueData.increment ?? 0) * valueLevel
+      values.add(value.floor())
+    }
+    affix.value = values
+  } else {
+    affix.level = 1
+  }
+}
+
+function jiejiSparkAffixLabel(affix) {
+  if (affix == null) return engine.locale('jieji_forge_spark_mystery')
+  var key = affix.description
+  if (key == null) key = affix.id
+  var name
+  if (key != null && affix.value is List) {
+    name = engine.locale(key, interpolations: affix.value)
+  } else if (key != null) {
+    name = engine.locale(key)
+  }
+  if (name == null || name.contains('{')) {
+    return engine.locale('jieji_forge_spark_mystery')
+  }
+  return name
+}
+
+function jiejiAttachSparkAffix(card) {
+  if (!jiejiCardCanTakeExtraAffix(card)) return null
+  final picked = jiejiPickSupportAffix(card)
+  if (picked == null) return null
+  picked.isMain = false
+  var rank = card.rank ?? 0
+  if (picked.rank == null || picked.rank > rank) {
+    picked.rank = rank
+  }
+  jiejiFillAffixValue(picked)
+  card.affixes.add(picked)
+  if (card.affixUniqueIds == null) {
+    card.affixUniqueIds = []
+  }
+  if (picked.uniqueId is string) {
+    card.affixUniqueIds.add(picked.uniqueId)
+  }
+  return jiejiSparkAffixLabel(picked)
+}
+
+function jiejiTryForgeSpark(card, chance) {
+  if (card == null) return
+  if (random.nextDouble() > chance) return
+  var label = jiejiAttachSparkAffix(card)
+  if (label == null) {
+    var rank = card.rank ?? 0
+    if (rank < kCultivationRankMax) {
+      card.rank = rank + 1
+      label = jiejiAttachSparkAffix(card)
+      if (label == null) {
+        label = engine.locale('jieji_forge_spark_rank')
+      }
+    }
+  }
+  if (label == null) return
+  card.jiejiSparkName = label
 }

@@ -1649,6 +1649,19 @@ Future<void> _heroForgeCardBlank(dynamic location, {bool advanced = false}) asyn
     interpolations: [cardName],
   );
   await dialog.execute();
+  String? sparkName;
+  try {
+    final s = card['jiejiSparkName'];
+    if (s != null) sparkName = '$s';
+  } catch (_) {}
+  if (sparkName != null && sparkName.isNotEmpty) {
+    dialog.pushDialog(
+      'hint_jieji_forge_spark',
+      npcId: location['npcId'],
+      interpolations: [sparkName],
+    );
+    await dialog.execute();
+  }
 }
 
 
