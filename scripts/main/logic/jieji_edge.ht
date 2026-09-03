@@ -1,0 +1,196 @@
+/// 工坊「试锋」：磨锋 / 试刃 / 血试。不替换淬器。
+const kJiejiEdgeCooldownDays = 1
+const kJiejiEdgeHoneHerb = 1
+const kJiejiEdgeHoneHerbMist = 0
+const kJiejiEdgeHoneLife = 6
+const kJiejiEdgeTestMoney = 40
+const kJiejiEdgeTestMoneyThunder = 20
+const kJiejiEdgeTestLife = 4
+const kJiejiEdgeBloodLife = 2
+const kJiejiEdgeBloodLifeBlood = 3
+const kJiejiEdgeBloodGongfaRate = 0.35
+const kJiejiEdgeBloodMoney = 40
+
+function _jiejiEdgeSeasonId() {
+  if (game.jieji != null && game.jieji.seasonId != null) {
+    return game.jieji.seasonId
+  }
+  return null
+}
+
+function _jiejiEdgeCurrentDay() {
+  if (game.timestamp == null) return null
+  if (Constants.ticksPerDay == null) return null
+  if (Constants.ticksPerDay <= 0) return null
+  return game.timestamp ~/ Constants.ticksPerDay
+}
+
+function _jiejiEdgeOnCooldown() {
+  final jieji = ensureJiejiFlags()
+  final day = _jiejiEdgeCurrentDay()
+  if (day == null) return false
+  if (jieji.lastEdgeDay == null) return false
+  if (day - jieji.lastEdgeDay < kJiejiEdgeCooldownDays) return true
+  return false
+}
+
+function _jiejiEdgeMark() {
+  final jieji = ensureJiejiFlags()
+  jieji.lastEdgeDay = _jiejiEdgeCurrentDay()
+}
+
+function _jiejiEdgeCostLife(want) {
+  var lost = want
+  final life = hero.life ?? 1
+  if (life - lost < 1) lost = life - 1
+  if (lost < 0) lost = 0
+  if (lost > 0) {
+    Player.setLife(hero.life - lost)
+  }
+  return lost
+}
+
+function _jiejiEdgeHoneHerbCost(seasonId) {
+  if (seasonId == 'mist') return kJiejiEdgeHoneHerbMist
+  return kJiejiEdgeHoneHerb
+}
+
+function _jiejiEdgeTestMoneyCost(seasonId) {
+  if (seasonId == 'thunder') return kJiejiEdgeTestMoneyThunder
+  return kJiejiEdgeTestMoney
+}
+
+function _jiejiEdgeBloodLifeCost(seasonId) {
+  if (seasonId == 'blood') return kJiejiEdgeBloodLifeBlood
+  return kJiejiEdgeBloodLife
+}
+
+function _jiejiEdgeNormalizeKind(kind) {
+  if (kind == 'hone' || kind == 'jieji_edge_hone') return 'hone'
+  if (kind == 'test' || kind == 'jieji_edge_test') return 'test'
+  if (kind == 'blood' || kind == 'jieji_edge_blood') return 'blood'
+  return null
+}
+
+function _jiejiEdgeChoices() {
+  return [
+    {
+      text: 'jieji_edge_hone',
+      description: 'hint_jieji_edge_hone',
+    },
+    {
+      text: 'jieji_edge_test',
+      description: 'hint_jieji_edge_test',
+    },
+    {
+      text: 'jieji_edge_blood',
+      description: 'hint_jieji_edge_blood',
+    },
+    'cancel',
+  ]
+}
+
+function _jiejiEdgeHerbNeed(selected, seasonId) {
+  if (selected == 'hone') return _jiejiEdgeHoneHerbCost(seasonId)
+  return 0
+}
+
+function _jiejiEdgeMoneyNeed(selected, seasonId) {
+  if (selected == 'test') return _jiejiEdgeTestMoneyCost(seasonId)
+  return 0
+}
+
+/// 破军未挂则挂 arrayFury；已挂则挂 feastFury。两者都有则只回血。不退护身阵。
+function _jiejiEdgeApplyTest() {
+  final jieji = ensureJiejiFlags()
+  if (jieji.arrayFury != true) {
+    jieji.arrayFury = true
+    return 'array'
+  }
+  if (jieji.feastFury != true) {
+    jieji.feastFury = true
+    return 'feast'
+  }
+  return null
+}
+
+/// 工坊试锋三选。free 为 true 时不扣费、不检查冷却（debug），仍弹出三选。
+/// 返回 'ok' | 'cooldown' | 'poor' | 'cancel'。
+async function edgeJiejiWeapon({ free = false }) {
+  if (hero == null) return 'cancel'
+  if (free != true && _jiejiEdgeOnCooldown()) {
+    return 'cooldown'
+  }
+
+  dialog.pushDialog('hint_edgeJiejiWeapon')
+  dialog.pushSelection('jiejiEdge', _jiejiEdgeChoices())
+  await dialog.execute()
+  final picked = dialog.checkSelected('jiejiEdge')
+  var selected = null
+  if (picked == null || picked == 'cancel') {
+    if (free == true && picked == null) {
+      selected = 'hone'
+    } else {
+      return 'cancel'
+    }
+  } else {
+    selected = _jiejiEdgeNormalizeKind(picked)
+  }
+  if (selected == null) return 'cancel'
+
+  final seasonId = _jiejiEdgeSeasonId()
+  if (free != true) {
+    final herbNeed = _jiejiEdgeHerbNeed(selected, seasonId)
+    final moneyNeed = _jiejiEdgeMoneyNeed(selected, seasonId)
+    final herbHave = hero.materials['herb'] ?? 0
+    final moneyHave = hero.materials['money'] ?? 0
+    if (herbHave < herbNeed || moneyHave < moneyNeed) {
+      return 'poor'
+    }
+  }
+
+  if (free != true) {
+    final herbNeed = _jiejiEdgeHerbNeed(selected, seasonId)
+    final moneyNeed = _jiejiEdgeMoneyNeed(selected, seasonId)
+    if (herbNeed > 0) {
+      Player.exhaust('herb', herbNeed)
+    }
+    if (moneyNeed > 0) {
+      Player.exhaust('money', moneyNeed)
+    }
+    if (selected == 'blood') {
+      _jiejiEdgeCostLife(_jiejiEdgeBloodLifeCost(seasonId))
+    }
+    _jiejiEdgeMark()
+  }
+
+  if (selected == 'test') {
+    final test = _jiejiEdgeApplyTest()
+    if (test == 'array') {
+      dialog.pushDialog('hint_edgeJiejiWeapon_test_array')
+    } else if (test == 'feast') {
+      dialog.pushDialog('hint_edgeJiejiWeapon_test_feast')
+    } else {
+      Player.restoreLife(kJiejiEdgeTestLife)
+      dialog.pushDialog('hint_edgeJiejiWeapon_test_life')
+    }
+    await dialog.execute()
+  } else if (selected == 'blood') {
+    final dropped = await tryDropGongfaShard(rate: kJiejiEdgeBloodGongfaRate)
+    if (dropped != true) {
+      await Player.collect('money', kJiejiEdgeBloodMoney, incurIncident: false)
+      dialog.pushDialog('hint_edgeJiejiWeapon_blood_money')
+      await dialog.execute()
+    } else {
+      dialog.pushDialog('hint_edgeJiejiWeapon_blood')
+      await dialog.execute()
+    }
+  } else {
+    Player.restoreLife(kJiejiEdgeHoneLife)
+    dialog.pushDialog('hint_edgeJiejiWeapon_hone')
+    await dialog.execute()
+  }
+
+  Game.updateUI()
+  return 'ok'
+}

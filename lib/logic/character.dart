@@ -2804,6 +2804,28 @@ Future<void> _heroCraftJiejiWeapon(dynamic location) async {
   }
 }
 
+Future<void> _heroEdgeJiejiWeapon(dynamic location) async {
+  final isRented = await GameLogic.checkRented(location);
+  if (!isRented) return;
+
+  final result = await engine.hetu.invoke('edgeJiejiWeapon');
+  if (result == 'cooldown') {
+    dialog.pushDialog(
+      'hint_edgeJiejiWeapon_cooldown',
+      npcId: location['npcId'],
+    );
+    await dialog.execute();
+    return;
+  }
+  if (result == 'poor') {
+    dialog.pushDialog(
+      'hint_edgeJiejiWeapon_notEnough',
+      npcId: location['npcId'],
+    );
+    await dialog.execute();
+    return;
+  }
+}
 
 Future<void> _heroShowKarmaCodex(dynamic location) async {
   final text = engine.hetu.invoke('formatKarmaCodex');
@@ -2873,6 +2895,10 @@ Future<void> _onInteractSite(
     siteOptions.add({
       'text': 'craftJiejiWeapon',
       'description': 'hint_craftJiejiWeapon_description',
+    });
+    siteOptions.add({
+      'text': 'edgeJiejiWeapon',
+      'description': 'hint_edgeJiejiWeapon_description',
     });
   } else if (siteKind == 'cardforge') {
     siteOptions.add({
@@ -3083,6 +3109,8 @@ Future<void> _onInteractSite(
       );
     case 'craftJiejiWeapon':
       await _heroCraftJiejiWeapon(location);
+    case 'edgeJiejiWeapon':
+      await _heroEdgeJiejiWeapon(location);
     case 'forgeCardBlank':
       await _heroForgeCardBlank(location);
     case 'forgeCardBlankAdvanced':
