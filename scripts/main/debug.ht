@@ -191,4 +191,18 @@ namespace debug {
     }
     return card
   }
+
+  /// 沙盒立刻打指定季的渡劫 Boss（含前兆三选）。会走 trySettleJieji。
+  async function forceTribulation(seasonId) {
+    var id = seasonId
+    if (id != 'thunder' && id != 'mist' && id != 'blood') {
+      id = 'thunder'
+    }
+    if (hero == null) return 'done'
+    final jieji = ensureJiejiFlags()
+    jieji.fighting = false
+    jieji.pendingEndedSeasonId = id
+    jieji.lastSettledSeasonId = null
+    return await trySettleJieji(endedSeasonId: id)
+  }
 }
