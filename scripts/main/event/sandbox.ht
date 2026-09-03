@@ -47,6 +47,18 @@ async function onNewGame() {
     // final homeLocation = game.locations[hero.homeLocationId]
     // World.markTile(homeLocation.worldPosition.left, homeLocation.worldPosition.top)
   }
+
+  await briefJiejiNewGame()
+}
+
+async function briefJiejiNewGame() {
+  game.flags.jieji ??= {}
+  if (game.flags.jieji.briefed == true) return
+  game.flags.jieji.briefed = true
+  dialog.pushDialog('hint_jieji_brief_1')
+  dialog.pushDialog('hint_jieji_brief_2')
+  dialog.pushDialog('hint_jieji_brief_3')
+  await dialog.execute()
 }
 
 function jiejiWildEncounterMul() {
