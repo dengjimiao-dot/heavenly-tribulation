@@ -2218,6 +2218,21 @@ Future<void> _heroCultivateJiejiArray(dynamic location) async {
   }
 }
 
+Future<void> _heroInsightJiejiStele(dynamic location) async {
+  final isRented = await GameLogic.checkRented(location);
+  if (!isRented) return;
+
+  final result = await engine.hetu.invoke('insightJiejiStele');
+  if (result == 'cooldown') {
+    dialog.pushDialog(
+      'hint_insightJiejiStele_cooldown',
+      npcId: location['npcId'],
+    );
+    await dialog.execute();
+    return;
+  }
+}
+
 
 Future<void> _heroShowKarmaCodex(dynamic location) async {
   final text = engine.hetu.invoke('formatKarmaCodex');
@@ -2335,6 +2350,11 @@ Future<void> _onInteractSite(
       'text': 'washJiejiCurse',
       'description': 'hint_washJiejiCurse_description',
     });
+  } else if (siteKind == 'daostele') {
+    siteOptions.add({
+      'text': 'insightJiejiStele',
+      'description': 'hint_insightJiejiStele_description',
+    });
   } else if (siteKind == 'exparray') {
     siteOptions.add({
       'text': 'cultivateJiejiArray',
@@ -2398,6 +2418,8 @@ Future<void> _onInteractSite(
       await _heroWashJiejiCurse(location);
     case 'cultivateJiejiArray':
       await _heroCultivateJiejiArray(location);
+    case 'insightJiejiStele':
+      await _heroInsightJiejiStele(location);
     case 'brewPotionCard':
       await _heroBrewPotionCard(location);
     case 'scribeJiejiTalisman':

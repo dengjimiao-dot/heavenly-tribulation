@@ -29,6 +29,7 @@ const _kJiejiKeepSiteKinds = {
   'enchantshop': true,
   'justicehall': true,
   'exparray': true,
+  'daostele': true,
 }
 
 function ensureJiejiFlags() {
@@ -178,6 +179,7 @@ function migrateSect() {
   ensureHomeEnchantShop()
   ensureHomeJusticeHall()
   ensureHomeExpArray()
+  ensureHomeDaoStele()
   engine.info('季末迁徙：拆除据点 ${removed}，城市规模 ${city.development}')
   return removed
 }

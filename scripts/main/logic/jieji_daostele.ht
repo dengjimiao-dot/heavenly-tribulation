@@ -1,0 +1,177 @@
+/// 问道碑「悟道」：拓印牌胚 / 观文残页 / 静坐回命。不替换原打坐冥想。
+const kJiejiInsightLifeCost = 1
+const kJiejiInsightCooldownDays = 2
+const kJiejiInsightReadMoney = 60
+const kJiejiInsightMistHerb = 1
+const kJiejiInsightSitLife = 6
+const kJiejiInsightSitLifeBlood = 8
+const kJiejiInsightThunderSparkRate = 0.3
+
+function _jiejiInsightSeasonId() {
+  if (game.jieji != null && game.jieji.seasonId != null) {
+    return game.jieji.seasonId
+  }
+  return 'thunder'
+}
+
+function ensureHomeDaoStele() {
+  if (hero == null) return
+  final city = getHeroHomeCity()
+  if (city == null) return
+  final siteIds = city.siteIds ?? []
+  for (final siteId in siteIds) {
+    final site = game.locations[siteId]
+    if (site != null && site.kind == kLocationKindDaoStele) return
+  }
+  Location(
+    category: 'site',
+    kind: kLocationKindDaoStele,
+    atCity: city,
+    sectId: city.sectId,
+    development: 0,
+    npcId: Constants.siteKindToNpcId[kLocationKindDaoStele],
+  )
+}
+
+function _jiejiInsightCurrentDay() {
+  if (game.timestamp == null) return null
+  if (Constants.ticksPerDay == null) return null
+  if (Constants.ticksPerDay <= 0) return null
+  return game.timestamp ~/ Constants.ticksPerDay
+}
+
+function _jiejiInsightOnCooldown() {
+  final jieji = ensureJiejiFlags()
+  final day = _jiejiInsightCurrentDay()
+  if (day == null) return false
+  if (jieji.lastInsightDay == null) return false
+  if (day - jieji.lastInsightDay < kJiejiInsightCooldownDays) return true
+  return false
+}
+
+function _jiejiInsightMark() {
+  final jieji = ensureJiejiFlags()
+  jieji.lastInsightDay = _jiejiInsightCurrentDay()
+}
+
+function _jiejiInsightCostLife(want) {
+  var lost = want
+  final life = hero.life ?? 1
+  if (life - lost < 1) lost = life - 1
+  if (lost < 0) lost = 0
+  if (lost > 0) {
+    Player.setLife(hero.life - lost)
+  }
+  return lost
+}
+
+function _jiejiInsightChoices() {
+  return [
+    {
+      text: 'jieji_insight_rub',
+      description: 'hint_jieji_insight_rub',
+    },
+    {
+      text: 'jieji_insight_read',
+      description: 'hint_jieji_insight_read',
+    },
+    {
+      text: 'jieji_insight_sit',
+      description: 'hint_jieji_insight_sit',
+    },
+  ]
+}
+
+async function _jiejiInsightRub(seasonId) {
+  final card = BattleCard(genre: null, rank: 0)
+  card.isCardBlank = true
+  Player.acquireCard(card)
+  if (seasonId == 'thunder' && random.nextDouble() < kJiejiInsightThunderSparkRate) {
+    jiejiTryForgeSpark(card, 1.0)
+  }
+  var name = card.name
+  if (name == null || name == '') {
+    name = '牌胚'
+  }
+  dialog.pushDialog('hint_insightJiejiStele_done_rub', interpolations: [name])
+  await dialog.execute()
+  final sparkName = card.jiejiSparkName
+  if (sparkName != null && sparkName != '') {
+    dialog.pushDialog('hint_jieji_forge_spark', interpolations: [sparkName])
+    await dialog.execute()
+  }
+}
+
+async function _jiejiInsightRead(seasonId) {
+  final dropped = await tryDropGongfaShard()
+  final mist = seasonId == 'mist'
+  if (dropped != true) {
+    await Player.collect('money', kJiejiInsightReadMoney, incurIncident: false)
+    if (mist) {
+      await Player.collect('herb', kJiejiInsightMistHerb, incurIncident: false)
+      dialog.pushDialog('hint_insightJiejiStele_done_read_mist', interpolations: [
+        kJiejiInsightReadMoney,
+        kJiejiInsightMistHerb,
+      ])
+    } else {
+      dialog.pushDialog('hint_insightJiejiStele_done_read', interpolations: [kJiejiInsightReadMoney])
+    }
+    await dialog.execute()
+    return
+  }
+  if (mist) {
+    await Player.collect('herb', kJiejiInsightMistHerb, incurIncident: false)
+    dialog.pushDialog('hint_insightJiejiStele_done_read_herb', interpolations: [kJiejiInsightMistHerb])
+    await dialog.execute()
+  }
+}
+
+async function _jiejiInsightSit(seasonId) {
+  var heal = kJiejiInsightSitLife
+  if (seasonId == 'blood') {
+    heal = kJiejiInsightSitLifeBlood
+  }
+  final healed = Player.restoreLife(heal)
+  dialog.pushDialog('hint_insightJiejiStele_done_sit', interpolations: [healed])
+  await dialog.execute()
+}
+
+/// 问道碑悟道三选。free 为 true 时不扣生机、不检查冷却（debug）。
+/// 返回 'ok' | 'cooldown' | 'cancel'。
+async function insightJiejiStele({ free = false }) {
+  if (hero == null) return 'cancel'
+  if (free != true && _jiejiInsightOnCooldown()) {
+    return 'cooldown'
+  }
+
+  final seasonId = _jiejiInsightSeasonId()
+  dialog.pushDialog('hint_insightJiejiStele')
+  dialog.pushSelection('jiejiInsight', _jiejiInsightChoices())
+  await dialog.execute()
+  var selected = dialog.checkSelected('jiejiInsight')
+  if (selected == null || selected == 'cancel') {
+    if (free == true && selected == null) {
+      selected = 'jieji_insight_rub'
+    } else {
+      return 'cancel'
+    }
+  }
+  if (selected != 'jieji_insight_rub' && selected != 'jieji_insight_read' && selected != 'jieji_insight_sit') {
+    return 'cancel'
+  }
+
+  if (free != true) {
+    _jiejiInsightCostLife(kJiejiInsightLifeCost)
+    _jiejiInsightMark()
+  }
+
+  if (selected == 'jieji_insight_rub') {
+    await _jiejiInsightRub(seasonId)
+  } else if (selected == 'jieji_insight_read') {
+    await _jiejiInsightRead(seasonId)
+  } else {
+    await _jiejiInsightSit(seasonId)
+  }
+  Game.updateUI()
+  return 'ok'
+}
