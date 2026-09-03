@@ -182,6 +182,17 @@ class LocationScene extends Scene with HasCursorState {
         };
         siteList.tryAddCard(siteCard);
         world.add(siteCard);
+        final brewCard = GameData.createSiteCard(
+          spriteId: 'location/card/alchemylab.png',
+          title: engine.locale('brewPotionCard'),
+          onPreviewed: _onPreviewSiteCard,
+          onUnpreviewed: _onUnpreviewSiteCard,
+        );
+        brewCard.onTap = (button, position) async {
+          await GameLogic.heroBrewPotionCard(location);
+        };
+        siteList.tryAddCard(brewCard);
+        world.add(brewCard);
       case 'runelab':
         final siteCard = GameData.createSiteCard(
           spriteId: 'location/card/runelab.png',

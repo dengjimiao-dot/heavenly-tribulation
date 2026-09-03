@@ -178,4 +178,17 @@ namespace debug {
       await playJiejiDungeonEncampOmen()
     }
   }
+
+  async function forceBrewPotion(kind) {
+    final card = brewJiejiPotionCard(kind, free: true)
+    if (card == null) {
+      dialog.pushDialog("hint_jieji_alchemy_failed")
+      await dialog.execute()
+      return null
+    }
+    if (card.jiejiAlchemyKarma == true) {
+      await grantKarmaCard("alchemy")
+    }
+    return card
+  }
 }

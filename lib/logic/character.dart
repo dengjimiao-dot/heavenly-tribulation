@@ -1665,6 +1665,113 @@ Future<void> _heroForgeCardBlank(dynamic location, {bool advanced = false}) asyn
 }
 
 
+
+Future<void> _heroBrewPotionCard(dynamic location) async {
+  final isRented = await GameLogic.checkRented(location);
+  if (!isRented) return;
+
+  if ((GameData.hero['life'] as num? ?? 0) <= 1) {
+    dialog.pushDialog(
+      'hint_notEnoughStaminaToWork',
+      npcId: location['npcId'],
+    );
+    await dialog.execute();
+    return;
+  }
+
+  var herbCost = 6;
+  var moneyCost = 120;
+  try {
+    final costs = engine.hetu.invoke('jiejiPotionCosts');
+    if (costs != null) {
+      herbCost = (costs['herb'] as num?)?.toInt() ?? herbCost;
+      moneyCost = (costs['money'] as num?)?.toInt() ?? moneyCost;
+    }
+  } catch (_) {}
+
+  final herb = (GameData.hero['materials']['herb'] as num?)?.toInt() ?? 0;
+  final money = (GameData.hero['materials']['money'] as num?)?.toInt() ?? 0;
+  if (herb < herbCost || money < moneyCost) {
+    dialog.pushDialog(
+      'hint_jieji_alchemy_notEnough',
+      npcId: location['npcId'],
+      interpolations: [herbCost, moneyCost],
+    );
+    await dialog.execute();
+    return;
+  }
+
+  dialog.pushSelection('jieji_potion_kind', [
+    'jieji_potion_heal',
+    'jieji_potion_strike',
+    'jieji_potion_ward',
+    'cancel',
+  ]);
+  await dialog.execute();
+  final selected = dialog.checkSelected('jieji_potion_kind');
+  if (selected == null || selected == 'cancel') return;
+
+  var kind = 'heal';
+  if (selected == 'jieji_potion_strike') kind = 'strike';
+  if (selected == 'jieji_potion_ward') kind = 'ward';
+
+  final card = engine.hetu.invoke(
+    'brewJiejiPotionCard',
+    positionalArgs: [kind],
+  );
+  if (card == null) {
+    dialog.pushDialog(
+      'hint_jieji_alchemy_notEnough',
+      npcId: location['npcId'],
+      interpolations: [herbCost, moneyCost],
+    );
+    await dialog.execute();
+    return;
+  }
+
+  GameLogic.updateGame(ticks: kTicksPerDay);
+  var cardName = engine.locale('card_jieji_potion_$kind');
+  try {
+    final n = card['name'];
+    if (n != null) cardName = '$n';
+  } catch (_) {}
+  dialog.pushDialog(
+    'hint_jieji_alchemy_done',
+    npcId: location['npcId'],
+    interpolations: [cardName],
+  );
+  await dialog.execute();
+  String? sparkName;
+  try {
+    final s = card['jiejiSparkName'];
+    if (s != null) sparkName = '$s';
+  } catch (_) {}
+  if (sparkName != null && sparkName.isNotEmpty) {
+    dialog.pushDialog(
+      'hint_jieji_forge_spark',
+      npcId: location['npcId'],
+      interpolations: [sparkName],
+    );
+    await dialog.execute();
+  }
+  var extraCopy = false;
+  try {
+    extraCopy = card['jiejiExtraCopy'] == true;
+  } catch (_) {}
+  if (extraCopy) {
+    dialog.pushDialog(
+      'hint_jieji_alchemy_mist_copy',
+      npcId: location['npcId'],
+    );
+    await dialog.execute();
+  }
+  try {
+    if (card['jiejiAlchemyKarma'] == true) {
+      await engine.hetu.invoke('grantKarmaCard', positionalArgs: ['alchemy']);
+    }
+  } catch (_) {}
+}
+
 Future<void> _heroShowKarmaCodex(dynamic location) async {
   final text = engine.hetu.invoke('formatKarmaCodex');
   dialog.pushDialog(
@@ -1715,6 +1822,11 @@ Future<void> _onInteractSite(
     siteOptions.add({
       'text': 'karmaCodex',
       'description': 'hint_karmaCodex_description',
+    });
+  } else if (siteKind == 'alchemylab') {
+    siteOptions.add({
+      'text': 'brewPotionCard',
+      'description': 'hint_brewPotionCard_description',
     });
   } else if (siteKind == 'divinationaltar') {
     siteOptions.add('divination');
@@ -1772,6 +1884,8 @@ Future<void> _onInteractSite(
       await _heroForgeCardBlank(location, advanced: true);
     case 'karmaCodex':
       await _heroShowKarmaCodex(location);
+    case 'brewPotionCard':
+      await _heroBrewPotionCard(location);
     case 'about_dungeon':
       dialog.pushDialog(
         'hint_dungeonEntrance',

@@ -4,6 +4,7 @@ const kJiejiCurseDamageTakenPer = 0.05
 const _kJiejiKeepSiteKinds = {
   'home': true,
   'cardforge': true,
+  'alchemylab': true,
   'cityhall': true,
   'headquarters': true,
   'residence': true,
@@ -146,6 +147,7 @@ function migrateSect() {
   }
   city.maxSiteCount = calculateMaxSiteCountForCity(city)
   ensureHomeCardforge()
+  ensureHomeAlchemylab()
   engine.info('季末迁徙：拆除据点 ${removed}，城市规模 ${city.development}')
   return removed
 }
@@ -297,6 +299,7 @@ async function trySettleJieji({ endedSeasonId }) {
     return 'done'
   }
 
+  stripJiejiPotionCards()
   final converted = convertKarmaToCurses()
   final seasonName = engine.locale('jieji_season_${endedId}')
   dialog.pushDialog('hint_jieji_season_end', interpolations: [

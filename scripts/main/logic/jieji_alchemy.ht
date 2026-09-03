@@ -1,0 +1,178 @@
+/// 丹房炼季限药剂战牌。不改原丹炉物品炼金。
+const kJiejiAlchemyHerbCost = 6
+const kJiejiAlchemyMoneyCost = 120
+const kJiejiAlchemyLifeCost = 1
+const kJiejiAlchemyHerbCostBlood = 4
+const kJiejiAlchemyMoneyCostThunder = 80
+const kJiejiAlchemySparkRate = 0.20
+const kJiejiAlchemyMistCopyRate = 0.50
+const kJiejiAlchemyBloodKarmaRate = 0.15
+
+function _jiejiAlchemySeasonId() {
+  if (game.jieji != null && game.jieji.seasonId != null) {
+    return game.jieji.seasonId
+  }
+  return null
+}
+
+function jiejiPotionCosts() {
+  var herb = kJiejiAlchemyHerbCost
+  var money = kJiejiAlchemyMoneyCost
+  final seasonId = _jiejiAlchemySeasonId()
+  if (seasonId == 'blood') {
+    herb = kJiejiAlchemyHerbCostBlood
+  } else if (seasonId == 'thunder') {
+    money = kJiejiAlchemyMoneyCostThunder
+  }
+  return {
+    herb: herb,
+    money: money,
+  }
+}
+
+function ensureHomeAlchemylab() {
+  if (hero == null) return
+  var city = game.locations[hero.homeLocationId]
+  if (city == null && hero.homeSiteId != null) {
+    final home = game.locations[hero.homeSiteId]
+    if (home != null) city = game.locations[home.atCityId]
+  }
+  if (city == null) return
+  final siteIds = city.siteIds ?? []
+  for (final siteId in siteIds) {
+    final site = game.locations[siteId]
+    if (site != null && site.kind == kLocationKindAlchemyLab) return
+  }
+  Location(
+    category: 'site',
+    kind: kLocationKindAlchemyLab,
+    atCity: city,
+    sectId: city.sectId,
+    development: 0,
+    npcId: Constants.siteKindToNpcId[kLocationKindAlchemyLab],
+  )
+}
+
+function _jiejiAlchemyNormalizeKind(kind) {
+  if (kind == 'heal' || kind == 'strike' || kind == 'ward') return kind
+  return random.nextIterable(['heal', 'strike', 'ward'])
+}
+
+function _jiejiAlchemyAffixId(kind) {
+  if (kind == 'heal') {
+    if (game.battleCards['heal'] != null) return 'heal'
+  } else if (kind == 'strike') {
+    if (game.battleCards['punch_attack'] != null) return 'punch_attack'
+  } else if (kind == 'ward') {
+    if (game.battleCards['punch_defend'] != null) return 'punch_defend'
+    if (game.battleCards['heal'] != null) return 'heal'
+  }
+  if (game.battleCards['punch_attack'] != null) return 'punch_attack'
+  return null
+}
+
+function _addJiejiPotionToCurrentDeck(card) {
+  if (hero == null || card == null) return
+  if (hero.battleDeckIndex == null) return
+  if (hero.battleDeckIndex < 0) return
+  if (hero.battleDecks == null || hero.battleDecks.isEmpty) return
+  final deck = hero.battleDecks[hero.battleDeckIndex]
+  if (deck == null || deck.cards == null) return
+  if (!deck.cards.contains(card.id)) {
+    deck.cards.add(card.id)
+  }
+}
+
+function _createJiejiPotionCard(kind) {
+  final affixId = _jiejiAlchemyAffixId(kind)
+  if (affixId == null) return null
+  final card = BattleCard(
+    affixId: affixId,
+    rank: 0,
+    isIdentified: true,
+  )
+  card.isSeasonLimited = true
+  card.jiejiPotion = true
+  card.jiejiPotionKind = kind
+  var nameKey = 'card_jieji_potion_heal'
+  if (kind == 'strike') nameKey = 'card_jieji_potion_strike'
+  if (kind == 'ward') nameKey = 'card_jieji_potion_ward'
+  card.name = engine.locale(nameKey)
+  return card
+}
+
+function _finishJiejiPotionCard(card) {
+  if (card == null) return
+  Player.acquireCard(card)
+  _addJiejiPotionToCurrentDeck(card)
+}
+
+/// 炼一枚季限药剂战牌。kind: heal | strike | ward；null 则随机。
+/// free 为 true 时不扣药材/铜钱/生机（debug）。
+function brewJiejiPotionCard(kind, { free = false }) {
+  if (hero == null) return null
+  final potionKind = _jiejiAlchemyNormalizeKind(kind)
+  if (free != true) {
+    final costs = jiejiPotionCosts()
+    final herbHave = hero.materials['herb'] ?? 0
+    final moneyHave = hero.materials['money'] ?? 0
+    if (herbHave < costs.herb || moneyHave < costs.money) {
+      return null
+    }
+    Player.exhaust('herb', costs.herb)
+    Player.exhaust('money', costs.money)
+    var nextLife = hero.life - kJiejiAlchemyLifeCost
+    if (nextLife < 1) nextLife = 1
+    Player.setLife(nextLife)
+  }
+
+  final card = _createJiejiPotionCard(potionKind)
+  if (card == null) return null
+  jiejiTryForgeSpark(card, kJiejiAlchemySparkRate)
+  _finishJiejiPotionCard(card)
+
+  final seasonId = _jiejiAlchemySeasonId()
+  if (seasonId == 'mist' && random.nextDouble() < kJiejiAlchemyMistCopyRate) {
+    final extra = _createJiejiPotionCard(potionKind)
+    if (extra != null) {
+      jiejiTryForgeSpark(extra, kJiejiAlchemySparkRate)
+      _finishJiejiPotionCard(extra)
+      card.jiejiExtraCopy = true
+    }
+  }
+  if (free != true && seasonId == 'blood' && random.nextDouble() < kJiejiAlchemyBloodKarmaRate) {
+    card.jiejiAlchemyKarma = true
+  }
+  return card
+}
+
+/// 季末清掉未用完的药剂牌，避免滚雪球。秘境出门仍会清季限牌。
+function stripJiejiPotionCards() {
+  if (hero == null) return 0
+  if (hero.cardLibrary == null) return 0
+  let ids = []
+  for (final card in hero.cardLibrary.values) {
+    if (card == null) continue
+    if (card.jiejiPotion == true) {
+      ids.add(card.id)
+    }
+  }
+  var removed = 0
+  for (final id in ids) {
+    if (hero.cardLibrary.containsKey(id)) {
+      hero.cardLibrary.remove(id)
+      removed += 1
+    }
+    if (hero.battleDecks != null) {
+      for (final deck in hero.battleDecks) {
+        if (deck.cards != null) {
+          deck.cards.remove(id)
+        }
+      }
+    }
+  }
+  if (removed > 0) {
+    engine.info('季末药剂牌消散：${removed}')
+  }
+  return removed
+}
