@@ -155,8 +155,16 @@ namespace debug {
       await playJiejiMerchantEvent()
     } else if (kind == 'mist') {
       await playJiejiMistRoadEvent(terrain)
+    } else if (kind == 'mist2') {
+      await playJiejiMistRoadEvent2(terrain)
     } else if (kind == 'blood') {
       await playJiejiBloodRoadEvent(terrain)
+    } else if (kind == 'blood2') {
+      await playJiejiBloodRoadEvent2(terrain)
+    } else if (kind == 'thunder2') {
+      await playJiejiThunderRoadEvent2(terrain)
+    } else if (kind == 'stele') {
+      await playJiejiSteleRoadEvent()
     } else {
       await playJiejiThunderRoadEvent(terrain)
     }
