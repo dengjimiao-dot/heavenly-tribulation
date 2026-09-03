@@ -1,0 +1,202 @@
+/// 灌灵池「淬灵」：温养 / 激淬 / 血淬。不替换点化。
+const kJiejiQuenchCooldownDays = 1
+const kJiejiQuenchWarmHerb = 2
+const kJiejiQuenchWarmHerbMist = 1
+const kJiejiQuenchWarmLife = 6
+const kJiejiQuenchWarmGongfaRate = 0.25
+const kJiejiQuenchFuryMoney = 40
+const kJiejiQuenchFuryMoneyThunder = 20
+const kJiejiQuenchFuryLife = 5
+const kJiejiQuenchBloodLife = 2
+const kJiejiQuenchBloodLifeBlood = 3
+const kJiejiQuenchBloodGongfaRate = 0.4
+const kJiejiQuenchBloodHeal = 8
+
+function _jiejiQuenchSeasonId() {
+  if (game.jieji != null && game.jieji.seasonId != null) {
+    return game.jieji.seasonId
+  }
+  return null
+}
+
+function _jiejiQuenchCurrentDay() {
+  if (game.timestamp == null) return null
+  if (Constants.ticksPerDay == null) return null
+  if (Constants.ticksPerDay <= 0) return null
+  return game.timestamp ~/ Constants.ticksPerDay
+}
+
+function _jiejiQuenchOnCooldown() {
+  final jieji = ensureJiejiFlags()
+  final day = _jiejiQuenchCurrentDay()
+  if (day == null) return false
+  if (jieji.lastQuenchDay == null) return false
+  if (day - jieji.lastQuenchDay < kJiejiQuenchCooldownDays) return true
+  return false
+}
+
+function _jiejiQuenchMark() {
+  final jieji = ensureJiejiFlags()
+  jieji.lastQuenchDay = _jiejiQuenchCurrentDay()
+}
+
+function _jiejiQuenchCostLife(want) {
+  var lost = want
+  final life = hero.life ?? 1
+  if (life - lost < 1) lost = life - 1
+  if (lost < 0) lost = 0
+  if (lost > 0) {
+    Player.setLife(hero.life - lost)
+  }
+  return lost
+}
+
+function _jiejiQuenchWarmHerbCost(seasonId) {
+  if (seasonId == 'mist') return kJiejiQuenchWarmHerbMist
+  return kJiejiQuenchWarmHerb
+}
+
+function _jiejiQuenchFuryMoneyCost(seasonId) {
+  if (seasonId == 'thunder') return kJiejiQuenchFuryMoneyThunder
+  return kJiejiQuenchFuryMoney
+}
+
+function _jiejiQuenchBloodLifeCost(seasonId) {
+  if (seasonId == 'blood') return kJiejiQuenchBloodLifeBlood
+  return kJiejiQuenchBloodLife
+}
+
+function _jiejiQuenchNormalizeKind(kind) {
+  if (kind == 'warm' || kind == 'jieji_quench_warm') return 'warm'
+  if (kind == 'fury' || kind == 'jieji_quench_fury') return 'fury'
+  if (kind == 'blood' || kind == 'jieji_quench_blood') return 'blood'
+  return null
+}
+
+function _jiejiQuenchChoices() {
+  return [
+    {
+      text: 'jieji_quench_warm',
+      description: 'hint_jieji_quench_warm',
+    },
+    {
+      text: 'jieji_quench_fury',
+      description: 'hint_jieji_quench_fury',
+    },
+    {
+      text: 'jieji_quench_blood',
+      description: 'hint_jieji_quench_blood',
+    },
+    'cancel',
+  ]
+}
+
+function _jiejiQuenchHerbNeed(selected, seasonId) {
+  if (selected == 'warm') return _jiejiQuenchWarmHerbCost(seasonId)
+  return 0
+}
+
+function _jiejiQuenchMoneyNeed(selected, seasonId) {
+  if (selected == 'fury') return _jiejiQuenchFuryMoneyCost(seasonId)
+  return 0
+}
+
+/// 破军未挂则挂 arrayFury；已挂则挂 feastFury。两者都有则只回血。
+function _jiejiQuenchApplyFury() {
+  final jieji = ensureJiejiFlags()
+  if (jieji.arrayFury != true) {
+    jieji.arrayFury = true
+    return 'array'
+  }
+  if (jieji.feastFury != true) {
+    jieji.feastFury = true
+    return 'feast'
+  }
+  return null
+}
+
+/// 灌灵池淬灵三选。free 为 true 时不扣费、不检查冷却（debug），仍弹出三选。
+/// 返回 'ok' | 'cooldown' | 'poor' | 'cancel'。
+async function quenchJiejiSpirit({ free = false }) {
+  if (hero == null) return 'cancel'
+  if (free != true && _jiejiQuenchOnCooldown()) {
+    return 'cooldown'
+  }
+
+  dialog.pushDialog('hint_quenchJiejiSpirit')
+  dialog.pushSelection('jiejiQuench', _jiejiQuenchChoices())
+  await dialog.execute()
+  final picked = dialog.checkSelected('jiejiQuench')
+  var selected = null
+  if (picked == null || picked == 'cancel') {
+    if (free == true && picked == null) {
+      selected = 'warm'
+    } else {
+      return 'cancel'
+    }
+  } else {
+    selected = _jiejiQuenchNormalizeKind(picked)
+  }
+  if (selected == null) return 'cancel'
+
+  final seasonId = _jiejiQuenchSeasonId()
+  if (free != true) {
+    final herbNeed = _jiejiQuenchHerbNeed(selected, seasonId)
+    final moneyNeed = _jiejiQuenchMoneyNeed(selected, seasonId)
+    final herbHave = hero.materials['herb'] ?? 0
+    final moneyHave = hero.materials['money'] ?? 0
+    if (herbHave < herbNeed || moneyHave < moneyNeed) {
+      return 'poor'
+    }
+  }
+
+  if (free != true) {
+    final herbNeed = _jiejiQuenchHerbNeed(selected, seasonId)
+    final moneyNeed = _jiejiQuenchMoneyNeed(selected, seasonId)
+    if (herbNeed > 0) {
+      Player.exhaust('herb', herbNeed)
+    }
+    if (moneyNeed > 0) {
+      Player.exhaust('money', moneyNeed)
+    }
+    if (selected == 'blood') {
+      _jiejiQuenchCostLife(_jiejiQuenchBloodLifeCost(seasonId))
+    }
+    _jiejiQuenchMark()
+  }
+
+  if (selected == 'fury') {
+    final fury = _jiejiQuenchApplyFury()
+    if (fury == 'array') {
+      dialog.pushDialog('hint_quenchJiejiSpirit_fury_array')
+    } else if (fury == 'feast') {
+      dialog.pushDialog('hint_quenchJiejiSpirit_fury_feast')
+    } else {
+      Player.restoreLife(kJiejiQuenchFuryLife)
+      dialog.pushDialog('hint_quenchJiejiSpirit_fury')
+    }
+    await dialog.execute()
+  } else if (selected == 'blood') {
+    final jieji = ensureJiejiFlags()
+    if (jieji.arrayWard != true) {
+      jieji.arrayWard = true
+      dialog.pushDialog('hint_quenchJiejiSpirit_blood')
+      await dialog.execute()
+    } else {
+      final dropped = await tryDropGongfaShard(rate: kJiejiQuenchBloodGongfaRate)
+      if (dropped != true) {
+        Player.restoreLife(kJiejiQuenchBloodHeal)
+        dialog.pushDialog('hint_quenchJiejiSpirit_blood_heal')
+        await dialog.execute()
+      }
+    }
+  } else {
+    Player.restoreLife(kJiejiQuenchWarmLife)
+    dialog.pushDialog('hint_quenchJiejiSpirit_warm')
+    await dialog.execute()
+    await tryDropGongfaShard(rate: kJiejiQuenchWarmGongfaRate)
+  }
+
+  Game.updateUI()
+  return 'ok'
+}

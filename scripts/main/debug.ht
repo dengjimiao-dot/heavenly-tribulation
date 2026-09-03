@@ -380,6 +380,11 @@ namespace debug {
     return result
   }
 
+  /// 忽略冷却与花费，仍弹出灌灵池淬灵三选。
+  async function forceQuench() {
+    return await quenchJiejiSpirit(free: true)
+  }
+
   async function forceWashCurse() {
     final result = await washJiejiCurse(free: true)
     if (result == 'empty') {

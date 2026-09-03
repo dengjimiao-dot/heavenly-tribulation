@@ -2408,6 +2408,30 @@ Future<void> _heroSparkJiejiEnchant(dynamic location) async {
 }
 
 
+Future<void> _heroQuenchJiejiSpirit(dynamic location) async {
+  final isRented = await GameLogic.checkRented(location);
+  if (!isRented) return;
+
+  final result = await engine.hetu.invoke('quenchJiejiSpirit');
+  if (result == 'cooldown') {
+    dialog.pushDialog(
+      'hint_quenchJiejiSpirit_cooldown',
+      npcId: location['npcId'],
+    );
+    await dialog.execute();
+    return;
+  }
+  if (result == 'poor') {
+    dialog.pushDialog(
+      'hint_quenchJiejiSpirit_notEnough',
+      npcId: location['npcId'],
+    );
+    await dialog.execute();
+    return;
+  }
+}
+
+
 Future<void> _heroWashJiejiCurse(dynamic location) async {
   final result = await engine.hetu.invoke('washJiejiCurse');
   if (result == 'cooldown') {
@@ -2708,6 +2732,10 @@ Future<void> _onInteractSite(
       'text': 'sparkJiejiEnchant',
       'description': 'hint_sparkJiejiEnchant_description',
     });
+    siteOptions.add({
+      'text': 'quenchJiejiSpirit',
+      'description': 'hint_quenchJiejiSpirit_description',
+    });
   } else if (siteKind == 'alchemylab') {
     siteOptions.add({
       'text': 'brewPotionCard',
@@ -2875,6 +2903,8 @@ Future<void> _onInteractSite(
       await _heroShowKarmaCodex(location);
     case 'sparkJiejiEnchant':
       await _heroSparkJiejiEnchant(location);
+    case 'quenchJiejiSpirit':
+      await _heroQuenchJiejiSpirit(location);
     case 'washJiejiCurse':
       await _heroWashJiejiCurse(location);
     case 'cultivateJiejiArray':
