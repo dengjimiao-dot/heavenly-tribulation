@@ -1,0 +1,169 @@
+/// 观星台问劫：当季三选星象。不替换原占卜。
+const kJiejiStarOmenHerbCost = 2
+const kJiejiStarOmenMoneyCost = 50
+const kJiejiStarOmenMoneyCostThunder = 40
+const kJiejiStarOmenHerbCostMist = 1
+const kJiejiStarOmenLifeCostBlood = 1
+const kJiejiStarOmenWardMoney = 60
+const kJiejiStarOmenWealthHerb = 3
+const kJiejiStarOmenWealthMoney = 80
+const kJiejiStarOmenKarmaRate = 0.20
+const kJiejiStarOmenGongfaRate = 0.40
+const kJiejiStarOmenTribulationMoney = 40
+
+function _jiejiOmenSeasonId() {
+  if (game.jieji != null && game.jieji.seasonId != null) {
+    return game.jieji.seasonId
+  }
+  return null
+}
+
+function jiejiStarOmenCosts() {
+  var herb = kJiejiStarOmenHerbCost
+  var money = kJiejiStarOmenMoneyCost
+  var life = 0
+  final seasonId = _jiejiOmenSeasonId()
+  if (seasonId == 'thunder') {
+    money = kJiejiStarOmenMoneyCostThunder
+  } else if (seasonId == 'mist') {
+    herb = kJiejiStarOmenHerbCostMist
+  } else if (seasonId == 'blood') {
+    life = kJiejiStarOmenLifeCostBlood
+  }
+  return {
+    herb: herb,
+    money: money,
+    life: life,
+  }
+}
+
+function ensureHomeDivinationAltar() {
+  if (hero == null) return
+  final city = getHeroHomeCity()
+  if (city == null) return
+  final siteIds = city.siteIds ?? []
+  for (final siteId in siteIds) {
+    final site = game.locations[siteId]
+    if (site != null && site.kind == kLocationKindDivinationAltar) return
+  }
+  Location(
+    category: 'site',
+    kind: kLocationKindDivinationAltar,
+    atCity: city,
+    sectId: city.sectId,
+    development: 0,
+    npcId: Constants.siteKindToNpcId[kLocationKindDivinationAltar],
+  )
+}
+
+function consumeJiejiStarWardWild() {
+  final jieji = ensureJiejiFlags()
+  if (jieji.starWardWild != true) return false
+  jieji.starWardWild = false
+  return true
+}
+
+async function applyJiejiStarWardOnWildWin(result) {
+  if (result != true) return
+  await Player.collect('money', kJiejiStarOmenWardMoney, incurIncident: false)
+  dialog.pushDialog('hint_consultJiejiStars_ward_win')
+  await dialog.execute()
+  Game.updateUI()
+}
+
+function _jiejiOmenChoices() {
+  return [
+    {
+      text: 'jieji_omen_ward',
+      description: 'hint_jieji_omen_ward',
+    },
+    {
+      text: 'jieji_omen_wealth',
+      description: 'hint_jieji_omen_wealth',
+    },
+    {
+      text: 'jieji_omen_tribulation',
+      description: 'hint_jieji_omen_tribulation',
+    },
+    'cancel',
+  ]
+}
+
+/// 观星台问劫三选。free 为 true 时不扣费、不检查冷却（debug）。
+/// 返回 'ok' | 'cooldown' | 'poor' | 'cancel'。
+async function consultJiejiStars({ free = false }) {
+  if (hero == null) return 'cancel'
+  final seasonId = _jiejiOmenSeasonId()
+  final jieji = ensureJiejiFlags()
+  if (free != true && seasonId != null && jieji.lastStarOmenSeasonId == seasonId) {
+    return 'cooldown'
+  }
+
+  if (free != true) {
+    final costs = jiejiStarOmenCosts()
+    final herbHave = hero.materials['herb'] ?? 0
+    final moneyHave = hero.materials['money'] ?? 0
+    if (herbHave < costs.herb || moneyHave < costs.money) {
+      return 'poor'
+    }
+  }
+
+  dialog.pushDialog('hint_consultJiejiStars')
+  dialog.pushSelection('jiejiStarOmen', _jiejiOmenChoices())
+  await dialog.execute()
+  var selected = dialog.checkSelected('jiejiStarOmen')
+  if (selected == null || selected == 'cancel') {
+    if (free == true && selected == null) {
+      selected = 'jieji_omen_ward'
+    } else {
+      return 'cancel'
+    }
+  }
+  if (selected != 'jieji_omen_ward' && selected != 'jieji_omen_wealth' && selected != 'jieji_omen_tribulation') {
+    return 'cancel'
+  }
+
+  if (free != true) {
+    final costs = jiejiStarOmenCosts()
+    Player.exhaust('herb', costs.herb)
+    Player.exhaust('money', costs.money)
+    if (costs.life > 0) {
+      var nextLife = (hero.life ?? 1) - costs.life
+      if (nextLife < 1) nextLife = 1
+      Player.setLife(nextLife)
+    }
+    if (seasonId != null) {
+      jieji.lastStarOmenSeasonId = seasonId
+    }
+  }
+
+  if (selected == 'jieji_omen_ward') {
+    jieji.starWardWild = true
+    dialog.pushDialog('hint_consultJiejiStars_ward')
+    await dialog.execute()
+  } else if (selected == 'jieji_omen_wealth') {
+    if (random.nextDouble() < 0.50) {
+      await Player.collect('herb', kJiejiStarOmenWealthHerb, incurIncident: false)
+      dialog.pushDialog('hint_consultJiejiStars_wealth_herb')
+      await dialog.execute()
+    } else {
+      await Player.collect('money', kJiejiStarOmenWealthMoney, incurIncident: false)
+      dialog.pushDialog('hint_consultJiejiStars_wealth_money')
+      await dialog.execute()
+    }
+  } else {
+    if (random.nextDouble() < kJiejiStarOmenKarmaRate) {
+      await grantKarmaCard('shrine')
+    } else {
+      final dropped = await tryDropGongfaShard(rate: kJiejiStarOmenGongfaRate)
+      if (!dropped) {
+        await Player.collect('money', kJiejiStarOmenTribulationMoney, incurIncident: false)
+        dialog.pushDialog('hint_consultJiejiStars_tribulation_money')
+        await dialog.execute()
+      }
+    }
+  }
+
+  Game.updateUI()
+  return 'ok'
+}

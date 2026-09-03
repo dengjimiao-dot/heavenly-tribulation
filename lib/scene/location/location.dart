@@ -317,6 +317,18 @@ class LocationScene extends Scene with HasCursorState {
         };
         siteList.tryAddCard(siteCard);
         world.add(siteCard);
+      case 'divinationaltar':
+        final omenCard = GameData.createSiteCard(
+          spriteId: 'location/card/divinationaltar.png',
+          title: engine.locale('consultJiejiStars'),
+          onPreviewed: _onPreviewSiteCard,
+          onUnpreviewed: _onUnpreviewSiteCard,
+        );
+        omenCard.onTap = (button, position) async {
+          await GameLogic.heroConsultJiejiStars(location);
+        };
+        siteList.tryAddCard(omenCard);
+        world.add(omenCard);
       default:
         for (final siteId in location['siteIds']) {
           final siteData = GameData.getLocation(siteId);
@@ -449,6 +461,9 @@ class LocationScene extends Scene with HasCursorState {
       } catch (_) {}
       try {
         engine.hetu.invoke('ensureHomeLibrary');
+      } catch (_) {}
+      try {
+        engine.hetu.invoke('ensureHomeDivinationAltar');
       } catch (_) {}
     }
     _loadSites();

@@ -5,6 +5,7 @@ async function onNewGame() {
   ensureHomeResidence()
   ensureHomeLibrary()
   ensureHomeFarmland()
+  ensureHomeDivinationAltar()
   final xitong = game.npcs['xitong']
 
   // final itemsInfo = [
@@ -79,6 +80,16 @@ async function tryWildEncounterOnMove(terrain) {
   let er = rate * (1 - hero.rank * kEnemyEncounterRateRankFactor) * jiejiWildEncounterMul()
   if (er < 0) er = 0
   if (random.nextDouble() > er) return false
+  if (consumeJiejiStarWardWild()) {
+    await encounterEnemy(
+      rank: hero.rank,
+      terrainKind: terrain.kind,
+      battleEndCallback: async function (result, roundCount) {
+        await applyJiejiStarWardOnWildWin(result)
+      },
+    )
+    return true
+  }
   if (await tryJiejiWildEliteOnWildEncounter(terrain)) return true
   await encounterEnemy(rank: hero.rank, terrainKind: terrain.kind)
   return true

@@ -1912,6 +1912,39 @@ Future<void> _heroRiteJiejiHarvest(dynamic location) async {
   }
 }
 
+Future<void> _heroConsultJiejiStars(dynamic location) async {
+  final isRented = await GameLogic.checkRented(location);
+  if (!isRented) return;
+
+  final result = await engine.hetu.invoke('consultJiejiStars');
+  if (result == 'cooldown') {
+    dialog.pushDialog(
+      'hint_consultJiejiStars_cooldown',
+      npcId: location['npcId'],
+    );
+    await dialog.execute();
+    return;
+  }
+  if (result == 'poor') {
+    var herbCost = 2;
+    var moneyCost = 50;
+    try {
+      final costs = engine.hetu.invoke('jiejiStarOmenCosts');
+      if (costs != null) {
+        herbCost = (costs['herb'] as num?)?.toInt() ?? herbCost;
+        moneyCost = (costs['money'] as num?)?.toInt() ?? moneyCost;
+      }
+    } catch (_) {}
+    dialog.pushDialog(
+      'hint_consultJiejiStars_notEnough',
+      npcId: location['npcId'],
+      interpolations: [herbCost, moneyCost],
+    );
+    await dialog.execute();
+    return;
+  }
+}
+
 Future<void> _heroRestJiejiSite(dynamic location) async {
   final kind = location['kind'] == 'hotel' ? 'hotel' : 'home';
   final result = await engine.hetu.invoke(
@@ -2021,6 +2054,10 @@ Future<void> _onInteractSite(
     });
   } else if (siteKind == 'divinationaltar') {
     siteOptions.add('divination');
+    siteOptions.add({
+      'text': 'consultJiejiStars',
+      'description': 'hint_consultJiejiStars_description',
+    });
   } else if (siteKind == 'arena') {
     siteOptions.add('about_arena');
   } else if (siteKind == 'dungeon') {
@@ -2099,6 +2136,8 @@ Future<void> _onInteractSite(
       await dialog.execute();
     case 'divination':
       await _heroDivination(location);
+    case 'consultJiejiStars':
+      await _heroConsultJiejiStars(location);
   }
 }
 

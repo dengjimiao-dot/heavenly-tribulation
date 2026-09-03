@@ -193,6 +193,16 @@ function _jiejiWildEliteNameKey(seasonId) {
 /// 具名劫纹精英：境界 +1（封顶），胜后额外铜钱 + 功法残页骰。不管冷却/几率。
 async function startJiejiWildEliteEncounter(terrain) {
   if (hero == null) return
+  if (consumeJiejiStarWardWild()) {
+    await encounterEnemy(
+      rank: hero.rank,
+      terrainKind: _jiejiRoadTerrainKind(terrain),
+      battleEndCallback: async function (result, roundCount) {
+        await applyJiejiStarWardOnWildWin(result)
+      },
+    )
+    return
+  }
   final jieji = _jiejiRoadEnsureFlags()
   jieji.lastWildEliteMove = jieji.worldMoves ?? 0
 
@@ -230,6 +240,8 @@ async function startJiejiWildEliteEncounter(terrain) {
 async function tryJiejiWildEliteOnWildEncounter(terrain) {
   if (hero == null) return false
   if (_jiejiRoadTutorialLocked()) return false
+  final jiejiPending = _jiejiRoadEnsureFlags()
+  if (jiejiPending.starWardWild == true) return false
   final seasonId = _jiejiRoadSeasonId()
   final chance = _jiejiWildEliteChance(seasonId)
   if (chance <= 0) return false
