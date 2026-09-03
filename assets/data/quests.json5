@@ -99,5 +99,21 @@
     contribution: 11,
     rank: 0,
   },
+  hidden_ore_vein: {
+    id: "hidden_ore_vein",
+    policy: null,
+    isBounty: false,
+    isHidden: true,
+    contribution: 12,
+    rank: 0,
+  },
+  hidden_ferry_lantern: {
+    id: "hidden_ferry_lantern",
+    policy: null,
+    isBounty: false,
+    isHidden: true,
+    contribution: 10,
+    rank: 0,
+  },
 
 }
