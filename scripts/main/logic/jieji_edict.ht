@@ -1,0 +1,223 @@
+/// 山门「劫令」：发饷 / 徵材 / 血誓。不替换入门、请辞、外交、捐献。
+const kJiejiEdictPayrollWorkerCost = 1
+const kJiejiEdictPayrollMoneyCost = 80
+const kJiejiEdictPayrollWorkerMoney = 120
+const kJiejiEdictPayrollMoneyHerb = 2
+const kJiejiEdictPayrollExtraMoney = 40
+const kJiejiEdictPayrollBloodLife = 1
+const kJiejiEdictLevyMoney = 80
+const kJiejiEdictLevyMoneyMist = 50
+const kJiejiEdictLevyHerb = 3
+const kJiejiEdictLevyTimber = 1
+const kJiejiEdictLevyStone = 1
+const kJiejiEdictLevyMoneyExtra = 40
+const kJiejiEdictOathLife = 2
+const kJiejiEdictOathLifeBlood = 3
+const kJiejiEdictOathWorker = 1
+const kJiejiEdictOathMoney = 100
+const kJiejiEdictOathGongfaRate = 0.25
+
+function _jiejiEdictSeasonId() {
+  if (game.jieji != null && game.jieji.seasonId != null) {
+    return game.jieji.seasonId
+  }
+  return null
+}
+
+function _jiejiEdictAlreadyClaimed() {
+  final jieji = ensureJiejiFlags()
+  final seasonId = _jiejiEdictSeasonId()
+  if (seasonId == null) return false
+  if (jieji.lastEdictSeasonId == null) return false
+  return jieji.lastEdictSeasonId == seasonId
+}
+
+function _jiejiEdictMark() {
+  final jieji = ensureJiejiFlags()
+  final seasonId = _jiejiEdictSeasonId()
+  if (seasonId == null) return
+  jieji.lastEdictSeasonId = seasonId
+}
+
+function _jiejiEdictHasMaterial(id) {
+  if (Constants.materialKinds == null) return false
+  return Constants.materialKinds.contains(id)
+}
+
+function _jiejiEdictNormalizeKind(kind) {
+  if (kind == 'payroll' || kind == 'jieji_edict_payroll') return 'payroll'
+  if (kind == 'levy' || kind == 'jieji_edict_levy') return 'levy'
+  if (kind == 'oath' || kind == 'jieji_edict_oath') return 'oath'
+  return null
+}
+
+function _jiejiEdictChoices() {
+  return [
+    {
+      text: 'jieji_edict_payroll',
+      description: 'hint_jieji_edict_payroll',
+    },
+    {
+      text: 'jieji_edict_levy',
+      description: 'hint_jieji_edict_levy',
+    },
+    {
+      text: 'jieji_edict_oath',
+      description: 'hint_jieji_edict_oath',
+    },
+    'cancel',
+  ]
+}
+
+function _jiejiEdictCostLife(want) {
+  var lost = want
+  final life = hero.life ?? 1
+  if (life - lost < 1) lost = life - 1
+  if (lost < 0) lost = 0
+  if (lost > 0) {
+    Player.setLife(hero.life - lost)
+  }
+  return lost
+}
+
+function _jiejiEdictLevyMoneyCost(seasonId) {
+  if (seasonId == 'mist') return kJiejiEdictLevyMoneyMist
+  return kJiejiEdictLevyMoney
+}
+
+function _jiejiEdictPayrollUsesWorker() {
+  final workerHave = hero.materials['worker'] ?? 0
+  return workerHave >= kJiejiEdictPayrollWorkerCost
+}
+
+async function _jiejiEdictDoPayroll(free, seasonId) {
+  final useWorker = _jiejiEdictPayrollUsesWorker()
+  if (free != true) {
+    if (useWorker) {
+      Player.exhaust('worker', kJiejiEdictPayrollWorkerCost)
+    } else {
+      Player.exhaust('money', kJiejiEdictPayrollMoneyCost)
+    }
+  }
+
+  if (useWorker) {
+    var money = kJiejiEdictPayrollWorkerMoney
+    var bloodPath = false
+    if (seasonId == 'thunder') {
+      money = money + kJiejiEdictPayrollExtraMoney
+    } else if (seasonId == 'blood') {
+      bloodPath = true
+      if (free != true) {
+        _jiejiEdictCostLife(kJiejiEdictPayrollBloodLife)
+      }
+      money = money + kJiejiEdictPayrollExtraMoney
+    }
+    await Player.collect('money', money, incurIncident: false)
+    if (bloodPath) {
+      dialog.pushDialog('hint_issueJiejiEdict_payroll_worker_blood', interpolations: [money])
+    } else {
+      dialog.pushDialog('hint_issueJiejiEdict_payroll_worker', interpolations: [money])
+    }
+  } else {
+    await Player.collect('herb', kJiejiEdictPayrollMoneyHerb, incurIncident: false)
+    dialog.pushDialog('hint_issueJiejiEdict_payroll_money', interpolations: [kJiejiEdictPayrollMoneyHerb])
+  }
+  await dialog.execute()
+  Game.updateUI()
+  return 'ok'
+}
+
+async function _jiejiEdictDoLevy(free, seasonId) {
+  if (free != true) {
+    Player.exhaust('money', _jiejiEdictLevyMoneyCost(seasonId))
+  }
+  await Player.collect('herb', kJiejiEdictLevyHerb, incurIncident: false)
+  if (_jiejiEdictHasMaterial('timber')) {
+    await Player.collect('timber', kJiejiEdictLevyTimber, incurIncident: false)
+    dialog.pushDialog('hint_issueJiejiEdict_levy_timber', interpolations: [kJiejiEdictLevyHerb, kJiejiEdictLevyTimber])
+  } else if (_jiejiEdictHasMaterial('stone')) {
+    await Player.collect('stone', kJiejiEdictLevyStone, incurIncident: false)
+    dialog.pushDialog('hint_issueJiejiEdict_levy_stone', interpolations: [kJiejiEdictLevyHerb, kJiejiEdictLevyStone])
+  } else {
+    await Player.collect('money', kJiejiEdictLevyMoneyExtra, incurIncident: false)
+    dialog.pushDialog('hint_issueJiejiEdict_levy_money', interpolations: [kJiejiEdictLevyHerb, kJiejiEdictLevyMoneyExtra])
+  }
+  await dialog.execute()
+  Game.updateUI()
+  return 'ok'
+}
+
+async function _jiejiEdictDoOath(free, seasonId) {
+  var lifeCost = kJiejiEdictOathLife
+  if (seasonId == 'blood') {
+    lifeCost = kJiejiEdictOathLifeBlood
+  }
+  if (free != true) {
+    _jiejiEdictCostLife(lifeCost)
+  }
+  if (_jiejiEdictHasMaterial('worker')) {
+    await Player.collect('worker', kJiejiEdictOathWorker, incurIncident: false)
+    dialog.pushDialog('hint_issueJiejiEdict_oath_worker')
+  } else {
+    await Player.collect('money', kJiejiEdictOathMoney, incurIncident: false)
+    dialog.pushDialog('hint_issueJiejiEdict_oath_money', interpolations: [kJiejiEdictOathMoney])
+  }
+  await dialog.execute()
+  await tryDropGongfaShard(rate: kJiejiEdictOathGongfaRate)
+  Game.updateUI()
+  return 'ok'
+}
+
+/// 山门劫令三选。free 为 true 时不检查一季一次、不耗物资生机（debug），仍弹出三选。
+/// 返回 'ok' | 'claimed' | 'poor' | 'cancel'。
+async function issueJiejiEdict({ free = false }) {
+  if (hero == null) return 'cancel'
+  if (free != true && _jiejiEdictAlreadyClaimed()) {
+    return 'claimed'
+  }
+
+  dialog.pushDialog('hint_issueJiejiEdict')
+  dialog.pushSelection('jiejiEdict', _jiejiEdictChoices())
+  await dialog.execute()
+  final picked = dialog.checkSelected('jiejiEdict')
+  var selected = null
+  if (picked == null || picked == 'cancel') {
+    if (free == true && picked == null) {
+      selected = 'payroll'
+    } else {
+      return 'cancel'
+    }
+  } else {
+    selected = _jiejiEdictNormalizeKind(picked)
+  }
+  if (selected == null) return 'cancel'
+
+  final seasonId = _jiejiEdictSeasonId()
+  if (free != true) {
+    if (selected == 'payroll') {
+      if (!_jiejiEdictPayrollUsesWorker()) {
+        final moneyHave = hero.materials['money'] ?? 0
+        if (moneyHave < kJiejiEdictPayrollMoneyCost) {
+          return 'poor'
+        }
+      }
+    } else if (selected == 'levy') {
+      final moneyHave = hero.materials['money'] ?? 0
+      if (moneyHave < _jiejiEdictLevyMoneyCost(seasonId)) {
+        return 'poor'
+      }
+    }
+    _jiejiEdictMark()
+  }
+
+  if (selected == 'payroll') {
+    return await _jiejiEdictDoPayroll(free, seasonId)
+  }
+  if (selected == 'levy') {
+    return await _jiejiEdictDoLevy(free, seasonId)
+  }
+  if (selected == 'oath') {
+    return await _jiejiEdictDoOath(free, seasonId)
+  }
+  return 'cancel'
+}

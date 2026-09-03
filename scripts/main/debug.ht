@@ -373,6 +373,11 @@ namespace debug {
     return await claimJiejiBounty(free: true, kind: k)
   }
 
+  /// 忽略一季一次与花费，仍弹出劫令三选。
+  async function forceEdict() {
+    return await issueJiejiEdict(free: true)
+  }
+
   /// 忽略费用与冷却，直接挂上迷障（下次野遇糊弄过去）。
   function forceVeil() {
     if (hero == null) return

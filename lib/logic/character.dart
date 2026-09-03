@@ -949,7 +949,11 @@ Future<void> _onInteractHeadquarters(
   dynamic heroId,
 ) async {
   final siteKind = location['kind'];
-  final siteOptions = ['sectInformation'];
+  final siteOptions = <dynamic>['sectInformation'];
+  siteOptions.add({
+    'text': 'issueJiejiEdict',
+    'description': 'hint_issueJiejiEdict_description',
+  });
   final heroSectId = GameData.hero['sectId'];
   if (heroSectId == null) {
     siteOptions.add('enroll');
@@ -1024,6 +1028,8 @@ Future<void> _onInteractHeadquarters(
           'isAdmin': isAdmin,
         },
       );
+    case 'issueJiejiEdict':
+      await _heroIssueJiejiEdict(location);
     case 'enroll':
       await _heroEnrollSect(sect, npc);
     case 'resign':
@@ -2128,6 +2134,26 @@ Future<void> _heroDuelJiejiArena(dynamic location) async {
   }
 }
 
+
+Future<void> _heroIssueJiejiEdict(dynamic location) async {
+  final result = await engine.hetu.invoke('issueJiejiEdict');
+  if (result == 'claimed') {
+    dialog.pushDialog(
+      'hint_issueJiejiEdict_claimed',
+      npcId: location['npcId'],
+    );
+    await dialog.execute();
+    return;
+  }
+  if (result == 'poor') {
+    dialog.pushDialog(
+      'hint_issueJiejiEdict_notEnough',
+      npcId: location['npcId'],
+    );
+    await dialog.execute();
+    return;
+  }
+}
 
 Future<void> _heroClaimJiejiBounty(dynamic location) async {
   final result = await engine.hetu.invoke('claimJiejiBounty');
