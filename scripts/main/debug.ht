@@ -425,6 +425,11 @@ namespace debug {
     return await cultivateJiejiArray(free: true)
   }
 
+  /// 忽略冷却与花费，仍弹出聚灵阵加持三选。
+  async function forceBless() {
+    return await blessJiejiArray(free: true)
+  }
+
   async function forceInsight() {
     return await insightJiejiStele(free: true)
   }

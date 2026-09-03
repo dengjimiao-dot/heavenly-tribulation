@@ -267,6 +267,17 @@ class LocationScene extends Scene with HasCursorState {
         };
         siteList.tryAddCard(siteCard);
         world.add(siteCard);
+        final blessCard = GameData.createSiteCard(
+          spriteId: 'location/card/exparray.png',
+          title: engine.locale('blessJiejiArray'),
+          onPreviewed: _onPreviewSiteCard,
+          onUnpreviewed: _onUnpreviewSiteCard,
+        );
+        blessCard.onTap = (button, position) async {
+          await GameLogic.heroBlessJiejiArray(location);
+        };
+        siteList.tryAddCard(blessCard);
+        world.add(blessCard);
       case 'library':
         final siteCard = GameData.createSiteCard(
           spriteId: 'location/card/carddesk.png',

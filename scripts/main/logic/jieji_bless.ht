@@ -1,0 +1,201 @@
+/// 聚灵阵「加持」：温养 / 破军 / 血阵。不替换吐纳。
+const kJiejiBlessCooldownDays = 1
+const kJiejiBlessWarmHerb = 1
+const kJiejiBlessWarmHerbMist = 0
+const kJiejiBlessWarmLife = 6
+const kJiejiBlessWarmGongfaRate = 0.2
+const kJiejiBlessFuryMoney = 40
+const kJiejiBlessFuryMoneyThunder = 20
+const kJiejiBlessFuryLife = 4
+const kJiejiBlessBloodLife = 2
+const kJiejiBlessBloodLifeBlood = 3
+const kJiejiBlessBloodGongfaRate = 0.35
+const kJiejiBlessBloodMoney = 40
+
+function _jiejiBlessSeasonId() {
+  if (game.jieji != null && game.jieji.seasonId != null) {
+    return game.jieji.seasonId
+  }
+  return null
+}
+
+function _jiejiBlessCurrentDay() {
+  if (game.timestamp == null) return null
+  if (Constants.ticksPerDay == null) return null
+  if (Constants.ticksPerDay <= 0) return null
+  return game.timestamp ~/ Constants.ticksPerDay
+}
+
+function _jiejiBlessOnCooldown() {
+  final jieji = ensureJiejiFlags()
+  final day = _jiejiBlessCurrentDay()
+  if (day == null) return false
+  if (jieji.lastBlessDay == null) return false
+  if (day - jieji.lastBlessDay < kJiejiBlessCooldownDays) return true
+  return false
+}
+
+function _jiejiBlessMark() {
+  final jieji = ensureJiejiFlags()
+  jieji.lastBlessDay = _jiejiBlessCurrentDay()
+}
+
+function _jiejiBlessCostLife(want) {
+  var lost = want
+  final life = hero.life ?? 1
+  if (life - lost < 1) lost = life - 1
+  if (lost < 0) lost = 0
+  if (lost > 0) {
+    Player.setLife(hero.life - lost)
+  }
+  return lost
+}
+
+function _jiejiBlessWarmHerbCost(seasonId) {
+  if (seasonId == 'mist') return kJiejiBlessWarmHerbMist
+  return kJiejiBlessWarmHerb
+}
+
+function _jiejiBlessFuryMoneyCost(seasonId) {
+  if (seasonId == 'thunder') return kJiejiBlessFuryMoneyThunder
+  return kJiejiBlessFuryMoney
+}
+
+function _jiejiBlessBloodLifeCost(seasonId) {
+  if (seasonId == 'blood') return kJiejiBlessBloodLifeBlood
+  return kJiejiBlessBloodLife
+}
+
+function _jiejiBlessNormalizeKind(kind) {
+  if (kind == 'warm' || kind == 'jieji_bless_warm') return 'warm'
+  if (kind == 'fury' || kind == 'jieji_bless_fury') return 'fury'
+  if (kind == 'blood' || kind == 'jieji_bless_blood') return 'blood'
+  return null
+}
+
+function _jiejiBlessChoices() {
+  return [
+    {
+      text: 'jieji_bless_warm',
+      description: 'hint_jieji_bless_warm',
+    },
+    {
+      text: 'jieji_bless_fury',
+      description: 'hint_jieji_bless_fury',
+    },
+    {
+      text: 'jieji_bless_blood',
+      description: 'hint_jieji_bless_blood',
+    },
+    'cancel',
+  ]
+}
+
+function _jiejiBlessHerbNeed(selected, seasonId) {
+  if (selected == 'warm') return _jiejiBlessWarmHerbCost(seasonId)
+  return 0
+}
+
+function _jiejiBlessMoneyNeed(selected, seasonId) {
+  if (selected == 'fury') return _jiejiBlessFuryMoneyCost(seasonId)
+  return 0
+}
+
+/// 破军未挂则挂 arrayFury；已挂则挂 feastFury。两者都有则只回血。
+function _jiejiBlessApplyFury() {
+  final jieji = ensureJiejiFlags()
+  if (jieji.arrayFury != true) {
+    jieji.arrayFury = true
+    return 'array'
+  }
+  if (jieji.feastFury != true) {
+    jieji.feastFury = true
+    return 'feast'
+  }
+  return null
+}
+
+/// 聚灵阵加持三选。free 为 true 时不扣费、不检查冷却（debug），仍弹出三选。
+/// 返回 'ok' | 'cooldown' | 'poor' | 'cancel'。
+async function blessJiejiArray({ free = false }) {
+  if (hero == null) return 'cancel'
+  if (free != true && _jiejiBlessOnCooldown()) {
+    return 'cooldown'
+  }
+
+  dialog.pushDialog('hint_blessJiejiArray')
+  dialog.pushSelection('jiejiBless', _jiejiBlessChoices())
+  await dialog.execute()
+  final picked = dialog.checkSelected('jiejiBless')
+  var selected = null
+  if (picked == null || picked == 'cancel') {
+    if (free == true && picked == null) {
+      selected = 'warm'
+    } else {
+      return 'cancel'
+    }
+  } else {
+    selected = _jiejiBlessNormalizeKind(picked)
+  }
+  if (selected == null) return 'cancel'
+
+  final seasonId = _jiejiBlessSeasonId()
+  if (free != true) {
+    final herbNeed = _jiejiBlessHerbNeed(selected, seasonId)
+    final moneyNeed = _jiejiBlessMoneyNeed(selected, seasonId)
+    final herbHave = hero.materials['herb'] ?? 0
+    final moneyHave = hero.materials['money'] ?? 0
+    if (herbHave < herbNeed || moneyHave < moneyNeed) {
+      return 'poor'
+    }
+  }
+
+  if (free != true) {
+    final herbNeed = _jiejiBlessHerbNeed(selected, seasonId)
+    final moneyNeed = _jiejiBlessMoneyNeed(selected, seasonId)
+    if (herbNeed > 0) {
+      Player.exhaust('herb', herbNeed)
+    }
+    if (moneyNeed > 0) {
+      Player.exhaust('money', moneyNeed)
+    }
+    if (selected == 'blood') {
+      _jiejiBlessCostLife(_jiejiBlessBloodLifeCost(seasonId))
+    }
+    _jiejiBlessMark()
+  }
+
+  if (selected == 'fury') {
+    final fury = _jiejiBlessApplyFury()
+    if (fury == 'array') {
+      dialog.pushDialog('hint_blessJiejiArray_fury_array')
+    } else if (fury == 'feast') {
+      dialog.pushDialog('hint_blessJiejiArray_fury_feast')
+    } else {
+      Player.restoreLife(kJiejiBlessFuryLife)
+      dialog.pushDialog('hint_blessJiejiArray_fury')
+    }
+    await dialog.execute()
+  } else if (selected == 'blood') {
+    final jieji = ensureJiejiFlags()
+    if (jieji.arrayWard != true) {
+      jieji.arrayWard = true
+      dialog.pushDialog('hint_blessJiejiArray_blood')
+      await dialog.execute()
+    }
+    final dropped = await tryDropGongfaShard(rate: kJiejiBlessBloodGongfaRate)
+    if (dropped != true) {
+      await Player.collect('money', kJiejiBlessBloodMoney, incurIncident: false)
+      dialog.pushDialog('hint_blessJiejiArray_blood_money')
+      await dialog.execute()
+    }
+  } else {
+    Player.restoreLife(kJiejiBlessWarmLife)
+    dialog.pushDialog('hint_blessJiejiArray_warm')
+    await dialog.execute()
+    await tryDropGongfaShard(rate: kJiejiBlessWarmGongfaRate)
+  }
+
+  Game.updateUI()
+  return 'ok'
+}

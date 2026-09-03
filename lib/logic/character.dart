@@ -2532,6 +2532,29 @@ Future<void> _heroCultivateJiejiArray(dynamic location) async {
   }
 }
 
+Future<void> _heroBlessJiejiArray(dynamic location) async {
+  final isRented = await GameLogic.checkRented(location);
+  if (!isRented) return;
+
+  final result = await engine.hetu.invoke('blessJiejiArray');
+  if (result == 'cooldown') {
+    dialog.pushDialog(
+      'hint_blessJiejiArray_cooldown',
+      npcId: location['npcId'],
+    );
+    await dialog.execute();
+    return;
+  }
+  if (result == 'poor') {
+    dialog.pushDialog(
+      'hint_blessJiejiArray_notEnough',
+      npcId: location['npcId'],
+    );
+    await dialog.execute();
+    return;
+  }
+}
+
 Future<void> _heroInsightJiejiStele(dynamic location) async {
   final isRented = await GameLogic.checkRented(location);
   if (!isRented) return;
@@ -2894,6 +2917,10 @@ Future<void> _onInteractSite(
       'text': 'cultivateJiejiArray',
       'description': 'hint_cultivateJiejiArray_description',
     });
+    siteOptions.add({
+      'text': 'blessJiejiArray',
+      'description': 'hint_blessJiejiArray_description',
+    });
   } else if (siteKind == 'arraylab') {
     siteOptions.add({
       'text': 'layJiejiArray',
@@ -2991,6 +3018,8 @@ Future<void> _onInteractSite(
       await _heroShameJiejiCrowd(location);
     case 'cultivateJiejiArray':
       await _heroCultivateJiejiArray(location);
+    case 'blessJiejiArray':
+      await _heroBlessJiejiArray(location);
     case 'insightJiejiStele':
       await _heroInsightJiejiStele(location);
     case 'layJiejiArray':

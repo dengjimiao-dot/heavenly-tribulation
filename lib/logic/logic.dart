@@ -1677,6 +1677,9 @@ final class GameLogic {
         location: location,
       );
 
+  static Future<void> heroBlessJiejiArray(dynamic location) =>
+      _heroBlessJiejiArray(location);
+
   static void onInteractCardLibraryDesk({
     dynamic sect,
     dynamic location,
