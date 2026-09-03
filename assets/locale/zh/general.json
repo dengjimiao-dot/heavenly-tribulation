@@ -1128,6 +1128,23 @@
   "hint_swapJiejiGoods_cooldown": "今日牌价已换过一次。过一日再来。",
   "hint_swapJiejiGoods_notEnough": "柜上这桩换货，你手头不够。",
 
+  "layJiejiArray": "布劫阵",
+  "jiejiArray": "布劫阵",
+  "hint_layJiejiArray_description": "耗 2 药材、60 铜钱与 1 点生机（至少留 1），布下一座阵。一日一次。同时只能有一座。护身：下一场承伤 -8%。破军：下一场出手 +8%。迷雾：立刻回 4 命。",
+  "hint_layJiejiArray": "阵盘空着。耗 2 药材、60 铜钱与 1 点生机（至少留 1），布一座阵。一日一次。新阵会盖掉旧阵。",
+  "jieji_array_ward": "护身阵",
+  "jieji_array_fury": "破军阵",
+  "jieji_array_mist": "迷雾阵",
+  "hint_jieji_array_ward": "护身阵：下一场战斗你承受的伤害 -8%。",
+  "hint_jieji_array_fury": "破军阵：下一场战斗你打出的伤害 +8%。",
+  "hint_jieji_array_mist": "迷雾阵：立刻回复 4 点生机。",
+  "hint_layJiejiArray_done_ward": "护身阵落下。下一场你更抗打。",
+  "hint_layJiejiArray_done_fury": "破军阵落下。下一场你出手更狠。",
+  "hint_layJiejiArray_done_mist": "迷雾散开。生机回了 {0} 点。",
+  "hint_layJiejiArray_cooldown": "阵盘余温未散。过一日再来布阵。",
+  "hint_layJiejiArray_notEnough": "布阵要 2 药材和 60 铜钱，并耗 1 点生机。",
+
+
   "recruitJiejiAid": "招外援",
   "hint_recruitJiejiAid_description": "耗费人力与铜钱，从外门寮招来三张当季外援战牌。雷月铜钱更省，血月以人力作血税，雾月或可多一张。季末或出秘境后消散。",
   "jieji_aid_genre": "选择外援流派",

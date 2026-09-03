@@ -31,6 +31,7 @@ const _kJiejiKeepSiteKinds = {
   'justicehall': true,
   'exparray': true,
   'daostele': true,
+  'arraylab': true,
 }
 
 function ensureJiejiFlags() {
@@ -181,6 +182,7 @@ function migrateSect() {
   ensureHomeJusticeHall()
   ensureHomeExpArray()
   ensureHomeDaoStele()
+  ensureHomeArrayLab()
   engine.info('季末迁徙：拆除据点 ${removed}，城市规模 ${city.development}')
   return removed
 }

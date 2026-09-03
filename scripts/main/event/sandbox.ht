@@ -12,6 +12,7 @@ async function onNewGame() {
   ensureHomeJusticeHall()
   ensureHomeExpArray()
   ensureHomeDaoStele()
+  ensureHomeArrayLab()
   final xitong = game.npcs['xitong']
 
   // final itemsInfo = [

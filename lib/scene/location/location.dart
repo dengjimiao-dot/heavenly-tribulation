@@ -476,6 +476,9 @@ class LocationScene extends Scene with HasCursorState {
       try {
         engine.hetu.invoke('ensureHomeDivinationAltar');
       } catch (_) {}
+      try {
+        engine.hetu.invoke('ensureHomeArrayLab');
+      } catch (_) {}
     }
     _loadSites();
   }

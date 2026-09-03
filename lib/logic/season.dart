@@ -23,6 +23,12 @@ final class SeasonLogic {
   /// 血酒：本场英雄造成伤害 +0.06。开战时从 flags.jieji.restBloodFury 锁入，打完清掉。
   static bool restBloodFuryThisFight = false;
 
+  /// 护身阵：本场英雄承伤 -0.08。开战时从 flags.jieji.arrayWard 锁入，打完清掉。
+  static bool arrayWardThisFight = false;
+
+  /// 破军阵：本场英雄造成伤害 +0.08。开战时从 flags.jieji.arrayFury 锁入，打完清掉。
+  static bool arrayFuryThisFight = false;
+
   static int get dayIndexInYear {
     // month/day are 1-based after calculateTimestamp
     return (GameLogic.month - 1) * 30 + GameLogic.day;
@@ -385,6 +391,20 @@ final class SeasonLogic {
     if (selfIsHero && holdsGongfa('gongfa_guard')) {
       damageDetails['percentageChange3'] -= 0.06;
     }
+    if (selfIsHero) {
+      if (!arrayWardThisFight) {
+        try {
+          final jieji = _jiejiFlags();
+          if (jieji != null && jieji['arrayWard'] == true) {
+            arrayWardThisFight = true;
+            jieji['arrayWard'] = false;
+          }
+        } catch (_) {}
+      }
+      if (arrayWardThisFight) {
+        damageDetails['percentageChange3'] -= 0.08;
+      }
+    }
     if (!selfIsHero) {
       if (!restBloodFuryThisFight) {
         try {
@@ -397,6 +417,18 @@ final class SeasonLogic {
       }
       if (restBloodFuryThisFight) {
         damageDetails['percentageChange3'] += 0.06;
+      }
+      if (!arrayFuryThisFight) {
+        try {
+          final jieji = _jiejiFlags();
+          if (jieji != null && jieji['arrayFury'] == true) {
+            arrayFuryThisFight = true;
+            jieji['arrayFury'] = false;
+          }
+        } catch (_) {}
+      }
+      if (arrayFuryThisFight) {
+        damageDetails['percentageChange3'] += 0.08;
       }
     }
   }
@@ -415,6 +447,39 @@ final class SeasonLogic {
 
   static void endRestBloodFuryFight() {
     restBloodFuryThisFight = false;
+  }
+
+  static void beginArrayFight() {
+    arrayWardThisFight = false;
+    arrayFuryThisFight = false;
+    try {
+      final jieji = _jiejiFlags();
+      if (jieji == null) return;
+      if (jieji['arrayWard'] == true) {
+        arrayWardThisFight = true;
+        jieji['arrayWard'] = false;
+      }
+      if (jieji['arrayFury'] == true) {
+        arrayFuryThisFight = true;
+        jieji['arrayFury'] = false;
+      }
+    } catch (_) {}
+  }
+
+  static void endArrayFight() {
+    arrayWardThisFight = false;
+    arrayFuryThisFight = false;
+  }
+
+  static bool get arrayPending {
+    if (arrayWardThisFight || arrayFuryThisFight) return true;
+    try {
+      final jieji = _jiejiFlags();
+      if (jieji == null) return false;
+      return jieji['arrayWard'] == true || jieji['arrayFury'] == true;
+    } catch (_) {
+      return false;
+    }
   }
 
   static String hudLine() {
@@ -438,6 +503,9 @@ final class SeasonLogic {
       } else if (xm == 'xianming_nurture') {
         line += ' · 养门徒';
       }
+    }
+    if (arrayPending) {
+      line += ' · 阵';
     }
     return line;
   }

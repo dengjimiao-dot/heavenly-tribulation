@@ -1,0 +1,149 @@
+/// 阵法所「布劫阵」：护身 / 破军 / 迷雾。不替换原阵法所 UI。
+const kJiejiArrayHerbCost = 2
+const kJiejiArrayMoneyCost = 60
+const kJiejiArrayLifeCost = 1
+const kJiejiArrayCooldownDays = 1
+const kJiejiArrayMistLife = 4
+
+function ensureHomeArrayLab() {
+  if (hero == null) return
+  final city = getHeroHomeCity()
+  if (city == null) return
+  final siteIds = city.siteIds ?? []
+  for (final siteId in siteIds) {
+    final site = game.locations[siteId]
+    if (site != null && site.kind == kLocationKindArrayLab) return
+  }
+  Location(
+    category: 'site',
+    kind: kLocationKindArrayLab,
+    atCity: city,
+    sectId: city.sectId,
+    development: 0,
+    npcId: Constants.siteKindToNpcId[kLocationKindArrayLab],
+  )
+}
+
+function _jiejiArrayCurrentDay() {
+  if (game.timestamp == null) return null
+  if (Constants.ticksPerDay == null) return null
+  if (Constants.ticksPerDay <= 0) return null
+  return game.timestamp ~/ Constants.ticksPerDay
+}
+
+function _jiejiArrayOnCooldown() {
+  final jieji = ensureJiejiFlags()
+  final day = _jiejiArrayCurrentDay()
+  if (day == null) return false
+  if (jieji.lastArrayDay == null) return false
+  if (day - jieji.lastArrayDay < kJiejiArrayCooldownDays) return true
+  return false
+}
+
+function _jiejiArrayMark() {
+  final jieji = ensureJiejiFlags()
+  jieji.lastArrayDay = _jiejiArrayCurrentDay()
+}
+
+function _jiejiArrayCostLife(want) {
+  var lost = want
+  final life = hero.life ?? 1
+  if (life - lost < 1) lost = life - 1
+  if (lost < 0) lost = 0
+  if (lost > 0) {
+    Player.setLife(hero.life - lost)
+  }
+  return lost
+}
+
+function _jiejiArrayNormalizeKind(kind) {
+  if (kind == 'ward' || kind == 'jieji_array_ward') return 'ward'
+  if (kind == 'fury' || kind == 'jieji_array_fury') return 'fury'
+  if (kind == 'mist' || kind == 'jieji_array_mist') return 'mist'
+  return null
+}
+
+function _jiejiArrayChoices() {
+  return [
+    {
+      text: 'jieji_array_ward',
+      description: 'hint_jieji_array_ward',
+    },
+    {
+      text: 'jieji_array_fury',
+      description: 'hint_jieji_array_fury',
+    },
+    {
+      text: 'jieji_array_mist',
+      description: 'hint_jieji_array_mist',
+    },
+  ]
+}
+
+function _jiejiArrayApply(kind) {
+  final jieji = ensureJiejiFlags()
+  jieji.arrayWard = false
+  jieji.arrayFury = false
+  if (kind == 'ward') {
+    jieji.arrayWard = true
+    return 'ward'
+  }
+  if (kind == 'fury') {
+    jieji.arrayFury = true
+    return 'fury'
+  }
+  return 'mist'
+}
+
+/// 阵法所布劫阵三选。free 为 true 时不扣费、不检查冷却（debug）。
+/// kind 传入 ward/fury/mist 时跳过选择（debug.forceArray）。
+/// 返回 'ok' | 'cooldown' | 'poor' | 'cancel'。
+async function layJiejiArray({ free = false, kind = null }) {
+  if (hero == null) return 'cancel'
+  if (free != true && _jiejiArrayOnCooldown()) {
+    return 'cooldown'
+  }
+
+  var selected = _jiejiArrayNormalizeKind(kind)
+  if (selected == null) {
+    dialog.pushDialog('hint_layJiejiArray')
+    dialog.pushSelection('jiejiArray', _jiejiArrayChoices())
+    await dialog.execute()
+    final picked = dialog.checkSelected('jiejiArray')
+    if (picked == null || picked == 'cancel') {
+      if (free == true) {
+        selected = 'ward'
+      } else {
+        return 'cancel'
+      }
+    } else {
+      selected = _jiejiArrayNormalizeKind(picked)
+    }
+  }
+  if (selected == null) return 'cancel'
+
+  if (free != true) {
+    final herbHave = hero.materials['herb'] ?? 0
+    final moneyHave = hero.materials['money'] ?? 0
+    if (herbHave < kJiejiArrayHerbCost || moneyHave < kJiejiArrayMoneyCost) {
+      return 'poor'
+    }
+    Player.exhaust('herb', kJiejiArrayHerbCost)
+    Player.exhaust('money', kJiejiArrayMoneyCost)
+    _jiejiArrayCostLife(kJiejiArrayLifeCost)
+    _jiejiArrayMark()
+  }
+
+  final applied = _jiejiArrayApply(selected)
+  if (applied == 'mist') {
+    final healed = Player.restoreLife(kJiejiArrayMistLife)
+    dialog.pushDialog('hint_layJiejiArray_done_mist', interpolations: [healed])
+  } else if (applied == 'fury') {
+    dialog.pushDialog('hint_layJiejiArray_done_fury')
+  } else {
+    dialog.pushDialog('hint_layJiejiArray_done_ward')
+  }
+  await dialog.execute()
+  Game.updateUI()
+  return 'ok'
+}
