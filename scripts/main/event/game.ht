@@ -549,6 +549,33 @@ async function onAfterEnterLocation(location) -> bool {
           }
           return true
         }
+        case 'hidden_blood_feast': {
+          if (isLate) {
+            Player.progressJournalById(journal.id, stage: 2)
+            dialog.pushDialog('quest_hidden_late_failed', interpolations: [journal.title])
+            await dialog.execute()
+          } else {
+            Player.progressJournalById(journal.id)
+            var locName = ''
+            final loc = game.locations[journal.quest.targetLocationId]
+            if (loc != null) {
+              locName = loc.name
+            }
+            dialog.pushDialog('quest_hidden_blood_feast_complete', interpolations: [
+              journal.title,
+              locName,
+            ])
+            await dialog.execute()
+            final items = await Player.loot(journal.quest.reward)
+            Game.promptItems(items)
+            Player.restoreLife(4)
+            dialog.pushDialog('hint_jieji_blood_feast_extra')
+            await dialog.execute()
+            await tryDropGongfaShard(rate: 0.25)
+            await grantJiejiHiddenQuestExtra('banquet')
+          }
+          return true
+        }
       }
     }
   }

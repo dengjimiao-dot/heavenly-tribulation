@@ -123,5 +123,13 @@
     contribution: 12,
     rank: 0,
   },
+  hidden_blood_feast: {
+    id: "hidden_blood_feast",
+    policy: null,
+    isBounty: false,
+    isHidden: true,
+    contribution: 11,
+    rank: 0,
+  },
 
 }
