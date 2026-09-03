@@ -1713,6 +1713,9 @@ final class GameLogic {
   static Future<void> heroInvokeJiejiTheurgy(dynamic location) =>
       _heroInvokeJiejiTheurgy(location);
 
+  static Future<void> heroInkJiejiTattoo(dynamic location) =>
+      _heroInkJiejiTattoo(location);
+
   static void onInteractRunelabWorkbench({dynamic location}) =>
       _onInteractRunelabWorkbench(location: location);
 

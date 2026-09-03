@@ -35,6 +35,7 @@ const _kJiejiKeepSiteKinds = {
   'illusionaltar': true,
   'psychictemple': true,
   'theurgytemple': true,
+  'tattooshop': true,
 }
 
 function ensureJiejiFlags() {
@@ -189,6 +190,7 @@ function migrateSect() {
   ensureHomeIllusionAltar()
   ensureHomePsychicTemple()
   ensureHomeTheurgyTemple()
+  ensureHomeTattooShop()
   engine.info('季末迁徙：拆除据点 ${removed}，城市规模 ${city.development}')
   return removed
 }
@@ -294,6 +296,7 @@ async function finishJiejiSeason(endedId) {
   jieji.fighting = false
   jieji.bossPrep = null
   jieji.bossWinMoney = null
+  clearJiejiTattoo()
   await tryOfferGongfaEngrave()
   await pickXianming()
   // 仅在劫季 id 已切换（Dart 写入 pendingOmenSeasonId）时弹入季天象征兆。

@@ -364,6 +364,18 @@ class LocationScene extends Scene with HasCursorState {
         };
         siteList.tryAddCard(theurgyCard);
         world.add(theurgyCard);
+      case 'tattooshop':
+        final tattooCard = GameData.createSiteCard(
+          spriteId: 'location/card/tattooshop.png',
+          title: engine.locale('inkJiejiTattoo'),
+          onPreviewed: _onPreviewSiteCard,
+          onUnpreviewed: _onUnpreviewSiteCard,
+        );
+        tattooCard.onTap = (button, position) async {
+          await GameLogic.heroInkJiejiTattoo(location);
+        };
+        siteList.tryAddCard(tattooCard);
+        world.add(tattooCard);
       default:
         for (final siteId in location['siteIds']) {
           final siteData = GameData.getLocation(siteId);
@@ -511,6 +523,9 @@ class LocationScene extends Scene with HasCursorState {
       } catch (_) {}
       try {
         engine.hetu.invoke('ensureHomeTheurgyTemple');
+      } catch (_) {}
+      try {
+        engine.hetu.invoke('ensureHomeTattooShop');
       } catch (_) {}
     }
     _loadSites();

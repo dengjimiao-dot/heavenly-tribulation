@@ -329,6 +329,14 @@ namespace debug {
     return await invokeJiejiTheurgy(free: true, kind: k)
   }
 
+  async function forceTattoo(kind) {
+    var k = kind
+    if (k != 'thunder' && k != 'mist' && k != 'blood') {
+      k = 'thunder'
+    }
+    return await inkJiejiTattoo(free: true, kind: k)
+  }
+
   /// 忽略费用与冷却，直接挂上迷障（下次野遇糊弄过去）。
   function forceVeil() {
     if (hero == null) return

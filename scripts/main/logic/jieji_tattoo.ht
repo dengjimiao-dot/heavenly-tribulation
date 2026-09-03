@@ -1,0 +1,159 @@
+/// 纹身铺「季纹」：雷纹 / 雾纹 / 血纹。当季一直生效。不替换原纹身 UI。
+const kJiejiTattooHerbCost = 4
+const kJiejiTattooMoneyCost = 100
+const kJiejiTattooMoneyCostThunder = 80
+const kJiejiTattooHerbCostMist = 3
+const kJiejiTattooLifeCost = 1
+const kJiejiTattooLifeCostBlood = 2
+
+function _jiejiTattooSeasonId() {
+  if (game.jieji != null && game.jieji.seasonId != null) {
+    return game.jieji.seasonId
+  }
+  return null
+}
+
+function jiejiTattooCosts() {
+  var herb = kJiejiTattooHerbCost
+  var money = kJiejiTattooMoneyCost
+  var life = kJiejiTattooLifeCost
+  final seasonId = _jiejiTattooSeasonId()
+  if (seasonId == 'thunder') {
+    money = kJiejiTattooMoneyCostThunder
+  } else if (seasonId == 'mist') {
+    herb = kJiejiTattooHerbCostMist
+  } else if (seasonId == 'blood') {
+    life = kJiejiTattooLifeCostBlood
+  }
+  return {
+    herb: herb,
+    money: money,
+    life: life,
+  }
+}
+
+function ensureHomeTattooShop() {
+  if (hero == null) return
+  final city = getHeroHomeCity()
+  if (city == null) return
+  final siteIds = city.siteIds ?? []
+  for (final siteId in siteIds) {
+    final site = game.locations[siteId]
+    if (site != null && site.kind == kLocationKindTattooShop) return
+  }
+  Location(
+    category: 'site',
+    kind: kLocationKindTattooShop,
+    atCity: city,
+    sectId: city.sectId,
+    development: 0,
+    npcId: Constants.siteKindToNpcId[kLocationKindTattooShop],
+  )
+}
+
+function _jiejiTattooCostLife(want) {
+  var lost = want
+  final life = hero.life ?? 1
+  if (life - lost < 1) lost = life - 1
+  if (lost < 0) lost = 0
+  if (lost > 0) {
+    Player.setLife(hero.life - lost)
+  }
+  return lost
+}
+
+function _jiejiTattooNormalizeKind(kind) {
+  if (kind == 'thunder' || kind == 'jieji_tattoo_thunder') return 'thunder'
+  if (kind == 'mist' || kind == 'jieji_tattoo_mist') return 'mist'
+  if (kind == 'blood' || kind == 'jieji_tattoo_blood') return 'blood'
+  return null
+}
+
+function _jiejiTattooChoices() {
+  return [
+    {
+      text: 'jieji_tattoo_thunder',
+      description: 'hint_jieji_tattoo_thunder',
+    },
+    {
+      text: 'jieji_tattoo_mist',
+      description: 'hint_jieji_tattoo_mist',
+    },
+    {
+      text: 'jieji_tattoo_blood',
+      description: 'hint_jieji_tattoo_blood',
+    },
+    'cancel',
+  ]
+}
+
+function _jiejiTattooApply(kind) {
+  final jieji = ensureJiejiFlags()
+  jieji.tattoo = kind
+  final seasonId = _jiejiTattooSeasonId()
+  if (seasonId != null) {
+    jieji.lastTattooSeasonId = seasonId
+  }
+  return kind
+}
+
+function clearJiejiTattoo() {
+  final jieji = ensureJiejiFlags()
+  jieji.tattoo = null
+  jieji.lastTattooSeasonId = null
+}
+
+/// 纹身铺季纹三选。free 为 true 时不扣费（debug）。
+/// kind 传入 thunder/mist/blood 时跳过选择（debug.forceTattoo）。
+/// 当季可覆盖，每次付费，后刺覆盖先刺。返回 'ok' | 'poor' | 'cancel'。
+async function inkJiejiTattoo({ free = false, kind = null }) {
+  if (hero == null) return 'cancel'
+
+  if (free != true) {
+    final costs = jiejiTattooCosts()
+    final herbHave = hero.materials['herb'] ?? 0
+    final moneyHave = hero.materials['money'] ?? 0
+    if (herbHave < costs.herb || moneyHave < costs.money) {
+      return 'poor'
+    }
+  }
+
+  var selected = _jiejiTattooNormalizeKind(kind)
+  if (selected == null) {
+    dialog.pushDialog('hint_inkJiejiTattoo')
+    dialog.pushSelection('jiejiTattoo', _jiejiTattooChoices())
+    await dialog.execute()
+    final picked = dialog.checkSelected('jiejiTattoo')
+    if (picked == null || picked == 'cancel') {
+      if (free == true) {
+        selected = 'thunder'
+      } else {
+        return 'cancel'
+      }
+    } else {
+      selected = _jiejiTattooNormalizeKind(picked)
+    }
+  }
+  if (selected == null) return 'cancel'
+
+  if (free != true) {
+    final costs = jiejiTattooCosts()
+    Player.exhaust('herb', costs.herb)
+    Player.exhaust('money', costs.money)
+    if (costs.life > 0) {
+      _jiejiTattooCostLife(costs.life)
+    }
+  }
+
+  final applied = _jiejiTattooApply(selected)
+  if (applied == 'mist') {
+    dialog.pushDialog('hint_inkJiejiTattoo_done_mist')
+  } else if (applied == 'blood') {
+    dialog.pushDialog('hint_inkJiejiTattoo_done_blood')
+  } else {
+    dialog.pushDialog('hint_inkJiejiTattoo_done_thunder')
+  }
+  await dialog.execute()
+  Game.updateUI()
+  return 'ok'
+}

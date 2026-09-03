@@ -16,6 +16,7 @@ async function onNewGame() {
   ensureHomeIllusionAltar()
   ensureHomePsychicTemple()
   ensureHomeTheurgyTemple()
+  ensureHomeTattooShop()
   final xitong = game.npcs['xitong']
 
   // final itemsInfo = [

@@ -213,6 +213,7 @@ final class SeasonLogic {
             'pendingSettle': pendingSettlement,
             'xianming': xianming,
             'xianmingSeason': _jiejiFlags()?['xianmingSeason'],
+            'tattoo': tattoo,
           };
         }
       } catch (_) {}
@@ -305,6 +306,10 @@ final class SeasonLogic {
       m -= 0.15;
       if (m < 0.3) m = 0.3;
     }
+    if (tattoo == 'mist') {
+      m -= 0.10;
+      if (m < 0.3) m = 0.3;
+    }
     if (m < 0) return 0.0;
     return m;
   }
@@ -313,6 +318,9 @@ final class SeasonLogic {
     var v = _mod('lifeStealBonus', 0.0);
     if (holdsGongfa('gongfa_blood')) {
       v += 0.05;
+    }
+    if (tattoo == 'blood') {
+      v += 0.03;
     }
     return v;
   }
@@ -340,6 +348,17 @@ final class SeasonLogic {
       return season != null && season.isNotEmpty && season == currentId;
     } catch (_) {
       return false;
+    }
+  }
+
+  /// 当季纹身：thunder / mist / blood。季末 finishJiejiSeason 清掉。
+  static String? get tattoo {
+    try {
+      final t = _jiejiFlags()?['tattoo']?.toString();
+      if (t == 'thunder' || t == 'mist' || t == 'blood') return t;
+      return null;
+    } catch (_) {
+      return null;
     }
   }
 
@@ -393,6 +412,9 @@ final class SeasonLogic {
     }
     if (!selfIsHero && holdsGongfa('gongfa_thunder')) {
       damageDetails['percentageChange3'] += 0.08;
+    }
+    if (!selfIsHero && tattoo == 'thunder') {
+      damageDetails['percentageChange3'] += 0.04;
     }
     if (selfIsHero && holdsGongfa('gongfa_guard')) {
       damageDetails['percentageChange3'] -= 0.06;
@@ -586,6 +608,9 @@ final class SeasonLogic {
       } else if (xm == 'xianming_nurture') {
         line += ' · 养门徒';
       }
+    }
+    if (tattoo != null) {
+      line += ' · 纹';
     }
     if (arrayPending) {
       line += ' · 阵';

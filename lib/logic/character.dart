@@ -2345,6 +2345,21 @@ Future<void> _heroInvokeJiejiTheurgy(dynamic location) async {
   }
 }
 
+Future<void> _heroInkJiejiTattoo(dynamic location) async {
+  final isRented = await GameLogic.checkRented(location);
+  if (!isRented) return;
+
+  final result = await engine.hetu.invoke('inkJiejiTattoo');
+  if (result == 'poor') {
+    dialog.pushDialog(
+      'hint_inkJiejiTattoo_notEnough',
+      npcId: location['npcId'],
+    );
+    await dialog.execute();
+    return;
+  }
+}
+
 
 Future<void> _heroShowKarmaCodex(dynamic location) async {
   final text = engine.hetu.invoke('formatKarmaCodex');
@@ -2498,6 +2513,11 @@ Future<void> _onInteractSite(
       'text': 'invokeJiejiTheurgy',
       'description': 'hint_invokeJiejiTheurgy_description',
     });
+  } else if (siteKind == 'tattooshop') {
+    siteOptions.add({
+      'text': 'inkJiejiTattoo',
+      'description': 'hint_inkJiejiTattoo_description',
+    });
   } else if (siteKind == 'dungeon') {
     siteOptions.add('about_dungeon');
   }
@@ -2566,6 +2586,8 @@ Future<void> _onInteractSite(
       await _heroConsultJiejiPsychic(location);
     case 'invokeJiejiTheurgy':
       await _heroInvokeJiejiTheurgy(location);
+    case 'inkJiejiTattoo':
+      await _heroInkJiejiTattoo(location);
     case 'brewPotionCard':
       await _heroBrewPotionCard(location);
     case 'scribeJiejiTalisman':
