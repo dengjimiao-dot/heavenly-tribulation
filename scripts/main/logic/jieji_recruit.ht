@@ -1,0 +1,203 @@
+/// 外门寮：弟子作活卡包。不生成 Character NPC。
+const kJiejiAidWorkerCost = 2
+const kJiejiAidMoneyCost = 200
+const kJiejiAidWorkerCostBlood = 3
+const kJiejiAidMoneyCostThunder = 150
+const kJiejiAidMoneyCostBlood = 120
+const kJiejiAidMistExtraRate = 0.30
+const kJiejiAidCooldownDays = 3
+const kJiejiAidCooldownMoves = 8
+
+function _jiejiAidSeasonId() {
+  if (game.jieji != null && game.jieji.seasonId != null) {
+    return game.jieji.seasonId
+  }
+  return null
+}
+
+function jiejiAidCosts() {
+  var worker = kJiejiAidWorkerCost
+  var money = kJiejiAidMoneyCost
+  final seasonId = _jiejiAidSeasonId()
+  if (seasonId == 'blood') {
+    worker = kJiejiAidWorkerCostBlood
+    money = kJiejiAidMoneyCostBlood
+  } else if (seasonId == 'thunder') {
+    money = kJiejiAidMoneyCostThunder
+  }
+  return {
+    worker: worker,
+    money: money,
+  }
+}
+
+function ensureHomeResidence() {
+  if (hero == null) return
+  final city = getHeroHomeCity()
+  if (city == null) return
+  final siteIds = city.siteIds ?? []
+  for (final siteId in siteIds) {
+    final site = game.locations[siteId]
+    if (site != null && site.kind == kLocationKindResidence) return
+  }
+  Location(
+    category: 'site',
+    kind: kLocationKindResidence,
+    atCity: city,
+    sectId: city.sectId,
+    development: 0,
+    npcId: Constants.siteKindToNpcId[kLocationKindResidence],
+    background: 'location/site/hotel.png',
+  )
+}
+
+function _jiejiAidNormalizeGenre(genre) {
+  if (genre == null || genre == 'none' || genre == '') return null
+  if (Constants.cultivationGenres.contains(genre)) return genre
+  return null
+}
+
+function _jiejiAidCurrentDay() {
+  if (game.timestamp == null) return null
+  if (Constants.ticksPerDay == null) return null
+  if (Constants.ticksPerDay <= 0) return null
+  return game.timestamp ~/ Constants.ticksPerDay
+}
+
+function _jiejiAidOnCooldown() {
+  final jieji = ensureJiejiFlags()
+  final day = _jiejiAidCurrentDay()
+  if (day != null && jieji.lastRecruitDay != null) {
+    if (day - jieji.lastRecruitDay < kJiejiAidCooldownDays) return true
+    return false
+  }
+  if (jieji.lastRecruitMove != null) {
+    final moves = jieji.worldMoves ?? 0
+    if (moves - jieji.lastRecruitMove < kJiejiAidCooldownMoves) return true
+  }
+  return false
+}
+
+function _addJiejiAidToCurrentDeck(card) {
+  if (hero == null || card == null) return
+  if (hero.battleDeckIndex == null) return
+  if (hero.battleDeckIndex < 0) return
+  if (hero.battleDecks == null || hero.battleDecks.isEmpty) return
+  final deck = hero.battleDecks[hero.battleDeckIndex]
+  if (deck == null || deck.cards == null) return
+  if (!deck.cards.contains(card.id)) {
+    deck.cards.add(card.id)
+  }
+}
+
+function _createJiejiAidCard(genre) {
+  var cardGenre = genre
+  if (cardGenre == 'none' || cardGenre == '') {
+    cardGenre = null
+  }
+  final card = BattleCard(
+    genre: cardGenre,
+    rank: 0,
+  )
+  card.isSeasonLimited = true
+  card.jiejiAid = true
+  return card
+}
+
+function _finishJiejiAidCard(card) {
+  if (card == null) return
+  Player.acquireCard(card)
+  _addJiejiAidToCurrentDeck(card)
+}
+
+function _markJiejiAidRecruit() {
+  final jieji = ensureJiejiFlags()
+  final day = _jiejiAidCurrentDay()
+  if (day != null) {
+    jieji.lastRecruitDay = day
+  }
+  jieji.lastRecruitMove = jieji.worldMoves ?? 0
+}
+
+/// 从外门寮招一包季限外援战牌。genre 为 null/'none' 则三张各随机流派。
+/// free 为 true 时不扣人力/铜钱、不检查冷却（debug）。
+/// 付不起返回 null；冷却中返回 'cooldown'；成功返回 {ok, cards, extra, count}。
+function recruitJiejiAid(genre, { free = false }) {
+  if (hero == null) return null
+  if (free != true && _jiejiAidOnCooldown()) {
+    return 'cooldown'
+  }
+
+  final chosen = _jiejiAidNormalizeGenre(genre)
+  if (free != true) {
+    final costs = jiejiAidCosts()
+    final workerHave = hero.materials['worker'] ?? 0
+    final moneyHave = hero.materials['money'] ?? 0
+    if (workerHave < costs.worker || moneyHave < costs.money) {
+      return null
+    }
+    Player.exhaust('worker', costs.worker)
+    Player.exhaust('money', costs.money)
+  }
+
+  var packSize = 3
+  var extra = false
+  final seasonId = _jiejiAidSeasonId()
+  if (seasonId == 'mist' && random.nextDouble() < kJiejiAidMistExtraRate) {
+    packSize = 4
+    extra = true
+  }
+
+  let cards = []
+  for (var i in range(packSize)) {
+    var cardGenre = chosen
+    if (cardGenre == null) {
+      cardGenre = random.nextIterable(Constants.cultivationGenres)
+    }
+    final card = _createJiejiAidCard(cardGenre)
+    if (card == null) continue
+    _finishJiejiAidCard(card)
+    cards.add(card)
+  }
+  if (cards.isEmpty) return null
+  if (free != true) {
+    _markJiejiAidRecruit()
+  }
+  return {
+    ok: true,
+    cards: cards,
+    extra: extra,
+    count: cards.length,
+  }
+}
+
+/// 季末清掉未用完的外援牌，避免大地图滚雪球。秘境出门仍会清季限牌。
+function stripJiejiAidCards() {
+  if (hero == null) return 0
+  if (hero.cardLibrary == null) return 0
+  let ids = []
+  for (final card in hero.cardLibrary.values) {
+    if (card == null) continue
+    if (card.jiejiAid == true) {
+      ids.add(card.id)
+    }
+  }
+  var removed = 0
+  for (final id in ids) {
+    if (hero.cardLibrary.containsKey(id)) {
+      hero.cardLibrary.remove(id)
+      removed += 1
+    }
+    if (hero.battleDecks != null) {
+      for (final deck in hero.battleDecks) {
+        if (deck.cards != null) {
+          deck.cards.remove(id)
+        }
+      }
+    }
+  }
+  if (removed > 0) {
+    engine.info('季末外援牌消散：${removed}')
+  }
+  return removed
+}

@@ -39,7 +39,12 @@ class LocationScene extends Scene with HasCursorState {
   FutureOr<void> Function()? onEnterScene;
 
   void openResidenceList() async {
-    final List residingCharacterIds = location['residents'];
+    dynamic city = location;
+    if (city['category'] != 'city') {
+      city = GameData.getLocation(city['atCityId']);
+    }
+    if (city == null) return;
+    final List residingCharacterIds = city['residents'] ?? [];
     if (residingCharacterIds.isNotEmpty) {
       final List characterIds = residingCharacterIds.toList();
       bool heroResidesHere = false;
@@ -64,6 +69,7 @@ class LocationScene extends Scene with HasCursorState {
         'hint_visitEmptyVillage',
         isHero: true,
       );
+      await dialog.execute();
     }
   }
 
@@ -74,6 +80,57 @@ class LocationScene extends Scene with HasCursorState {
 
   void _onUnpreviewSiteCard() {
     cursorState = MouseCursorState.normal;
+  }
+
+  bool _isHeroHomeCity([dynamic loc]) {
+    loc ??= location;
+    final hero = GameData.hero;
+    if (hero == null) return false;
+    if (loc['id'] == hero['homeLocationId']) return true;
+    if (loc['id'] == hero['homeSiteId']) return true;
+    final homeLoc = GameData.getLocation(hero['homeLocationId']);
+    if (homeLoc != null && homeLoc['atCityId'] == loc['id']) return true;
+    final homeSite = GameData.getLocation(hero['homeSiteId']);
+    if (homeSite != null && homeSite['atCityId'] == loc['id']) return true;
+    return false;
+  }
+
+  bool _cityHasResidenceSite(dynamic city) {
+    final siteIds = city['siteIds'];
+    if (siteIds is! Iterable) return false;
+    for (final siteId in siteIds) {
+      final siteData = GameData.getLocation(siteId);
+      if (siteData != null && siteData['kind'] == 'residence') return true;
+    }
+    return false;
+  }
+
+  void _addRecruitAidCard() {
+    final recruitCard = GameData.createSiteCard(
+      spriteId: 'location/card/residence.png',
+      title: engine.locale('recruitJiejiAid'),
+      onPreviewed: _onPreviewSiteCard,
+      onUnpreviewed: _onUnpreviewSiteCard,
+    );
+    recruitCard.onTap = (button, position) async {
+      await GameLogic.heroRecruitJiejiAid(location);
+    };
+    siteList.tryAddCard(recruitCard);
+    world.add(recruitCard);
+  }
+
+  void _addVisitResidenceCard() {
+    final visitCard = GameData.createSiteCard(
+      spriteId: 'location/card/residence.png',
+      title: engine.locale('visitResidence'),
+      onPreviewed: _onPreviewSiteCard,
+      onUnpreviewed: _onUnpreviewSiteCard,
+    );
+    visitCard.onTap = (button, position) {
+      openResidenceList();
+    };
+    siteList.tryAddCard(visitCard);
+    world.add(visitCard);
   }
 
   void _loadSites() {
@@ -109,7 +166,11 @@ class LocationScene extends Scene with HasCursorState {
           };
           siteList.tryAddCard(depositCard);
           world.add(depositCard);
+          _addRecruitAidCard();
         }
+      case 'residence':
+        _addRecruitAidCard();
+        _addVisitResidenceCard();
       case 'cityhall':
         final siteCard = GameData.createSiteCard(
           spriteId: 'location/card/bed.png',
@@ -253,14 +314,31 @@ class LocationScene extends Scene with HasCursorState {
         }
     }
 
-    if (location['category'] == 'city') {
+    if (location['category'] == 'city' && !_cityHasResidenceSite(location)) {
       final siteCard = GameData.createSiteCard(
         spriteId: 'location/card/residence.png',
         title: engine.locale('residence'),
         onPreviewed: _onPreviewSiteCard,
         onUnpreviewed: _onUnpreviewSiteCard,
       );
-      siteCard.onTap = (button, position) {
+      siteCard.onTap = (button, position) async {
+        if (_isHeroHomeCity()) {
+          dialog.pushSelection('residenceHome', [
+            {
+              'text': 'recruitJiejiAid',
+              'description': 'hint_recruitJiejiAid_description',
+            },
+            'visitResidence',
+            'cancel',
+          ]);
+          await dialog.execute();
+          final selected = dialog.checkSelected('residenceHome');
+          if (selected == 'recruitJiejiAid') {
+            await GameLogic.heroRecruitJiejiAid(location);
+            return;
+          }
+          if (selected != 'visitResidence') return;
+        }
         openResidenceList();
       };
       siteList.tryAddCard(siteCard);
@@ -338,6 +416,11 @@ class LocationScene extends Scene with HasCursorState {
         ({positionalArgs, namedArgs}) => _loadSites(),
         override: true);
 
+    if (location['category'] == 'city') {
+      try {
+        engine.hetu.invoke('ensureHomeResidence');
+      } catch (_) {}
+    }
     _loadSites();
   }
 

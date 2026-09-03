@@ -160,6 +160,7 @@ function migrateSect() {
   city.maxSiteCount = calculateMaxSiteCountForCity(city)
   ensureHomeCardforge()
   ensureHomeAlchemylab()
+  ensureHomeResidence()
   engine.info('季末迁徙：拆除据点 ${removed}，城市规模 ${city.development}')
   return removed
 }
@@ -465,6 +466,7 @@ async function trySettleJieji({ endedSeasonId }) {
   }
 
   stripJiejiPotionCards()
+  stripJiejiAidCards()
   final converted = convertKarmaToCurses()
   final seasonName = engine.locale('jieji_season_' + endedId)
   dialog.pushDialog('hint_jieji_season_end', interpolations: [

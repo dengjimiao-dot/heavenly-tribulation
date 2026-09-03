@@ -570,6 +570,7 @@ const kLocationKindCityhall = 'cityhall';
 
 const kLocationSiteKinds = {
   'home',
+  'residence',
   'headquarters',
   'cityhall',
   'tradinghouse',
@@ -600,6 +601,7 @@ const kLocationSiteKinds = {
 };
 
 const kSiteKindToNpcId = {
+  'residence': 'hotelManager',
   'headquarters': 'executiveAssistant',
   'cityhall': 'assistant',
   'tradinghouse': 'trader',
@@ -1002,6 +1004,7 @@ const kSectGenreToSiteKinds = {
 
 const kSitePriority = {
   'home': 99,
+  'residence': 52,
   'headquarters': 55,
   'cityhall': 54,
   'tradinghouse': 53,

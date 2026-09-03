@@ -1772,6 +1772,88 @@ Future<void> _heroBrewPotionCard(dynamic location) async {
   } catch (_) {}
 }
 
+
+Future<void> _heroRecruitJiejiAid(dynamic location) async {
+  final isRented = await GameLogic.checkRented(location);
+  if (!isRented) return;
+
+  var workerCost = 2;
+  var moneyCost = 200;
+  try {
+    final costs = engine.hetu.invoke('jiejiAidCosts');
+    if (costs != null) {
+      workerCost = (costs['worker'] as num?)?.toInt() ?? workerCost;
+      moneyCost = (costs['money'] as num?)?.toInt() ?? moneyCost;
+    }
+  } catch (_) {}
+
+  final worker = (GameData.hero['materials']['worker'] as num?)?.toInt() ?? 0;
+  final money = (GameData.hero['materials']['money'] as num?)?.toInt() ?? 0;
+  if (worker < workerCost || money < moneyCost) {
+    dialog.pushDialog(
+      'hint_jieji_aid_notEnough',
+      npcId: location['npcId'],
+      interpolations: [workerCost, moneyCost],
+    );
+    await dialog.execute();
+    return;
+  }
+
+  dialog.pushSelection('jieji_aid_genre', [
+    'jieji_aid_genre_none',
+    'spellcraft',
+    'swordcraft',
+    'bodyforge',
+    'cancel',
+  ]);
+  await dialog.execute();
+  final selected = dialog.checkSelected('jieji_aid_genre');
+  if (selected == null || selected == 'cancel') return;
+
+  final genre = selected == 'jieji_aid_genre_none' ? 'none' : selected;
+  final result = engine.hetu.invoke(
+    'recruitJiejiAid',
+    positionalArgs: [genre],
+  );
+  if (result == 'cooldown') {
+    dialog.pushDialog(
+      'hint_jieji_aid_cooldown',
+      npcId: location['npcId'],
+    );
+    await dialog.execute();
+    return;
+  }
+  if (result == null) {
+    dialog.pushDialog(
+      'hint_jieji_aid_notEnough',
+      npcId: location['npcId'],
+      interpolations: [workerCost, moneyCost],
+    );
+    await dialog.execute();
+    return;
+  }
+
+  var count = 3;
+  var extra = false;
+  try {
+    count = (result['count'] as num?)?.toInt() ?? count;
+    extra = result['extra'] == true;
+  } catch (_) {}
+  dialog.pushDialog(
+    'hint_jieji_aid_done',
+    npcId: location['npcId'],
+    interpolations: [count],
+  );
+  await dialog.execute();
+  if (extra) {
+    dialog.pushDialog(
+      'hint_jieji_aid_mist_extra',
+      npcId: location['npcId'],
+    );
+    await dialog.execute();
+  }
+}
+
 Future<void> _heroShowKarmaCodex(dynamic location) async {
   final text = engine.hetu.invoke('formatKarmaCodex');
   dialog.pushDialog(
@@ -1827,6 +1909,11 @@ Future<void> _onInteractSite(
     siteOptions.add({
       'text': 'brewPotionCard',
       'description': 'hint_brewPotionCard_description',
+    });
+  } else if (siteKind == 'residence' || siteKind == 'home') {
+    siteOptions.add({
+      'text': 'recruitJiejiAid',
+      'description': 'hint_recruitJiejiAid_description',
     });
   } else if (siteKind == 'divinationaltar') {
     siteOptions.add('divination');
@@ -1886,6 +1973,8 @@ Future<void> _onInteractSite(
       await _heroShowKarmaCodex(location);
     case 'brewPotionCard':
       await _heroBrewPotionCard(location);
+    case 'recruitJiejiAid':
+      await _heroRecruitJiejiAid(location);
     case 'about_dungeon':
       dialog.pushDialog(
         'hint_dungeonEntrance',

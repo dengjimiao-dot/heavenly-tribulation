@@ -1031,6 +1031,18 @@
   "card_jieji_potion_strike": "破气丹",
   "card_jieji_potion_ward": "护体丹",
 
+  "recruitJiejiAid": "招外援",
+  "hint_recruitJiejiAid_description": "耗费人力与铜钱，从外门寮招来三张当季外援战牌。雷月铜钱更省，血月以人力作血税，雾月或可多一张。季末或出秘境后消散。",
+  "jieji_aid_genre": "选择外援流派",
+  "jieji_aid_genre_none": "随缘（混搭）",
+  "hint_jieji_aid_notEnough": "招一队外援需要 {0} 人力和 {1} 铜钱。",
+  "hint_jieji_aid_cooldown": "外门弟子刚出过一次援手。需过几日，或再走几程，才能再招。",
+  "hint_jieji_aid_done": "外门弟子应召。{0} 张季限外援牌收入牌库，并已放入当前卡组。",
+  "hint_jieji_aid_mist_extra": "雾里多摸出一副手。多得一张外援牌。",
+  "hint_jieji_aid_failed": "外援未至。",
+  "visitResidence": "拜访住户",
+  "residenceHome": "外门寮",
+
 
   "hint_dungeon_need_deck": "进秘境前先指定一套出战卡组。没有卡组，锁门也锁不住。",
   "hint_dungeon_lock_deck": "此行将锁死出战卡组「{0}」。秘境内不能换整库、不能改构筑；拾取的季限牌离开时会消散。",

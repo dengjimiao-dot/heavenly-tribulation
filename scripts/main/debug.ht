@@ -200,6 +200,16 @@ namespace debug {
     return card
   }
 
+  async function forceRecruitAid(genre) {
+    final result = recruitJiejiAid(genre, free: true)
+    if (result == null || result == 'cooldown') {
+      dialog.pushDialog('hint_jieji_aid_failed')
+      await dialog.execute()
+      return null
+    }
+    return result
+  }
+
   /// 沙盒立刻打指定季的渡劫 Boss（含前兆三选）。会走 trySettleJieji。
   async function forceTribulation(seasonId) {
     var id = seasonId
