@@ -69,6 +69,7 @@
   "quest_hidden_mist_market": "劫纹迷市",
   "quest_hidden_gongfa_cave": "劫纹功法窟",
   "quest_hidden_mirror_ruins": "劫纹镜墟",
+  "quest_hidden_remnant_lamp": "劫纹残灯",
 
   "quest_hidden_ruins_explore_description": "行路听闻{0}附近有荒墟异象。亲自走一趟探明虚实。",
   "quest_hidden_karma_shrine_description": "有人在{0}看见无名祠。据说祭过的人会沾上业力，也会得一份机缘。",
@@ -82,6 +83,7 @@
   "quest_hidden_mist_market_description": "行路听闻{0}城里有人开劫纹迷市。去走一遭，或可换得药材。",
   "quest_hidden_gongfa_cave_description": "行路听闻{0}城里有劫纹功法窟。去走一遭，或可拾得残页。",
   "quest_hidden_mirror_ruins_description": "行路听闻{0}城里有劫纹镜墟。去走一遭，或可披上一层迷障。",
+  "quest_hidden_remnant_lamp_description": "行路听闻{0}城里有劫纹残灯。去走一遭，或可挂上一层减伤。",
 
   "quest_hidden_rumor": "路遇一位行色匆匆的修士，压低声音说：<yellow>{0}</>……去{1}看看。说完便隐入雾里。",
   "quest_hidden_spawned": "你察觉到一桩隐秘机缘：<yellow>{0}</>。去{1}探明虚实。",
@@ -97,5 +99,6 @@
   "quest_hidden_blood_feast_complete": "「{0}」有了着落。你在{1}赴了一席血宴。",
   "quest_hidden_mist_market_complete": "「{0}」有了着落。你在{1}的迷市里换了一批货。",
   "quest_hidden_gongfa_cave_complete": "「{0}」有了着落。你在{1}的功法窟里翻出残页。",
-  "quest_hidden_mirror_ruins_complete": "「{0}」有了着落。你在{1}的镜墟里走了一遭。"
+  "quest_hidden_mirror_ruins_complete": "「{0}」有了着落。你在{1}的镜墟里走了一遭。",
+  "quest_hidden_remnant_lamp_complete": "「{0}」有了着落。你在{1}的残灯旁走了一遭。"
 }

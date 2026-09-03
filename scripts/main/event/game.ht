@@ -656,6 +656,40 @@ async function onAfterEnterLocation(location) -> bool {
           }
           return true
         }
+        case 'hidden_remnant_lamp': {
+          if (isLate) {
+            Player.progressJournalById(journal.id, stage: 2)
+            dialog.pushDialog('quest_hidden_late_failed', interpolations: [journal.title])
+            await dialog.execute()
+          } else {
+            Player.progressJournalById(journal.id)
+            var locName = ''
+            final loc = game.locations[journal.quest.targetLocationId]
+            if (loc != null) {
+              locName = loc.name
+            }
+            dialog.pushDialog('quest_hidden_remnant_lamp_complete', interpolations: [
+              journal.title,
+              locName,
+            ])
+            await dialog.execute()
+            final items = await Player.loot(journal.quest.reward)
+            Game.promptItems(items)
+            await Player.collect('money', 25, incurIncident: false)
+            final jieji = ensureJiejiFlags()
+            if (jieji.arrayWard != true) {
+              jieji.arrayWard = true
+              dialog.pushDialog('hint_jieji_remnant_lamp_extra')
+            } else {
+              jieji.illusionVeil = true
+              dialog.pushDialog('hint_jieji_remnant_lamp_extra_veil')
+            }
+            await dialog.execute()
+            await tryDropGongfaShard(rate: 0.4)
+            await grantJiejiHiddenQuestExtra('remnant')
+          }
+          return true
+        }
       }
     }
   }

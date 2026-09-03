@@ -169,6 +169,10 @@ namespace debug {
       questKind = 'hidden_gongfa_cave'
     } else if (kind == 'mirror') {
       questKind = 'hidden_mirror_ruins'
+    } else if (kind == 'remnant') {
+      questKind = 'hidden_remnant_lamp'
+    } else if (kind == 'lamp') {
+      questKind = 'hidden_remnant_lamp'
     }
     final ctor = Quests[questKind]
     if (ctor == null) return false

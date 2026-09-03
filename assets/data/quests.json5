@@ -155,5 +155,13 @@
     contribution: 11,
     rank: 0,
   },
+  hidden_remnant_lamp: {
+    id: "hidden_remnant_lamp",
+    policy: null,
+    isBounty: false,
+    isHidden: true,
+    contribution: 11,
+    rank: 0,
+  },
 
 }
