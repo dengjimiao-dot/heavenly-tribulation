@@ -15,6 +15,7 @@ const kJiejiBossWatchLevelDelta = 2
 
 const _kJiejiKeepSiteKinds = {
   'home': true,
+  'hotel': true,
   'cardforge': true,
   'alchemylab': true,
   'runelab': true,

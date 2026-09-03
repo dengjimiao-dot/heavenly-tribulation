@@ -635,6 +635,7 @@ class BattleScene extends Scene {
       SeasonLogic.beginRestBloodFuryFight();
       SeasonLogic.beginArrayFight();
       SeasonLogic.beginTheurgyFight();
+      SeasonLogic.beginFeastFuryFight();
     }
     hero.reset();
     enemy.reset();
@@ -1149,6 +1150,7 @@ class BattleScene extends Scene {
       SeasonLogic.endRestBloodFuryFight();
       SeasonLogic.endArrayFight();
       SeasonLogic.endTheurgyFight();
+      SeasonLogic.endFeastFuryFight();
     }
 
     if (battleResult == true) {

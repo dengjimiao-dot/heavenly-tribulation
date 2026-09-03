@@ -2106,6 +2106,26 @@ Future<void> _heroRestJiejiSite(dynamic location) async {
   }
 }
 
+Future<void> _heroFeastJiejiHotel(dynamic location) async {
+  final result = await engine.hetu.invoke('feastJiejiHotel');
+  if (result == 'cooldown') {
+    dialog.pushDialog(
+      'hint_feastJiejiHotel_cooldown',
+      npcId: location['npcId'],
+    );
+    await dialog.execute();
+    return;
+  }
+  if (result == 'poor') {
+    dialog.pushDialog(
+      'hint_feastJiejiHotel_notEnough',
+      npcId: location['npcId'],
+    );
+    await dialog.execute();
+    return;
+  }
+}
+
 Future<void> _heroDuelJiejiArena(dynamic location) async {
   final result = await engine.hetu.invoke('duelJiejiArena');
   if (result == 'cooldown') {
@@ -2591,6 +2611,10 @@ Future<void> _onInteractSite(
       'text': 'restJiejiSite',
       'description': 'hint_restJiejiSite_description',
     });
+    siteOptions.add({
+      'text': 'feastJiejiHotel',
+      'description': 'hint_feastJiejiHotel_description',
+    });
   } else if (siteKind == 'divinationaltar') {
     siteOptions.add('divination');
     siteOptions.add({
@@ -2729,6 +2753,8 @@ Future<void> _onInteractSite(
       await _heroGatherJiejiSite(location);
     case 'restJiejiSite':
       await _heroRestJiejiSite(location);
+    case 'feastJiejiHotel':
+      await _heroFeastJiejiHotel(location);
     case 'about_dungeon':
       dialog.pushDialog(
         'hint_dungeonEntrance',

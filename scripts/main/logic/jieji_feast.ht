@@ -1,0 +1,175 @@
+/// 酒楼「劫宴」三选：请客 / 听曲 / 拼酒。仅酒楼；不替换歇息与客房。
+const kJiejiFeastTreatMoney = 120
+const kJiejiFeastTreatMoneyThunder = 90
+const kJiejiFeastTreatLife = 8
+const kJiejiFeastTreatGongfaRate = 0.20
+const kJiejiFeastListenMoney = 60
+const kJiejiFeastListenMoneyMist = 40
+const kJiejiFeastListenBlankRate = 0.30
+const kJiejiFeastListenHerb = 1
+const kJiejiFeastDrinkLife = 2
+const kJiejiFeastDrinkLifeBlood = 3
+const kJiejiFeastCooldownDays = 2
+
+function _jiejiFeastSeasonId() {
+  if (game.jieji != null && game.jieji.seasonId != null) {
+    return game.jieji.seasonId
+  }
+  return 'thunder'
+}
+
+function _jiejiFeastCurrentDay() {
+  if (game.timestamp == null) return null
+  if (Constants.ticksPerDay == null) return null
+  if (Constants.ticksPerDay <= 0) return null
+  return game.timestamp ~/ Constants.ticksPerDay
+}
+
+function _jiejiFeastOnCooldown() {
+  final jieji = ensureJiejiFlags()
+  final day = _jiejiFeastCurrentDay()
+  if (day == null) return false
+  if (jieji.lastFeastDay == null) return false
+  if (day - jieji.lastFeastDay < kJiejiFeastCooldownDays) return true
+  return false
+}
+
+function _jiejiFeastMark() {
+  final jieji = ensureJiejiFlags()
+  jieji.lastFeastDay = _jiejiFeastCurrentDay()
+}
+
+function _jiejiFeastCostLife(want) {
+  var lost = want
+  final life = hero.life ?? 1
+  if (life - lost < 1) lost = life - 1
+  if (lost < 0) lost = 0
+  if (lost > 0) {
+    Player.setLife(hero.life - lost)
+  }
+  return lost
+}
+
+function _jiejiFeastGrantBlank() {
+  final card = BattleCard(rank: 0)
+  card.isCardBlank = true
+  Player.acquireCard(card)
+  return card
+}
+
+function _jiejiFeastTreatMoneyCost(seasonId) {
+  if (seasonId == 'thunder') return kJiejiFeastTreatMoneyThunder
+  return kJiejiFeastTreatMoney
+}
+
+function _jiejiFeastListenMoneyCost(seasonId) {
+  if (seasonId == 'mist') return kJiejiFeastListenMoneyMist
+  return kJiejiFeastListenMoney
+}
+
+function _jiejiFeastDrinkLifeCost(seasonId) {
+  if (seasonId == 'blood') return kJiejiFeastDrinkLifeBlood
+  return kJiejiFeastDrinkLife
+}
+
+function _jiejiFeastNormalizeKind(kind) {
+  if (kind == 'treat' || kind == 'jieji_feast_treat') return 'treat'
+  if (kind == 'listen' || kind == 'jieji_feast_listen') return 'listen'
+  if (kind == 'drink' || kind == 'jieji_feast_drink') return 'drink'
+  return null
+}
+
+function _jiejiFeastChoices() {
+  return [
+    {
+      text: 'jieji_feast_treat',
+      description: 'hint_jieji_feast_treat',
+    },
+    {
+      text: 'jieji_feast_listen',
+      description: 'hint_jieji_feast_listen',
+    },
+    {
+      text: 'jieji_feast_drink',
+      description: 'hint_jieji_feast_drink',
+    },
+    'cancel',
+  ]
+}
+
+function _jiejiFeastActionMoney(selected, seasonId) {
+  if (selected == 'treat') return _jiejiFeastTreatMoneyCost(seasonId)
+  if (selected == 'listen') return _jiejiFeastListenMoneyCost(seasonId)
+  return 0
+}
+
+/// 酒楼劫宴三选。free 为 true 时不扣费、不检查冷却（debug），仍弹出三选。
+/// 返回 'ok' | 'cooldown' | 'poor' | 'cancel'。
+async function feastJiejiHotel({ free = false }) {
+  if (hero == null) return 'cancel'
+  if (free != true && _jiejiFeastOnCooldown()) {
+    return 'cooldown'
+  }
+
+  dialog.pushDialog('hint_feastJiejiHotel')
+  dialog.pushSelection('jiejiFeast', _jiejiFeastChoices())
+  await dialog.execute()
+  final picked = dialog.checkSelected('jiejiFeast')
+  var selected = null
+  if (picked == null || picked == 'cancel') {
+    if (free == true && picked == null) {
+      selected = 'treat'
+    } else {
+      return 'cancel'
+    }
+  } else {
+    selected = _jiejiFeastNormalizeKind(picked)
+  }
+  if (selected == null) return 'cancel'
+
+  final seasonId = _jiejiFeastSeasonId()
+  if (free != true) {
+    final moneyNeed = _jiejiFeastActionMoney(selected, seasonId)
+    if (moneyNeed > 0) {
+      final moneyHave = hero.materials['money'] ?? 0
+      if (moneyHave < moneyNeed) {
+        return 'poor'
+      }
+    }
+  }
+
+  if (free != true) {
+    final moneyNeed = _jiejiFeastActionMoney(selected, seasonId)
+    if (moneyNeed > 0) {
+      Player.exhaust('money', moneyNeed)
+    }
+    if (selected == 'drink') {
+      _jiejiFeastCostLife(_jiejiFeastDrinkLifeCost(seasonId))
+    }
+    _jiejiFeastMark()
+  }
+
+  if (selected == 'listen') {
+    if (random.nextDouble() < kJiejiFeastListenBlankRate) {
+      _jiejiFeastGrantBlank()
+      dialog.pushDialog('hint_feastJiejiHotel_listen_blank')
+    } else {
+      await Player.collect('herb', kJiejiFeastListenHerb, incurIncident: false)
+      dialog.pushDialog('hint_feastJiejiHotel_listen_herb')
+    }
+    await dialog.execute()
+  } else if (selected == 'drink') {
+    final jieji = ensureJiejiFlags()
+    jieji.feastFury = true
+    dialog.pushDialog('hint_feastJiejiHotel_drink')
+    await dialog.execute()
+  } else {
+    Player.restoreLife(kJiejiFeastTreatLife)
+    dialog.pushDialog('hint_feastJiejiHotel_treat')
+    await dialog.execute()
+    await tryDropGongfaShard(rate: kJiejiFeastTreatGongfaRate)
+  }
+
+  Game.updateUI()
+  return 'ok'
+}

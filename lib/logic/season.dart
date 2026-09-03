@@ -35,6 +35,9 @@ final class SeasonLogic {
   /// 雷火神：本场英雄造成伤害 +0.10。开战时从 flags.jieji.theurgyFury 锁入，打完清掉。
   static bool theurgyFuryThisFight = false;
 
+  /// 劫宴拼酒：本场英雄造成伤害 +0.08。开战时从 flags.jieji.feastFury 锁入，打完清掉。
+  static bool feastFuryThisFight = false;
+
   static int get dayIndexInYear {
     // month/day are 1-based after calculateTimestamp
     return (GameLogic.month - 1) * 30 + GameLogic.day;
@@ -482,6 +485,18 @@ final class SeasonLogic {
       if (theurgyFuryThisFight) {
         damageDetails['percentageChange3'] += 0.10;
       }
+      if (!feastFuryThisFight) {
+        try {
+          final jieji = _jiejiFlags();
+          if (jieji != null && jieji['feastFury'] == true) {
+            feastFuryThisFight = true;
+            jieji['feastFury'] = false;
+          }
+        } catch (_) {}
+      }
+      if (feastFuryThisFight) {
+        damageDetails['percentageChange3'] += 0.08;
+      }
     }
   }
 
@@ -545,12 +560,39 @@ final class SeasonLogic {
     theurgyFuryThisFight = false;
   }
 
+  static void beginFeastFuryFight() {
+    feastFuryThisFight = false;
+    try {
+      final jieji = _jiejiFlags();
+      if (jieji == null) return;
+      if (jieji['feastFury'] == true) {
+        feastFuryThisFight = true;
+        jieji['feastFury'] = false;
+      }
+    } catch (_) {}
+  }
+
+  static void endFeastFuryFight() {
+    feastFuryThisFight = false;
+  }
+
   static bool get theurgyPending {
     if (theurgyWardThisFight || theurgyFuryThisFight) return true;
     try {
       final jieji = _jiejiFlags();
       if (jieji == null) return false;
       return jieji['theurgyWard'] == true || jieji['theurgyFury'] == true;
+    } catch (_) {
+      return false;
+    }
+  }
+
+  static bool get feastPending {
+    if (feastFuryThisFight) return true;
+    try {
+      final jieji = _jiejiFlags();
+      if (jieji == null) return false;
+      return jieji['feastFury'] == true;
     } catch (_) {
       return false;
     }
@@ -623,6 +665,9 @@ final class SeasonLogic {
     }
     if (theurgyPending) {
       line += ' · 神';
+    }
+    if (feastPending) {
+      line += ' · 宴';
     }
     return line;
   }
