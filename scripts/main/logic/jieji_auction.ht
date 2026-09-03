@@ -1,0 +1,261 @@
+/// 拍卖行「劫季黑拍」：三件里拍一件。不替换原交易货架。
+const kJiejiAuctionBlankMoney = 100
+const kJiejiAuctionShardMoney = 180
+const kJiejiAuctionKarmaMoney = 80
+const kJiejiAuctionMistMoney = 60
+const kJiejiAuctionThunderMoney = 120
+const kJiejiAuctionBloodLife = 3
+const kJiejiAuctionKarmaRate = 0.40
+const kJiejiAuctionKarmaHerb = 2
+const kJiejiAuctionMistHerb = 3
+const kJiejiAuctionThunderWinMoney = 150
+const kJiejiAuctionBloodGongfaRate = 0.25
+const kJiejiAuctionBloodMoney = 200
+const kJiejiAuctionCooldownDays = 1
+const kJiejiAuctionCooldownMoves = 8
+
+function _jiejiAuctionSeasonId() {
+  if (game.jieji != null && game.jieji.seasonId != null) {
+    return game.jieji.seasonId
+  }
+  return 'thunder'
+}
+
+function ensureHomeAuction() {
+  if (hero == null) return
+  final city = getHeroHomeCity()
+  if (city == null) return
+  final siteIds = city.siteIds ?? []
+  for (final siteId in siteIds) {
+    final site = game.locations[siteId]
+    if (site != null && site.kind == kLocationKindAuctionHouse) return
+  }
+  Location(
+    category: 'site',
+    kind: kLocationKindAuctionHouse,
+    atCity: city,
+    sectId: city.sectId,
+    development: 0,
+    npcId: Constants.siteKindToNpcId[kLocationKindAuctionHouse],
+  )
+}
+
+function _jiejiAuctionCurrentDay() {
+  if (game.timestamp == null) return null
+  if (Constants.ticksPerDay == null) return null
+  if (Constants.ticksPerDay <= 0) return null
+  return game.timestamp ~/ Constants.ticksPerDay
+}
+
+function _jiejiAuctionOnCooldown() {
+  final jieji = ensureJiejiFlags()
+  final last = jieji.lastBlackLot
+  if (last == null) return false
+  final day = _jiejiAuctionCurrentDay()
+  final lastDay = last.day
+  final lastMove = last.move
+  var dayReady = false
+  var moveReady = false
+  if (day != null && lastDay != null) {
+    if (day - lastDay >= kJiejiAuctionCooldownDays) dayReady = true
+  }
+  if (lastMove != null) {
+    final moves = jieji.worldMoves ?? 0
+    if (moves - lastMove >= kJiejiAuctionCooldownMoves) moveReady = true
+  }
+  if (dayReady || moveReady) return false
+  if (lastDay != null || lastMove != null) return true
+  return false
+}
+
+function _jiejiAuctionMark() {
+  final jieji = ensureJiejiFlags()
+  jieji.lastBlackLot = {
+    day: _jiejiAuctionCurrentDay(),
+    move: jieji.worldMoves ?? 0,
+  }
+}
+
+function _jiejiAuctionGrantBlank() {
+  final card = BattleCard(rank: 0)
+  card.isCardBlank = true
+  Player.acquireCard(card)
+  return card
+}
+
+function _jiejiAuctionCostLife(want) {
+  var lost = want
+  final life = hero.life ?? 1
+  if (life - lost < 1) lost = life - 1
+  if (lost < 0) lost = 0
+  if (lost > 0) {
+    Player.setLife(hero.life - lost)
+  }
+  return lost
+}
+
+function _jiejiAuctionMoneyCost(kind) {
+  if (kind == 'jieji_blacklot_blank') return kJiejiAuctionBlankMoney
+  if (kind == 'jieji_blacklot_shard') return kJiejiAuctionShardMoney
+  if (kind == 'jieji_blacklot_karma') return kJiejiAuctionKarmaMoney
+  if (kind == 'jieji_blacklot_mist') return kJiejiAuctionMistMoney
+  if (kind == 'jieji_blacklot_thunder') return kJiejiAuctionThunderMoney
+  return 0
+}
+
+function _jiejiAuctionLotPool(seasonId) {
+  let pool = [
+    'jieji_blacklot_blank',
+    'jieji_blacklot_shard',
+    'jieji_blacklot_karma',
+    'jieji_blacklot_mist',
+    'jieji_blacklot_thunder',
+    'jieji_blacklot_blood',
+  ]
+  if (seasonId == 'mist') {
+    pool.add('jieji_blacklot_mist')
+    pool.add('jieji_blacklot_mist')
+  } else if (seasonId == 'thunder') {
+    pool.add('jieji_blacklot_thunder')
+    pool.add('jieji_blacklot_thunder')
+  } else if (seasonId == 'blood') {
+    pool.add('jieji_blacklot_blood')
+    pool.add('jieji_blacklot_blood')
+  }
+  return pool
+}
+
+function _jiejiAuctionPickLots(seasonId) {
+  var pool = _jiejiAuctionLotPool(seasonId)
+  let lots = []
+  while (lots.length < 3 && pool.isNotEmpty) {
+    final kind = random.nextIterable(pool)
+    lots.add(kind)
+    let next = []
+    for (final item in pool) {
+      if (item != kind) next.add(item)
+    }
+    pool = next
+  }
+  return lots
+}
+
+function _jiejiAuctionLotOptions(lots) {
+  let options = []
+  for (final kind in lots) {
+    var desc = 'hint_jieji_blacklot_blank'
+    if (kind == 'jieji_blacklot_shard') desc = 'hint_jieji_blacklot_shard'
+    if (kind == 'jieji_blacklot_karma') desc = 'hint_jieji_blacklot_karma'
+    if (kind == 'jieji_blacklot_mist') desc = 'hint_jieji_blacklot_mist'
+    if (kind == 'jieji_blacklot_thunder') desc = 'hint_jieji_blacklot_thunder'
+    if (kind == 'jieji_blacklot_blood') desc = 'hint_jieji_blacklot_blood'
+    options.add({
+      text: kind,
+      description: desc,
+    })
+  }
+  options.add('jieji_blacklot_leave')
+  return options
+}
+
+/// 拍卖行劫季黑拍。free 为 true 时不扣费、不检查冷却（debug）。
+/// 返回 'ok' | 'cooldown' | 'poor' | 'cancel'。
+async function bidJiejiBlackLot({ free = false }) {
+  if (hero == null) return 'cancel'
+  if (free != true && _jiejiAuctionOnCooldown()) {
+    return 'cooldown'
+  }
+
+  final seasonId = _jiejiAuctionSeasonId()
+  final lots = _jiejiAuctionPickLots(seasonId)
+  if (lots.isEmpty) return 'cancel'
+
+  dialog.pushDialog('hint_bidJiejiBlackLot')
+  dialog.pushSelection('jiejiBlackLot', _jiejiAuctionLotOptions(lots))
+  await dialog.execute()
+  var selected = dialog.checkSelected('jiejiBlackLot')
+  if (selected == null || selected == 'cancel' || selected == 'jieji_blacklot_leave') {
+    if (free == true && selected == null) {
+      selected = lots.first
+    } else {
+      return 'cancel'
+    }
+  }
+
+  var known = false
+  for (final kind in lots) {
+    if (kind == selected) known = true
+  }
+  if (known != true) return 'cancel'
+
+  final moneyCost = _jiejiAuctionMoneyCost(selected)
+  if (free != true && moneyCost > 0) {
+    final moneyHave = hero.materials['money'] ?? 0
+    if (moneyHave < moneyCost) {
+      return 'poor'
+    }
+  }
+
+  if (free != true) {
+    if (moneyCost > 0) {
+      Player.exhaust('money', moneyCost)
+    }
+    if (selected == 'jieji_blacklot_blood') {
+      _jiejiAuctionCostLife(kJiejiAuctionBloodLife)
+    }
+    _jiejiAuctionMark()
+  }
+
+  if (selected == 'jieji_blacklot_blank') {
+    _jiejiAuctionGrantBlank()
+    dialog.pushDialog('hint_bidJiejiBlackLot_blank')
+    await dialog.execute()
+  } else if (selected == 'jieji_blacklot_shard') {
+    var ok = await tryDropGongfaShard(rate: 1)
+    if (ok != true) {
+      ok = await grantGongfaShard(null)
+    }
+    if (ok != true) {
+      dialog.pushDialog('hint_bidJiejiBlackLot_shard_none')
+      await dialog.execute()
+    }
+  } else if (selected == 'jieji_blacklot_karma') {
+    if (random.nextDouble() < kJiejiAuctionKarmaRate) {
+      await grantKarmaCard('blackmarket')
+    } else {
+      await Player.collect('herb', kJiejiAuctionKarmaHerb, incurIncident: false)
+      dialog.pushDialog('hint_bidJiejiBlackLot_karma_herb')
+      await dialog.execute()
+    }
+  } else if (selected == 'jieji_blacklot_mist') {
+    await Player.collect('herb', kJiejiAuctionMistHerb, incurIncident: false)
+    dialog.pushDialog('hint_bidJiejiBlackLot_mist')
+    await dialog.execute()
+  } else if (selected == 'jieji_blacklot_thunder') {
+    if (random.nextDouble() < 0.5) {
+      await Player.collect('money', kJiejiAuctionThunderWinMoney, incurIncident: false)
+      dialog.pushDialog('hint_bidJiejiBlackLot_thunder_money')
+      await dialog.execute()
+    } else {
+      _jiejiAuctionGrantBlank()
+      dialog.pushDialog('hint_bidJiejiBlackLot_thunder_blank')
+      await dialog.execute()
+    }
+  } else if (selected == 'jieji_blacklot_blood') {
+    if (random.nextDouble() < kJiejiAuctionBloodGongfaRate) {
+      final ok = await grantGongfaShard(null)
+      if (ok != true) {
+        await Player.collect('money', kJiejiAuctionBloodMoney, incurIncident: false)
+        dialog.pushDialog('hint_bidJiejiBlackLot_blood_money')
+        await dialog.execute()
+      }
+    } else {
+      await Player.collect('money', kJiejiAuctionBloodMoney, incurIncident: false)
+      dialog.pushDialog('hint_bidJiejiBlackLot_blood_money')
+      await dialog.execute()
+    }
+  }
+
+  Game.updateUI()
+  return 'ok'
+}

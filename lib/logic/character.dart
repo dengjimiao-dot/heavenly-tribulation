@@ -1997,6 +1997,27 @@ Future<void> _heroDuelJiejiArena(dynamic location) async {
   }
 }
 
+
+Future<void> _heroBidJiejiBlackLot(dynamic location) async {
+  final result = await engine.hetu.invoke('bidJiejiBlackLot');
+  if (result == 'cooldown') {
+    dialog.pushDialog(
+      'hint_bidJiejiBlackLot_cooldown',
+      npcId: location['npcId'],
+    );
+    await dialog.execute();
+    return;
+  }
+  if (result == 'poor') {
+    dialog.pushDialog(
+      'hint_bidJiejiBlackLot_notEnough',
+      npcId: location['npcId'],
+    );
+    await dialog.execute();
+    return;
+  }
+}
+
 Future<void> _heroShowKarmaCodex(dynamic location) async {
   final text = engine.hetu.invoke('formatKarmaCodex');
   dialog.pushDialog(
@@ -2036,6 +2057,12 @@ Future<void> _onInteractSite(
   }
   if (kSiteKindsTradable.contains(siteKind)) {
     siteOptions.add('trade');
+  }
+  if (siteKind == 'auctionhouse') {
+    siteOptions.add({
+      'text': 'bidJiejiBlackLot',
+      'description': 'hint_bidJiejiBlackLot_description',
+    });
   }
   if (siteKind == 'tradinghouse' || kProductionSiteKinds.contains(siteKind)) {
     siteOptions.add('tradeMaterial');
@@ -2168,6 +2195,8 @@ Future<void> _onInteractSite(
       await dialog.execute();
     case 'duelJiejiArena':
       await _heroDuelJiejiArena(location);
+    case 'bidJiejiBlackLot':
+      await _heroBidJiejiBlackLot(location);
     case 'divination':
       await _heroDivination(location);
     case 'consultJiejiStars':

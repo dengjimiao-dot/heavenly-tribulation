@@ -261,6 +261,10 @@ namespace debug {
     return await duelJiejiArena(free: true)
   }
 
+  async function forceBlackLot() {
+    return await bidJiejiBlackLot(free: true)
+  }
+
   /// 忽略几率与冷却，在当前地形开一场劫纹精英（未知则平原）。
   async function forceWildElite() {
     if (hero == null) return
