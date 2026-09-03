@@ -1,0 +1,209 @@
+/// 铸牌斋「检胚」：温胚 / 借纹 / 血炼。不替换铸牌、精铸、业力录。
+const kJiejiAssayCooldownDays = 1
+const kJiejiAssayWarmHerb = 1
+const kJiejiAssayWarmHerbMist = 0
+const kJiejiAssayWarmLife = 6
+const kJiejiAssaySparkMoney = 40
+const kJiejiAssaySparkMoneyThunder = 20
+const kJiejiAssaySparkLife = 4
+const kJiejiAssayBloodLife = 2
+const kJiejiAssayBloodLifeBlood = 3
+const kJiejiAssayBloodGongfaRate = 0.35
+const kJiejiAssayBloodMoney = 40
+
+function _jiejiAssaySeasonId() {
+  if (game.jieji != null && game.jieji.seasonId != null) {
+    return game.jieji.seasonId
+  }
+  return null
+}
+
+function _jiejiAssayCurrentDay() {
+  if (game.timestamp == null) return null
+  if (Constants.ticksPerDay == null) return null
+  if (Constants.ticksPerDay <= 0) return null
+  return game.timestamp ~/ Constants.ticksPerDay
+}
+
+function _jiejiAssayOnCooldown() {
+  final jieji = ensureJiejiFlags()
+  final day = _jiejiAssayCurrentDay()
+  if (day == null) return false
+  if (jieji.lastAssayDay == null) return false
+  if (day - jieji.lastAssayDay < kJiejiAssayCooldownDays) return true
+  return false
+}
+
+function _jiejiAssayMark() {
+  final jieji = ensureJiejiFlags()
+  jieji.lastAssayDay = _jiejiAssayCurrentDay()
+}
+
+function _jiejiAssayCostLife(want) {
+  var lost = want
+  final life = hero.life ?? 1
+  if (life - lost < 1) lost = life - 1
+  if (lost < 0) lost = 0
+  if (lost > 0) {
+    Player.setLife(hero.life - lost)
+  }
+  return lost
+}
+
+function _jiejiAssayWarmHerbCost(seasonId) {
+  if (seasonId == 'mist') return kJiejiAssayWarmHerbMist
+  return kJiejiAssayWarmHerb
+}
+
+function _jiejiAssaySparkMoneyCost(seasonId) {
+  if (seasonId == 'thunder') return kJiejiAssaySparkMoneyThunder
+  return kJiejiAssaySparkMoney
+}
+
+function _jiejiAssayBloodLifeCost(seasonId) {
+  if (seasonId == 'blood') return kJiejiAssayBloodLifeBlood
+  return kJiejiAssayBloodLife
+}
+
+function _jiejiAssayNormalizeKind(kind) {
+  if (kind == 'warm' || kind == 'jieji_assay_warm') return 'warm'
+  if (kind == 'spark' || kind == 'jieji_assay_spark') return 'spark'
+  if (kind == 'blood' || kind == 'jieji_assay_blood') return 'blood'
+  return null
+}
+
+function _jiejiAssayChoices() {
+  return [
+    {
+      text: 'jieji_assay_warm',
+      description: 'hint_jieji_assay_warm',
+    },
+    {
+      text: 'jieji_assay_spark',
+      description: 'hint_jieji_assay_spark',
+    },
+    {
+      text: 'jieji_assay_blood',
+      description: 'hint_jieji_assay_blood',
+    },
+    'cancel',
+  ]
+}
+
+function _jiejiAssayHerbNeed(selected, seasonId) {
+  if (selected == 'warm') return _jiejiAssayWarmHerbCost(seasonId)
+  return 0
+}
+
+function _jiejiAssayMoneyNeed(selected, seasonId) {
+  if (selected == 'spark') return _jiejiAssaySparkMoneyCost(seasonId)
+  return 0
+}
+
+/// 优先给一枚零阶牌胚。构不成或入手失败则挂破军 / 拼酒劲 / 回 4 命。
+function _jiejiAssayGrantBlank() {
+  final card = BattleCard(rank: 0)
+  if (card == null) return null
+  card.isCardBlank = true
+  Player.acquireCard(card)
+  return card
+}
+
+function _jiejiAssayApplySparkFallback() {
+  final jieji = ensureJiejiFlags()
+  if (jieji.arrayFury != true) {
+    jieji.arrayFury = true
+    return 'array'
+  }
+  if (jieji.feastFury != true) {
+    jieji.feastFury = true
+    return 'feast'
+  }
+  return null
+}
+
+/// 铸牌斋检胚三选。free 为 true 时不扣费、不检查冷却（debug），仍弹出三选。
+/// 返回 'ok' | 'cooldown' | 'poor' | 'cancel'。
+async function assayJiejiBlank({ free = false }) {
+  if (hero == null) return 'cancel'
+  if (free != true && _jiejiAssayOnCooldown()) {
+    return 'cooldown'
+  }
+
+  dialog.pushDialog('hint_assayJiejiBlank')
+  dialog.pushSelection('jiejiAssay', _jiejiAssayChoices())
+  await dialog.execute()
+  final picked = dialog.checkSelected('jiejiAssay')
+  var selected = null
+  if (picked == null || picked == 'cancel') {
+    if (free == true && picked == null) {
+      selected = 'warm'
+    } else {
+      return 'cancel'
+    }
+  } else {
+    selected = _jiejiAssayNormalizeKind(picked)
+  }
+  if (selected == null) return 'cancel'
+
+  final seasonId = _jiejiAssaySeasonId()
+  if (free != true) {
+    final herbNeed = _jiejiAssayHerbNeed(selected, seasonId)
+    final moneyNeed = _jiejiAssayMoneyNeed(selected, seasonId)
+    final herbHave = hero.materials['herb'] ?? 0
+    final moneyHave = hero.materials['money'] ?? 0
+    if (herbHave < herbNeed || moneyHave < moneyNeed) {
+      return 'poor'
+    }
+  }
+
+  if (free != true) {
+    final herbNeed = _jiejiAssayHerbNeed(selected, seasonId)
+    final moneyNeed = _jiejiAssayMoneyNeed(selected, seasonId)
+    if (herbNeed > 0) {
+      Player.exhaust('herb', herbNeed)
+    }
+    if (moneyNeed > 0) {
+      Player.exhaust('money', moneyNeed)
+    }
+    if (selected == 'blood') {
+      _jiejiAssayCostLife(_jiejiAssayBloodLifeCost(seasonId))
+    }
+    _jiejiAssayMark()
+  }
+
+  if (selected == 'spark') {
+    final card = _jiejiAssayGrantBlank()
+    if (card != null) {
+      dialog.pushDialog('hint_assayJiejiBlank_spark')
+    } else {
+      final fallback = _jiejiAssayApplySparkFallback()
+      if (fallback == 'array') {
+        dialog.pushDialog('hint_assayJiejiBlank_spark_array')
+      } else if (fallback == 'feast') {
+        dialog.pushDialog('hint_assayJiejiBlank_spark_feast')
+      } else {
+        Player.restoreLife(kJiejiAssaySparkLife)
+        dialog.pushDialog('hint_assayJiejiBlank_spark_life')
+      }
+    }
+    await dialog.execute()
+  } else if (selected == 'blood') {
+    final dropped = await tryDropGongfaShard(rate: kJiejiAssayBloodGongfaRate)
+    if (dropped != true) {
+      await Player.collect('money', kJiejiAssayBloodMoney, incurIncident: false)
+      dialog.pushDialog('hint_assayJiejiBlank_blood_money')
+      await dialog.execute()
+    } else {
+      dialog.pushDialog('hint_assayJiejiBlank_blood')
+      await dialog.execute()
+    }
+  } else {
+    Player.restoreLife(kJiejiAssayWarmLife)
+    dialog.pushDialog('hint_assayJiejiBlank_warm')
+    await dialog.execute()
+  }
+
+  Game.updateUI()
+  return 'ok'
+}

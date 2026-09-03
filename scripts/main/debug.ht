@@ -463,6 +463,11 @@ namespace debug {
     return await haggleJiejiGoods(free: true)
   }
 
+  /// 忽略冷却与花费，仍弹出铸牌斋检胚三选。
+  async function forceAssay() {
+    return await assayJiejiBlank(free: true)
+  }
+
   async function forceArray(kind) {
     var k = kind
     if (k != 'ward' && k != 'fury' && k != 'mist') {

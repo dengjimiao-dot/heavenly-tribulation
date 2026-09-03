@@ -2880,6 +2880,29 @@ Future<void> _heroShowKarmaCodex(dynamic location) async {
   await dialog.execute();
 }
 
+Future<void> _heroAssayJiejiBlank(dynamic location) async {
+  final isRented = await GameLogic.checkRented(location);
+  if (!isRented) return;
+
+  final result = await engine.hetu.invoke('assayJiejiBlank');
+  if (result == 'cooldown') {
+    dialog.pushDialog(
+      'hint_assayJiejiBlank_cooldown',
+      npcId: location['npcId'],
+    );
+    await dialog.execute();
+    return;
+  }
+  if (result == 'poor') {
+    dialog.pushDialog(
+      'hint_assayJiejiBlank_notEnough',
+      npcId: location['npcId'],
+    );
+    await dialog.execute();
+    return;
+  }
+}
+
 Future<void> _onInteractSite(
   dynamic location,
   String siteKind,
@@ -2959,6 +2982,10 @@ Future<void> _onInteractSite(
     siteOptions.add({
       'text': 'karmaCodex',
       'description': 'hint_karmaCodex_description',
+    });
+    siteOptions.add({
+      'text': 'assayJiejiBlank',
+      'description': 'hint_assayJiejiBlank_description',
     });
   } else if (siteKind == 'enchantshop') {
     siteOptions.add({
@@ -3168,6 +3195,8 @@ Future<void> _onInteractSite(
       await _heroForgeCardBlank(location, advanced: true);
     case 'karmaCodex':
       await _heroShowKarmaCodex(location);
+    case 'assayJiejiBlank':
+      await _heroAssayJiejiBlank(location);
     case 'sparkJiejiEnchant':
       await _heroSparkJiejiEnchant(location);
     case 'quenchJiejiSpirit':
