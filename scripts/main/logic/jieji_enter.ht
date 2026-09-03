@@ -1,0 +1,203 @@
+/// 幻术祭坛「入幻」三选：观影 / 借形 / 血影。不替换迷障。
+const kJiejiEnterCooldownDays = 1
+const kJiejiEnterGazeHerb = 1
+const kJiejiEnterGazeLife = 5
+const kJiejiEnterGazeGongfaRate = 0.25
+const kJiejiEnterFormMoney = 40
+const kJiejiEnterFormMoneyThunder = 20
+const kJiejiEnterFormLife = 4
+const kJiejiEnterBloodLife = 2
+const kJiejiEnterBloodLifeBlood = 3
+const kJiejiEnterBloodGongfaRate = 0.6
+const kJiejiEnterBloodMoney = 50
+
+function _jiejiEnterSeasonId() {
+  if (game.jieji != null && game.jieji.seasonId != null) {
+    return game.jieji.seasonId
+  }
+  return 'thunder'
+}
+
+function _jiejiEnterCurrentDay() {
+  if (game.timestamp == null) return null
+  if (Constants.ticksPerDay == null) return null
+  if (Constants.ticksPerDay <= 0) return null
+  return game.timestamp ~/ Constants.ticksPerDay
+}
+
+function _jiejiEnterOnCooldown() {
+  final jieji = ensureJiejiFlags()
+  final day = _jiejiEnterCurrentDay()
+  if (day == null) return false
+  if (jieji.lastEnterDay == null) return false
+  if (day - jieji.lastEnterDay < kJiejiEnterCooldownDays) return true
+  return false
+}
+
+function _jiejiEnterMark() {
+  final jieji = ensureJiejiFlags()
+  jieji.lastEnterDay = _jiejiEnterCurrentDay()
+}
+
+function _jiejiEnterCostLife(want) {
+  var lost = want
+  final life = hero.life ?? 1
+  if (life - lost < 1) lost = life - 1
+  if (lost < 0) lost = 0
+  if (lost > 0) {
+    Player.setLife(hero.life - lost)
+  }
+  return lost
+}
+
+function _jiejiEnterGazeHerbCost(seasonId) {
+  if (seasonId == 'mist') return 0
+  return kJiejiEnterGazeHerb
+}
+
+function _jiejiEnterFormMoneyCost(seasonId) {
+  if (seasonId == 'thunder') return kJiejiEnterFormMoneyThunder
+  return kJiejiEnterFormMoney
+}
+
+function _jiejiEnterBloodLifeCost(seasonId) {
+  if (seasonId == 'blood') return kJiejiEnterBloodLifeBlood
+  return kJiejiEnterBloodLife
+}
+
+function _jiejiEnterNormalizeKind(kind) {
+  if (kind == 'gaze' || kind == 'jieji_enter_gaze') return 'gaze'
+  if (kind == 'form' || kind == 'jieji_enter_form') return 'form'
+  if (kind == 'blood' || kind == 'jieji_enter_blood') return 'blood'
+  return null
+}
+
+function _jiejiEnterChoices() {
+  return [
+    {
+      text: 'jieji_enter_gaze',
+      description: 'hint_jieji_enter_gaze',
+    },
+    {
+      text: 'jieji_enter_form',
+      description: 'hint_jieji_enter_form',
+    },
+    {
+      text: 'jieji_enter_blood',
+      description: 'hint_jieji_enter_blood',
+    },
+    'cancel',
+  ]
+}
+
+function _jiejiEnterHerbNeed(selected, seasonId) {
+  if (selected == 'gaze') return _jiejiEnterGazeHerbCost(seasonId)
+  return 0
+}
+
+function _jiejiEnterMoneyNeed(selected, seasonId) {
+  if (selected == 'form') return _jiejiEnterFormMoneyCost(seasonId)
+  return 0
+}
+
+/// 护身阵未挂则挂 arrayWard；已挂则挂 feastFury。两者都有则只回血。
+function _jiejiEnterApplyForm() {
+  final jieji = ensureJiejiFlags()
+  if (jieji.arrayWard != true) {
+    jieji.arrayWard = true
+    return 'ward'
+  }
+  if (jieji.feastFury != true) {
+    jieji.feastFury = true
+    return 'fury'
+  }
+  return null
+}
+
+/// 幻术祭坛入幻三选。free 为 true 时不扣费、不检查冷却（debug），仍弹出三选。
+/// 返回 'ok' | 'cooldown' | 'poor' | 'cancel'。
+async function enterJiejiIllusion({ free = false }) {
+  if (hero == null) return 'cancel'
+  if (free != true && _jiejiEnterOnCooldown()) {
+    return 'cooldown'
+  }
+
+  dialog.pushDialog('hint_enterJiejiIllusion')
+  dialog.pushSelection('jiejiEnter', _jiejiEnterChoices())
+  await dialog.execute()
+  final picked = dialog.checkSelected('jiejiEnter')
+  var selected = null
+  if (picked == null || picked == 'cancel') {
+    if (free == true && picked == null) {
+      selected = 'gaze'
+    } else {
+      return 'cancel'
+    }
+  } else {
+    selected = _jiejiEnterNormalizeKind(picked)
+  }
+  if (selected == null) return 'cancel'
+
+  final seasonId = _jiejiEnterSeasonId()
+  if (free != true) {
+    final herbNeed = _jiejiEnterHerbNeed(selected, seasonId)
+    final moneyNeed = _jiejiEnterMoneyNeed(selected, seasonId)
+    final herbHave = hero.materials['herb'] ?? 0
+    final moneyHave = hero.materials['money'] ?? 0
+    if (herbHave < herbNeed || moneyHave < moneyNeed) {
+      return 'poor'
+    }
+  }
+
+  var bloodLost = 0
+  if (free != true) {
+    final herbNeed = _jiejiEnterHerbNeed(selected, seasonId)
+    final moneyNeed = _jiejiEnterMoneyNeed(selected, seasonId)
+    if (herbNeed > 0) {
+      Player.exhaust('herb', herbNeed)
+    }
+    if (moneyNeed > 0) {
+      Player.exhaust('money', moneyNeed)
+    }
+    if (selected == 'blood') {
+      bloodLost = _jiejiEnterCostLife(_jiejiEnterBloodLifeCost(seasonId))
+    }
+    _jiejiEnterMark()
+  }
+
+  if (selected == 'form') {
+    final flag = _jiejiEnterApplyForm()
+    if (flag == 'ward') {
+      dialog.pushDialog('hint_enterJiejiIllusion_form_ward')
+    } else if (flag == 'fury') {
+      dialog.pushDialog('hint_enterJiejiIllusion_form_fury')
+    } else {
+      final healed = Player.restoreLife(kJiejiEnterFormLife)
+      dialog.pushDialog('hint_enterJiejiIllusion_form', interpolations: [healed])
+    }
+    await dialog.execute()
+  } else if (selected == 'blood') {
+    if (free == true) {
+      bloodLost = _jiejiEnterBloodLifeCost(seasonId)
+    }
+    dialog.pushDialog('hint_enterJiejiIllusion_blood', interpolations: [bloodLost])
+    await dialog.execute()
+    var ok = await tryDropGongfaShard(rate: kJiejiEnterBloodGongfaRate)
+    if (ok != true) {
+      ok = await grantGongfaShard(null)
+    }
+    if (ok != true) {
+      await Player.collect('money', kJiejiEnterBloodMoney, incurIncident: false)
+      dialog.pushDialog('hint_enterJiejiIllusion_blood_none', interpolations: [kJiejiEnterBloodMoney])
+      await dialog.execute()
+    }
+  } else {
+    final healed = Player.restoreLife(kJiejiEnterGazeLife)
+    dialog.pushDialog('hint_enterJiejiIllusion_gaze', interpolations: [healed])
+    await dialog.execute()
+    await tryDropGongfaShard(rate: kJiejiEnterGazeGongfaRate)
+  }
+
+  Game.updateUI()
+  return 'ok'
+}

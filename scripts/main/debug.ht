@@ -516,6 +516,11 @@ namespace debug {
     return await playJiejiLanternEvent({ kind: 'plain' })
   }
 
+  /// 忽略冷却与花费，仍弹出幻术祭坛入幻三选。
+  async function forceEnter() {
+    return await enterJiejiIllusion(free: true)
+  }
+
   /// 忽略费用与冷却，直接挂上迷障（下次野遇糊弄过去）。
   function forceVeil() {
     if (hero == null) return
