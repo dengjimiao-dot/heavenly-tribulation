@@ -482,6 +482,16 @@ final class SeasonLogic {
     }
   }
 
+  static bool get veilPending {
+    try {
+      final jieji = _jiejiFlags();
+      if (jieji == null) return false;
+      return jieji['illusionVeil'] == true;
+    } catch (_) {
+      return false;
+    }
+  }
+
   static String hudLine() {
     if (GameData.seasons.isEmpty) return '';
     var line = '$currentName · 余$daysRemainingInSeason日';
@@ -506,6 +516,9 @@ final class SeasonLogic {
     }
     if (arrayPending) {
       line += ' · 阵';
+    }
+    if (veilPending) {
+      line += ' · 障';
     }
     return line;
   }

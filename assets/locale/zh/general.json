@@ -1144,6 +1144,21 @@
   "hint_layJiejiArray_cooldown": "阵盘余温未散。过一日再来布阵。",
   "hint_layJiejiArray_notEnough": "布阵要 2 药材和 60 铜钱，并耗 1 点生机。",
 
+  "castJiejiVeil": "迷障",
+  "jiejiVeil": "迷障",
+  "hint_castJiejiVeil_description": "耗 2 药材与 40 铜钱施迷障。一日一次。雾月 1 药材。雷月 50 铜钱。血月再耗 1 点生机（至少留 1）。迷障：下次野遇被糊弄过去。疑兵：立刻得 80 铜钱，不挂迷障。已有迷障再施会刷新。",
+  "hint_castJiejiVeil": "坛上起雾。耗 2 药材与 40 铜钱。雾月 1 药材。雷月 50 铜钱。血月再耗 1 点生机（至少留 1）。一日一次。迷障糊弄下次野遇；疑兵立刻换 80 铜钱。",
+  "jieji_veil_cast": "迷障",
+  "jieji_veil_decoy": "疑兵",
+  "jieji_veil_leave": "离开",
+  "hint_jieji_veil_cast": "迷障：挂一层障。下次野遇被糊弄过去，不打仗。",
+  "hint_jieji_veil_decoy": "疑兵：立刻得 80 铜钱，不挂迷障。",
+  "hint_castJiejiVeil_done": "迷障落下。下次野遇会被糊弄过去。",
+  "hint_castJiejiVeil_done_decoy": "疑兵布好。立刻得了 80 铜钱。",
+  "hint_castJiejiVeil_cooldown": "坛上余雾未散。过一日再来施术。",
+  "hint_castJiejiVeil_notEnough": "迷障要 2 药材和 40 铜钱。雾月 1 药材。雷月 50 铜钱。血月再耗 1 点生机。",
+  "hint_jieji_veil_dodge": "眼前一阵迷障。这一场野遇被糊弄过去了。",
+
 
   "recruitJiejiAid": "招外援",
   "hint_recruitJiejiAid_description": "耗费人力与铜钱，从外门寮招来三张当季外援战牌。雷月铜钱更省，血月以人力作血税，雾月或可多一张。季末或出秘境后消散。",

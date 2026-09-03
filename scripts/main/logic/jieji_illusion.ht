@@ -1,0 +1,162 @@
+/// 幻术祭坛「迷障」：糊弄下一场野遇，或布疑兵换铜钱。不替换原幻术 UI。
+const kJiejiVeilHerbCost = 2
+const kJiejiVeilMoneyCost = 40
+const kJiejiVeilMoneyCostThunder = 50
+const kJiejiVeilHerbCostMist = 1
+const kJiejiVeilLifeCostBlood = 1
+const kJiejiVeilCooldownDays = 1
+const kJiejiVeilDecoyMoney = 80
+
+function _jiejiVeilSeasonId() {
+  if (game.jieji != null && game.jieji.seasonId != null) {
+    return game.jieji.seasonId
+  }
+  return null
+}
+
+function jiejiVeilCosts() {
+  var herb = kJiejiVeilHerbCost
+  var money = kJiejiVeilMoneyCost
+  var life = 0
+  final seasonId = _jiejiVeilSeasonId()
+  if (seasonId == 'thunder') {
+    money = kJiejiVeilMoneyCostThunder
+  } else if (seasonId == 'mist') {
+    herb = kJiejiVeilHerbCostMist
+  } else if (seasonId == 'blood') {
+    life = kJiejiVeilLifeCostBlood
+  }
+  return {
+    herb: herb,
+    money: money,
+    life: life,
+  }
+}
+
+function ensureHomeIllusionAltar() {
+  if (hero == null) return
+  final city = getHeroHomeCity()
+  if (city == null) return
+  final siteIds = city.siteIds ?? []
+  for (final siteId in siteIds) {
+    final site = game.locations[siteId]
+    if (site != null && site.kind == kLocationKindIllusionAltar) return
+  }
+  Location(
+    category: 'site',
+    kind: kLocationKindIllusionAltar,
+    atCity: city,
+    sectId: city.sectId,
+    development: 0,
+    npcId: Constants.siteKindToNpcId[kLocationKindIllusionAltar],
+  )
+}
+
+function _jiejiVeilCurrentDay() {
+  if (game.timestamp == null) return null
+  if (Constants.ticksPerDay == null) return null
+  if (Constants.ticksPerDay <= 0) return null
+  return game.timestamp ~/ Constants.ticksPerDay
+}
+
+function _jiejiVeilOnCooldown() {
+  final jieji = ensureJiejiFlags()
+  final day = _jiejiVeilCurrentDay()
+  if (day == null) return false
+  if (jieji.lastVeilDay == null) return false
+  if (day - jieji.lastVeilDay < kJiejiVeilCooldownDays) return true
+  return false
+}
+
+function _jiejiVeilMark() {
+  final jieji = ensureJiejiFlags()
+  jieji.lastVeilDay = _jiejiVeilCurrentDay()
+}
+
+function _jiejiVeilCostLife(want) {
+  var lost = want
+  final life = hero.life ?? 1
+  if (life - lost < 1) lost = life - 1
+  if (lost < 0) lost = 0
+  if (lost > 0) {
+    Player.setLife(hero.life - lost)
+  }
+  return lost
+}
+
+function _jiejiVeilChoices() {
+  return [
+    {
+      text: 'jieji_veil_cast',
+      description: 'hint_jieji_veil_cast',
+    },
+    {
+      text: 'jieji_veil_decoy',
+      description: 'hint_jieji_veil_decoy',
+    },
+    'jieji_veil_leave',
+  ]
+}
+
+function consumeJiejiIllusionVeil() {
+  final jieji = ensureJiejiFlags()
+  if (jieji.illusionVeil != true) return false
+  jieji.illusionVeil = false
+  return true
+}
+
+/// 幻术祭坛迷障。free 为 true 时不扣费、不检查冷却（debug）。
+/// 返回 'ok' | 'cooldown' | 'poor' | 'cancel'。
+async function castJiejiVeil({ free = false }) {
+  if (hero == null) return 'cancel'
+  if (free != true && _jiejiVeilOnCooldown()) {
+    return 'cooldown'
+  }
+
+  if (free != true) {
+    final costs = jiejiVeilCosts()
+    final herbHave = hero.materials['herb'] ?? 0
+    final moneyHave = hero.materials['money'] ?? 0
+    if (herbHave < costs.herb || moneyHave < costs.money) {
+      return 'poor'
+    }
+  }
+
+  dialog.pushDialog('hint_castJiejiVeil')
+  dialog.pushSelection('jiejiVeil', _jiejiVeilChoices())
+  await dialog.execute()
+  var selected = dialog.checkSelected('jiejiVeil')
+  if (selected == null || selected == 'cancel' || selected == 'jieji_veil_leave') {
+    if (free == true && selected == null) {
+      selected = 'jieji_veil_cast'
+    } else {
+      return 'cancel'
+    }
+  }
+  if (selected != 'jieji_veil_cast' && selected != 'jieji_veil_decoy') {
+    return 'cancel'
+  }
+
+  if (free != true) {
+    final costs = jiejiVeilCosts()
+    Player.exhaust('herb', costs.herb)
+    Player.exhaust('money', costs.money)
+    if (costs.life > 0) {
+      _jiejiVeilCostLife(costs.life)
+    }
+    _jiejiVeilMark()
+  }
+
+  final jieji = ensureJiejiFlags()
+  if (selected == 'jieji_veil_decoy') {
+    await Player.collect('money', kJiejiVeilDecoyMoney, incurIncident: false)
+    dialog.pushDialog('hint_castJiejiVeil_done_decoy')
+    await dialog.execute()
+  } else {
+    jieji.illusionVeil = true
+    dialog.pushDialog('hint_castJiejiVeil_done')
+    await dialog.execute()
+  }
+  Game.updateUI()
+  return 'ok'
+}

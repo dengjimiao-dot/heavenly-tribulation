@@ -13,6 +13,7 @@ async function onNewGame() {
   ensureHomeExpArray()
   ensureHomeDaoStele()
   ensureHomeArrayLab()
+  ensureHomeIllusionAltar()
   final xitong = game.npcs['xitong']
 
   // final itemsInfo = [
@@ -87,6 +88,12 @@ async function tryWildEncounterOnMove(terrain) {
   let er = rate * (1 - hero.rank * kEnemyEncounterRateRankFactor) * jiejiWildEncounterMul()
   if (er < 0) er = 0
   if (random.nextDouble() > er) return false
+  if (consumeJiejiIllusionVeil()) {
+    dialog.pushDialog('hint_jieji_veil_dodge')
+    await dialog.execute()
+    Game.updateUI()
+    return true
+  }
   if (consumeJiejiStarWardWild()) {
     await encounterEnemy(
       rank: hero.rank,
