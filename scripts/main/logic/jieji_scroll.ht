@@ -1,0 +1,165 @@
+/// 赶路「劫纹残卷」三选：展卷 / 抄录 / 血印。隐藏、劫兆、野遇、赶路、行商、拾荒、扎营、残锋都没中时才滚。
+const kJiejiScrollBaseRate = 0.06
+const kJiejiScrollMoveCooldown = 12
+const kJiejiScrollReadHerb = 1
+const kJiejiScrollReadGongfaRate = 0.40
+const kJiejiScrollReadGongfaRateThunder = 0.55
+const kJiejiScrollReadMoney = 30
+const kJiejiScrollCopyMoney = 20
+const kJiejiScrollCopyLife = 3
+const kJiejiScrollSmearLife = 2
+const kJiejiScrollSmearLifeBlood = 3
+const kJiejiScrollSmearGongfaRate = 0.70
+const kJiejiScrollSmearMoney = 50
+
+function _jiejiScrollSeasonId() {
+  if (game.jieji != null && game.jieji.seasonId != null) {
+    return game.jieji.seasonId
+  }
+  return null
+}
+
+function _jiejiScrollTutorialLocked() {
+  return game.enableTutorial && game.flags.tutorial.bountyQuest != true
+}
+
+function _jiejiScrollReadHerbCost(seasonId) {
+  if (seasonId == 'mist') return 0
+  return kJiejiScrollReadHerb
+}
+
+function _jiejiScrollReadGongfaChance(seasonId) {
+  if (seasonId == 'thunder') return kJiejiScrollReadGongfaRateThunder
+  return kJiejiScrollReadGongfaRate
+}
+
+function _jiejiScrollSmearLifeCost(seasonId) {
+  if (seasonId == 'blood') return kJiejiScrollSmearLifeBlood
+  return kJiejiScrollSmearLife
+}
+
+function _jiejiScrollCostLife(want) {
+  var lost = want
+  final life = hero.life ?? 1
+  if (life - lost < 1) lost = life - 1
+  if (lost < 0) lost = 0
+  if (lost > 0) {
+    Player.setLife(hero.life - lost)
+  }
+  return lost
+}
+
+function _jiejiScrollGrantBlank() {
+  final card = BattleCard(rank: 0)
+  card.isCardBlank = true
+  Player.acquireCard(card)
+  return card
+}
+
+function _jiejiScrollNormalizeKind(kind) {
+  if (kind == 'read' || kind == 'jieji_scroll_read') return 'read'
+  if (kind == 'copy' || kind == 'jieji_scroll_copy') return 'copy'
+  if (kind == 'smear' || kind == 'jieji_scroll_smear') return 'smear'
+  return null
+}
+
+function _jiejiScrollChoices() {
+  return [
+    {
+      text: 'jieji_scroll_read',
+      description: 'hint_jieji_scroll_read',
+    },
+    {
+      text: 'jieji_scroll_copy',
+      description: 'hint_jieji_scroll_copy',
+    },
+    {
+      text: 'jieji_scroll_smear',
+      description: 'hint_jieji_scroll_smear',
+    },
+  ]
+}
+
+/// 赶路劫纹残卷三选。debug.forceJiejiEvent('scroll') / forceScroll 直接走这里，仍弹出三选。
+async function playJiejiScrollEvent(terrain) {
+  if (hero == null) return false
+
+  dialog.pushDialog('hint_jieji_scroll')
+  dialog.pushSelection('jiejiScroll', _jiejiScrollChoices())
+  await dialog.execute()
+  final picked = dialog.checkSelected('jiejiScroll')
+  var selected = _jiejiScrollNormalizeKind(picked)
+  if (selected == null) {
+    selected = 'read'
+  }
+
+  final seasonId = _jiejiScrollSeasonId()
+  if (selected == 'read') {
+    final herbNeed = _jiejiScrollReadHerbCost(seasonId)
+    final herbHave = hero.materials['herb'] ?? 0
+    if (herbNeed > 0 && herbHave < herbNeed) {
+      dialog.pushDialog('hint_jieji_scroll_read_broke', interpolations: [herbNeed])
+      await dialog.execute()
+    } else {
+      if (herbNeed > 0) {
+        Player.exhaust('herb', herbNeed)
+      }
+      var dropped = false
+      if (random.nextDouble() < _jiejiScrollReadGongfaChance(seasonId)) {
+        dropped = await tryDropGongfaShard(rate: 1)
+      }
+      if (dropped != true) {
+        await Player.collect('money', kJiejiScrollReadMoney, incurIncident: false)
+        dialog.pushDialog('hint_jieji_scroll_read_ok', interpolations: [kJiejiScrollReadMoney])
+        await dialog.execute()
+      }
+    }
+  } else if (selected == 'copy') {
+    final moneyHave = hero.materials['money'] ?? 0
+    if (moneyHave < kJiejiScrollCopyMoney) {
+      dialog.pushDialog('hint_jieji_scroll_copy_broke', interpolations: [kJiejiScrollCopyMoney])
+      await dialog.execute()
+    } else {
+      Player.exhaust('money', kJiejiScrollCopyMoney)
+      _jiejiScrollGrantBlank()
+      final healed = Player.restoreLife(kJiejiScrollCopyLife)
+      dialog.pushDialog('hint_jieji_scroll_copy_ok', interpolations: [healed])
+      await dialog.execute()
+    }
+  } else {
+    final lost = _jiejiScrollCostLife(_jiejiScrollSmearLifeCost(seasonId))
+    dialog.pushDialog('hint_jieji_scroll_smear_ok', interpolations: [lost])
+    await dialog.execute()
+    var ok = await tryDropGongfaShard(rate: kJiejiScrollSmearGongfaRate)
+    if (ok != true) {
+      ok = await grantGongfaShard(null)
+    }
+    if (ok != true) {
+      await Player.collect('money', kJiejiScrollSmearMoney, incurIncident: false)
+      dialog.pushDialog('hint_jieji_scroll_smear_none', interpolations: [kJiejiScrollSmearMoney])
+      await dialog.execute()
+    }
+  }
+
+  Game.updateUI()
+  return true
+}
+
+/// 赶路触发：教程锁与路遇相同；冷却 12 步；约 6%。出过则返回 true。
+async function tryJiejiScrollOnMove(terrain) {
+  if (hero == null) return false
+  if (_jiejiScrollTutorialLocked()) return false
+
+  final jieji = ensureJiejiFlags()
+  final moves = jieji.worldMoves ?? 0
+  final last = jieji.lastScrollMove ?? -999
+  if (moves - last < kJiejiScrollMoveCooldown) return false
+
+  var rate = kJiejiScrollBaseRate
+  if (rate < 0) rate = 0
+  if (random.nextDouble() > rate) return false
+
+  jieji.lastScrollMove = moves
+  await playJiejiScrollEvent(terrain)
+  return true
+}
