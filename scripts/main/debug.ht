@@ -457,6 +457,11 @@ namespace debug {
     return await layJiejiArray(free: true, kind: k)
   }
 
+  /// 忽略冷却与花费，仍弹出阵法所破阵三选。
+  async function forceBreak() {
+    return await breakJiejiArray(free: true)
+  }
+
   async function forcePsychic(kind) {
     var k = kind
     if (k != 'scry' && k != 'summon' && k != 'draw') {

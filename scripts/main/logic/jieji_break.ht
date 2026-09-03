@@ -1,0 +1,211 @@
+/// 阵法所「破阵」：拆纹 / 借阵 / 血破。不替换布阵。
+const kJiejiBreakCooldownDays = 1
+const kJiejiBreakTearHerb = 1
+const kJiejiBreakTearHerbMist = 0
+const kJiejiBreakTearLife = 6
+const kJiejiBreakTearArrayLife = 2
+const kJiejiBreakBorrowMoney = 40
+const kJiejiBreakBorrowMoneyThunder = 20
+const kJiejiBreakBorrowLife = 4
+const kJiejiBreakBloodLife = 2
+const kJiejiBreakBloodLifeBlood = 3
+const kJiejiBreakBloodGongfaRate = 0.35
+const kJiejiBreakBloodMoney = 40
+
+function _jiejiBreakSeasonId() {
+  if (game.jieji != null && game.jieji.seasonId != null) {
+    return game.jieji.seasonId
+  }
+  return null
+}
+
+function _jiejiBreakCurrentDay() {
+  if (game.timestamp == null) return null
+  if (Constants.ticksPerDay == null) return null
+  if (Constants.ticksPerDay <= 0) return null
+  return game.timestamp ~/ Constants.ticksPerDay
+}
+
+function _jiejiBreakOnCooldown() {
+  final jieji = ensureJiejiFlags()
+  final day = _jiejiBreakCurrentDay()
+  if (day == null) return false
+  if (jieji.lastBreakDay == null) return false
+  if (day - jieji.lastBreakDay < kJiejiBreakCooldownDays) return true
+  return false
+}
+
+function _jiejiBreakMark() {
+  final jieji = ensureJiejiFlags()
+  jieji.lastBreakDay = _jiejiBreakCurrentDay()
+}
+
+function _jiejiBreakCostLife(want) {
+  var lost = want
+  final life = hero.life ?? 1
+  if (life - lost < 1) lost = life - 1
+  if (lost < 0) lost = 0
+  if (lost > 0) {
+    Player.setLife(hero.life - lost)
+  }
+  return lost
+}
+
+function _jiejiBreakTearHerbCost(seasonId) {
+  if (seasonId == 'mist') return kJiejiBreakTearHerbMist
+  return kJiejiBreakTearHerb
+}
+
+function _jiejiBreakBorrowMoneyCost(seasonId) {
+  if (seasonId == 'thunder') return kJiejiBreakBorrowMoneyThunder
+  return kJiejiBreakBorrowMoney
+}
+
+function _jiejiBreakBloodLifeCost(seasonId) {
+  if (seasonId == 'blood') return kJiejiBreakBloodLifeBlood
+  return kJiejiBreakBloodLife
+}
+
+function _jiejiBreakNormalizeKind(kind) {
+  if (kind == 'tear' || kind == 'jieji_break_tear') return 'tear'
+  if (kind == 'borrow' || kind == 'jieji_break_borrow') return 'borrow'
+  if (kind == 'blood' || kind == 'jieji_break_blood') return 'blood'
+  return null
+}
+
+function _jiejiBreakChoices() {
+  return [
+    {
+      text: 'jieji_break_tear',
+      description: 'hint_jieji_break_tear',
+    },
+    {
+      text: 'jieji_break_borrow',
+      description: 'hint_jieji_break_borrow',
+    },
+    {
+      text: 'jieji_break_blood',
+      description: 'hint_jieji_break_blood',
+    },
+    'cancel',
+  ]
+}
+
+function _jiejiBreakHerbNeed(selected, seasonId) {
+  if (selected == 'tear') return _jiejiBreakTearHerbCost(seasonId)
+  return 0
+}
+
+function _jiejiBreakMoneyNeed(selected, seasonId) {
+  if (selected == 'borrow') return _jiejiBreakBorrowMoneyCost(seasonId)
+  return 0
+}
+
+/// 破军未挂则挂 arrayFury；已挂则挂 feastFury。两者都有则只回血。不退护身阵。
+function _jiejiBreakApplyBorrow() {
+  final jieji = ensureJiejiFlags()
+  if (jieji.arrayFury != true) {
+    jieji.arrayFury = true
+    return 'array'
+  }
+  if (jieji.feastFury != true) {
+    jieji.feastFury = true
+    return 'feast'
+  }
+  return null
+}
+
+/// 阵法所破阵三选。free 为 true 时不扣费、不检查冷却（debug），仍弹出三选。
+/// 返回 'ok' | 'cooldown' | 'poor' | 'cancel'。
+async function breakJiejiArray({ free = false }) {
+  if (hero == null) return 'cancel'
+  if (free != true && _jiejiBreakOnCooldown()) {
+    return 'cooldown'
+  }
+
+  dialog.pushDialog('hint_breakJiejiArray')
+  dialog.pushSelection('jiejiBreak', _jiejiBreakChoices())
+  await dialog.execute()
+  final picked = dialog.checkSelected('jiejiBreak')
+  var selected = null
+  if (picked == null || picked == 'cancel') {
+    if (free == true && picked == null) {
+      selected = 'tear'
+    } else {
+      return 'cancel'
+    }
+  } else {
+    selected = _jiejiBreakNormalizeKind(picked)
+  }
+  if (selected == null) return 'cancel'
+
+  final seasonId = _jiejiBreakSeasonId()
+  if (free != true) {
+    final herbNeed = _jiejiBreakHerbNeed(selected, seasonId)
+    final moneyNeed = _jiejiBreakMoneyNeed(selected, seasonId)
+    final herbHave = hero.materials['herb'] ?? 0
+    final moneyHave = hero.materials['money'] ?? 0
+    if (herbHave < herbNeed || moneyHave < moneyNeed) {
+      return 'poor'
+    }
+  }
+
+  if (free != true) {
+    final herbNeed = _jiejiBreakHerbNeed(selected, seasonId)
+    final moneyNeed = _jiejiBreakMoneyNeed(selected, seasonId)
+    if (herbNeed > 0) {
+      Player.exhaust('herb', herbNeed)
+    }
+    if (moneyNeed > 0) {
+      Player.exhaust('money', moneyNeed)
+    }
+    if (selected == 'blood') {
+      _jiejiBreakCostLife(_jiejiBreakBloodLifeCost(seasonId))
+    }
+    _jiejiBreakMark()
+  }
+
+  if (selected == 'borrow') {
+    final borrow = _jiejiBreakApplyBorrow()
+    if (borrow == 'array') {
+      dialog.pushDialog('hint_breakJiejiArray_borrow')
+    } else if (borrow == 'feast') {
+      dialog.pushDialog('hint_breakJiejiArray_borrow_feast')
+    } else {
+      Player.restoreLife(kJiejiBreakBorrowLife)
+      dialog.pushDialog('hint_breakJiejiArray_borrow_life')
+    }
+    await dialog.execute()
+  } else if (selected == 'blood') {
+    final jieji = ensureJiejiFlags()
+    if (jieji.arrayWard == true || jieji.arrayFury == true) {
+      jieji.arrayWard = false
+      jieji.arrayFury = false
+    }
+    final dropped = await tryDropGongfaShard(rate: kJiejiBreakBloodGongfaRate)
+    if (dropped != true) {
+      await Player.collect('money', kJiejiBreakBloodMoney, incurIncident: false)
+      dialog.pushDialog('hint_breakJiejiArray_blood_money')
+      await dialog.execute()
+    } else {
+      dialog.pushDialog('hint_breakJiejiArray_blood')
+      await dialog.execute()
+    }
+  } else {
+    Player.restoreLife(kJiejiBreakTearLife)
+    final jieji = ensureJiejiFlags()
+    final hadArray = jieji.arrayWard == true || jieji.arrayFury == true
+    if (hadArray) {
+      jieji.arrayWard = false
+      jieji.arrayFury = false
+      Player.restoreLife(kJiejiBreakTearArrayLife)
+      dialog.pushDialog('hint_breakJiejiArray_tear_array')
+    } else {
+      dialog.pushDialog('hint_breakJiejiArray_tear')
+    }
+    await dialog.execute()
+  }
+
+  Game.updateUI()
+  return 'ok'
+}
