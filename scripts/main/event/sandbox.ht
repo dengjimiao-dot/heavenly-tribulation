@@ -194,6 +194,7 @@ async function onAfterMove(terrain) {
   if (!fought) {
     if (await tryJiejiRoadEventOnMove(terrain)) return true
     if (await tryJiejiMerchantOnMove()) return true
+    if (await tryJiejiScavengeOnMove(terrain)) return true
   }
   return fought
 }

@@ -210,6 +210,8 @@ namespace debug {
       await playJiejiSteleRoadEvent()
     } else if (kind == 'shrine') {
       await playJiejiShrineRoadEvent()
+    } else if (kind == 'scavenge') {
+      await playJiejiScavengeEvent(terrain)
     } else {
       await playJiejiThunderRoadEvent(terrain)
     }
@@ -416,6 +418,11 @@ namespace debug {
   /// 忽略余日与一季一次，仍弹出季末前夜劫兆三选。
   async function forceEve() {
     return await playJiejiSeasonEve()
+  }
+
+  /// 忽略几率与冷却，仍弹出赶路拾荒三选。
+  async function forceScavenge() {
+    return await playJiejiScavengeEvent({ kind: 'plain' })
   }
 
   /// 忽略费用与冷却，直接挂上迷障（下次野遇糊弄过去）。

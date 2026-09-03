@@ -1,0 +1,153 @@
+/// 赶路「拾荒」三选：翻拣 / 深挖 / 路过。隐藏、劫兆、野遇、赶路、行商都没中时才滚。
+const kJiejiScavengeBaseRate = 0.06
+const kJiejiScavengeMoveCooldown = 8
+const kJiejiScavengePickHerb = 1
+const kJiejiScavengePickHerbMist = 1
+const kJiejiScavengePickMoney = 30
+const kJiejiScavengePickMoneyThunder = 20
+const kJiejiScavengeDigOre = 2
+const kJiejiScavengeDigMoney = 80
+const kJiejiScavengeDigLife = 2
+
+function _jiejiScavengeSeasonId() {
+  if (game.jieji != null && game.jieji.seasonId != null) {
+    return game.jieji.seasonId
+  }
+  return null
+}
+
+function _jiejiScavengeTutorialLocked() {
+  return game.enableTutorial && game.flags.tutorial.bountyQuest != true
+}
+
+function _jiejiScavengeTerrainKind(terrain) {
+  if (terrain != null && terrain.kind != null) return terrain.kind
+  return 'plain'
+}
+
+function _jiejiScavengeHasOre() {
+  if (Constants.materialKinds == null) return false
+  return Constants.materialKinds.contains('ore')
+}
+
+function _jiejiScavengePickHerb(seasonId) {
+  var herb = kJiejiScavengePickHerb
+  if (seasonId == 'mist') {
+    herb = herb + kJiejiScavengePickHerbMist
+  }
+  return herb
+}
+
+function _jiejiScavengePickMoney(seasonId) {
+  var money = kJiejiScavengePickMoney
+  if (seasonId == 'thunder') {
+    money = money + kJiejiScavengePickMoneyThunder
+  }
+  return money
+}
+
+function _jiejiScavengeCostLife(want) {
+  var lost = want
+  final life = hero.life ?? 1
+  if (life - lost < 1) lost = life - 1
+  if (lost < 0) lost = 0
+  if (lost > 0) {
+    Player.setLife(hero.life - lost)
+  }
+  return lost
+}
+
+/// 有赶路耗日辅助则耗 1 日；与 _jiejiRoadSpendDay 同一套 Game.updateGame。不可见则跳过。
+async function _jiejiScavengeSpendDay() {
+  if (Constants.ticksPerDay == null) return false
+  if (Constants.ticksPerDay <= 0) return false
+  await Game.updateGame(tick: Constants.ticksPerDay)
+  return true
+}
+
+function _jiejiScavengeNormalizeKind(kind) {
+  if (kind == 'pick' || kind == 'jieji_scavenge_pick') return 'pick'
+  if (kind == 'dig' || kind == 'jieji_scavenge_dig') return 'dig'
+  if (kind == 'pass' || kind == 'jieji_scavenge_pass') return 'pass'
+  return null
+}
+
+function _jiejiScavengeChoices() {
+  return [
+    {
+      text: 'jieji_scavenge_pick',
+      description: 'hint_jieji_scavenge_pick',
+    },
+    {
+      text: 'jieji_scavenge_dig',
+      description: 'hint_jieji_scavenge_dig',
+    },
+    {
+      text: 'jieji_scavenge_pass',
+      description: 'hint_jieji_scavenge_pass',
+    },
+  ]
+}
+
+/// 赶路拾荒三选。debug.forceJiejiEvent('scavenge') / forceScavenge 直接走这里，仍弹出三选。
+async function playJiejiScavengeEvent(terrain) {
+  if (hero == null) return false
+
+  final kind = _jiejiScavengeTerrainKind(terrain)
+  dialog.pushDialog('hint_jieji_scavenge', interpolations: [engine.locale(kind)])
+  dialog.pushSelection('jiejiScavenge', _jiejiScavengeChoices())
+  await dialog.execute()
+  final picked = dialog.checkSelected('jiejiScavenge')
+  var selected = _jiejiScavengeNormalizeKind(picked)
+  if (selected == null) {
+    selected = 'pass'
+  }
+
+  final seasonId = _jiejiScavengeSeasonId()
+  if (selected == 'pick') {
+    final herb = _jiejiScavengePickHerb(seasonId)
+    final money = _jiejiScavengePickMoney(seasonId)
+    await Player.collect('herb', herb, incurIncident: false)
+    await Player.collect('money', money, incurIncident: false)
+    dialog.pushDialog('hint_jieji_scavenge_pick_ok', interpolations: [herb, money])
+    await dialog.execute()
+  } else if (selected == 'dig') {
+    await _jiejiScavengeSpendDay()
+    if (random.nextDouble() < 0.50) {
+      if (_jiejiScavengeHasOre()) {
+        await Player.collect('ore', kJiejiScavengeDigOre, incurIncident: false)
+        dialog.pushDialog('hint_jieji_scavenge_dig_ore', interpolations: [kJiejiScavengeDigOre])
+      } else {
+        await Player.collect('money', kJiejiScavengeDigMoney, incurIncident: false)
+        dialog.pushDialog('hint_jieji_scavenge_dig_money', interpolations: [kJiejiScavengeDigMoney])
+      }
+      await dialog.execute()
+    } else {
+      final lost = _jiejiScavengeCostLife(kJiejiScavengeDigLife)
+      dialog.pushDialog('hint_jieji_scavenge_dig_hurt', interpolations: [lost])
+      await dialog.execute()
+    }
+  }
+
+  Game.updateUI()
+  return true
+}
+
+/// 赶路触发：教程锁与路遇相同；冷却 8 步；约 6%。出过则返回 true。
+async function tryJiejiScavengeOnMove(terrain) {
+  if (hero == null) return false
+  if (_jiejiScavengeTutorialLocked()) return false
+
+  final jieji = ensureJiejiFlags()
+  final moves = jieji.worldMoves ?? 0
+  final last = jieji.lastScavengeMove ?? -999
+  if (moves - last < kJiejiScavengeMoveCooldown) return false
+
+  var rate = kJiejiScavengeBaseRate
+  if (rate < 0) rate = 0
+  if (random.nextDouble() > rate) return false
+
+  jieji.lastScavengeMove = moves
+  await playJiejiScavengeEvent(terrain)
+  return true
+}
