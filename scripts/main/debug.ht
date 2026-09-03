@@ -259,6 +259,14 @@ namespace debug {
     return await riteJiejiHarvest(free: true)
   }
 
+  async function forceGather(kind) {
+    var k = kind
+    if (k != 'mine' && k != 'fishery' && k != 'timberland' && k != 'huntingground') {
+      k = 'mine'
+    }
+    return await gatherJiejiSite(k, free: true)
+  }
+
   async function forceRest(kind) {
     return await restJiejiSite(kind, free: true)
   }

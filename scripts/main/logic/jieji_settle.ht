@@ -37,6 +37,10 @@ const _kJiejiKeepSiteKinds = {
   'theurgytemple': true,
   'tattooshop': true,
   'workshop': true,
+  'mine': true,
+  'fishery': true,
+  'timberland': true,
+  'huntingground': true,
 }
 
 function ensureJiejiFlags() {

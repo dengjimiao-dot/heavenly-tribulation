@@ -2018,6 +2018,31 @@ Future<void> _heroRiteJiejiHarvest(dynamic location) async {
   }
 }
 
+
+Future<void> _heroGatherJiejiSite(dynamic location) async {
+  final kind = location['kind'];
+  final result = await engine.hetu.invoke(
+    'gatherJiejiSite',
+    positionalArgs: [kind],
+  );
+  if (result == 'cooldown') {
+    dialog.pushDialog(
+      'hint_gatherJiejiSite_cooldown',
+      npcId: location['npcId'],
+    );
+    await dialog.execute();
+    return;
+  }
+  if (result == 'poor') {
+    dialog.pushDialog(
+      'hint_gatherJiejiSite_notEnough',
+      npcId: location['npcId'],
+    );
+    await dialog.execute();
+    return;
+  }
+}
+
 Future<void> _heroConsultJiejiStars(dynamic location) async {
   final isRented = await GameLogic.checkRented(location);
   if (!isRented) return;
@@ -2459,6 +2484,15 @@ Future<void> _onInteractSite(
       'description': 'hint_riteJiejiHarvest_description',
     });
   }
+  if (siteKind == 'mine' ||
+      siteKind == 'fishery' ||
+      siteKind == 'timberland' ||
+      siteKind == 'huntingground') {
+    siteOptions.add({
+      'text': 'gatherJiejiSite',
+      'description': 'hint_gatherJiejiSite_description',
+    });
+  }
   if (kSiteKindsTradable.contains(siteKind)) {
     siteOptions.add('trade');
   }
@@ -2665,6 +2699,8 @@ Future<void> _onInteractSite(
       await _heroConsultXianming(location);
     case 'riteJiejiHarvest':
       await _heroRiteJiejiHarvest(location);
+    case 'gatherJiejiSite':
+      await _heroGatherJiejiSite(location);
     case 'restJiejiSite':
       await _heroRestJiejiSite(location);
     case 'about_dungeon':

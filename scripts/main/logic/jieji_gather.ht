@@ -1,0 +1,217 @@
+/// 四野季采：矿/渔/林/猎共用两日一次。不改 matching 小游戏计分。
+const kJiejiGatherCooldownDays = 2
+const kJiejiGatherWorkerCost = 1
+const kJiejiGatherLifeCost = 1
+const kJiejiGatherLifeCostBlood = 2
+const kJiejiGatherMoneyCost = 40
+const kJiejiGatherMoneyCostThunder = 20
+const kJiejiGatherPullAmount = 2
+const kJiejiGatherPullPrimaryThunder = 3
+const kJiejiGatherSellMoney = 90
+const kJiejiGatherSellHerbMist = 2
+const kJiejiGatherSellMoneyBlood = 40
+const kJiejiGatherRiskPrimary = 4
+const kJiejiGatherRiskHerb = 1
+const kJiejiGatherRiskLife = 3
+const kJiejiGatherRiskRate = 0.50
+
+function _jiejiGatherSeasonId() {
+  if (game.jieji != null && game.jieji.seasonId != null) {
+    return game.jieji.seasonId
+  }
+  return 'thunder'
+}
+
+function _jiejiGatherNormalizeKind(kind) {
+  if (kind == 'mine' || kind == kLocationKindMine) return 'mine'
+  if (kind == 'fishery' || kind == kLocationKindFishery) return 'fishery'
+  if (kind == 'timberland' || kind == kLocationKindTimberland) return 'timberland'
+  if (kind == 'huntingground' || kind == kLocationKindHuntingground) return 'huntingground'
+  return null
+}
+
+function _jiejiGatherMats(kind) {
+  if (kind == 'mine') {
+    return { a: 'stone', b: 'ore', primary: 'ore' }
+  }
+  if (kind == 'fishery') {
+    return { a: 'water', b: 'meat', primary: 'meat' }
+  }
+  if (kind == 'timberland') {
+    return { a: 'timber', b: 'herb', primary: 'timber' }
+  }
+  return { a: 'leather', b: 'meat', primary: 'meat' }
+}
+
+function _jiejiGatherCurrentDay() {
+  if (game.timestamp == null) return null
+  if (Constants.ticksPerDay == null) return null
+  if (Constants.ticksPerDay <= 0) return null
+  return game.timestamp ~/ Constants.ticksPerDay
+}
+
+function _jiejiGatherOnCooldown() {
+  final jieji = ensureJiejiFlags()
+  final day = _jiejiGatherCurrentDay()
+  if (day == null) return false
+  if (jieji.lastGatherDay == null) return false
+  if (day - jieji.lastGatherDay < kJiejiGatherCooldownDays) return true
+  return false
+}
+
+function _jiejiGatherMark() {
+  final jieji = ensureJiejiFlags()
+  jieji.lastGatherDay = _jiejiGatherCurrentDay()
+}
+
+function _jiejiGatherCostLife(want) {
+  var lost = want
+  final life = hero.life ?? 1
+  if (life - lost < 1) lost = life - 1
+  if (lost < 0) lost = 0
+  if (lost > 0) {
+    Player.setLife(hero.life - lost)
+  }
+  return lost
+}
+
+function _jiejiGatherHasWorker() {
+  final worker = hero.materials['worker'] ?? 0
+  return worker >= kJiejiGatherWorkerCost
+}
+
+function _jiejiGatherMoneyNeed(seasonId) {
+  if (_jiejiGatherHasWorker()) return 0
+  if (seasonId == 'blood') return 0
+  if (seasonId == 'thunder') return kJiejiGatherMoneyCostThunder
+  return kJiejiGatherMoneyCost
+}
+
+function _jiejiGatherIntroKey(kind) {
+  if (kind == 'mine') return 'hint_gatherJiejiSite_mine'
+  if (kind == 'fishery') return 'hint_gatherJiejiSite_fishery'
+  if (kind == 'timberland') return 'hint_gatherJiejiSite_timberland'
+  return 'hint_gatherJiejiSite_huntingground'
+}
+
+function _jiejiGatherChoices() {
+  return [
+    {
+      text: 'jieji_gather_pull',
+      description: 'hint_jieji_gather_pull',
+    },
+    {
+      text: 'jieji_gather_sell',
+      description: 'hint_jieji_gather_sell',
+    },
+    {
+      text: 'jieji_gather_risk',
+      description: 'hint_jieji_gather_risk',
+    },
+    'cancel',
+  ]
+}
+
+function _jiejiGatherSpendCost(seasonId) {
+  if (_jiejiGatherHasWorker()) {
+    Player.exhaust('worker', kJiejiGatherWorkerCost)
+    return
+  }
+  if (seasonId == 'blood') {
+    _jiejiGatherCostLife(kJiejiGatherLifeCostBlood)
+    return
+  }
+  _jiejiGatherCostLife(kJiejiGatherLifeCost)
+  final money = _jiejiGatherMoneyNeed(seasonId)
+  if (money > 0) {
+    Player.exhaust('money', money)
+  }
+}
+
+/// 四野季采三选。free 为 true 时不扣费、不检查冷却（debug）。
+/// 返回 'ok' | 'poor' | 'cooldown' | 'cancel'。
+async function gatherJiejiSite(kind, { free = false }) {
+  if (hero == null) return 'cancel'
+  final siteKind = _jiejiGatherNormalizeKind(kind)
+  if (siteKind == null) return 'cancel'
+  if (free != true && _jiejiGatherOnCooldown()) {
+    return 'cooldown'
+  }
+
+  final seasonId = _jiejiGatherSeasonId()
+  dialog.pushDialog(_jiejiGatherIntroKey(siteKind))
+  dialog.pushSelection('jiejiGather', _jiejiGatherChoices())
+  await dialog.execute()
+  var selected = dialog.checkSelected('jiejiGather')
+  if (selected == null || selected == 'cancel') {
+    if (free == true && selected == null) {
+      selected = 'jieji_gather_pull'
+    } else {
+      return 'cancel'
+    }
+  }
+  if (selected != 'jieji_gather_pull' && selected != 'jieji_gather_sell' && selected != 'jieji_gather_risk') {
+    return 'cancel'
+  }
+
+  if (free != true) {
+    final moneyNeed = _jiejiGatherMoneyNeed(seasonId)
+    if (moneyNeed > 0) {
+      final moneyHave = hero.materials['money'] ?? 0
+      if (moneyHave < moneyNeed) {
+        return 'poor'
+      }
+    }
+    _jiejiGatherSpendCost(seasonId)
+    _jiejiGatherMark()
+  }
+
+  final mats = _jiejiGatherMats(siteKind)
+  if (selected == 'jieji_gather_pull') {
+    var primaryAmt = kJiejiGatherPullAmount
+    if (seasonId == 'thunder') {
+      primaryAmt = kJiejiGatherPullPrimaryThunder
+    }
+    var aAmt = kJiejiGatherPullAmount
+    var bAmt = kJiejiGatherPullAmount
+    if (mats.a == mats.primary) aAmt = primaryAmt
+    if (mats.b == mats.primary) bAmt = primaryAmt
+    await Player.collect(mats.a, aAmt, incurIncident: false)
+    if (mats.b != mats.a) {
+      await Player.collect(mats.b, bAmt, incurIncident: false)
+    }
+    var pullKey = 'hint_gatherJiejiSite_pull_huntingground'
+    if (siteKind == 'mine') pullKey = 'hint_gatherJiejiSite_pull_mine'
+    if (siteKind == 'fishery') pullKey = 'hint_gatherJiejiSite_pull_fishery'
+    if (siteKind == 'timberland') pullKey = 'hint_gatherJiejiSite_pull_timberland'
+    dialog.pushDialog(pullKey, interpolations: [aAmt, bAmt])
+    await dialog.execute()
+  } else if (selected == 'jieji_gather_sell') {
+    var money = kJiejiGatherSellMoney
+    if (seasonId == 'blood') {
+      money = money + kJiejiGatherSellMoneyBlood
+    }
+    await Player.collect('money', money, incurIncident: false)
+    if (seasonId == 'mist') {
+      await Player.collect('herb', kJiejiGatherSellHerbMist, incurIncident: false)
+      dialog.pushDialog('hint_gatherJiejiSite_sell_mist', interpolations: [money, kJiejiGatherSellHerbMist])
+    } else {
+      dialog.pushDialog('hint_gatherJiejiSite_sell', interpolations: [money])
+    }
+    await dialog.execute()
+  } else {
+    if (random.nextDouble() < kJiejiGatherRiskRate) {
+      await Player.collect(mats.primary, kJiejiGatherRiskPrimary, incurIncident: false)
+      await Player.collect('herb', kJiejiGatherRiskHerb, incurIncident: false)
+      dialog.pushDialog('hint_gatherJiejiSite_risk_ok', interpolations: [kJiejiGatherRiskPrimary, kJiejiGatherRiskHerb])
+      await dialog.execute()
+    } else {
+      final lost = _jiejiGatherCostLife(kJiejiGatherRiskLife)
+      dialog.pushDialog('hint_gatherJiejiSite_risk_fail', interpolations: [lost])
+      await dialog.execute()
+    }
+  }
+
+  Game.updateUI()
+  return 'ok'
+}
