@@ -2360,6 +2360,41 @@ Future<void> _heroInkJiejiTattoo(dynamic location) async {
   }
 }
 
+Future<void> _heroCraftJiejiWeapon(dynamic location) async {
+  final isRented = await GameLogic.checkRented(location);
+  if (!isRented) return;
+
+  final result = await engine.hetu.invoke('craftJiejiWeapon');
+  if (result == 'cooldown') {
+    dialog.pushDialog(
+      'hint_jieji_workshop_cooldown',
+      npcId: location['npcId'],
+    );
+    await dialog.execute();
+    return;
+  }
+  if (result == 'poor') {
+    var herbCost = 2;
+    var moneyCost = 120;
+    var lifeCost = 1;
+    try {
+      final costs = engine.hetu.invoke('jiejiWeaponCosts');
+      if (costs != null) {
+        herbCost = (costs['herb'] as num?)?.toInt() ?? herbCost;
+        moneyCost = (costs['money'] as num?)?.toInt() ?? moneyCost;
+        lifeCost = (costs['life'] as num?)?.toInt() ?? lifeCost;
+      }
+    } catch (_) {}
+    dialog.pushDialog(
+      'hint_jieji_workshop_notEnough',
+      npcId: location['npcId'],
+      interpolations: [herbCost, moneyCost, lifeCost],
+    );
+    await dialog.execute();
+    return;
+  }
+}
+
 
 Future<void> _heroShowKarmaCodex(dynamic location) async {
   final text = engine.hetu.invoke('formatKarmaCodex');
@@ -2417,6 +2452,10 @@ Future<void> _onInteractSite(
     siteOptions.add('tradeMaterial');
   } else if (siteKind == 'workshop') {
     siteOptions.add('workbench');
+    siteOptions.add({
+      'text': 'craftJiejiWeapon',
+      'description': 'hint_craftJiejiWeapon_description',
+    });
   } else if (siteKind == 'cardforge') {
     siteOptions.add({
       'text': 'forgeCardBlank',
@@ -2564,6 +2603,8 @@ Future<void> _onInteractSite(
         ViewPanels.workbench,
         arguments: {'location': location},
       );
+    case 'craftJiejiWeapon':
+      await _heroCraftJiejiWeapon(location);
     case 'forgeCardBlank':
       await _heroForgeCardBlank(location);
     case 'forgeCardBlankAdvanced':

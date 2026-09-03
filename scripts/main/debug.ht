@@ -337,6 +337,14 @@ namespace debug {
     return await inkJiejiTattoo(free: true, kind: k)
   }
 
+  async function forceCraftWeapon(kind) {
+    var k = kind
+    if (k != 'blade' && k != 'mail' && k != 'spike') {
+      k = 'blade'
+    }
+    return await craftJiejiWeapon(free: true, kind: k)
+  }
+
   /// 忽略费用与冷却，直接挂上迷障（下次野遇糊弄过去）。
   function forceVeil() {
     if (hero == null) return

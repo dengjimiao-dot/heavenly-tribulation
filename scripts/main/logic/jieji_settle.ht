@@ -36,6 +36,7 @@ const _kJiejiKeepSiteKinds = {
   'psychictemple': true,
   'theurgytemple': true,
   'tattooshop': true,
+  'workshop': true,
 }
 
 function ensureJiejiFlags() {
@@ -191,6 +192,7 @@ function migrateSect() {
   ensureHomePsychicTemple()
   ensureHomeTheurgyTemple()
   ensureHomeTattooShop()
+  ensureHomeWorkshop()
   engine.info('季末迁徙：拆除据点 ${removed}，城市规模 ${city.development}')
   return removed
 }
@@ -499,6 +501,7 @@ async function trySettleJieji({ endedSeasonId }) {
   stripJiejiPotionCards()
   stripJiejiAidCards()
   stripJiejiTalismanCards()
+  stripJiejiWeaponCards()
   final converted = convertKarmaToCurses()
   final seasonName = engine.locale('jieji_season_' + endedId)
   dialog.pushDialog('hint_jieji_season_end', interpolations: [

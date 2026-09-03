@@ -541,6 +541,13 @@ Future<void> _onInteractAlchemyFurnace({dynamic location}) async {
   );
 }
 
+Future<void> _onInteractWorkbench({dynamic location}) async {
+  engine.context.read<ViewPanelState>().toogle(
+    ViewPanels.workbench,
+    arguments: {'location': location},
+  );
+}
+
 Future<void> _onInteractRunelabWorkbench({dynamic location}) async {
   final isRented = await GameLogic.checkRented(location);
   if (!isRented) return;

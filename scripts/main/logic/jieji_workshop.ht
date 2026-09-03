@@ -1,0 +1,252 @@
+/// 工坊「淬器」。不改原工作台。
+const kJiejiWorkshopHerbCost = 2
+const kJiejiWorkshopMoneyCost = 120
+const kJiejiWorkshopLifeCost = 1
+const kJiejiWorkshopHerbCostMist = 1
+const kJiejiWorkshopMoneyCostThunder = 90
+const kJiejiWorkshopLifeCostBlood = 2
+const kJiejiWorkshopSparkRate = 0.20
+const kJiejiWorkshopCooldownDays = 1
+
+function _jiejiWorkshopSeasonId() {
+  if (game.jieji != null && game.jieji.seasonId != null) {
+    return game.jieji.seasonId
+  }
+  return null
+}
+
+function jiejiWeaponCosts() {
+  var herb = kJiejiWorkshopHerbCost
+  var money = kJiejiWorkshopMoneyCost
+  var life = kJiejiWorkshopLifeCost
+  final seasonId = _jiejiWorkshopSeasonId()
+  if (seasonId == 'thunder') {
+    money = kJiejiWorkshopMoneyCostThunder
+  } else if (seasonId == 'mist') {
+    herb = kJiejiWorkshopHerbCostMist
+  } else if (seasonId == 'blood') {
+    life = kJiejiWorkshopLifeCostBlood
+  }
+  return {
+    herb: herb,
+    money: money,
+    life: life,
+  }
+}
+
+function ensureHomeWorkshop() {
+  if (hero == null) return
+  final city = getHeroHomeCity()
+  if (city == null) return
+  final siteIds = city.siteIds ?? []
+  for (final siteId in siteIds) {
+    final site = game.locations[siteId]
+    if (site != null && site.kind == kLocationKindWorkshop) return
+  }
+  Location(
+    category: 'site',
+    kind: kLocationKindWorkshop,
+    atCity: city,
+    sectId: city.sectId,
+    development: 0,
+    npcId: Constants.siteKindToNpcId[kLocationKindWorkshop],
+  )
+}
+
+function _jiejiWorkshopNormalizeKind(kind) {
+  if (kind == 'blade' || kind == 'jieji_weapon_blade') return 'blade'
+  if (kind == 'mail' || kind == 'jieji_weapon_mail') return 'mail'
+  if (kind == 'spike' || kind == 'jieji_weapon_spike') return 'spike'
+  return null
+}
+
+function _jiejiWorkshopFirstAffix(ids) {
+  if (ids == null) return null
+  for (final id in ids) {
+    if (id != null && game.battleCards[id] != null) return id
+  }
+  return null
+}
+
+/// 雷刃伤、雾甲护、血钉伤；没有则按后备词缀，只改名字。
+function _jiejiWorkshopAffixId(kind) {
+  var id = null
+  if (kind == 'blade') {
+    id = _jiejiWorkshopFirstAffix(['punch_attack', 'heal', 'punch_defend'])
+  } else if (kind == 'mail') {
+    id = _jiejiWorkshopFirstAffix(['punch_defend', 'heal', 'punch_attack'])
+  } else if (kind == 'spike') {
+    id = _jiejiWorkshopFirstAffix(['punch_attack', 'uniquecard_draw', 'heal'])
+  }
+  if (id != null) return id
+  return _jiejiWorkshopFirstAffix(['punch_attack', 'heal', 'punch_defend'])
+}
+
+function _addJiejiWeaponToCurrentDeck(card) {
+  if (hero == null || card == null) return
+  if (hero.battleDeckIndex == null) return
+  if (hero.battleDeckIndex < 0) return
+  if (hero.battleDecks == null || hero.battleDecks.isEmpty) return
+  final deck = hero.battleDecks[hero.battleDeckIndex]
+  if (deck == null || deck.cards == null) return
+  if (!deck.cards.contains(card.id)) {
+    deck.cards.add(card.id)
+  }
+}
+
+function _createJiejiWeaponCard(kind) {
+  final affixId = _jiejiWorkshopAffixId(kind)
+  if (affixId == null) return null
+  final card = BattleCard(
+    affixId: affixId,
+    rank: 0,
+    isIdentified: true,
+  )
+  card.isSeasonLimited = true
+  card.jiejiWeapon = true
+  card.jiejiWeaponKind = kind
+  var nameKey = 'card_jieji_weapon_blade'
+  if (kind == 'mail') nameKey = 'card_jieji_weapon_mail'
+  if (kind == 'spike') nameKey = 'card_jieji_weapon_spike'
+  card.name = engine.locale(nameKey)
+  return card
+}
+
+function _finishJiejiWeaponCard(card) {
+  if (card == null) return
+  Player.acquireCard(card)
+  _addJiejiWeaponToCurrentDeck(card)
+}
+
+function _jiejiWorkshopCurrentDay() {
+  if (game.timestamp == null) return null
+  if (Constants.ticksPerDay == null) return null
+  if (Constants.ticksPerDay <= 0) return null
+  return game.timestamp ~/ Constants.ticksPerDay
+}
+
+function _jiejiWorkshopOnCooldown() {
+  final jieji = ensureJiejiFlags()
+  final day = _jiejiWorkshopCurrentDay()
+  if (day == null) return false
+  if (jieji.lastCraftDay == null) return false
+  if (day - jieji.lastCraftDay < kJiejiWorkshopCooldownDays) return true
+  return false
+}
+
+function _jiejiWorkshopMark() {
+  final jieji = ensureJiejiFlags()
+  jieji.lastCraftDay = _jiejiWorkshopCurrentDay()
+}
+
+function _jiejiWorkshopChoices() {
+  return [
+    {
+      text: 'jieji_weapon_blade',
+      description: 'hint_jieji_weapon_blade',
+    },
+    {
+      text: 'jieji_weapon_mail',
+      description: 'hint_jieji_weapon_mail',
+    },
+    {
+      text: 'jieji_weapon_spike',
+      description: 'hint_jieji_weapon_spike',
+    },
+    'cancel',
+  ]
+}
+
+/// 工坊淬器三选。free 为 true 时不扣费、不检查冷却（debug）。
+/// kind 传入 blade/mail/spike 时跳过选择（debug.forceCraftWeapon）。
+/// 返回 'ok' | 'poor' | 'cooldown' | 'cancel'。
+async function craftJiejiWeapon({ free = false, kind = null }) {
+  if (hero == null) return 'cancel'
+  if (free != true && _jiejiWorkshopOnCooldown()) {
+    return 'cooldown'
+  }
+
+  if (free != true) {
+    final costs = jiejiWeaponCosts()
+    final herbHave = hero.materials['herb'] ?? 0
+    final moneyHave = hero.materials['money'] ?? 0
+    if (herbHave < costs.herb || moneyHave < costs.money) {
+      return 'poor'
+    }
+  }
+
+  var selected = _jiejiWorkshopNormalizeKind(kind)
+  if (selected == null) {
+    dialog.pushDialog('hint_craftJiejiWeapon')
+    dialog.pushSelection('jiejiWeapon', _jiejiWorkshopChoices())
+    await dialog.execute()
+    final picked = dialog.checkSelected('jiejiWeapon')
+    if (picked == null || picked == 'cancel') {
+      if (free == true) {
+        selected = 'blade'
+      } else {
+        return 'cancel'
+      }
+    } else {
+      selected = _jiejiWorkshopNormalizeKind(picked)
+    }
+  }
+  if (selected == null) return 'cancel'
+
+  final card = _createJiejiWeaponCard(selected)
+  if (card == null) return 'cancel'
+
+  if (free != true) {
+    final costs = jiejiWeaponCosts()
+    Player.exhaust('herb', costs.herb)
+    Player.exhaust('money', costs.money)
+    var nextLife = (hero.life ?? 1) - (costs.life ?? kJiejiWorkshopLifeCost)
+    if (nextLife < 1) nextLife = 1
+    Player.setLife(nextLife)
+    _jiejiWorkshopMark()
+  }
+
+  jiejiTryForgeSpark(card, kJiejiWorkshopSparkRate)
+  _finishJiejiWeaponCard(card)
+
+  dialog.pushDialog('hint_jieji_workshop_done', interpolations: [card.name])
+  await dialog.execute()
+  var sparkName = card.jiejiSparkName
+  if (sparkName != null && sparkName != '') {
+    dialog.pushDialog('hint_jieji_forge_spark', interpolations: [sparkName])
+    await dialog.execute()
+  }
+  Game.updateUI()
+  return 'ok'
+}
+
+/// 季末清掉未用完的淬器牌，避免滚雪球。秘境出门仍会清季限牌。
+function stripJiejiWeaponCards() {
+  if (hero == null) return 0
+  if (hero.cardLibrary == null) return 0
+  let ids = []
+  for (final card in hero.cardLibrary.values) {
+    if (card == null) continue
+    if (card.jiejiWeapon == true) {
+      ids.add(card.id)
+    }
+  }
+  var removed = 0
+  for (final id in ids) {
+    if (hero.cardLibrary.containsKey(id)) {
+      hero.cardLibrary.remove(id)
+      removed += 1
+    }
+    if (hero.battleDecks != null) {
+      for (final deck in hero.battleDecks) {
+        if (deck.cards != null) {
+          deck.cards.remove(id)
+        }
+      }
+    }
+  }
+  if (removed > 0) {
+    engine.info('季末淬器牌消散：${removed}')
+  }
+  return removed
+}

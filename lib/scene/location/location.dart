@@ -258,6 +258,29 @@ class LocationScene extends Scene with HasCursorState {
         siteList.tryAddCard(siteCard);
         world.add(siteCard);
         _addRestJiejiCard();
+      case 'workshop':
+        final workbenchCard = GameData.createSiteCard(
+          spriteId: 'location/card/workshop.png',
+          title: engine.locale('workbench'),
+          onPreviewed: _onPreviewSiteCard,
+          onUnpreviewed: _onUnpreviewSiteCard,
+        );
+        workbenchCard.onTap = (button, position) async {
+          GameLogic.onInteractWorkbench(location: location);
+        };
+        siteList.tryAddCard(workbenchCard);
+        world.add(workbenchCard);
+        final craftCard = GameData.createSiteCard(
+          spriteId: 'location/card/workshop.png',
+          title: engine.locale('craftJiejiWeapon'),
+          onPreviewed: _onPreviewSiteCard,
+          onUnpreviewed: _onUnpreviewSiteCard,
+        );
+        craftCard.onTap = (button, position) async {
+          await GameLogic.heroCraftJiejiWeapon(location);
+        };
+        siteList.tryAddCard(craftCard);
+        world.add(craftCard);
       case 'alchemylab':
         final siteCard = GameData.createSiteCard(
           spriteId: 'location/card/alchemylab.png',
@@ -526,6 +549,9 @@ class LocationScene extends Scene with HasCursorState {
       } catch (_) {}
       try {
         engine.hetu.invoke('ensureHomeTattooShop');
+      } catch (_) {}
+      try {
+        engine.hetu.invoke('ensureHomeWorkshop');
       } catch (_) {}
     }
     _loadSites();
