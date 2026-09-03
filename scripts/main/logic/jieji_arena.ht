@@ -1,0 +1,149 @@
+/// 斗技场「劫季切磋」：具名对手点到为止。不替换原下注对打。
+const kJiejiArenaFeeDefault = 40
+const kJiejiArenaFeeThunder = 20
+const kJiejiArenaFeeBlood = 60
+const kJiejiArenaCooldownDays = 1
+const kJiejiArenaCooldownMoves = 4
+const kJiejiArenaWinMoneyMin = 80
+const kJiejiArenaWinMoneySpan = 61
+const kJiejiArenaWinMoneyBloodBonus = 40
+const kJiejiArenaGongfaRate = 0.25
+const kJiejiArenaWinLife = 2
+const kJiejiArenaLoseLife = 4
+
+function _jiejiArenaSeasonId() {
+  if (game.jieji != null && game.jieji.seasonId != null) {
+    return game.jieji.seasonId
+  }
+  return 'thunder'
+}
+
+function jiejiArenaFee() {
+  final seasonId = _jiejiArenaSeasonId()
+  if (seasonId == 'thunder') return kJiejiArenaFeeThunder
+  if (seasonId == 'blood') return kJiejiArenaFeeBlood
+  return kJiejiArenaFeeDefault
+}
+
+function _jiejiArenaCurrentDay() {
+  if (game.timestamp == null) return null
+  if (Constants.ticksPerDay == null) return null
+  if (Constants.ticksPerDay <= 0) return null
+  return game.timestamp ~/ Constants.ticksPerDay
+}
+
+function _jiejiArenaOnCooldown() {
+  final jieji = ensureJiejiFlags()
+  final last = jieji.lastArenaDuel
+  if (last == null) return false
+  final day = _jiejiArenaCurrentDay()
+  final lastDay = last.day
+  final lastMove = last.move
+  var dayReady = false
+  var moveReady = false
+  if (day != null && lastDay != null) {
+    if (day - lastDay >= kJiejiArenaCooldownDays) dayReady = true
+  }
+  if (lastMove != null) {
+    final moves = jieji.worldMoves ?? 0
+    if (moves - lastMove >= kJiejiArenaCooldownMoves) moveReady = true
+  }
+  if (dayReady || moveReady) return false
+  if (lastDay != null || lastMove != null) return true
+  return false
+}
+
+function _jiejiArenaMark() {
+  final jieji = ensureJiejiFlags()
+  jieji.lastArenaDuel = {
+    day: _jiejiArenaCurrentDay(),
+    move: jieji.worldMoves ?? 0,
+  }
+}
+
+function _jiejiArenaFoeRank() {
+  var rank = hero.rank ?? 0
+  if (_jiejiArenaSeasonId() == 'thunder') {
+    if (rank < kCultivationRankMax) {
+      rank = rank + 1
+    }
+  }
+  return rank
+}
+
+function _jiejiArenaFoeLevel(rank) {
+  final minLevel = minLevelForRank(rank)
+  final maxLevel = maxLevelForRank(rank)
+  var level = (hero.level ?? 1) + random.nextInt(5) - 2
+  if (level < minLevel) level = minLevel
+  if (level > maxLevel) level = maxLevel
+  return level
+}
+
+function _jiejiArenaBackground() {
+  var background = kTerrainKindToBackground['plain']
+  if (background == null) background = 'battle/scene/plain'
+  final time = toTime(game.timestamp)
+  if (time > 2) {
+    return background + '_night.png'
+  }
+  return background + '_day.png'
+}
+
+/// 斗技场劫季切磋。free 为 true 时不扣费、不检查冷却（debug）。
+/// 开战前返回 'ok' | 'cooldown' | 'poor'。战斗结束走回调，败不致死、不记杀业。
+async function duelJiejiArena({ free = false }) {
+  if (hero == null) return 'poor'
+  if (free != true && _jiejiArenaOnCooldown()) {
+    return 'cooldown'
+  }
+
+  final fee = jiejiArenaFee()
+  if (free != true) {
+    final moneyHave = hero.materials['money'] ?? 0
+    if (moneyHave < fee) {
+      return 'poor'
+    }
+    Player.exhaust('money', fee)
+    _jiejiArenaMark()
+  }
+
+  final seasonId = _jiejiArenaSeasonId()
+  var foeKey = 'jieji_arena_foe_thunder'
+  if (seasonId == 'mist') foeKey = 'jieji_arena_foe_mist'
+  if (seasonId == 'blood') foeKey = 'jieji_arena_foe_blood'
+  final foeName = engine.locale(foeKey)
+  final rank = _jiejiArenaFoeRank()
+  final level = _jiejiArenaFoeLevel(rank)
+  final enemy = BattleEntity(name: foeName, rank: rank, level: level)
+
+  dialog.pushDialog('hint_duelJiejiArena')
+  await dialog.execute()
+
+  Game.updateUI()
+  Game.showPrebattle(enemy,
+    background: _jiejiArenaBackground(),
+    loseOnEscape: true,
+    onBattleEnd: async function [onJiejiArenaDuelEnd] (result, roundCount) {
+      if (result) {
+        var money = kJiejiArenaWinMoneyMin + random.nextInt(kJiejiArenaWinMoneySpan)
+        if (seasonId == 'blood') {
+          money = money + kJiejiArenaWinMoneyBloodBonus
+        }
+        await Player.collect('money', money, incurIncident: false)
+        await tryDropGongfaShard(rate: kJiejiArenaGongfaRate)
+        Player.restoreLife(kJiejiArenaWinLife)
+        dialog.pushDialog('hint_duelJiejiArena_win', interpolations: ['${money}'])
+        await dialog.execute()
+      } else {
+        var nextLife = (hero.life ?? 1) - kJiejiArenaLoseLife
+        if (nextLife < 1) nextLife = 1
+        Player.setLife(nextLife)
+        dialog.pushDialog('hint_duelJiejiArena_lose')
+        await dialog.execute()
+      }
+      Game.updateUI()
+    }
+  )
+  return 'ok'
+}

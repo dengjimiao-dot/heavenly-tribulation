@@ -1128,6 +1128,17 @@
   "hint_consultJiejiStars_cooldown": "本季已经问过一次劫。待下一季再来。",
   "hint_consultJiejiStars_notEnough": "问劫需要 {0} 药材和 {1} 铜钱。",
 
+  "duelJiejiArena": "劫季切磋",
+  "hint_duelJiejiArena_description": "花铜钱上台，与当季具名对手切磋。四程或一日才能再打。雷月入场 20，平常 40，血月 60。胜了拿彩头，败了只伤生机，不会丧命。",
+  "hint_duelJiejiArena": "台下有人应了你的名帖。点到为止，败了也不过伤些筋骨。",
+  "hint_duelJiejiArena_win": "点到为止。你赢了这场切磋，袋里多了 {0} 铜钱，生机也回了两分。",
+  "hint_duelJiejiArena_lose": "点到为止。你输了，生机少了几分，人还在。",
+  "hint_duelJiejiArena_cooldown": "刚切磋过。再走过四程，或再过一日，才能再上台。",
+  "hint_duelJiejiArena_notEnough": "切磋入场要 {0} 铜钱。雷月 20，平常 40，血月 60。",
+  "jieji_arena_foe_thunder": "雷纹擂手",
+  "jieji_arena_foe_mist": "雾隐切磋客",
+  "jieji_arena_foe_blood": "血月武客",
+
   "hint_dungeon_need_deck": "进秘境前先指定一套出战卡组。没有卡组，锁门也锁不住。",
   "hint_dungeon_lock_deck": "此行将锁死出战卡组「{0}」。秘境内不能换整库、不能改构筑；拾取的季限牌离开时会消散。",
   "dungeonLockDeck": "确认锁卡组",

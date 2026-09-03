@@ -23,6 +23,7 @@ const _kJiejiKeepSiteKinds = {
   'residence': true,
   'farmland': true,
   'divinationaltar': true,
+  'arena': true,
 }
 
 function ensureJiejiFlags() {

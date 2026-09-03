@@ -1969,6 +1969,34 @@ Future<void> _heroRestJiejiSite(dynamic location) async {
   }
 }
 
+Future<void> _heroDuelJiejiArena(dynamic location) async {
+  final result = await engine.hetu.invoke('duelJiejiArena');
+  if (result == 'cooldown') {
+    dialog.pushDialog(
+      'hint_duelJiejiArena_cooldown',
+      npcId: location['npcId'],
+    );
+    await dialog.execute();
+    return;
+  }
+  if (result == 'poor') {
+    var fee = 40;
+    try {
+      final raw = engine.hetu.invoke('jiejiArenaFee');
+      if (raw != null) {
+        fee = (raw as num).toInt();
+      }
+    } catch (_) {}
+    dialog.pushDialog(
+      'hint_duelJiejiArena_notEnough',
+      npcId: location['npcId'],
+      interpolations: [fee],
+    );
+    await dialog.execute();
+    return;
+  }
+}
+
 Future<void> _heroShowKarmaCodex(dynamic location) async {
   final text = engine.hetu.invoke('formatKarmaCodex');
   dialog.pushDialog(
@@ -2060,6 +2088,10 @@ Future<void> _onInteractSite(
     });
   } else if (siteKind == 'arena') {
     siteOptions.add('about_arena');
+    siteOptions.add({
+      'text': 'duelJiejiArena',
+      'description': 'hint_duelJiejiArena_description',
+    });
   } else if (siteKind == 'dungeon') {
     siteOptions.add('about_dungeon');
   }
@@ -2134,6 +2166,8 @@ Future<void> _onInteractSite(
         npcId: location['npcId'],
       );
       await dialog.execute();
+    case 'duelJiejiArena':
+      await _heroDuelJiejiArena(location);
     case 'divination':
       await _heroDivination(location);
     case 'consultJiejiStars':
