@@ -139,5 +139,13 @@
     contribution: 11,
     rank: 0,
   },
+  hidden_gongfa_cave: {
+    id: "hidden_gongfa_cave",
+    policy: null,
+    isBounty: false,
+    isHidden: true,
+    contribution: 13,
+    rank: 0,
+  },
 
 }

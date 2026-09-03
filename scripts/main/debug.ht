@@ -165,6 +165,8 @@ namespace debug {
       questKind = 'hidden_blood_feast'
     } else if (kind == 'market') {
       questKind = 'hidden_mist_market'
+    } else if (kind == 'cave') {
+      questKind = 'hidden_gongfa_cave'
     }
     final ctor = Quests[questKind]
     if (ctor == null) return false
