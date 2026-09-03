@@ -1,0 +1,177 @@
+/// 交易所「议价」：压价 / 赊账 / 血账。不替换换货。
+const kJiejiHaggleCooldownDays = 1
+const kJiejiHaggleCutHerb = 1
+const kJiejiHaggleCutHerbMist = 0
+const kJiejiHaggleCutMoney = 50
+const kJiejiHaggleCutMoneyThunder = 70
+const kJiejiHaggleTickMoney = 40
+const kJiejiHaggleTickMoneyThunder = 20
+const kJiejiHaggleBloodLife = 2
+const kJiejiHaggleBloodLifeBlood = 3
+const kJiejiHaggleBloodHerb = 3
+const kJiejiHaggleBloodGongfaRate = 0.25
+
+function _jiejiHaggleSeasonId() {
+  if (game.jieji != null && game.jieji.seasonId != null) {
+    return game.jieji.seasonId
+  }
+  return null
+}
+
+function _jiejiHaggleCurrentDay() {
+  if (game.timestamp == null) return null
+  if (Constants.ticksPerDay == null) return null
+  if (Constants.ticksPerDay <= 0) return null
+  return game.timestamp ~/ Constants.ticksPerDay
+}
+
+function _jiejiHaggleOnCooldown() {
+  final jieji = ensureJiejiFlags()
+  final day = _jiejiHaggleCurrentDay()
+  if (day == null) return false
+  if (jieji.lastHaggleDay == null) return false
+  if (day - jieji.lastHaggleDay < kJiejiHaggleCooldownDays) return true
+  return false
+}
+
+function _jiejiHaggleMark() {
+  final jieji = ensureJiejiFlags()
+  jieji.lastHaggleDay = _jiejiHaggleCurrentDay()
+}
+
+function _jiejiHaggleCostLife(want) {
+  var lost = want
+  final life = hero.life ?? 1
+  if (life - lost < 1) lost = life - 1
+  if (lost < 0) lost = 0
+  if (lost > 0) {
+    Player.setLife(hero.life - lost)
+  }
+  return lost
+}
+
+function _jiejiHaggleCutHerbCost(seasonId) {
+  if (seasonId == 'mist') return kJiejiHaggleCutHerbMist
+  return kJiejiHaggleCutHerb
+}
+
+function _jiejiHaggleCutMoneyGain(seasonId) {
+  if (seasonId == 'thunder') return kJiejiHaggleCutMoneyThunder
+  return kJiejiHaggleCutMoney
+}
+
+function _jiejiHaggleTickMoneyCost(seasonId) {
+  if (seasonId == 'thunder') return kJiejiHaggleTickMoneyThunder
+  return kJiejiHaggleTickMoney
+}
+
+function _jiejiHaggleBloodLifeCost(seasonId) {
+  if (seasonId == 'blood') return kJiejiHaggleBloodLifeBlood
+  return kJiejiHaggleBloodLife
+}
+
+function _jiejiHaggleNormalizeKind(kind) {
+  if (kind == 'cut' || kind == 'jieji_haggle_cut') return 'cut'
+  if (kind == 'tick' || kind == 'jieji_haggle_tick') return 'tick'
+  if (kind == 'blood' || kind == 'jieji_haggle_blood') return 'blood'
+  return null
+}
+
+function _jiejiHaggleChoices() {
+  return [
+    {
+      text: 'jieji_haggle_cut',
+      description: 'hint_jieji_haggle_cut',
+    },
+    {
+      text: 'jieji_haggle_tick',
+      description: 'hint_jieji_haggle_tick',
+    },
+    {
+      text: 'jieji_haggle_blood',
+      description: 'hint_jieji_haggle_blood',
+    },
+    'cancel',
+  ]
+}
+
+function _jiejiHaggleHerbNeed(selected, seasonId) {
+  if (selected == 'cut') return _jiejiHaggleCutHerbCost(seasonId)
+  return 0
+}
+
+function _jiejiHaggleMoneyNeed(selected, seasonId) {
+  if (selected == 'tick') return _jiejiHaggleTickMoneyCost(seasonId)
+  return 0
+}
+
+/// 交易所议价三选。free 为 true 时不扣费、不检查冷却（debug），仍弹出三选。
+/// 返回 'ok' | 'cooldown' | 'poor' | 'cancel'。
+async function haggleJiejiGoods({ free = false }) {
+  if (hero == null) return 'cancel'
+  if (free != true && _jiejiHaggleOnCooldown()) {
+    return 'cooldown'
+  }
+
+  dialog.pushDialog('hint_haggleJiejiGoods')
+  dialog.pushSelection('jiejiHaggle', _jiejiHaggleChoices())
+  await dialog.execute()
+  final picked = dialog.checkSelected('jiejiHaggle')
+  var selected = null
+  if (picked == null || picked == 'cancel') {
+    if (free == true && picked == null) {
+      selected = 'cut'
+    } else {
+      return 'cancel'
+    }
+  } else {
+    selected = _jiejiHaggleNormalizeKind(picked)
+  }
+  if (selected == null) return 'cancel'
+
+  final seasonId = _jiejiHaggleSeasonId()
+  if (free != true) {
+    final herbNeed = _jiejiHaggleHerbNeed(selected, seasonId)
+    final moneyNeed = _jiejiHaggleMoneyNeed(selected, seasonId)
+    final herbHave = hero.materials['herb'] ?? 0
+    final moneyHave = hero.materials['money'] ?? 0
+    if (herbHave < herbNeed || moneyHave < moneyNeed) {
+      return 'poor'
+    }
+  }
+
+  if (free != true) {
+    final herbNeed = _jiejiHaggleHerbNeed(selected, seasonId)
+    final moneyNeed = _jiejiHaggleMoneyNeed(selected, seasonId)
+    if (herbNeed > 0) {
+      Player.exhaust('herb', herbNeed)
+    }
+    if (moneyNeed > 0) {
+      Player.exhaust('money', moneyNeed)
+    }
+    if (selected == 'blood') {
+      _jiejiHaggleCostLife(_jiejiHaggleBloodLifeCost(seasonId))
+    }
+    _jiejiHaggleMark()
+  }
+
+  if (selected == 'cut') {
+    final money = _jiejiHaggleCutMoneyGain(seasonId)
+    await Player.collect('money', money, incurIncident: false)
+    dialog.pushDialog('hint_haggleJiejiGoods_cut', interpolations: [money])
+    await dialog.execute()
+  } else if (selected == 'tick') {
+    final jieji = ensureJiejiFlags()
+    jieji.illusionVeil = true
+    dialog.pushDialog('hint_haggleJiejiGoods_tick')
+    await dialog.execute()
+  } else {
+    await Player.collect('herb', kJiejiHaggleBloodHerb, incurIncident: false)
+    dialog.pushDialog('hint_haggleJiejiGoods_blood')
+    await dialog.execute()
+    await tryDropGongfaShard(rate: kJiejiHaggleBloodGongfaRate)
+  }
+
+  Game.updateUI()
+  return 'ok'
+}

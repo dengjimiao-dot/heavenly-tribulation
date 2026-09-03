@@ -456,6 +456,11 @@ namespace debug {
     return await swapJiejiGoods(free: true)
   }
 
+  /// 忽略冷却与花费，仍弹出交易所议价三选。
+  async function forceHaggle() {
+    return await haggleJiejiGoods(free: true)
+  }
+
   async function forceArray(kind) {
     var k = kind
     if (k != 'ward' && k != 'fury' && k != 'mist') {
