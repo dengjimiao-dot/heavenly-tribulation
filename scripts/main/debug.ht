@@ -218,6 +218,8 @@ namespace debug {
       await playJiejiShrineRoadEvent()
     } else if (kind == 'scavenge') {
       await playJiejiScavengeEvent(terrain)
+    } else if (kind == 'camp') {
+      await playJiejiCampEvent(terrain)
     } else {
       await playJiejiThunderRoadEvent(terrain)
     }
@@ -435,6 +437,11 @@ namespace debug {
   /// 忽略几率与冷却，仍弹出赶路拾荒三选。
   async function forceScavenge() {
     return await playJiejiScavengeEvent({ kind: 'plain' })
+  }
+
+  /// 忽略几率与冷却，仍弹出赶路扎营三选。
+  async function forceCamp() {
+    return await playJiejiCampEvent({ kind: 'plain' })
   }
 
   /// 忽略费用与冷却，直接挂上迷障（下次野遇糊弄过去）。

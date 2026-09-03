@@ -1,0 +1,129 @@
+/// 赶路「扎营」三选：歇火 / 守夜 / 拔营。隐藏、劫兆、野遇、赶路、行商、拾荒都没中时才滚。
+const kJiejiCampBaseRate = 0.05
+const kJiejiCampMoveCooldown = 10
+const kJiejiCampRestLife = 6
+const kJiejiCampRestLifeMist = 8
+const kJiejiCampWatchLife = 1
+const kJiejiCampWatchMoneyThunder = 40
+const kJiejiCampLeaveMoney = 20
+
+function _jiejiCampSeasonId() {
+  if (game.jieji != null && game.jieji.seasonId != null) {
+    return game.jieji.seasonId
+  }
+  return null
+}
+
+function _jiejiCampTutorialLocked() {
+  return game.enableTutorial && game.flags.tutorial.bountyQuest != true
+}
+
+function _jiejiCampRestLife(seasonId) {
+  if (seasonId == 'mist') return kJiejiCampRestLifeMist
+  return kJiejiCampRestLife
+}
+
+function _jiejiCampCostLife(want) {
+  var lost = want
+  final life = hero.life ?? 1
+  if (life - lost < 1) lost = life - 1
+  if (lost < 0) lost = 0
+  if (lost > 0) {
+    Player.setLife(hero.life - lost)
+  }
+  return lost
+}
+
+/// 有赶路耗日辅助则耗 1 日；与 _jiejiScavengeSpendDay 同一套 Game.updateGame。不可见则跳过。
+async function _jiejiCampSpendDay() {
+  if (Constants.ticksPerDay == null) return false
+  if (Constants.ticksPerDay <= 0) return false
+  await Game.updateGame(tick: Constants.ticksPerDay)
+  return true
+}
+
+function _jiejiCampNormalizeKind(kind) {
+  if (kind == 'rest' || kind == 'jieji_camp_rest') return 'rest'
+  if (kind == 'watch' || kind == 'jieji_camp_watch') return 'watch'
+  if (kind == 'leave' || kind == 'jieji_camp_leave') return 'leave'
+  return null
+}
+
+function _jiejiCampChoices() {
+  return [
+    {
+      text: 'jieji_camp_rest',
+      description: 'hint_jieji_camp_rest',
+    },
+    {
+      text: 'jieji_camp_watch',
+      description: 'hint_jieji_camp_watch',
+    },
+    {
+      text: 'jieji_camp_leave',
+      description: 'hint_jieji_camp_leave',
+    },
+  ]
+}
+
+/// 赶路扎营三选。debug.forceJiejiEvent('camp') / forceCamp 直接走这里，仍弹出三选。
+async function playJiejiCampEvent(terrain) {
+  if (hero == null) return false
+
+  dialog.pushDialog('hint_jieji_camp')
+  dialog.pushSelection('jiejiCamp', _jiejiCampChoices())
+  await dialog.execute()
+  final picked = dialog.checkSelected('jiejiCamp')
+  var selected = _jiejiCampNormalizeKind(picked)
+  if (selected == null) {
+    selected = 'leave'
+  }
+
+  final seasonId = _jiejiCampSeasonId()
+  if (selected == 'rest') {
+    await _jiejiCampSpendDay()
+    final healed = Player.restoreLife(_jiejiCampRestLife(seasonId))
+    dialog.pushDialog('hint_jieji_camp_rest_ok', interpolations: [healed])
+    await dialog.execute()
+  } else if (selected == 'watch') {
+    final lost = _jiejiCampCostLife(kJiejiCampWatchLife)
+    final jieji = ensureJiejiFlags()
+    jieji.illusionVeil = true
+    if (seasonId == 'thunder') {
+      await Player.collect('money', kJiejiCampWatchMoneyThunder, incurIncident: false)
+      dialog.pushDialog('hint_jieji_camp_watch_thunder', interpolations: [
+        lost,
+        kJiejiCampWatchMoneyThunder,
+      ])
+    } else {
+      dialog.pushDialog('hint_jieji_camp_watch_ok', interpolations: [lost])
+    }
+    await dialog.execute()
+  } else {
+    await Player.collect('money', kJiejiCampLeaveMoney, incurIncident: false)
+    dialog.pushDialog('hint_jieji_camp_leave_ok', interpolations: [kJiejiCampLeaveMoney])
+    await dialog.execute()
+  }
+
+  Game.updateUI()
+  return true
+}
+
+/// 赶路触发：教程锁与路遇相同；冷却 10 步；约 5%。出过则返回 true。
+async function tryJiejiCampOnMove(terrain) {
+  if (hero == null) return false
+  if (_jiejiCampTutorialLocked()) return false
+
+  final jieji = ensureJiejiFlags()
+  final moves = jieji.worldMoves ?? 0
+  final last = jieji.lastCampMove ?? -999
+  if (moves - last < kJiejiCampMoveCooldown) return false
+
+  var rate = kJiejiCampBaseRate
+  if (rate < 0) rate = 0
+  if (random.nextDouble() > rate) return false
+
+  jieji.lastCampMove = moves
+  await playJiejiCampEvent(terrain)
+  return true
+}
