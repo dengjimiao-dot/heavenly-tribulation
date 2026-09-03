@@ -1,0 +1,201 @@
+/// 演武场「加练」三选：对桩 / 换招 / 血练。不替换切磋、挑战与原对打。
+const kJiejiDrillCooldownDays = 1
+const kJiejiDrillDummyMoney = 30
+const kJiejiDrillDummyMoneyThunder = 15
+const kJiejiDrillDummyLife = 4
+const kJiejiDrillSparHerb = 1
+const kJiejiDrillSparMistMoney = 20
+const kJiejiDrillBloodLife = 2
+const kJiejiDrillBloodLifeBlood = 3
+const kJiejiDrillBloodHeal = 8
+
+function _jiejiDrillSeasonId() {
+  if (game.jieji != null && game.jieji.seasonId != null) {
+    return game.jieji.seasonId
+  }
+  return 'thunder'
+}
+
+function _jiejiDrillCurrentDay() {
+  if (game.timestamp == null) return null
+  if (Constants.ticksPerDay == null) return null
+  if (Constants.ticksPerDay <= 0) return null
+  return game.timestamp ~/ Constants.ticksPerDay
+}
+
+function _jiejiDrillOnCooldown() {
+  final jieji = ensureJiejiFlags()
+  final day = _jiejiDrillCurrentDay()
+  if (day == null) return false
+  if (jieji.lastDrillDay == null) return false
+  if (day - jieji.lastDrillDay < kJiejiDrillCooldownDays) return true
+  return false
+}
+
+function _jiejiDrillMark() {
+  final jieji = ensureJiejiFlags()
+  jieji.lastDrillDay = _jiejiDrillCurrentDay()
+}
+
+function _jiejiDrillCostLife(want) {
+  var lost = want
+  final life = hero.life ?? 1
+  if (life - lost < 1) lost = life - 1
+  if (lost < 0) lost = 0
+  if (lost > 0) {
+    Player.setLife(hero.life - lost)
+  }
+  return lost
+}
+
+function _jiejiDrillGrantBlank() {
+  final card = BattleCard(rank: 0)
+  card.isCardBlank = true
+  Player.acquireCard(card)
+  return card
+}
+
+function _jiejiDrillDummyMoneyCost(seasonId) {
+  if (seasonId == 'thunder') return kJiejiDrillDummyMoneyThunder
+  return kJiejiDrillDummyMoney
+}
+
+function _jiejiDrillBloodLifeCost(seasonId) {
+  if (seasonId == 'blood') return kJiejiDrillBloodLifeBlood
+  return kJiejiDrillBloodLife
+}
+
+function _jiejiDrillNormalizeKind(kind) {
+  if (kind == 'dummy' || kind == 'jieji_drill_dummy') return 'dummy'
+  if (kind == 'spar' || kind == 'jieji_drill_spar') return 'spar'
+  if (kind == 'blood' || kind == 'jieji_drill_blood') return 'blood'
+  return null
+}
+
+function _jiejiDrillChoices() {
+  return [
+    {
+      text: 'jieji_drill_dummy',
+      description: 'hint_jieji_drill_dummy',
+    },
+    {
+      text: 'jieji_drill_spar',
+      description: 'hint_jieji_drill_spar',
+    },
+    {
+      text: 'jieji_drill_blood',
+      description: 'hint_jieji_drill_blood',
+    },
+    'cancel',
+  ]
+}
+
+function _jiejiDrillHerbNeed(selected) {
+  if (selected == 'spar') return kJiejiDrillSparHerb
+  return 0
+}
+
+function _jiejiDrillMoneyNeed(selected, seasonId) {
+  if (selected == 'dummy') return _jiejiDrillDummyMoneyCost(seasonId)
+  return 0
+}
+
+/// 破军未挂则挂 arrayFury；已挂则挂 feastFury。两者都有则只回血。
+function _jiejiDrillApplyDummyFury() {
+  final jieji = ensureJiejiFlags()
+  if (jieji.arrayFury != true) {
+    jieji.arrayFury = true
+    return 'array'
+  }
+  if (jieji.feastFury != true) {
+    jieji.feastFury = true
+    return 'feast'
+  }
+  return null
+}
+
+/// 演武场加练三选。free 为 true 时不扣费、不检查冷却（debug），仍弹出三选。
+/// 返回 'ok' | 'cooldown' | 'poor' | 'cancel'。
+async function drillJiejiArena({ free = false }) {
+  if (hero == null) return 'cancel'
+  if (free != true && _jiejiDrillOnCooldown()) {
+    return 'cooldown'
+  }
+
+  dialog.pushDialog('hint_drillJiejiArena')
+  dialog.pushSelection('jiejiDrill', _jiejiDrillChoices())
+  await dialog.execute()
+  final picked = dialog.checkSelected('jiejiDrill')
+  var selected = null
+  if (picked == null || picked == 'cancel') {
+    if (free == true && picked == null) {
+      selected = 'dummy'
+    } else {
+      return 'cancel'
+    }
+  } else {
+    selected = _jiejiDrillNormalizeKind(picked)
+  }
+  if (selected == null) return 'cancel'
+
+  final seasonId = _jiejiDrillSeasonId()
+  if (free != true) {
+    final herbNeed = _jiejiDrillHerbNeed(selected)
+    final moneyNeed = _jiejiDrillMoneyNeed(selected, seasonId)
+    final herbHave = hero.materials['herb'] ?? 0
+    final moneyHave = hero.materials['money'] ?? 0
+    if (herbHave < herbNeed || moneyHave < moneyNeed) {
+      return 'poor'
+    }
+  }
+
+  if (free != true) {
+    final herbNeed = _jiejiDrillHerbNeed(selected)
+    final moneyNeed = _jiejiDrillMoneyNeed(selected, seasonId)
+    if (herbNeed > 0) {
+      Player.exhaust('herb', herbNeed)
+    }
+    if (moneyNeed > 0) {
+      Player.exhaust('money', moneyNeed)
+    }
+    if (selected == 'blood') {
+      _jiejiDrillCostLife(_jiejiDrillBloodLifeCost(seasonId))
+    }
+    _jiejiDrillMark()
+  }
+
+  if (selected == 'spar') {
+    _jiejiDrillGrantBlank()
+    if (seasonId == 'mist') {
+      await Player.collect('money', kJiejiDrillSparMistMoney, incurIncident: false)
+      dialog.pushDialog('hint_drillJiejiArena_spar_mist')
+    } else {
+      dialog.pushDialog('hint_drillJiejiArena_spar')
+    }
+    await dialog.execute()
+  } else if (selected == 'blood') {
+    final jieji = ensureJiejiFlags()
+    if (jieji.arrayWard != true) {
+      jieji.arrayWard = true
+      dialog.pushDialog('hint_drillJiejiArena_blood')
+    } else {
+      Player.restoreLife(kJiejiDrillBloodHeal)
+      dialog.pushDialog('hint_drillJiejiArena_blood_heal')
+    }
+    await dialog.execute()
+  } else {
+    Player.restoreLife(kJiejiDrillDummyLife)
+    final fury = _jiejiDrillApplyDummyFury()
+    if (fury == 'array') {
+      dialog.pushDialog('hint_drillJiejiArena_dummy_array')
+    } else if (fury == 'feast') {
+      dialog.pushDialog('hint_drillJiejiArena_dummy_feast')
+    } else {
+      dialog.pushDialog('hint_drillJiejiArena_dummy')
+    }
+    await dialog.execute()
+  }
+
+  Game.updateUI()
+  return 'ok'
+}

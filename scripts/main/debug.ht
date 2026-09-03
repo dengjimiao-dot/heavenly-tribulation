@@ -345,6 +345,11 @@ namespace debug {
     return await duelJiejiArena(free: true)
   }
 
+  /// 忽略冷却与花费，仍弹出演武场加练三选。
+  async function forceDrill() {
+    return await drillJiejiArena(free: true)
+  }
+
   async function forceBlackLot() {
     return await bidJiejiBlackLot(free: true)
   }
