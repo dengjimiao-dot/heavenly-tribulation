@@ -313,6 +313,14 @@ namespace debug {
     return await layJiejiArray(free: true, kind: k)
   }
 
+  async function forcePsychic(kind) {
+    var k = kind
+    if (k != 'scry' && k != 'summon' && k != 'draw') {
+      k = 'draw'
+    }
+    return await consultJiejiPsychic(free: true, kind: k)
+  }
+
   /// 忽略费用与冷却，直接挂上迷障（下次野遇糊弄过去）。
   function forceVeil() {
     if (hero == null) return

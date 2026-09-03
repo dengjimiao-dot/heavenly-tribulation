@@ -492,6 +492,16 @@ final class SeasonLogic {
     }
   }
 
+  static bool get psychicPending {
+    try {
+      final jieji = _jiejiFlags();
+      if (jieji == null) return false;
+      return jieji['psychicDrawElite'] == true;
+    } catch (_) {
+      return false;
+    }
+  }
+
   static String hudLine() {
     if (GameData.seasons.isEmpty) return '';
     var line = '$currentName · 余$daysRemainingInSeason日';
@@ -519,6 +529,9 @@ final class SeasonLogic {
     }
     if (veilPending) {
       line += ' · 障';
+    }
+    if (psychicPending) {
+      line += ' · 灵';
     }
     return line;
   }

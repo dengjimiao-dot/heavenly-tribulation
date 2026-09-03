@@ -340,6 +340,18 @@ class LocationScene extends Scene with HasCursorState {
         };
         siteList.tryAddCard(omenCard);
         world.add(omenCard);
+      case 'psychictemple':
+        final psychicCard = GameData.createSiteCard(
+          spriteId: 'location/card/psychictemple.png',
+          title: engine.locale('consultJiejiPsychic'),
+          onPreviewed: _onPreviewSiteCard,
+          onUnpreviewed: _onUnpreviewSiteCard,
+        );
+        psychicCard.onTap = (button, position) async {
+          await GameLogic.heroConsultJiejiPsychic(location);
+        };
+        siteList.tryAddCard(psychicCard);
+        world.add(psychicCard);
       default:
         for (final siteId in location['siteIds']) {
           final siteData = GameData.getLocation(siteId);
@@ -481,6 +493,9 @@ class LocationScene extends Scene with HasCursorState {
       } catch (_) {}
       try {
         engine.hetu.invoke('ensureHomeIllusionAltar');
+      } catch (_) {}
+      try {
+        engine.hetu.invoke('ensureHomePsychicTemple');
       } catch (_) {}
     }
     _loadSites();

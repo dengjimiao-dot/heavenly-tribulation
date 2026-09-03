@@ -14,6 +14,7 @@ async function onNewGame() {
   ensureHomeDaoStele()
   ensureHomeArrayLab()
   ensureHomeIllusionAltar()
+  ensureHomePsychicTemple()
   final xitong = game.npcs['xitong']
 
   // final itemsInfo = [
@@ -102,6 +103,10 @@ async function tryWildEncounterOnMove(terrain) {
         await applyJiejiStarWardOnWildWin(result)
       },
     )
+    return true
+  }
+  if (consumeJiejiPsychicDrawElite()) {
+    await startJiejiWildEliteEncounter(terrain)
     return true
   }
   if (await tryJiejiWildEliteOnWildEncounter(terrain)) return true

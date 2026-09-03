@@ -2299,6 +2299,29 @@ Future<void> _heroCastJiejiVeil(dynamic location) async {
   }
 }
 
+Future<void> _heroConsultJiejiPsychic(dynamic location) async {
+  final isRented = await GameLogic.checkRented(location);
+  if (!isRented) return;
+
+  final result = await engine.hetu.invoke('consultJiejiPsychic');
+  if (result == 'cooldown') {
+    dialog.pushDialog(
+      'hint_consultJiejiPsychic_cooldown',
+      npcId: location['npcId'],
+    );
+    await dialog.execute();
+    return;
+  }
+  if (result == 'poor') {
+    dialog.pushDialog(
+      'hint_consultJiejiPsychic_notEnough',
+      npcId: location['npcId'],
+    );
+    await dialog.execute();
+    return;
+  }
+}
+
 
 Future<void> _heroShowKarmaCodex(dynamic location) async {
   final text = engine.hetu.invoke('formatKarmaCodex');
@@ -2442,6 +2465,11 @@ Future<void> _onInteractSite(
       'text': 'castJiejiVeil',
       'description': 'hint_castJiejiVeil_description',
     });
+  } else if (siteKind == 'psychictemple') {
+    siteOptions.add({
+      'text': 'consultJiejiPsychic',
+      'description': 'hint_consultJiejiPsychic_description',
+    });
   } else if (siteKind == 'dungeon') {
     siteOptions.add('about_dungeon');
   }
@@ -2506,6 +2534,8 @@ Future<void> _onInteractSite(
       await _heroLayJiejiArray(location);
     case 'castJiejiVeil':
       await _heroCastJiejiVeil(location);
+    case 'consultJiejiPsychic':
+      await _heroConsultJiejiPsychic(location);
     case 'brewPotionCard':
       await _heroBrewPotionCard(location);
     case 'scribeJiejiTalisman':

@@ -1707,6 +1707,9 @@ final class GameLogic {
   static Future<void> heroConsultJiejiStars(dynamic location) =>
       _heroConsultJiejiStars(location);
 
+  static Future<void> heroConsultJiejiPsychic(dynamic location) =>
+      _heroConsultJiejiPsychic(location);
+
   static void onInteractRunelabWorkbench({dynamic location}) =>
       _onInteractRunelabWorkbench(location: location);
 

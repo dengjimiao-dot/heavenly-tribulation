@@ -1,0 +1,227 @@
+/// 通灵殿「通灵」：窥劫 / 招魂 / 引魂。不替换原通灵殿 UI。
+const kJiejiPsychicHerbCost = 2
+const kJiejiPsychicMoneyCost = 45
+const kJiejiPsychicMoneyCostThunder = 55
+const kJiejiPsychicHerbCostMist = 1
+const kJiejiPsychicLifeCostBlood = 1
+const kJiejiPsychicCooldownDays = 1
+const kJiejiPsychicScryMoney = 70
+const kJiejiPsychicScryMoneyThunder = 90
+const kJiejiPsychicScryMoneyMist = 50
+const kJiejiPsychicScryHerbMist = 2
+const kJiejiPsychicScryMoneyBlood = 100
+const kJiejiPsychicSummonBlankChance = 0.40
+const kJiejiPsychicSummonHerb = 3
+const kJiejiPsychicSummonMoney = 60
+
+function _jiejiPsychicSeasonId() {
+  if (game.jieji != null && game.jieji.seasonId != null) {
+    return game.jieji.seasonId
+  }
+  return null
+}
+
+function jiejiPsychicCosts() {
+  var herb = kJiejiPsychicHerbCost
+  var money = kJiejiPsychicMoneyCost
+  var life = 0
+  final seasonId = _jiejiPsychicSeasonId()
+  if (seasonId == 'thunder') {
+    money = kJiejiPsychicMoneyCostThunder
+  } else if (seasonId == 'mist') {
+    herb = kJiejiPsychicHerbCostMist
+  } else if (seasonId == 'blood') {
+    life = kJiejiPsychicLifeCostBlood
+  }
+  return {
+    herb: herb,
+    money: money,
+    life: life,
+  }
+}
+
+function ensureHomePsychicTemple() {
+  if (hero == null) return
+  final city = getHeroHomeCity()
+  if (city == null) return
+  final siteIds = city.siteIds ?? []
+  for (final siteId in siteIds) {
+    final site = game.locations[siteId]
+    if (site != null && site.kind == kLocationKindPsychicTemple) return
+  }
+  Location(
+    category: 'site',
+    kind: kLocationKindPsychicTemple,
+    atCity: city,
+    sectId: city.sectId,
+    development: 0,
+    npcId: Constants.siteKindToNpcId[kLocationKindPsychicTemple],
+  )
+}
+
+function _jiejiPsychicCurrentDay() {
+  if (game.timestamp == null) return null
+  if (Constants.ticksPerDay == null) return null
+  if (Constants.ticksPerDay <= 0) return null
+  return game.timestamp ~/ Constants.ticksPerDay
+}
+
+function _jiejiPsychicOnCooldown() {
+  final jieji = ensureJiejiFlags()
+  final day = _jiejiPsychicCurrentDay()
+  if (day == null) return false
+  if (jieji.lastPsychicDay == null) return false
+  if (day - jieji.lastPsychicDay < kJiejiPsychicCooldownDays) return true
+  return false
+}
+
+function _jiejiPsychicMark() {
+  final jieji = ensureJiejiFlags()
+  jieji.lastPsychicDay = _jiejiPsychicCurrentDay()
+}
+
+function _jiejiPsychicCostLife(want) {
+  var lost = want
+  final life = hero.life ?? 1
+  if (life - lost < 1) lost = life - 1
+  if (lost < 0) lost = 0
+  if (lost > 0) {
+    Player.setLife(hero.life - lost)
+  }
+  return lost
+}
+
+function _jiejiPsychicChoices() {
+  return [
+    {
+      text: 'jieji_psychic_scry',
+      description: 'hint_jieji_psychic_scry',
+    },
+    {
+      text: 'jieji_psychic_summon',
+      description: 'hint_jieji_psychic_summon',
+    },
+    {
+      text: 'jieji_psychic_draw',
+      description: 'hint_jieji_psychic_draw',
+    },
+    'cancel',
+  ]
+}
+
+function _jiejiPsychicNormalizeKind(kind) {
+  if (kind == 'scry' || kind == 'jieji_psychic_scry') return 'scry'
+  if (kind == 'summon' || kind == 'jieji_psychic_summon') return 'summon'
+  if (kind == 'draw' || kind == 'jieji_psychic_draw') return 'draw'
+  return null
+}
+
+function consumeJiejiPsychicDrawElite() {
+  final jieji = ensureJiejiFlags()
+  if (jieji.psychicDrawElite != true) return false
+  jieji.psychicDrawElite = false
+  return true
+}
+
+function _jiejiPsychicGrantBlank() {
+  final card = BattleCard(rank: 0)
+  card.isCardBlank = true
+  Player.acquireCard(card)
+}
+
+async function _jiejiPsychicApplyScry() {
+  final seasonId = _jiejiPsychicSeasonId()
+  if (seasonId == 'mist') {
+    await Player.collect('money', kJiejiPsychicScryMoneyMist, incurIncident: false)
+    await Player.collect('herb', kJiejiPsychicScryHerbMist, incurIncident: false)
+    dialog.pushDialog('hint_consultJiejiPsychic_done_scry_mist')
+  } else if (seasonId == 'blood') {
+    await Player.collect('money', kJiejiPsychicScryMoneyBlood, incurIncident: false)
+    dialog.pushDialog('hint_consultJiejiPsychic_done_scry_blood')
+  } else if (seasonId == 'thunder') {
+    await Player.collect('money', kJiejiPsychicScryMoneyThunder, incurIncident: false)
+    dialog.pushDialog('hint_consultJiejiPsychic_done_scry_thunder')
+  } else {
+    await Player.collect('money', kJiejiPsychicScryMoney, incurIncident: false)
+    dialog.pushDialog('hint_consultJiejiPsychic_done_scry')
+  }
+  await dialog.execute()
+}
+
+async function _jiejiPsychicApplySummon() {
+  if (random.nextDouble() < kJiejiPsychicSummonBlankChance) {
+    _jiejiPsychicGrantBlank()
+    dialog.pushDialog('hint_consultJiejiPsychic_done_summon_blank')
+  } else if (random.nextDouble() < 0.5) {
+    await Player.collect('herb', kJiejiPsychicSummonHerb, incurIncident: false)
+    dialog.pushDialog('hint_consultJiejiPsychic_done_summon_herb')
+  } else {
+    await Player.collect('money', kJiejiPsychicSummonMoney, incurIncident: false)
+    dialog.pushDialog('hint_consultJiejiPsychic_done_summon_money')
+  }
+  await dialog.execute()
+}
+
+function _jiejiPsychicApplyDraw() {
+  final jieji = ensureJiejiFlags()
+  jieji.psychicDrawElite = true
+}
+
+/// 通灵殿通灵三选。free 为 true 时不扣费、不检查冷却（debug）。
+/// kind 传入 scry/summon/draw 时跳过选择（debug.forcePsychic）。
+/// 返回 'ok' | 'cooldown' | 'poor' | 'cancel'。
+async function consultJiejiPsychic({ free = false, kind = null }) {
+  if (hero == null) return 'cancel'
+  if (free != true && _jiejiPsychicOnCooldown()) {
+    return 'cooldown'
+  }
+
+  if (free != true) {
+    final costs = jiejiPsychicCosts()
+    final herbHave = hero.materials['herb'] ?? 0
+    final moneyHave = hero.materials['money'] ?? 0
+    if (herbHave < costs.herb || moneyHave < costs.money) {
+      return 'poor'
+    }
+  }
+
+  var selected = _jiejiPsychicNormalizeKind(kind)
+  if (selected == null) {
+    dialog.pushDialog('hint_consultJiejiPsychic')
+    dialog.pushSelection('jiejiPsychic', _jiejiPsychicChoices())
+    await dialog.execute()
+    final picked = dialog.checkSelected('jiejiPsychic')
+    if (picked == null || picked == 'cancel') {
+      if (free == true) {
+        selected = 'scry'
+      } else {
+        return 'cancel'
+      }
+    } else {
+      selected = _jiejiPsychicNormalizeKind(picked)
+    }
+  }
+  if (selected == null) return 'cancel'
+
+  if (free != true) {
+    final costs = jiejiPsychicCosts()
+    Player.exhaust('herb', costs.herb)
+    Player.exhaust('money', costs.money)
+    if (costs.life > 0) {
+      _jiejiPsychicCostLife(costs.life)
+    }
+    _jiejiPsychicMark()
+  }
+
+  if (selected == 'scry') {
+    await _jiejiPsychicApplyScry()
+  } else if (selected == 'summon') {
+    await _jiejiPsychicApplySummon()
+  } else {
+    _jiejiPsychicApplyDraw()
+    dialog.pushDialog('hint_consultJiejiPsychic_done_draw')
+    await dialog.execute()
+  }
+  Game.updateUI()
+  return 'ok'
+}
