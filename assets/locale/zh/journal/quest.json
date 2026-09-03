@@ -66,6 +66,7 @@
   "quest_hidden_ferry_lantern": "雾渡灯",
   "quest_hidden_storm_well": "劫纹雷井",
   "quest_hidden_blood_feast": "劫纹血宴",
+  "quest_hidden_mist_market": "劫纹迷市",
 
   "quest_hidden_ruins_explore_description": "行路听闻{0}附近有荒墟异象。亲自走一趟探明虚实。",
   "quest_hidden_karma_shrine_description": "有人在{0}看见无名祠。据说祭过的人会沾上业力，也会得一份机缘。",
@@ -76,6 +77,7 @@
   "quest_hidden_ferry_lantern_description": "雾中有人在{0}点起渡灯。去会一会，或可换得灵药。",
   "quest_hidden_storm_well_description": "行路听闻{0}附近有劫纹雷井。亲自走一趟汲一口雷水。",
   "quest_hidden_blood_feast_description": "行路听闻{0}城里有人开劫纹血宴。去赴一席，或可回些生机。",
+  "quest_hidden_mist_market_description": "行路听闻{0}城里有人开劫纹迷市。去走一遭，或可换得药材。",
 
   "quest_hidden_rumor": "路遇一位行色匆匆的修士，压低声音说：<yellow>{0}</>……去{1}看看。说完便隐入雾里。",
   "quest_hidden_spawned": "你察觉到一桩隐秘机缘：<yellow>{0}</>。去{1}探明虚实。",
@@ -88,5 +90,6 @@
   "quest_hidden_ore_vein_complete": "「{0}」有了着落。你在{1}挖出了劫纹矿石。",
   "quest_hidden_ferry_lantern_complete": "「{0}」有了着落。你在{1}的渡口收下了灯下的灵药。",
   "quest_hidden_storm_well_complete": "「{0}」有了着落。你在{1}的雷井边汲回了生机。",
-  "quest_hidden_blood_feast_complete": "「{0}」有了着落。你在{1}赴了一席血宴。"
+  "quest_hidden_blood_feast_complete": "「{0}」有了着落。你在{1}赴了一席血宴。",
+  "quest_hidden_mist_market_complete": "「{0}」有了着落。你在{1}的迷市里换了一批货。"
 }
