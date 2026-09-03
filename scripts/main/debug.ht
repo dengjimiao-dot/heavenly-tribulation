@@ -188,6 +188,8 @@ namespace debug {
     final terrain = { kind: 'plain' }
     if (kind == 'merchant') {
       await playJiejiMerchantEvent()
+    } else if (kind == 'merchant2') {
+      await playJiejiMerchantEvent2()
     } else if (kind == 'mist') {
       await playJiejiMistRoadEvent(terrain)
     } else if (kind == 'mist2') {

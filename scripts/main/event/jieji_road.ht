@@ -15,6 +15,16 @@ const kJiejiMerchantSellHerb = 3
 const kJiejiMerchantSellMoney = 120
 const kJiejiMerchantBoxFailCost = 50
 const kJiejiMerchantBoxKarmaChance = 0.40
+const kJiejiMerchant2BladeCost = 100
+const kJiejiMerchant2BladeCostThunder = 70
+const kJiejiMerchant2HerbCost = 2
+const kJiejiMerchant2HerbMoney = 90
+const kJiejiMerchant2HerbCostMist = 3
+const kJiejiMerchant2HerbMoneyMist = 120
+const kJiejiMerchant2GambleKarmaChance = 0.45
+const kJiejiMerchant2GambleKarmaChanceBlood = 0.35
+const kJiejiMerchant2GambleLifeLoss = 3
+const kJiejiMerchant2GambleHerbGain = 1
 const kThunderTempleKarmaChance = 0.20
 const kThunderPrayBlankChance = 0.30
 const kJiejiRoadSteleRate = 0.25
@@ -196,7 +206,11 @@ async function tryJiejiMerchantOnMove() {
   if (random.nextDouble() > rate) return false
 
   jieji.lastMerchantMove = moves
-  await playJiejiMerchantEvent()
+  if (random.nextDouble() < 0.50) {
+    await playJiejiMerchantEvent2()
+  } else {
+    await playJiejiMerchantEvent()
+  }
   return true
 }
 
@@ -767,6 +781,111 @@ async function playJiejiMerchantEvent() {
         Player.exhaust('money', lost)
       }
       dialog.pushDialog('hint_jieji_road_merchant_box_fail', interpolations: ['${lost}'])
+      await dialog.execute()
+    }
+  }
+  Game.updateUI()
+}
+
+function _addJiejiRoadCardToCurrentDeck(card) {
+  if (hero == null || card == null) return
+  if (hero.battleDeckIndex == null) return
+  if (hero.battleDeckIndex < 0) return
+  if (hero.battleDecks == null || hero.battleDecks.isEmpty) return
+  final deck = hero.battleDecks[hero.battleDeckIndex]
+  if (deck == null || deck.cards == null) return
+  if (!deck.cards.contains(card.id)) {
+    deck.cards.add(card.id)
+  }
+}
+
+function _createJiejiMerchantBladeCard() {
+  if (game.battleCards == null) return null
+  if (game.battleCards['punch_attack'] == null) return null
+  final card = BattleCard(
+    affixId: 'punch_attack',
+    rank: 0,
+    isIdentified: true,
+  )
+  card.isSeasonLimited = true
+  card.name = engine.locale('card_jieji_merchant_blade')
+  return card
+}
+
+async function playJiejiMerchantEvent2() {
+  dialog.pushDialog('hint_jieji_road_merchant2')
+  dialog.pushSelection('jiejiWanderMerchant2', [
+    'jieji_merchant2_blade',
+    'jieji_merchant2_herb',
+    'jieji_merchant2_gamble',
+  ])
+  await dialog.execute()
+  final selected = dialog.checkSelected('jiejiWanderMerchant2')
+  final seasonId = _jiejiRoadSeasonId()
+
+  if (selected == 'jieji_merchant2_blade') {
+    var cost = kJiejiMerchant2BladeCost
+    if (seasonId == 'thunder') {
+      cost = kJiejiMerchant2BladeCostThunder
+    }
+    final money = hero.materials['money'] ?? 0
+    if (money >= cost) {
+      Player.exhaust('money', cost)
+      final card = _createJiejiMerchantBladeCard()
+      if (card != null) {
+        Player.acquireCard(card)
+        _addJiejiRoadCardToCurrentDeck(card)
+        dialog.pushDialog('hint_jieji_road_merchant2_blade', interpolations: [
+          '${cost}',
+          card.name,
+        ])
+        await dialog.execute()
+      } else {
+        _jiejiRoadGrantBlank()
+        dialog.pushDialog('hint_jieji_road_merchant2_blade_blank', interpolations: ['${cost}'])
+        await dialog.execute()
+      }
+    } else {
+      dialog.pushDialog('hint_jieji_road_merchant2_blade_broke', interpolations: ['${cost}'])
+      await dialog.execute()
+    }
+  } else if (selected == 'jieji_merchant2_herb') {
+    var herbCost = kJiejiMerchant2HerbCost
+    var moneyGain = kJiejiMerchant2HerbMoney
+    if (seasonId == 'mist') {
+      herbCost = kJiejiMerchant2HerbCostMist
+      moneyGain = kJiejiMerchant2HerbMoneyMist
+    }
+    final herb = hero.materials['herb'] ?? 0
+    if (herb >= herbCost) {
+      Player.exhaust('herb', herbCost)
+      await Player.collect('money', moneyGain, incurIncident: false)
+      dialog.pushDialog('hint_jieji_road_merchant2_herb', interpolations: [
+        '${herbCost}',
+        '${moneyGain}',
+      ])
+      await dialog.execute()
+    } else {
+      dialog.pushDialog('hint_jieji_road_merchant2_herb_broke', interpolations: ['${herbCost}'])
+      await dialog.execute()
+    }
+  } else if (selected == 'jieji_merchant2_gamble') {
+    var karmaChance = kJiejiMerchant2GambleKarmaChance
+    if (seasonId == 'blood') {
+      karmaChance = kJiejiMerchant2GambleKarmaChanceBlood
+    }
+    if (random.nextDouble() < karmaChance) {
+      await grantKarmaCard('merchant2')
+      final herbGain = kJiejiMerchant2GambleHerbGain
+      await Player.collect('herb', herbGain, incurIncident: false)
+      dialog.pushDialog('hint_jieji_road_merchant2_gamble_win', interpolations: ['${herbGain}'])
+      await dialog.execute()
+    } else {
+      final lost = _jiejiRoadClampLifeLoss(kJiejiMerchant2GambleLifeLoss)
+      if (lost > 0) {
+        Player.setLife(hero.life - lost)
+      }
+      dialog.pushDialog('hint_jieji_road_merchant2_gamble_fail', interpolations: ['${lost}'])
       await dialog.execute()
     }
   }
