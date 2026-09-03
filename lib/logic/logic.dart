@@ -1710,6 +1710,9 @@ final class GameLogic {
   static Future<void> heroConsultJiejiPsychic(dynamic location) =>
       _heroConsultJiejiPsychic(location);
 
+  static Future<void> heroInvokeJiejiTheurgy(dynamic location) =>
+      _heroInvokeJiejiTheurgy(location);
+
   static void onInteractRunelabWorkbench({dynamic location}) =>
       _onInteractRunelabWorkbench(location: location);
 

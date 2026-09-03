@@ -29,6 +29,12 @@ final class SeasonLogic {
   /// 破军阵：本场英雄造成伤害 +0.08。开战时从 flags.jieji.arrayFury 锁入，打完清掉。
   static bool arrayFuryThisFight = false;
 
+  /// 护身神：本场英雄承伤 -0.10。开战时从 flags.jieji.theurgyWard 锁入，打完清掉。
+  static bool theurgyWardThisFight = false;
+
+  /// 雷火神：本场英雄造成伤害 +0.10。开战时从 flags.jieji.theurgyFury 锁入，打完清掉。
+  static bool theurgyFuryThisFight = false;
+
   static int get dayIndexInYear {
     // month/day are 1-based after calculateTimestamp
     return (GameLogic.month - 1) * 30 + GameLogic.day;
@@ -404,6 +410,18 @@ final class SeasonLogic {
       if (arrayWardThisFight) {
         damageDetails['percentageChange3'] -= 0.08;
       }
+      if (!theurgyWardThisFight) {
+        try {
+          final jieji = _jiejiFlags();
+          if (jieji != null && jieji['theurgyWard'] == true) {
+            theurgyWardThisFight = true;
+            jieji['theurgyWard'] = false;
+          }
+        } catch (_) {}
+      }
+      if (theurgyWardThisFight) {
+        damageDetails['percentageChange3'] -= 0.10;
+      }
     }
     if (!selfIsHero) {
       if (!restBloodFuryThisFight) {
@@ -429,6 +447,18 @@ final class SeasonLogic {
       }
       if (arrayFuryThisFight) {
         damageDetails['percentageChange3'] += 0.08;
+      }
+      if (!theurgyFuryThisFight) {
+        try {
+          final jieji = _jiejiFlags();
+          if (jieji != null && jieji['theurgyFury'] == true) {
+            theurgyFuryThisFight = true;
+            jieji['theurgyFury'] = false;
+          }
+        } catch (_) {}
+      }
+      if (theurgyFuryThisFight) {
+        damageDetails['percentageChange3'] += 0.10;
       }
     }
   }
@@ -469,6 +499,39 @@ final class SeasonLogic {
   static void endArrayFight() {
     arrayWardThisFight = false;
     arrayFuryThisFight = false;
+  }
+
+  static void beginTheurgyFight() {
+    theurgyWardThisFight = false;
+    theurgyFuryThisFight = false;
+    try {
+      final jieji = _jiejiFlags();
+      if (jieji == null) return;
+      if (jieji['theurgyWard'] == true) {
+        theurgyWardThisFight = true;
+        jieji['theurgyWard'] = false;
+      }
+      if (jieji['theurgyFury'] == true) {
+        theurgyFuryThisFight = true;
+        jieji['theurgyFury'] = false;
+      }
+    } catch (_) {}
+  }
+
+  static void endTheurgyFight() {
+    theurgyWardThisFight = false;
+    theurgyFuryThisFight = false;
+  }
+
+  static bool get theurgyPending {
+    if (theurgyWardThisFight || theurgyFuryThisFight) return true;
+    try {
+      final jieji = _jiejiFlags();
+      if (jieji == null) return false;
+      return jieji['theurgyWard'] == true || jieji['theurgyFury'] == true;
+    } catch (_) {
+      return false;
+    }
   }
 
   static bool get arrayPending {
@@ -532,6 +595,9 @@ final class SeasonLogic {
     }
     if (psychicPending) {
       line += ' · 灵';
+    }
+    if (theurgyPending) {
+      line += ' · 神';
     }
     return line;
   }

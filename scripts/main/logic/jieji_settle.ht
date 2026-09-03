@@ -33,6 +33,8 @@ const _kJiejiKeepSiteKinds = {
   'daostele': true,
   'arraylab': true,
   'illusionaltar': true,
+  'psychictemple': true,
+  'theurgytemple': true,
 }
 
 function ensureJiejiFlags() {
@@ -185,6 +187,8 @@ function migrateSect() {
   ensureHomeDaoStele()
   ensureHomeArrayLab()
   ensureHomeIllusionAltar()
+  ensureHomePsychicTemple()
+  ensureHomeTheurgyTemple()
   engine.info('季末迁徙：拆除据点 ${removed}，城市规模 ${city.development}')
   return removed
 }

@@ -1,0 +1,185 @@
+/// 显圣殿「请神」：护身神 / 雷火神 / 甘露。不替换原显圣殿 UI。
+const kJiejiTheurgyHerbCost = 3
+const kJiejiTheurgyMoneyCost = 80
+const kJiejiTheurgyMoneyCostThunder = 60
+const kJiejiTheurgyHerbCostMist = 2
+const kJiejiTheurgyLifeCostBlood = 1
+const kJiejiTheurgyCooldownDays = 1
+const kJiejiTheurgyHealLife = 10
+
+function _jiejiTheurgySeasonId() {
+  if (game.jieji != null && game.jieji.seasonId != null) {
+    return game.jieji.seasonId
+  }
+  return null
+}
+
+function jiejiTheurgyCosts() {
+  var herb = kJiejiTheurgyHerbCost
+  var money = kJiejiTheurgyMoneyCost
+  var life = 0
+  final seasonId = _jiejiTheurgySeasonId()
+  if (seasonId == 'thunder') {
+    money = kJiejiTheurgyMoneyCostThunder
+  } else if (seasonId == 'mist') {
+    herb = kJiejiTheurgyHerbCostMist
+  } else if (seasonId == 'blood') {
+    life = kJiejiTheurgyLifeCostBlood
+  }
+  return {
+    herb: herb,
+    money: money,
+    life: life,
+  }
+}
+
+function ensureHomeTheurgyTemple() {
+  if (hero == null) return
+  final city = getHeroHomeCity()
+  if (city == null) return
+  final siteIds = city.siteIds ?? []
+  for (final siteId in siteIds) {
+    final site = game.locations[siteId]
+    if (site != null && site.kind == kLocationKindTheurgyTemple) return
+  }
+  Location(
+    category: 'site',
+    kind: kLocationKindTheurgyTemple,
+    atCity: city,
+    sectId: city.sectId,
+    development: 0,
+    npcId: Constants.siteKindToNpcId[kLocationKindTheurgyTemple],
+  )
+}
+
+function _jiejiTheurgyCurrentDay() {
+  if (game.timestamp == null) return null
+  if (Constants.ticksPerDay == null) return null
+  if (Constants.ticksPerDay <= 0) return null
+  return game.timestamp ~/ Constants.ticksPerDay
+}
+
+function _jiejiTheurgyOnCooldown() {
+  final jieji = ensureJiejiFlags()
+  final day = _jiejiTheurgyCurrentDay()
+  if (day == null) return false
+  if (jieji.lastTheurgyDay == null) return false
+  if (day - jieji.lastTheurgyDay < kJiejiTheurgyCooldownDays) return true
+  return false
+}
+
+function _jiejiTheurgyMark() {
+  final jieji = ensureJiejiFlags()
+  jieji.lastTheurgyDay = _jiejiTheurgyCurrentDay()
+}
+
+function _jiejiTheurgyCostLife(want) {
+  var lost = want
+  final life = hero.life ?? 1
+  if (life - lost < 1) lost = life - 1
+  if (lost < 0) lost = 0
+  if (lost > 0) {
+    Player.setLife(hero.life - lost)
+  }
+  return lost
+}
+
+function _jiejiTheurgyNormalizeKind(kind) {
+  if (kind == 'ward' || kind == 'jieji_theurgy_ward') return 'ward'
+  if (kind == 'fury' || kind == 'jieji_theurgy_fury') return 'fury'
+  if (kind == 'heal' || kind == 'jieji_theurgy_heal') return 'heal'
+  return null
+}
+
+function _jiejiTheurgyChoices() {
+  return [
+    {
+      text: 'jieji_theurgy_ward',
+      description: 'hint_jieji_theurgy_ward',
+    },
+    {
+      text: 'jieji_theurgy_fury',
+      description: 'hint_jieji_theurgy_fury',
+    },
+    {
+      text: 'jieji_theurgy_heal',
+      description: 'hint_jieji_theurgy_heal',
+    },
+    'cancel',
+  ]
+}
+
+function _jiejiTheurgyApply(kind) {
+  final jieji = ensureJiejiFlags()
+  jieji.theurgyWard = false
+  jieji.theurgyFury = false
+  if (kind == 'ward') {
+    jieji.theurgyWard = true
+    return 'ward'
+  }
+  if (kind == 'fury') {
+    jieji.theurgyFury = true
+    return 'fury'
+  }
+  return 'heal'
+}
+
+/// 显圣殿请神三选。free 为 true 时不扣费、不检查冷却（debug）。
+/// kind 传入 ward/fury/heal 时跳过选择（debug.forceTheurgy）。
+/// 返回 'ok' | 'cooldown' | 'poor' | 'cancel'。
+async function invokeJiejiTheurgy({ free = false, kind = null }) {
+  if (hero == null) return 'cancel'
+  if (free != true && _jiejiTheurgyOnCooldown()) {
+    return 'cooldown'
+  }
+
+  if (free != true) {
+    final costs = jiejiTheurgyCosts()
+    final herbHave = hero.materials['herb'] ?? 0
+    final moneyHave = hero.materials['money'] ?? 0
+    if (herbHave < costs.herb || moneyHave < costs.money) {
+      return 'poor'
+    }
+  }
+
+  var selected = _jiejiTheurgyNormalizeKind(kind)
+  if (selected == null) {
+    dialog.pushDialog('hint_invokeJiejiTheurgy')
+    dialog.pushSelection('jiejiTheurgy', _jiejiTheurgyChoices())
+    await dialog.execute()
+    final picked = dialog.checkSelected('jiejiTheurgy')
+    if (picked == null || picked == 'cancel') {
+      if (free == true) {
+        selected = 'ward'
+      } else {
+        return 'cancel'
+      }
+    } else {
+      selected = _jiejiTheurgyNormalizeKind(picked)
+    }
+  }
+  if (selected == null) return 'cancel'
+
+  if (free != true) {
+    final costs = jiejiTheurgyCosts()
+    Player.exhaust('herb', costs.herb)
+    Player.exhaust('money', costs.money)
+    if (costs.life > 0) {
+      _jiejiTheurgyCostLife(costs.life)
+    }
+    _jiejiTheurgyMark()
+  }
+
+  final applied = _jiejiTheurgyApply(selected)
+  if (applied == 'heal') {
+    final healed = Player.restoreLife(kJiejiTheurgyHealLife)
+    dialog.pushDialog('hint_invokeJiejiTheurgy_done_heal', interpolations: [healed])
+  } else if (applied == 'fury') {
+    dialog.pushDialog('hint_invokeJiejiTheurgy_done_fury')
+  } else {
+    dialog.pushDialog('hint_invokeJiejiTheurgy_done_ward')
+  }
+  await dialog.execute()
+  Game.updateUI()
+  return 'ok'
+}

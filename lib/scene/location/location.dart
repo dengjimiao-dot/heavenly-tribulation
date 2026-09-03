@@ -352,6 +352,18 @@ class LocationScene extends Scene with HasCursorState {
         };
         siteList.tryAddCard(psychicCard);
         world.add(psychicCard);
+      case 'theurgytemple':
+        final theurgyCard = GameData.createSiteCard(
+          spriteId: 'location/card/theurgytemple.png',
+          title: engine.locale('invokeJiejiTheurgy'),
+          onPreviewed: _onPreviewSiteCard,
+          onUnpreviewed: _onUnpreviewSiteCard,
+        );
+        theurgyCard.onTap = (button, position) async {
+          await GameLogic.heroInvokeJiejiTheurgy(location);
+        };
+        siteList.tryAddCard(theurgyCard);
+        world.add(theurgyCard);
       default:
         for (final siteId in location['siteIds']) {
           final siteData = GameData.getLocation(siteId);
@@ -496,6 +508,9 @@ class LocationScene extends Scene with HasCursorState {
       } catch (_) {}
       try {
         engine.hetu.invoke('ensureHomePsychicTemple');
+      } catch (_) {}
+      try {
+        engine.hetu.invoke('ensureHomeTheurgyTemple');
       } catch (_) {}
     }
     _loadSites();

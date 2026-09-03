@@ -321,6 +321,14 @@ namespace debug {
     return await consultJiejiPsychic(free: true, kind: k)
   }
 
+  async function forceTheurgy(kind) {
+    var k = kind
+    if (k != 'ward' && k != 'fury' && k != 'heal') {
+      k = 'ward'
+    }
+    return await invokeJiejiTheurgy(free: true, kind: k)
+  }
+
   /// 忽略费用与冷却，直接挂上迷障（下次野遇糊弄过去）。
   function forceVeil() {
     if (hero == null) return

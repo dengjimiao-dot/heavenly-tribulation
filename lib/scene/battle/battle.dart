@@ -634,6 +634,7 @@ class BattleScene extends Scene {
     if (!isPractice) {
       SeasonLogic.beginRestBloodFuryFight();
       SeasonLogic.beginArrayFight();
+      SeasonLogic.beginTheurgyFight();
     }
     hero.reset();
     enemy.reset();
@@ -1147,6 +1148,7 @@ class BattleScene extends Scene {
     if (!isPractice) {
       SeasonLogic.endRestBloodFuryFight();
       SeasonLogic.endArrayFight();
+      SeasonLogic.endTheurgyFight();
     }
 
     if (battleResult == true) {
