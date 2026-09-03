@@ -294,6 +294,11 @@ namespace debug {
     return await restJiejiSite(kind, free: true)
   }
 
+  /// 忽略冷却与花费，仍弹出家中夜课三选。
+  async function forceStudy() {
+    return await studyJiejiHome(free: true)
+  }
+
   /// 忽略冷却与花费，仍弹出酒楼劫宴三选。
   async function forceFeast() {
     return await feastJiejiHotel(free: true)

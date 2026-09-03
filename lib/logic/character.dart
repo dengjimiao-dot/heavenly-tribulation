@@ -2106,6 +2106,26 @@ Future<void> _heroRestJiejiSite(dynamic location) async {
   }
 }
 
+Future<void> _heroStudyJiejiHome(dynamic location) async {
+  final result = await engine.hetu.invoke('studyJiejiHome');
+  if (result == 'cooldown') {
+    dialog.pushDialog(
+      'hint_studyJiejiHome_cooldown',
+      npcId: location['npcId'],
+    );
+    await dialog.execute();
+    return;
+  }
+  if (result == 'poor') {
+    dialog.pushDialog(
+      'hint_studyJiejiHome_notEnough',
+      npcId: location['npcId'],
+    );
+    await dialog.execute();
+    return;
+  }
+}
+
 Future<void> _heroFeastJiejiHotel(dynamic location) async {
   final result = await engine.hetu.invoke('feastJiejiHotel');
   if (result == 'cooldown') {
@@ -2605,6 +2625,10 @@ Future<void> _onInteractSite(
         'text': 'restJiejiSite',
         'description': 'hint_restJiejiSite_description',
       });
+      siteOptions.add({
+        'text': 'studyJiejiHome',
+        'description': 'hint_studyJiejiHome_description',
+      });
     }
   } else if (siteKind == 'hotel') {
     siteOptions.add({
@@ -2753,6 +2777,8 @@ Future<void> _onInteractSite(
       await _heroGatherJiejiSite(location);
     case 'restJiejiSite':
       await _heroRestJiejiSite(location);
+    case 'studyJiejiHome':
+      await _heroStudyJiejiHome(location);
     case 'feastJiejiHotel':
       await _heroFeastJiejiHotel(location);
     case 'about_dungeon':
