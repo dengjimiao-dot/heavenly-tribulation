@@ -1,4 +1,4 @@
-/// 秘境劫季切片：营地天象、精英/Boss 染色、祭坛/匣奇遇。
+/// 秘境劫季切片：营地天象、精英/Boss 染色、祭坛/匣/劫泉/伏击奇遇。
 /// 由 dungeon.ht 的 _prepareMap / onEnterMap 小钩子调用。不改教程房布局。
 
 const kJiejiDungeonGuideCost = 80
@@ -16,6 +16,22 @@ const kJiejiDungeonEliteGongfaRate = 0.12
 const kJiejiDungeonBloodGongfaRate = 0.18
 const kJiejiDungeonMistExtraMoneyMin = 60
 const kJiejiDungeonMistExtraMoneySpan = 41
+const kJiejiDungeonSpringSipLife = 8
+const kJiejiDungeonSpringSipLifeThunder = 10
+const kJiejiDungeonSpringSipLifeBlood = 6
+const kJiejiDungeonSpringBottleCost = 40
+const kJiejiDungeonSpringBottleHerb = 2
+const kJiejiDungeonSpringBottleHerbMistExtra = 1
+const kJiejiDungeonSpringBottleLife = 4
+const kJiejiDungeonAmbushToll = 80
+const kJiejiDungeonAmbushTollThunder = 50
+const kJiejiDungeonAmbushTollBlood = 100
+const kJiejiDungeonAmbushWinMoneyMin = 100
+const kJiejiDungeonAmbushWinMoneySpan = 61
+const kJiejiDungeonAmbushGongfaRate = 0.15
+const kJiejiDungeonAmbushLoseLife = 4
+const kJiejiDungeonAmbushDetourLife = 3
+const kJiejiDungeonAmbushDetourHerbMist = 1
 
 function jiejiDungeonEnsureFlags() {
   game.flags.dungeon ??= {}
@@ -163,6 +179,10 @@ async function playJiejiDungeonEncounter() {
     await playJiejiDungeonAltar()
   } else if (kind == 'jiejiCache') {
     await playJiejiDungeonCache()
+  } else if (kind == 'jiejiSpring') {
+    await playJiejiDungeonSpring()
+  } else if (kind == 'jiejiAmbush') {
+    await playJiejiDungeonAmbush()
   }
   Game.updateUI()
 }
@@ -371,5 +391,152 @@ async function playJiejiDungeonCache() {
   } else {
     dialog.pushDialog('hint_jieji_dungeon_see_leave')
     await dialog.execute()
+  }
+}
+
+function jiejiDungeonSpringSipLife() {
+  final seasonId = jiejiDungeonSeasonId()
+  if (seasonId == 'thunder') return kJiejiDungeonSpringSipLifeThunder
+  if (seasonId == 'blood') return kJiejiDungeonSpringSipLifeBlood
+  return kJiejiDungeonSpringSipLife
+}
+
+function jiejiDungeonSpringBottleHerb() {
+  var herb = kJiejiDungeonSpringBottleHerb
+  if (jiejiDungeonSeasonId() == 'mist') {
+    herb = herb + kJiejiDungeonSpringBottleHerbMistExtra
+  }
+  return herb
+}
+
+function jiejiDungeonAmbushTollCost() {
+  final seasonId = jiejiDungeonSeasonId()
+  if (seasonId == 'thunder') return kJiejiDungeonAmbushTollThunder
+  if (seasonId == 'blood') return kJiejiDungeonAmbushTollBlood
+  return kJiejiDungeonAmbushToll
+}
+
+function _jiejiDungeonAmbushFoeRank() {
+  var rank = hero.rank ?? 0
+  if (jiejiDungeonSeasonId() == 'thunder') {
+    if (rank < kCultivationRankMax) {
+      rank = rank + 1
+    }
+  }
+  return rank
+}
+
+function _jiejiDungeonAmbushFoeLevel(rank) {
+  final minLevel = minLevelForRank(rank)
+  final maxLevel = maxLevelForRank(rank)
+  var level = (hero.level ?? 1) + random.nextInt(5) - 2
+  if (level < minLevel) level = minLevel
+  if (level > maxLevel) level = maxLevel
+  return level
+}
+
+async function _playJiejiDungeonSpringSip() {
+  final want = jiejiDungeonSpringSipLife()
+  final healed = Player.restoreLife(want)
+  dialog.pushDialog('hint_jieji_dungeon_sip', interpolations: ['${healed}'])
+  await dialog.execute()
+}
+
+async function playJiejiDungeonSpring() {
+  dialog.pushDialog('hint_jieji_dungeon_spring')
+  dialog.pushSelection('jiejiDungeonSpring', [
+    'jieji_dungeon_sip',
+    'jieji_dungeon_bottle',
+    'jieji_dungeon_no_drink',
+  ])
+  await dialog.execute()
+  final selected = dialog.checkSelected('jiejiDungeonSpring')
+
+  if (selected == 'jieji_dungeon_sip') {
+    await _playJiejiDungeonSpringSip()
+  } else if (selected == 'jieji_dungeon_bottle') {
+    final cost = kJiejiDungeonSpringBottleCost
+    final money = hero.materials['money'] ?? 0
+    if (money >= cost) {
+      Player.exhaust('money', cost)
+      final herb = jiejiDungeonSpringBottleHerb()
+      await Player.collect('herb', herb, incurIncident: false)
+      final healed = Player.restoreLife(kJiejiDungeonSpringBottleLife)
+      dialog.pushDialog('hint_jieji_dungeon_bottle', interpolations: ['${cost}', '${herb}', '${healed}'])
+      await dialog.execute()
+    } else {
+      dialog.pushDialog('hint_jieji_dungeon_bottle_broke')
+      await dialog.execute()
+      await _playJiejiDungeonSpringSip()
+    }
+  } else {
+    dialog.pushDialog('hint_jieji_dungeon_no_drink')
+    await dialog.execute()
+  }
+}
+
+async function _playJiejiDungeonAmbushFight() {
+  final rank = _jiejiDungeonAmbushFoeRank()
+  final level = _jiejiDungeonAmbushFoeLevel(rank)
+  final enemy = BattleEntity(name: engine.locale('jieji_dungeon_ambush_foe'), rank: rank, level: level)
+
+  Game.updateUI()
+  Game.showPrebattle(enemy,
+    background: 'battle/scene/dungeon_night.png',
+    loseOnEscape: true,
+    onBattleEnd: async function [onJiejiDungeonAmbushEnd] (result, roundCount) {
+      if (result) {
+        final money = kJiejiDungeonAmbushWinMoneyMin + random.nextInt(kJiejiDungeonAmbushWinMoneySpan)
+        await Player.collect('money', money, incurIncident: false)
+        await tryDropGongfaShard(rate: kJiejiDungeonAmbushGongfaRate)
+        dialog.pushDialog('hint_jieji_dungeon_charge_win', interpolations: ['${money}'])
+        await dialog.execute()
+      } else {
+        var nextLife = (hero.life ?? 1) - kJiejiDungeonAmbushLoseLife
+        if (nextLife < 1) nextLife = 1
+        Player.setLife(nextLife)
+        dialog.pushDialog('hint_jieji_dungeon_charge_lose')
+        await dialog.execute()
+      }
+      Game.updateUI()
+    }
+  )
+}
+
+async function playJiejiDungeonAmbush() {
+  dialog.pushDialog('hint_jieji_dungeon_ambush')
+  dialog.pushSelection('jiejiDungeonAmbush', [
+    'jieji_dungeon_charge',
+    'jieji_dungeon_toll',
+    'jieji_dungeon_detour',
+  ])
+  await dialog.execute()
+  final selected = dialog.checkSelected('jiejiDungeonAmbush')
+
+  if (selected == 'jieji_dungeon_toll') {
+    final cost = jiejiDungeonAmbushTollCost()
+    final money = hero.materials['money'] ?? 0
+    if (money >= cost) {
+      Player.exhaust('money', cost)
+      dialog.pushDialog('hint_jieji_dungeon_toll', interpolations: ['${cost}'])
+      await dialog.execute()
+    } else {
+      dialog.pushDialog('hint_jieji_dungeon_toll_broke')
+      await dialog.execute()
+      await _playJiejiDungeonAmbushFight()
+    }
+  } else if (selected == 'jieji_dungeon_detour') {
+    final healed = Player.restoreLife(kJiejiDungeonAmbushDetourLife)
+    if (jiejiDungeonSeasonId() == 'mist') {
+      final herb = kJiejiDungeonAmbushDetourHerbMist
+      await Player.collect('herb', herb, incurIncident: false)
+      dialog.pushDialog('hint_jieji_dungeon_detour_mist', interpolations: ['${healed}', '${herb}'])
+      await dialog.execute()
+    } else {
+      dialog.pushDialog('hint_jieji_dungeon_detour', interpolations: ['${healed}'])
+      await dialog.execute()
+    }
+  } else {
+    await _playJiejiDungeonAmbushFight()
   }
 }

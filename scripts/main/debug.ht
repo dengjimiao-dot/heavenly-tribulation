@@ -218,6 +218,12 @@ namespace debug {
     } else if (kind == 'cache') {
       game.flags.dungeon.pendingEncounter = 'jiejiCache'
       await playJiejiDungeonEncounter()
+    } else if (kind == 'spring') {
+      game.flags.dungeon.pendingEncounter = 'jiejiSpring'
+      await playJiejiDungeonEncounter()
+    } else if (kind == 'ambush') {
+      game.flags.dungeon.pendingEncounter = 'jiejiAmbush'
+      await playJiejiDungeonEncounter()
     } else {
       game.flags.dungeon.pendingEncampOmen = true
       await playJiejiDungeonEncampOmen()
