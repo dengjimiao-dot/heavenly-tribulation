@@ -345,6 +345,14 @@ namespace debug {
     return await craftJiejiWeapon(free: true, kind: k)
   }
 
+  async function forceBounty(kind) {
+    var k = kind
+    if (k != 'hunt' && k != 'search' && k != 'blood') {
+      k = 'hunt'
+    }
+    return await claimJiejiBounty(free: true, kind: k)
+  }
+
   /// 忽略费用与冷却，直接挂上迷障（下次野遇糊弄过去）。
   function forceVeil() {
     if (hero == null) return

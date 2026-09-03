@@ -1,0 +1,239 @@
+/// 议事厅「劫赏」：缉凶 / 搜证 / 血契。不替换原悬赏任务。
+const kJiejiBountyHuntMoneyMin = 180
+const kJiejiBountyHuntMoneySpan = 61
+const kJiejiBountyHuntMoneyThunder = 250
+const kJiejiBountyHuntMoneyBloodBonus = 40
+const kJiejiBountyHuntGongfaRate = 0.25
+const kJiejiBountyHuntLoseLife = 4
+const kJiejiBountySearchHerb = 2
+const kJiejiBountySearchHerbMist = 3
+const kJiejiBountySearchMoney = 80
+const kJiejiBountySearchMoneyThunder = 120
+const kJiejiBountyBloodLife = 2
+const kJiejiBountyBloodLifeBlood = 3
+const kJiejiBountyBloodMoney = 160
+const kJiejiBountyBloodMoneyBlood = 220
+
+function _jiejiBountySeasonId() {
+  if (game.jieji != null && game.jieji.seasonId != null) {
+    return game.jieji.seasonId
+  }
+  return null
+}
+
+function _jiejiBountyAlreadyClaimed() {
+  final jieji = ensureJiejiFlags()
+  final seasonId = _jiejiBountySeasonId()
+  if (seasonId == null) return false
+  if (jieji.lastBountySeasonId == null) return false
+  return jieji.lastBountySeasonId == seasonId
+}
+
+function _jiejiBountyMark() {
+  final jieji = ensureJiejiFlags()
+  final seasonId = _jiejiBountySeasonId()
+  if (seasonId == null) return
+  jieji.lastBountySeasonId = seasonId
+}
+
+/// 有赶路耗日辅助则耗 1 日；与 _jiejiRoadSpendDay 同一套 Game.updateGame。
+async function _jiejiBountySpendDay() {
+  if (Constants.ticksPerDay == null) return
+  if (Constants.ticksPerDay <= 0) return
+  await Game.updateGame(tick: Constants.ticksPerDay)
+}
+
+function _jiejiBountyNormalizeKind(kind) {
+  if (kind == 'hunt' || kind == 'jieji_bounty_hunt') return 'hunt'
+  if (kind == 'search' || kind == 'jieji_bounty_search') return 'search'
+  if (kind == 'blood' || kind == 'jieji_bounty_blood') return 'blood'
+  return null
+}
+
+function _jiejiBountyChoices() {
+  return [
+    {
+      text: 'jieji_bounty_hunt',
+      description: 'hint_jieji_bounty_hunt',
+    },
+    {
+      text: 'jieji_bounty_search',
+      description: 'hint_jieji_bounty_search',
+    },
+    {
+      text: 'jieji_bounty_blood',
+      description: 'hint_jieji_bounty_blood',
+    },
+    'cancel',
+  ]
+}
+
+function _jiejiBountyFoeRank(seasonId) {
+  var rank = hero.rank ?? 0
+  if (seasonId == 'thunder') {
+    if (rank < kCultivationRankMax) {
+      rank = rank + 1
+    }
+  }
+  return rank
+}
+
+function _jiejiBountyFoeLevel(rank) {
+  final minLevel = minLevelForRank(rank)
+  final maxLevel = maxLevelForRank(rank)
+  var level = (hero.level ?? 1) + random.nextInt(5) - 2
+  if (level < minLevel) level = minLevel
+  if (level > maxLevel) level = maxLevel
+  return level
+}
+
+function _jiejiBountyBackground() {
+  var background = kTerrainKindToBackground['plain']
+  if (background == null) background = 'battle/scene/plain'
+  final time = toTime(game.timestamp)
+  if (time > 2) {
+    return background + '_night.png'
+  }
+  return background + '_day.png'
+}
+
+function _jiejiBountyCostLife(want) {
+  var lost = want
+  final life = hero.life ?? 1
+  if (life - lost < 1) lost = life - 1
+  if (lost < 0) lost = 0
+  if (lost > 0) {
+    Player.setLife(hero.life - lost)
+  }
+  return lost
+}
+
+function _jiejiBountyHuntMoney(seasonId) {
+  var money = kJiejiBountyHuntMoneyMin + random.nextInt(kJiejiBountyHuntMoneySpan)
+  if (seasonId == 'thunder') {
+    money = kJiejiBountyHuntMoneyThunder
+  } else if (seasonId == 'blood') {
+    money = money + kJiejiBountyHuntMoneyBloodBonus
+  }
+  return money
+}
+
+async function _jiejiBountyDoHunt(free, seasonId) {
+  if (free != true) {
+    await _jiejiBountySpendDay()
+  }
+
+  var foeKey = 'jieji_bounty_foe_thunder'
+  if (seasonId == 'mist') foeKey = 'jieji_bounty_foe_mist'
+  if (seasonId == 'blood') foeKey = 'jieji_bounty_foe_blood'
+  final foeName = engine.locale(foeKey)
+  final rank = _jiejiBountyFoeRank(seasonId)
+  final level = _jiejiBountyFoeLevel(rank)
+  final enemy = BattleEntity(name: foeName, rank: rank, level: level)
+
+  dialog.pushDialog('hint_claimJiejiBounty_hunt')
+  await dialog.execute()
+
+  Game.updateUI()
+  Game.showPrebattle(enemy,
+    background: _jiejiBountyBackground(),
+    loseOnEscape: true,
+    onBattleEnd: async function [onJiejiBountyHuntEnd] (result, roundCount) {
+      if (result) {
+        final money = _jiejiBountyHuntMoney(seasonId)
+        await Player.collect('money', money, incurIncident: false)
+        await tryDropGongfaShard(rate: kJiejiBountyHuntGongfaRate)
+        dialog.pushDialog('hint_claimJiejiBounty_hunt_win', interpolations: [money])
+        await dialog.execute()
+      } else {
+        _jiejiBountyCostLife(kJiejiBountyHuntLoseLife)
+        dialog.pushDialog('hint_claimJiejiBounty_hunt_lose')
+        await dialog.execute()
+      }
+      Game.updateUI()
+    }
+  )
+  return 'ok'
+}
+
+async function _jiejiBountyDoSearch(free, seasonId) {
+  if (free != true) {
+    await _jiejiBountySpendDay()
+  }
+  var herb = kJiejiBountySearchHerb
+  var money = kJiejiBountySearchMoney
+  if (seasonId == 'mist') {
+    herb = kJiejiBountySearchHerbMist
+  }
+  if (seasonId == 'thunder') {
+    money = kJiejiBountySearchMoneyThunder
+  }
+  await Player.collect('herb', herb, incurIncident: false)
+  await Player.collect('money', money, incurIncident: false)
+  dialog.pushDialog('hint_claimJiejiBounty_search', interpolations: [herb, money])
+  await dialog.execute()
+  Game.updateUI()
+  return 'ok'
+}
+
+async function _jiejiBountyDoBlood(free, seasonId) {
+  var lifeCost = kJiejiBountyBloodLife
+  var money = kJiejiBountyBloodMoney
+  if (seasonId == 'blood') {
+    lifeCost = kJiejiBountyBloodLifeBlood
+    money = kJiejiBountyBloodMoneyBlood
+  }
+  if (free != true) {
+    _jiejiBountyCostLife(lifeCost)
+  }
+  await Player.collect('money', money, incurIncident: false)
+  await tryDropGongfaShard()
+  dialog.pushDialog('hint_claimJiejiBounty_blood', interpolations: [money])
+  await dialog.execute()
+  Game.updateUI()
+  return 'ok'
+}
+
+/// 议事厅劫赏三选。free 为 true 时不检查一季一次、不耗日不耗生机（debug）。
+/// kind 传入 hunt/search/blood 时跳过选择（debug.forceBounty）。
+/// 返回 'ok' | 'claimed' | 'poor' | 'cancel'。
+async function claimJiejiBounty({ free = false, kind = null }) {
+  if (hero == null) return 'cancel'
+  if (free != true && _jiejiBountyAlreadyClaimed()) {
+    return 'claimed'
+  }
+
+  var selected = _jiejiBountyNormalizeKind(kind)
+  if (selected == null) {
+    dialog.pushDialog('hint_claimJiejiBounty')
+    dialog.pushSelection('jiejiBounty', _jiejiBountyChoices())
+    await dialog.execute()
+    final picked = dialog.checkSelected('jiejiBounty')
+    if (picked == null || picked == 'cancel') {
+      if (free == true) {
+        selected = 'hunt'
+      } else {
+        return 'cancel'
+      }
+    } else {
+      selected = _jiejiBountyNormalizeKind(picked)
+    }
+  }
+  if (selected == null) return 'cancel'
+
+  final seasonId = _jiejiBountySeasonId()
+  if (free != true) {
+    _jiejiBountyMark()
+  }
+
+  if (selected == 'hunt') {
+    return await _jiejiBountyDoHunt(free, seasonId)
+  }
+  if (selected == 'search') {
+    return await _jiejiBountyDoSearch(free, seasonId)
+  }
+  if (selected == 'blood') {
+    return await _jiejiBountyDoBlood(free, seasonId)
+  }
+  return 'cancel'
+}
