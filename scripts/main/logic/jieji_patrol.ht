@@ -1,0 +1,177 @@
+/// 外门寮「夜巡」三选：巡夜 / 查库 / 严令。外门寮与家；不替换招外援。
+const kJiejiPatrolCooldownDays = 1
+const kJiejiPatrolWalkWorker = 1
+const kJiejiPatrolWalkMoney = 50
+const kJiejiPatrolWalkWorkerGain = 70
+const kJiejiPatrolWalkWorkerGainThunder = 30
+const kJiejiPatrolWalkHerb = 2
+const kJiejiPatrolAuditMoney = 40
+const kJiejiPatrolAuditMoneyMist = 20
+const kJiejiPatrolAuditHerb = 3
+const kJiejiPatrolOrderLife = 1
+const kJiejiPatrolOrderLifeBlood = 2
+
+function _jiejiPatrolSeasonId() {
+  if (game.jieji != null && game.jieji.seasonId != null) {
+    return game.jieji.seasonId
+  }
+  return 'thunder'
+}
+
+function _jiejiPatrolCurrentDay() {
+  if (game.timestamp == null) return null
+  if (Constants.ticksPerDay == null) return null
+  if (Constants.ticksPerDay <= 0) return null
+  return game.timestamp ~/ Constants.ticksPerDay
+}
+
+function _jiejiPatrolOnCooldown() {
+  final jieji = ensureJiejiFlags()
+  final day = _jiejiPatrolCurrentDay()
+  if (day == null) return false
+  if (jieji.lastPatrolDay == null) return false
+  if (day - jieji.lastPatrolDay < kJiejiPatrolCooldownDays) return true
+  return false
+}
+
+function _jiejiPatrolMark() {
+  final jieji = ensureJiejiFlags()
+  jieji.lastPatrolDay = _jiejiPatrolCurrentDay()
+}
+
+function _jiejiPatrolCostLife(want) {
+  var lost = want
+  final life = hero.life ?? 1
+  if (life - lost < 1) lost = life - 1
+  if (lost < 0) lost = 0
+  if (lost > 0) {
+    Player.setLife(hero.life - lost)
+  }
+  return lost
+}
+
+function _jiejiPatrolAuditMoneyCost(seasonId) {
+  if (seasonId == 'mist') return kJiejiPatrolAuditMoneyMist
+  return kJiejiPatrolAuditMoney
+}
+
+function _jiejiPatrolOrderLifeCost(seasonId) {
+  if (seasonId == 'blood') return kJiejiPatrolOrderLifeBlood
+  return kJiejiPatrolOrderLife
+}
+
+function _jiejiPatrolNormalizeKind(kind) {
+  if (kind == 'walk' || kind == 'jieji_patrol_walk') return 'walk'
+  if (kind == 'audit' || kind == 'jieji_patrol_audit') return 'audit'
+  if (kind == 'order' || kind == 'jieji_patrol_order') return 'order'
+  return null
+}
+
+function _jiejiPatrolChoices() {
+  return [
+    {
+      text: 'jieji_patrol_walk',
+      description: 'hint_jieji_patrol_walk',
+    },
+    {
+      text: 'jieji_patrol_audit',
+      description: 'hint_jieji_patrol_audit',
+    },
+    {
+      text: 'jieji_patrol_order',
+      description: 'hint_jieji_patrol_order',
+    },
+    'cancel',
+  ]
+}
+
+/// 外门寮夜巡三选。free 为 true 时不扣费、不检查冷却（debug），仍弹出三选。
+/// 返回 'ok' | 'cooldown' | 'poor' | 'cancel'。
+async function patrolJiejiResidence({ free = false }) {
+  if (hero == null) return 'cancel'
+  if (free != true && _jiejiPatrolOnCooldown()) {
+    return 'cooldown'
+  }
+
+  dialog.pushDialog('hint_patrolJiejiResidence')
+  dialog.pushSelection('jiejiPatrol', _jiejiPatrolChoices())
+  await dialog.execute()
+  final picked = dialog.checkSelected('jiejiPatrol')
+  var selected = null
+  if (picked == null || picked == 'cancel') {
+    if (free == true && picked == null) {
+      selected = 'walk'
+    } else {
+      return 'cancel'
+    }
+  } else {
+    selected = _jiejiPatrolNormalizeKind(picked)
+  }
+  if (selected == null) return 'cancel'
+
+  final seasonId = _jiejiPatrolSeasonId()
+  final workerHave = hero.materials['worker'] ?? 0
+  var useWorker = false
+  if (selected == 'walk' && workerHave >= kJiejiPatrolWalkWorker) {
+    useWorker = true
+  }
+
+  if (free != true) {
+    if (selected == 'walk' && useWorker != true) {
+      final moneyHave = hero.materials['money'] ?? 0
+      if (moneyHave < kJiejiPatrolWalkMoney) {
+        return 'poor'
+      }
+    }
+    if (selected == 'audit') {
+      final moneyHave = hero.materials['money'] ?? 0
+      if (moneyHave < _jiejiPatrolAuditMoneyCost(seasonId)) {
+        return 'poor'
+      }
+    }
+  }
+
+  if (free != true) {
+    if (selected == 'walk') {
+      if (useWorker == true) {
+        Player.exhaust('worker', kJiejiPatrolWalkWorker)
+      } else {
+        Player.exhaust('money', kJiejiPatrolWalkMoney)
+      }
+    }
+    if (selected == 'audit') {
+      Player.exhaust('money', _jiejiPatrolAuditMoneyCost(seasonId))
+    }
+    if (selected == 'order') {
+      _jiejiPatrolCostLife(_jiejiPatrolOrderLifeCost(seasonId))
+    }
+    _jiejiPatrolMark()
+  }
+
+  if (selected == 'walk') {
+    if (useWorker == true) {
+      var gained = kJiejiPatrolWalkWorkerGain
+      if (seasonId == 'thunder') {
+        gained = gained + kJiejiPatrolWalkWorkerGainThunder
+      }
+      await Player.collect('money', gained, incurIncident: false)
+      dialog.pushDialog('hint_patrolJiejiResidence_walk_money', interpolations: [gained])
+    } else {
+      await Player.collect('herb', kJiejiPatrolWalkHerb, incurIncident: false)
+      dialog.pushDialog('hint_patrolJiejiResidence_walk_herb')
+    }
+    await dialog.execute()
+  } else if (selected == 'audit') {
+    await Player.collect('herb', kJiejiPatrolAuditHerb, incurIncident: false)
+    dialog.pushDialog('hint_patrolJiejiResidence_audit')
+    await dialog.execute()
+  } else {
+    final jieji = ensureJiejiFlags()
+    jieji.illusionVeil = true
+    dialog.pushDialog('hint_patrolJiejiResidence_order')
+    await dialog.execute()
+  }
+
+  Game.updateUI()
+  return 'ok'
+}

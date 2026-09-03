@@ -1966,6 +1966,29 @@ Future<void> _heroRecruitJiejiAid(dynamic location) async {
   }
 }
 
+Future<void> _heroPatrolJiejiResidence(dynamic location) async {
+  final isRented = await GameLogic.checkRented(location);
+  if (!isRented) return;
+
+  final result = await engine.hetu.invoke('patrolJiejiResidence');
+  if (result == 'cooldown') {
+    dialog.pushDialog(
+      'hint_patrolJiejiResidence_cooldown',
+      npcId: location['npcId'],
+    );
+    await dialog.execute();
+    return;
+  }
+  if (result == 'poor') {
+    dialog.pushDialog(
+      'hint_patrolJiejiResidence_notEnough',
+      npcId: location['npcId'],
+    );
+    await dialog.execute();
+    return;
+  }
+}
+
 
 Future<void> _heroConsultXianming(dynamic location) async {
   final isRented = await GameLogic.checkRented(location);
@@ -2620,6 +2643,10 @@ Future<void> _onInteractSite(
       'text': 'recruitJiejiAid',
       'description': 'hint_recruitJiejiAid_description',
     });
+    siteOptions.add({
+      'text': 'patrolJiejiResidence',
+      'description': 'hint_patrolJiejiResidence_description',
+    });
     if (siteKind == 'home') {
       siteOptions.add({
         'text': 'restJiejiSite',
@@ -2769,6 +2796,8 @@ Future<void> _onInteractSite(
       await _heroScribeJiejiTalisman(location);
     case 'recruitJiejiAid':
       await _heroRecruitJiejiAid(location);
+    case 'patrolJiejiResidence':
+      await _heroPatrolJiejiResidence(location);
     case 'consultXianming':
       await _heroConsultXianming(location);
     case 'riteJiejiHarvest':

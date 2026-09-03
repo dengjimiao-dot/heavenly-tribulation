@@ -119,6 +119,20 @@ class LocationScene extends Scene with HasCursorState {
     world.add(recruitCard);
   }
 
+  void _addPatrolJiejiCard() {
+    final patrolCard = GameData.createSiteCard(
+      spriteId: 'location/card/residence.png',
+      title: engine.locale('patrolJiejiResidence'),
+      onPreviewed: _onPreviewSiteCard,
+      onUnpreviewed: _onUnpreviewSiteCard,
+    );
+    patrolCard.onTap = (button, position) async {
+      await GameLogic.heroPatrolJiejiResidence(location);
+    };
+    siteList.tryAddCard(patrolCard);
+    world.add(patrolCard);
+  }
+
   void _addRestJiejiCard() {
     final restCard = GameData.createSiteCard(
       spriteId: 'location/card/bed.png',
@@ -209,11 +223,13 @@ class LocationScene extends Scene with HasCursorState {
           siteList.tryAddCard(depositCard);
           world.add(depositCard);
           _addRecruitAidCard();
+          _addPatrolJiejiCard();
           _addRestJiejiCard();
           _addStudyJiejiCard();
         }
       case 'residence':
         _addRecruitAidCard();
+        _addPatrolJiejiCard();
         _addVisitResidenceCard();
       case 'cityhall':
         final siteCard = GameData.createSiteCard(
@@ -467,6 +483,10 @@ class LocationScene extends Scene with HasCursorState {
               'text': 'recruitJiejiAid',
               'description': 'hint_recruitJiejiAid_description',
             },
+            {
+              'text': 'patrolJiejiResidence',
+              'description': 'hint_patrolJiejiResidence_description',
+            },
             'visitResidence',
             'cancel',
           ]);
@@ -474,6 +494,10 @@ class LocationScene extends Scene with HasCursorState {
           final selected = dialog.checkSelected('residenceHome');
           if (selected == 'recruitJiejiAid') {
             await GameLogic.heroRecruitJiejiAid(location);
+            return;
+          }
+          if (selected == 'patrolJiejiResidence') {
+            await GameLogic.heroPatrolJiejiResidence(location);
             return;
           }
           if (selected != 'visitResidence') return;

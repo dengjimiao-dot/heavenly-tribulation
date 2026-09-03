@@ -276,6 +276,11 @@ namespace debug {
     return result
   }
 
+  /// 忽略冷却与花费，仍弹出外门寮夜巡三选。
+  async function forcePatrol() {
+    return await patrolJiejiResidence(free: true)
+  }
+
   async function forceConsultXianming() {
     return await consultJiejiXianming(free: true)
   }
