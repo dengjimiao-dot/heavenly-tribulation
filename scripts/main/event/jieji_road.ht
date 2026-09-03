@@ -1,5 +1,6 @@
 /// 劫季赶路事件：雷/雾/血三季分叉（表 A/B 各一套）+ 残碑稀有事件 + 行脚商人。
 /// 由 sandbox onAfterMove 在隐藏任务与野遇都没触发时调用。
+/// 大地图野遇成功后可升格为当季具名劫纹精英（见 tryJiejiWildEliteOnWildEncounter）。
 
 const kJiejiRoadEventBaseRate = 0.10
 const kJiejiRoadEventMoveCooldown = 6
@@ -26,6 +27,13 @@ const kJiejiRoadRiteLifeLoss = 3
 const kJiejiRoadRiteHeal = 5
 const kJiejiRoadSteleHeal = 6
 const kJiejiRoadSteleKarmaChance = 0.15
+const kJiejiWildEliteMoveCooldown = 8
+const kJiejiWildEliteChanceThunder = 0.28
+const kJiejiWildEliteChanceBlood = 0.22
+const kJiejiWildEliteChanceMist = 0.12
+const kJiejiWildEliteMoneyMin = 80
+const kJiejiWildEliteMoneySpan = 61
+const kJiejiWildEliteThunderMoneyBonus = 40
 
 function _jiejiRoadWildMul() {
   var mul = 1.0
@@ -166,6 +174,73 @@ async function tryJiejiMerchantOnMove() {
 
   jieji.lastMerchantMove = moves
   await playJiejiMerchantEvent()
+  return true
+}
+
+function _jiejiWildEliteChance(seasonId) {
+  if (seasonId == 'thunder') return kJiejiWildEliteChanceThunder
+  if (seasonId == 'blood') return kJiejiWildEliteChanceBlood
+  if (seasonId == 'mist') return kJiejiWildEliteChanceMist
+  return 0
+}
+
+function _jiejiWildEliteNameKey(seasonId) {
+  if (seasonId == 'mist') return 'jieji_wild_elite_mist'
+  if (seasonId == 'blood') return 'jieji_wild_elite_blood'
+  return 'jieji_wild_elite_thunder'
+}
+
+/// 具名劫纹精英：境界 +1（封顶），胜后额外铜钱 + 功法残页骰。不管冷却/几率。
+async function startJiejiWildEliteEncounter(terrain) {
+  if (hero == null) return
+  final jieji = _jiejiRoadEnsureFlags()
+  jieji.lastWildEliteMove = jieji.worldMoves ?? 0
+
+  var seasonId = _jiejiRoadSeasonId()
+  if (seasonId != 'thunder' && seasonId != 'mist' && seasonId != 'blood') {
+    seasonId = 'thunder'
+  }
+
+  var eliteRank = (hero.rank ?? 0) + 1
+  if (eliteRank > kCultivationRankMax) eliteRank = kCultivationRankMax
+
+  dialog.pushDialog('hint_jieji_wild_elite')
+  await dialog.execute()
+
+  final nameKey = _jiejiWildEliteNameKey(seasonId)
+  await encounterEnemy(
+    rank: eliteRank,
+    terrainKind: _jiejiRoadTerrainKind(terrain),
+    name: engine.locale(nameKey),
+    battleEndCallback: async function (result, roundCount) {
+      if (result) {
+        var extra = kJiejiWildEliteMoneyMin + random.nextInt(kJiejiWildEliteMoneySpan)
+        if (seasonId == 'thunder') {
+          extra = extra + kJiejiWildEliteThunderMoneyBonus
+        }
+        await Player.collect('money', extra, incurIncident: false)
+        await tryDropGongfaShard()
+        Game.updateUI()
+      }
+    },
+  )
+}
+
+/// 野遇掷中之后调用。教程锁、冷却、当季几率都过才升格为精英。
+async function tryJiejiWildEliteOnWildEncounter(terrain) {
+  if (hero == null) return false
+  if (_jiejiRoadTutorialLocked()) return false
+  final seasonId = _jiejiRoadSeasonId()
+  final chance = _jiejiWildEliteChance(seasonId)
+  if (chance <= 0) return false
+
+  final jieji = _jiejiRoadEnsureFlags()
+  final moves = jieji.worldMoves ?? 0
+  final last = jieji.lastWildEliteMove ?? -999
+  if (moves - last < kJiejiWildEliteMoveCooldown) return false
+  if (random.nextDouble() > chance) return false
+
+  await startJiejiWildEliteEncounter(terrain)
   return true
 }
 

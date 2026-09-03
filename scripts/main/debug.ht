@@ -245,6 +245,22 @@ namespace debug {
     return await consultJiejiXianming(free: true)
   }
 
+  /// 忽略几率与冷却，在当前地形开一场劫纹精英（未知则平原）。
+  async function forceWildElite() {
+    if (hero == null) return
+    var terrain = { kind: 'plain' }
+    if (world != null && hero.worldPosition != null) {
+      final pos = hero.worldPosition
+      if (pos.left != null && pos.top != null) {
+        final tile = getTerrainByWorldPosition(pos.left, pos.top)
+        if (tile != null && tile.kind != null) {
+          terrain = tile
+        }
+      }
+    }
+    await startJiejiWildEliteEncounter(terrain)
+  }
+
   /// 沙盒立刻打指定季的渡劫 Boss（含前兆三选）。会走 trySettleJieji。
   async function forceTribulation(seasonId) {
     var id = seasonId
