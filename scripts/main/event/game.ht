@@ -781,6 +781,34 @@ async function onAfterEnterLocation(location) -> bool {
           }
           return true
         }
+        case 'hidden_haggle_stall': {
+          if (isLate) {
+            Player.progressJournalById(journal.id, stage: 2)
+            dialog.pushDialog('quest_hidden_late_failed', interpolations: [journal.title])
+            await dialog.execute()
+          } else {
+            Player.progressJournalById(journal.id)
+            var locName = ''
+            final loc = game.locations[journal.quest.targetLocationId]
+            if (loc != null) {
+              locName = loc.name
+            }
+            dialog.pushDialog('quest_hidden_haggle_stall_complete', interpolations: [
+              journal.title,
+              locName,
+            ])
+            await dialog.execute()
+            final items = await Player.loot(journal.quest.reward)
+            Game.promptItems(items)
+            await Player.collect('money', 20, incurIncident: false)
+            ensureJiejiFlags().illusionVeil = true
+            dialog.pushDialog('hint_jieji_haggle_stall_extra')
+            await dialog.execute()
+            await tryDropGongfaShard(rate: 0.25)
+            await grantJiejiHiddenQuestExtra('stall')
+          }
+          return true
+        }
       }
     }
   }
@@ -911,5 +939,12 @@ async function grantJiejiHiddenQuestExtra(kind) {
       await dialog.execute()
     }
     return
+  }
+  if (kind == 'stall') {
+    if (seasonId == 'mist') {
+      await Player.collect('herb', 2, incurIncident: false)
+      dialog.pushDialog('hint_jieji_haggle_stall_extra_mist')
+      await dialog.execute()
+    }
   }
 }
