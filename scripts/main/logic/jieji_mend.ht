@@ -1,0 +1,218 @@
+/// 纹身铺「补纹」：温纹 / 改杀 / 血补。不替换季纹。
+const kJiejiMendCooldownDays = 1
+const kJiejiMendWarmHerb = 1
+const kJiejiMendWarmHerbMist = 0
+const kJiejiMendWarmLife = 6
+const kJiejiMendWarmMistLife = 2
+const kJiejiMendShiftMoney = 40
+const kJiejiMendShiftMoneyThunder = 20
+const kJiejiMendShiftLife = 4
+const kJiejiMendBloodLife = 2
+const kJiejiMendBloodLifeBlood = 3
+const kJiejiMendBloodGongfaRate = 0.25
+const kJiejiMendBloodGongfaRateBlood = 0.40
+const kJiejiMendBloodMoney = 40
+
+function _jiejiMendSeasonId() {
+  if (game.jieji != null && game.jieji.seasonId != null) {
+    return game.jieji.seasonId
+  }
+  return null
+}
+
+function _jiejiMendCurrentDay() {
+  if (game.timestamp == null) return null
+  if (Constants.ticksPerDay == null) return null
+  if (Constants.ticksPerDay <= 0) return null
+  return game.timestamp ~/ Constants.ticksPerDay
+}
+
+function _jiejiMendOnCooldown() {
+  final jieji = ensureJiejiFlags()
+  final day = _jiejiMendCurrentDay()
+  if (day == null) return false
+  if (jieji.lastMendDay == null) return false
+  if (day - jieji.lastMendDay < kJiejiMendCooldownDays) return true
+  return false
+}
+
+function _jiejiMendMark() {
+  final jieji = ensureJiejiFlags()
+  jieji.lastMendDay = _jiejiMendCurrentDay()
+}
+
+function _jiejiMendCostLife(want) {
+  var lost = want
+  final life = hero.life ?? 1
+  if (life - lost < 1) lost = life - 1
+  if (lost < 0) lost = 0
+  if (lost > 0) {
+    Player.setLife(hero.life - lost)
+  }
+  return lost
+}
+
+function _jiejiMendWarmHerbCost(seasonId) {
+  if (seasonId == 'mist') return kJiejiMendWarmHerbMist
+  return kJiejiMendWarmHerb
+}
+
+function _jiejiMendShiftMoneyCost(seasonId) {
+  if (seasonId == 'thunder') return kJiejiMendShiftMoneyThunder
+  return kJiejiMendShiftMoney
+}
+
+function _jiejiMendBloodLifeCost(seasonId) {
+  if (seasonId == 'blood') return kJiejiMendBloodLifeBlood
+  return kJiejiMendBloodLife
+}
+
+function _jiejiMendNormalizeKind(kind) {
+  if (kind == 'warm' || kind == 'jieji_mend_warm') return 'warm'
+  if (kind == 'shift' || kind == 'jieji_mend_shift') return 'shift'
+  if (kind == 'blood' || kind == 'jieji_mend_blood') return 'blood'
+  return null
+}
+
+function _jiejiMendChoices() {
+  return [
+    {
+      text: 'jieji_mend_warm',
+      description: 'hint_jieji_mend_warm',
+    },
+    {
+      text: 'jieji_mend_shift',
+      description: 'hint_jieji_mend_shift',
+    },
+    {
+      text: 'jieji_mend_blood',
+      description: 'hint_jieji_mend_blood',
+    },
+    'cancel',
+  ]
+}
+
+function _jiejiMendHerbNeed(selected, seasonId) {
+  if (selected == 'warm') return _jiejiMendWarmHerbCost(seasonId)
+  return 0
+}
+
+function _jiejiMendMoneyNeed(selected, seasonId) {
+  if (selected == 'shift') return _jiejiMendShiftMoneyCost(seasonId)
+  return 0
+}
+
+/// 雷纹：破军未挂则挂 arrayFury；已挂则挂 feastFury。两者都有则只回血。不改纹身。
+function _jiejiMendApplyShiftThunder() {
+  final jieji = ensureJiejiFlags()
+  if (jieji.arrayFury != true) {
+    jieji.arrayFury = true
+    return 'array'
+  }
+  if (jieji.feastFury != true) {
+    jieji.feastFury = true
+    return 'feast'
+  }
+  return null
+}
+
+/// 纹身铺补纹三选。free 为 true 时不扣费、不检查冷却（debug），仍弹出三选。
+/// 返回 'ok' | 'cooldown' | 'poor' | 'cancel'。
+async function mendJiejiTattoo({ free = false }) {
+  if (hero == null) return 'cancel'
+  if (free != true && _jiejiMendOnCooldown()) {
+    return 'cooldown'
+  }
+
+  dialog.pushDialog('hint_mendJiejiTattoo')
+  dialog.pushSelection('jiejiMend', _jiejiMendChoices())
+  await dialog.execute()
+  final picked = dialog.checkSelected('jiejiMend')
+  var selected = null
+  if (picked == null || picked == 'cancel') {
+    if (free == true && picked == null) {
+      selected = 'warm'
+    } else {
+      return 'cancel'
+    }
+  } else {
+    selected = _jiejiMendNormalizeKind(picked)
+  }
+  if (selected == null) return 'cancel'
+
+  final seasonId = _jiejiMendSeasonId()
+  if (free != true) {
+    final herbNeed = _jiejiMendHerbNeed(selected, seasonId)
+    final moneyNeed = _jiejiMendMoneyNeed(selected, seasonId)
+    final herbHave = hero.materials['herb'] ?? 0
+    final moneyHave = hero.materials['money'] ?? 0
+    if (herbHave < herbNeed || moneyHave < moneyNeed) {
+      return 'poor'
+    }
+  }
+
+  if (free != true) {
+    final herbNeed = _jiejiMendHerbNeed(selected, seasonId)
+    final moneyNeed = _jiejiMendMoneyNeed(selected, seasonId)
+    if (herbNeed > 0) {
+      Player.exhaust('herb', herbNeed)
+    }
+    if (moneyNeed > 0) {
+      Player.exhaust('money', moneyNeed)
+    }
+    if (selected == 'blood') {
+      _jiejiMendCostLife(_jiejiMendBloodLifeCost(seasonId))
+    }
+    _jiejiMendMark()
+  }
+
+  if (selected == 'shift') {
+    final jieji = ensureJiejiFlags()
+    if (jieji.tattoo == 'thunder') {
+      final shift = _jiejiMendApplyShiftThunder()
+      if (shift == 'array') {
+        dialog.pushDialog('hint_mendJiejiTattoo_shift_array')
+      } else if (shift == 'feast') {
+        dialog.pushDialog('hint_mendJiejiTattoo_shift_feast')
+      } else {
+        Player.restoreLife(kJiejiMendShiftLife)
+        dialog.pushDialog('hint_mendJiejiTattoo_shift_life')
+      }
+    } else {
+      jieji.tattoo = 'thunder'
+      if (seasonId != null) {
+        jieji.lastTattooSeasonId = seasonId
+      }
+      dialog.pushDialog('hint_mendJiejiTattoo_shift')
+    }
+    await dialog.execute()
+  } else if (selected == 'blood') {
+    final jieji = ensureJiejiFlags()
+    var r = kJiejiMendBloodGongfaRate
+    if (jieji.tattoo == 'blood') {
+      r = kJiejiMendBloodGongfaRateBlood
+    }
+    final dropped = await tryDropGongfaShard(rate: r)
+    if (dropped != true) {
+      await Player.collect('money', kJiejiMendBloodMoney, incurIncident: false)
+      dialog.pushDialog('hint_mendJiejiTattoo_blood_money')
+      await dialog.execute()
+    } else {
+      dialog.pushDialog('hint_mendJiejiTattoo_blood')
+      await dialog.execute()
+    }
+  } else {
+    Player.restoreLife(kJiejiMendWarmLife)
+    final jieji = ensureJiejiFlags()
+    if (jieji.tattoo == 'mist') {
+      Player.restoreLife(kJiejiMendWarmMistLife)
+      dialog.pushDialog('hint_mendJiejiTattoo_warm_mist')
+    } else {
+      dialog.pushDialog('hint_mendJiejiTattoo_warm')
+    }
+    await dialog.execute()
+  }
+
+  Game.updateUI()
+  return 'ok'
+}

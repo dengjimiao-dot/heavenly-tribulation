@@ -491,6 +491,11 @@ namespace debug {
     return await inkJiejiTattoo(free: true, kind: k)
   }
 
+  /// 忽略冷却与花费，仍弹出纹身铺补纹三选。
+  async function forceMend() {
+    return await mendJiejiTattoo(free: true)
+  }
+
   async function forceCraftWeapon(kind) {
     var k = kind
     if (k != 'blade' && k != 'mail' && k != 'spike') {

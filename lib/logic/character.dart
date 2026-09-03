@@ -2746,6 +2746,29 @@ Future<void> _heroInkJiejiTattoo(dynamic location) async {
   }
 }
 
+Future<void> _heroMendJiejiTattoo(dynamic location) async {
+  final isRented = await GameLogic.checkRented(location);
+  if (!isRented) return;
+
+  final result = await engine.hetu.invoke('mendJiejiTattoo');
+  if (result == 'cooldown') {
+    dialog.pushDialog(
+      'hint_mendJiejiTattoo_cooldown',
+      npcId: location['npcId'],
+    );
+    await dialog.execute();
+    return;
+  }
+  if (result == 'poor') {
+    dialog.pushDialog(
+      'hint_mendJiejiTattoo_notEnough',
+      npcId: location['npcId'],
+    );
+    await dialog.execute();
+    return;
+  }
+}
+
 Future<void> _heroCraftJiejiWeapon(dynamic location) async {
   final isRented = await GameLogic.checkRented(location);
   if (!isRented) return;
@@ -3004,6 +3027,10 @@ Future<void> _onInteractSite(
       'text': 'inkJiejiTattoo',
       'description': 'hint_inkJiejiTattoo_description',
     });
+    siteOptions.add({
+      'text': 'mendJiejiTattoo',
+      'description': 'hint_mendJiejiTattoo_description',
+    });
   } else if (siteKind == 'dungeon') {
     siteOptions.add('about_dungeon');
     siteOptions.add({
@@ -3092,6 +3119,8 @@ Future<void> _onInteractSite(
       await _heroVowJiejiTheurgy(location);
     case 'inkJiejiTattoo':
       await _heroInkJiejiTattoo(location);
+    case 'mendJiejiTattoo':
+      await _heroMendJiejiTattoo(location);
     case 'brewPotionCard':
       await _heroBrewPotionCard(location);
     case 'tasteJiejiPotion':
