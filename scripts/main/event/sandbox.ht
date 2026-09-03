@@ -4,6 +4,7 @@ async function onNewGame() {
   ensureHomeAlchemylab()
   ensureHomeResidence()
   ensureHomeLibrary()
+  ensureHomeFarmland()
   final xitong = game.npcs['xitong']
 
   // final itemsInfo = [

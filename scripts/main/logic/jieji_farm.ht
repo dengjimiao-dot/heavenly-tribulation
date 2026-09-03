@@ -1,0 +1,270 @@
+/// 灵田祈年：当季三选收成。不改 matching 小游戏计分。
+const kJiejiHarvestLifeCost = 1
+const kJiejiHarvestRestLife = 4
+const kJiejiHarvestOfferMoney = 80
+const kJiejiHarvestOfferHerb = 2
+const kJiejiHarvestOfferBlankRate = 0.30
+const kJiejiHarvestRipenHerb = 4
+const kJiejiHarvestSearchHerb = 2
+const kJiejiHarvestSearchMoney = 40
+const kJiejiHarvestHireWorker = 1
+const kJiejiHarvestHireHerb = 6
+const kJiejiHarvestBloodLife = 3
+const kJiejiHarvestBloodHerb = 8
+const kJiejiHarvestPlainHerb = 3
+const kJiejiHarvestCooldownDays = 2
+const kJiejiHarvestCooldownMoves = 6
+
+function _jiejiHarvestSeasonId() {
+  if (game.jieji != null && game.jieji.seasonId != null) {
+    return game.jieji.seasonId
+  }
+  return 'thunder'
+}
+
+function ensureHomeFarmland() {
+  if (hero == null) return
+  final city = getHeroHomeCity()
+  if (city == null) return
+  final siteIds = city.siteIds ?? []
+  for (final siteId in siteIds) {
+    final site = game.locations[siteId]
+    if (site != null && site.kind == kLocationKindFarmland) return
+  }
+  for (final loc in game.locations.values) {
+    if (loc == null) continue
+    if (loc.kind == kLocationKindFarmland && loc.atCityId == city.id) return
+  }
+  if (city.worldPosition != null) {
+    final neighbors = getTileNeighbors(city.worldPosition.left, city.worldPosition.top)
+    if (neighbors != null) {
+      for (final terrain in neighbors.values) {
+        if (terrain == null) continue
+        if (terrain.locationId != null) continue
+        if (terrain.kind != 'plain' && terrain.kind != 'forest') continue
+        terrain.overlaySprite = {
+          sprite: 'object/farmland.png',
+        }
+        Location(
+          category: 'site',
+          kind: kLocationKindFarmland,
+          atTerrain: terrain,
+          atCity: city,
+          sectId: city.sectId,
+          development: 0,
+          npcId: Constants.siteKindToNpcId[kLocationKindFarmland],
+        )
+        return
+      }
+    }
+  }
+  Location(
+    category: 'site',
+    kind: kLocationKindFarmland,
+    atCity: city,
+    sectId: city.sectId,
+    development: 0,
+    npcId: Constants.siteKindToNpcId[kLocationKindFarmland],
+  )
+}
+
+function _jiejiHarvestCurrentDay() {
+  if (game.timestamp == null) return null
+  if (Constants.ticksPerDay == null) return null
+  if (Constants.ticksPerDay <= 0) return null
+  return game.timestamp ~/ Constants.ticksPerDay
+}
+
+function _jiejiHarvestOnCooldown() {
+  final jieji = ensureJiejiFlags()
+  final last = jieji.lastHarvestRite
+  if (last == null) return false
+  final day = _jiejiHarvestCurrentDay()
+  final lastDay = last.day
+  final lastMove = last.move
+  var dayReady = false
+  var moveReady = false
+  if (day != null && lastDay != null) {
+    if (day - lastDay >= kJiejiHarvestCooldownDays) dayReady = true
+  }
+  if (lastMove != null) {
+    final moves = jieji.worldMoves ?? 0
+    if (moves - lastMove >= kJiejiHarvestCooldownMoves) moveReady = true
+  }
+  if (dayReady || moveReady) return false
+  if (lastDay != null || lastMove != null) return true
+  return false
+}
+
+function _jiejiHarvestMark() {
+  final jieji = ensureJiejiFlags()
+  jieji.lastHarvestRite = {
+    day: _jiejiHarvestCurrentDay(),
+    move: jieji.worldMoves ?? 0,
+  }
+}
+
+function _jiejiHarvestCostLife(want) {
+  var lost = want
+  final life = hero.life ?? 1
+  if (life - lost < 1) lost = life - 1
+  if (lost < 0) lost = 0
+  if (lost > 0) {
+    Player.setLife(hero.life - lost)
+  }
+  return lost
+}
+
+function _jiejiHarvestGrantBlank() {
+  final card = BattleCard(rank: 0)
+  card.isCardBlank = true
+  Player.acquireCard(card)
+  return card
+}
+
+function _jiejiHarvestChoices(seasonId) {
+  if (seasonId == 'mist') {
+    return [
+      {
+        text: 'jieji_harvest_search',
+        description: 'hint_jieji_harvest_search',
+      },
+      {
+        text: 'jieji_harvest_hire',
+        description: 'hint_jieji_harvest_hire',
+      },
+      {
+        text: 'jieji_harvest_rest',
+        description: 'hint_jieji_harvest_rest',
+      },
+      'cancel',
+    ]
+  }
+  if (seasonId == 'blood') {
+    return [
+      {
+        text: 'jieji_harvest_blood',
+        description: 'hint_jieji_harvest_blood',
+      },
+      {
+        text: 'jieji_harvest_plain',
+        description: 'hint_jieji_harvest_plain',
+      },
+      {
+        text: 'jieji_harvest_rest',
+        description: 'hint_jieji_harvest_rest',
+      },
+      'cancel',
+    ]
+  }
+  return [
+    {
+      text: 'jieji_harvest_ripen',
+      description: 'hint_jieji_harvest_ripen',
+    },
+    {
+      text: 'jieji_harvest_offer',
+      description: 'hint_jieji_harvest_offer',
+    },
+    {
+      text: 'jieji_harvest_rest',
+      description: 'hint_jieji_harvest_rest',
+    },
+    'cancel',
+  ]
+}
+
+/// 灵田祈年三选。free 为 true 时不扣费、不检查冷却（debug）。
+/// 返回 'ok' | 'cooldown' | 'poor' | 'cancel'。
+async function riteJiejiHarvest({ free = false }) {
+  if (hero == null) return 'cancel'
+  if (free != true && _jiejiHarvestOnCooldown()) {
+    return 'cooldown'
+  }
+
+  final seasonId = _jiejiHarvestSeasonId()
+  var introKey = 'hint_riteJiejiHarvest_thunder'
+  if (seasonId == 'mist') introKey = 'hint_riteJiejiHarvest_mist'
+  if (seasonId == 'blood') introKey = 'hint_riteJiejiHarvest_blood'
+  dialog.pushDialog(introKey)
+  dialog.pushSelection('jiejiHarvest', _jiejiHarvestChoices(seasonId))
+  await dialog.execute()
+  var selected = dialog.checkSelected('jiejiHarvest')
+  if (selected == null || selected == 'cancel') {
+    if (free == true && selected == null) {
+      selected = 'jieji_harvest_rest'
+    } else {
+      return 'cancel'
+    }
+  }
+
+  if (selected == 'jieji_harvest_offer') {
+    if (free != true) {
+      final moneyHave = hero.materials['money'] ?? 0
+      if (moneyHave < kJiejiHarvestOfferMoney) {
+        return 'poor'
+      }
+    }
+  } else if (selected == 'jieji_harvest_hire') {
+    if (free != true) {
+      final workerHave = hero.materials['worker'] ?? 0
+      if (workerHave < kJiejiHarvestHireWorker) {
+        return 'poor'
+      }
+    }
+  }
+
+  if (free != true) {
+    if (selected == 'jieji_harvest_offer') {
+      Player.exhaust('money', kJiejiHarvestOfferMoney)
+    } else if (selected == 'jieji_harvest_hire') {
+      Player.exhaust('worker', kJiejiHarvestHireWorker)
+    }
+    if (selected == 'jieji_harvest_blood') {
+      _jiejiHarvestCostLife(kJiejiHarvestBloodLife)
+    } else if (selected != 'jieji_harvest_rest') {
+      _jiejiHarvestCostLife(kJiejiHarvestLifeCost)
+    }
+    await Game.updateGame(tick: Constants.ticksPerDay)
+    _jiejiHarvestMark()
+  }
+
+  var resultKey = 'hint_riteJiejiHarvest_rest'
+  var grantedBlank = false
+  if (selected == 'jieji_harvest_ripen') {
+    await Player.collect('herb', kJiejiHarvestRipenHerb, incurIncident: false)
+    resultKey = 'hint_riteJiejiHarvest_ripen'
+  } else if (selected == 'jieji_harvest_offer') {
+    await Player.collect('herb', kJiejiHarvestOfferHerb, incurIncident: false)
+    resultKey = 'hint_riteJiejiHarvest_offer'
+    if (random.nextDouble() < kJiejiHarvestOfferBlankRate) {
+      _jiejiHarvestGrantBlank()
+      grantedBlank = true
+    }
+  } else if (selected == 'jieji_harvest_search') {
+    await Player.collect('herb', kJiejiHarvestSearchHerb, incurIncident: false)
+    await Player.collect('money', kJiejiHarvestSearchMoney, incurIncident: false)
+    resultKey = 'hint_riteJiejiHarvest_search'
+  } else if (selected == 'jieji_harvest_hire') {
+    await Player.collect('herb', kJiejiHarvestHireHerb, incurIncident: false)
+    resultKey = 'hint_riteJiejiHarvest_hire'
+  } else if (selected == 'jieji_harvest_blood') {
+    await Player.collect('herb', kJiejiHarvestBloodHerb, incurIncident: false)
+    resultKey = 'hint_riteJiejiHarvest_blood'
+  } else if (selected == 'jieji_harvest_plain') {
+    await Player.collect('herb', kJiejiHarvestPlainHerb, incurIncident: false)
+    resultKey = 'hint_riteJiejiHarvest_plain'
+  } else {
+    Player.restoreLife(kJiejiHarvestRestLife)
+    resultKey = 'hint_riteJiejiHarvest_rest'
+  }
+
+  dialog.pushDialog(resultKey)
+  await dialog.execute()
+  if (grantedBlank) {
+    dialog.pushDialog('hint_riteJiejiHarvest_offer_blank')
+    await dialog.execute()
+  }
+  Game.updateUI()
+  return 'ok'
+}

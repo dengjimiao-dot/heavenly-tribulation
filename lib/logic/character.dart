@@ -1888,6 +1888,30 @@ Future<void> _heroConsultXianming(dynamic location) async {
   }
 }
 
+
+Future<void> _heroRiteJiejiHarvest(dynamic location) async {
+  final isRented = await GameLogic.checkRented(location);
+  if (!isRented) return;
+
+  final result = await engine.hetu.invoke('riteJiejiHarvest');
+  if (result == 'cooldown') {
+    dialog.pushDialog(
+      'hint_riteJiejiHarvest_cooldown',
+      npcId: location['npcId'],
+    );
+    await dialog.execute();
+    return;
+  }
+  if (result == 'poor') {
+    dialog.pushDialog(
+      'hint_riteJiejiHarvest_notEnough',
+      npcId: location['npcId'],
+    );
+    await dialog.execute();
+    return;
+  }
+}
+
 Future<void> _heroShowKarmaCodex(dynamic location) async {
   final text = engine.hetu.invoke('formatKarmaCodex');
   dialog.pushDialog(
@@ -1917,6 +1941,12 @@ Future<void> _onInteractSite(
     siteOptions.add({
       'text': 'produce',
       'description': 'hint_produce_description',
+    });
+  }
+  if (siteKind == 'farmland') {
+    siteOptions.add({
+      'text': 'riteJiejiHarvest',
+      'description': 'hint_riteJiejiHarvest_description',
     });
   }
   if (kSiteKindsTradable.contains(siteKind)) {
@@ -2016,6 +2046,8 @@ Future<void> _onInteractSite(
       await _heroRecruitJiejiAid(location);
     case 'consultXianming':
       await _heroConsultXianming(location);
+    case 'riteJiejiHarvest':
+      await _heroRiteJiejiHarvest(location);
     case 'about_dungeon':
       dialog.pushDialog(
         'hint_dungeonEntrance',

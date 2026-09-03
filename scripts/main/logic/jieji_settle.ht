@@ -21,6 +21,7 @@ const _kJiejiKeepSiteKinds = {
   'cityhall': true,
   'headquarters': true,
   'residence': true,
+  'farmland': true,
 }
 
 function ensureJiejiFlags() {
@@ -163,6 +164,7 @@ function migrateSect() {
   ensureHomeAlchemylab()
   ensureHomeResidence()
   ensureHomeLibrary()
+  ensureHomeFarmland()
   engine.info('季末迁徙：拆除据点 ${removed}，城市规模 ${city.development}')
   return removed
 }
