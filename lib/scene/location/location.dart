@@ -583,6 +583,9 @@ class LocationScene extends Scene with HasCursorState {
       try {
         engine.hetu.invoke('ensureHomeWorkshop');
       } catch (_) {}
+      try {
+        await engine.hetu.invoke('tryJiejiCityRumor', positionalArgs: [location]);
+      } catch (_) {}
     }
     _loadSites();
   }

@@ -401,6 +401,13 @@ namespace debug {
     return await issueJiejiEdict(free: true)
   }
 
+  /// 忽略一城一季一次，仍弹出进城劫谣三选。无参则用主角故乡。
+  async function forceCityRumor(location) {
+    var loc = location
+    if (loc == null) loc = getHeroHomeCity()
+    return await tryJiejiCityRumor(loc, free: true)
+  }
+
   /// 忽略费用与冷却，直接挂上迷障（下次野遇糊弄过去）。
   function forceVeil() {
     if (hero == null) return

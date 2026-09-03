@@ -1,0 +1,142 @@
+/// 进城「劫谣」：听谣 / 打点 / 不理。任意城市，一城一季一次。取消也算进过。
+const kJiejiRumorListenHerbRate = 0.40
+const kJiejiRumorListenHerb = 2
+const kJiejiRumorListenHerbMist = 3
+const kJiejiRumorListenMoney = 40
+const kJiejiRumorListenGongfaRate = 0.15
+const kJiejiRumorBribeMoney = 40
+const kJiejiRumorBribeMoneyThunder = 20
+const kJiejiRumorBribeLife = 5
+
+function _jiejiRumorSeasonId() {
+  if (game.jieji != null && game.jieji.seasonId != null) {
+    return game.jieji.seasonId
+  }
+  return 'thunder'
+}
+
+function _jiejiRumorResolve(location) {
+  if (location == null) return null
+  if (location.id != null || location.category != null || location.kind != null) {
+    return location
+  }
+  if (game.locations == null) return location
+  return game.locations[location]
+}
+
+function _jiejiRumorIsCity(loc) {
+  if (loc == null) return false
+  if (loc.category == 'city') return true
+  final kind = loc.kind
+  if (kind == kLocationKindInlandCity) return true
+  if (kind == kLocationKindHarborCity) return true
+  if (kind == kLocationKindIslandCity) return true
+  if (kind == kLocationKindMountainCity) return true
+  return false
+}
+
+function _jiejiRumorAlready(cityId, seasonId) {
+  if (cityId == null) return true
+  final jieji = ensureJiejiFlags()
+  jieji.cityRumors ??= {}
+  return jieji.cityRumors[cityId] == seasonId
+}
+
+function _jiejiRumorMark(cityId, seasonId) {
+  if (cityId == null) return
+  final jieji = ensureJiejiFlags()
+  jieji.cityRumors ??= {}
+  jieji.cityRumors[cityId] = seasonId
+}
+
+function _jiejiRumorBribeCost(seasonId) {
+  if (seasonId == 'thunder') return kJiejiRumorBribeMoneyThunder
+  return kJiejiRumorBribeMoney
+}
+
+function _jiejiRumorListenHerb(seasonId) {
+  if (seasonId == 'mist') return kJiejiRumorListenHerbMist
+  return kJiejiRumorListenHerb
+}
+
+function _jiejiRumorChoices() {
+  return [
+    {
+      text: 'jieji_rumor_listen',
+      description: 'hint_jieji_rumor_listen',
+    },
+    {
+      text: 'jieji_rumor_bribe',
+      description: 'hint_jieji_rumor_bribe',
+    },
+    {
+      text: 'jieji_rumor_ignore',
+      description: 'hint_jieji_rumor_ignore',
+    },
+  ]
+}
+
+function _jiejiRumorNormalize(kind) {
+  if (kind == 'listen' || kind == 'jieji_rumor_listen') return 'listen'
+  if (kind == 'bribe' || kind == 'jieji_rumor_bribe') return 'bribe'
+  if (kind == 'ignore' || kind == 'jieji_rumor_ignore') return 'ignore'
+  return null
+}
+
+/// 进城劫谣三选。free 为 true 时不检查一城一季一次、不耗铜钱（debug），仍弹出三选。
+/// 先标记再弹窗，取消也算进过。返回 true 表示弹过。
+async function tryJiejiCityRumor(location, { free = false }) {
+  if (hero == null) return false
+  final loc = _jiejiRumorResolve(location)
+  if (!_jiejiRumorIsCity(loc)) return false
+  final cityId = loc.id
+  if (cityId == null) return false
+  final seasonId = _jiejiRumorSeasonId()
+  if (free != true && _jiejiRumorAlready(cityId, seasonId)) return false
+  if (free != true) {
+    _jiejiRumorMark(cityId, seasonId)
+  }
+
+  dialog.pushDialog('hint_jieji_city_rumor')
+  dialog.pushSelection('jiejiCityRumor', _jiejiRumorChoices())
+  await dialog.execute()
+  final picked = dialog.checkSelected('jiejiCityRumor')
+  final selected = _jiejiRumorNormalize(picked)
+
+  if (selected == 'listen') {
+    if (random.nextDouble() < kJiejiRumorListenHerbRate) {
+      final herb = _jiejiRumorListenHerb(seasonId)
+      await Player.collect('herb', herb, incurIncident: false)
+      dialog.pushDialog('hint_jieji_city_rumor_listen_herb', interpolations: [herb])
+      await dialog.execute()
+    } else {
+      await Player.collect('money', kJiejiRumorListenMoney, incurIncident: false)
+      dialog.pushDialog('hint_jieji_city_rumor_listen_money')
+      await dialog.execute()
+    }
+    await tryDropGongfaShard(rate: kJiejiRumorListenGongfaRate)
+  } else if (selected == 'bribe') {
+    final cost = _jiejiRumorBribeCost(seasonId)
+    var paid = false
+    if (free == true) {
+      paid = true
+    } else {
+      final moneyHave = hero.materials['money'] ?? 0
+      if (moneyHave < cost) {
+        dialog.pushDialog('hint_jieji_city_rumor_bribe_broke', interpolations: [cost])
+        await dialog.execute()
+      } else {
+        Player.exhaust('money', cost)
+        paid = true
+      }
+    }
+    if (paid) {
+      final healed = Player.restoreLife(kJiejiRumorBribeLife)
+      dialog.pushDialog('hint_jieji_city_rumor_bribe', interpolations: [cost, healed])
+      await dialog.execute()
+    }
+  }
+
+  Game.updateUI()
+  return true
+}
