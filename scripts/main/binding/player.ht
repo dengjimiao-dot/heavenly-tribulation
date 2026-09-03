@@ -380,6 +380,20 @@ namespace Player {
     return n
   }
 
+  /// 农田/产地作物吃 lootMul（含养门徒 +0.15）；雷月药材/粮食再加 0.35。不缩放任务/独特物。
+  function scaleJiejiCropAmount(amount, materialId) {
+    var n = amount.round()
+    if (n < 0) n = 0
+    if (materialId != 'herb' && materialId != 'grain') return n
+    var mul = jiejiLootMul()
+    if (game.jieji != null && game.jieji.seasonId == 'thunder') {
+      mul = mul + 0.35
+    }
+    n = (amount * mul).round()
+    if (n < 0) n = 0
+    return n
+  }
+
   /// 用于从一个宝箱中根据物品信息创造物品并获取
   async function loot(itemsInfo: List) {
     final items = createLoot(itemsInfo)

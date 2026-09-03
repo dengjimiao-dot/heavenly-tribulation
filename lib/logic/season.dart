@@ -238,6 +238,21 @@ final class SeasonLogic {
     return m < 0 ? 0.0 : m;
   }
 
+  /// 农田/产地作物（药材、粮食）吃劫季掉落乘区；雷月额外更肥。
+  static const cropMaterialIds = {'herb', 'grain'};
+  static const thunderCropProduceBonus = 0.35;
+
+  static int scaleProduceAmount(int amount, String materialId) {
+    if (amount <= 0) return 0;
+    if (!cropMaterialIds.contains(materialId)) return amount;
+    var mul = lootMul;
+    if (currentId == 'thunder') {
+      mul += thunderCropProduceBonus;
+    }
+    final n = (amount * mul).round();
+    return n < 0 ? 0 : n;
+  }
+
   /// 对伤害详情写入乘区3（正气/戾气旁路的额外乘区），保持与原公式兼容。
   /// 诅咒槽额外提高英雄承伤：每层 +0.05。
   static void applyBattleDamageMods(dynamic damageDetails,

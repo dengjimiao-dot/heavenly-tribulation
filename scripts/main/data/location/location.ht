@@ -761,7 +761,7 @@ function replenishProductionMaterials(location) {
   
   for (final materialId in price.keys) {
     final amount = terrain.resources[materialId] * (location.development + 1) * _kProductionSiteResourceGeneration
-    location.materials[materialId] = amount
+    location.materials[materialId] = Player.scaleJiejiCropAmount(amount, materialId)
   }
 }
 

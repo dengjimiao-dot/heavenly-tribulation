@@ -79,10 +79,71 @@ async function tryWildEncounterOnMove(terrain) {
   return true
 }
 
+const kMistRoadEventBaseRate = 0.10
+const kMistRoadEventMoveCooldown = 6
+const kMistRoadEventGuideCost = 80
+
+/// 雾月赶路迷雾。隐藏任务与野遇都没触发时才滚；用 wildEncounterMul，不用 hiddenQuestMul。
+async function tryMistRoadEventOnMove(terrain) {
+  if (hero == null) return false
+  if (game.jieji == null || game.jieji.seasonId != 'mist') return false
+  if (game.enableTutorial && game.flags.tutorial.bountyQuest != true) return false
+
+  game.flags.jieji ??= {}
+  final moves = game.flags.jieji.worldMoves ?? 0
+  final last = game.flags.jieji.lastMistEventMove ?? -999
+  if (moves - last < kMistRoadEventMoveCooldown) return false
+
+  var rate = kMistRoadEventBaseRate * jiejiWildEncounterMul()
+  if (rate < 0) rate = 0
+  if (random.nextDouble() > rate) return false
+
+  game.flags.jieji.lastMistEventMove = moves
+
+  dialog.pushDialog('hint_jieji_mist_lost')
+  dialog.pushSelection('jiejiMistRoad', [
+    'jieji_mist_forage',
+    'jieji_mist_charge',
+    'jieji_mist_guide',
+  ])
+  await dialog.execute()
+  final selected = dialog.checkSelected('jiejiMistRoad')
+
+  if (selected == 'jieji_mist_forage') {
+    final herb = 2 + random.nextInt(3)
+    final money = 50 + random.nextInt(51)
+    await Player.collect('herb', herb, incurIncident: false)
+    await Player.collect('money', money, incurIncident: false)
+    dialog.pushDialog('hint_jieji_mist_forage', interpolations: ['${herb}', '${money}'])
+    await dialog.execute()
+  } else if (selected == 'jieji_mist_charge') {
+    dialog.pushDialog('hint_jieji_mist_charge')
+    await dialog.execute()
+    await encounterEnemy(rank: hero.rank, terrainKind: terrain.kind)
+  } else {
+    final cost = kMistRoadEventGuideCost
+    final money = hero.materials['money'] ?? 0
+    if (money >= cost) {
+      Player.exhaust('money', cost)
+      dialog.pushDialog('hint_jieji_mist_guide', interpolations: ['${cost}'])
+      await dialog.execute()
+    } else {
+      dialog.pushDialog('hint_jieji_mist_guide_broke')
+      await dialog.execute()
+    }
+    if (random.nextDouble() < 0.30) {
+      await grantKarmaCard('mist')
+    }
+  }
+  Game.updateUI()
+  return true
+}
+
 async function onAfterMove(terrain) {
   // 先尝试隐藏任务，避免开局十步保证被野遇吃掉。
   if (await trySpawnHiddenQuestOnMove(terrain)) return true
 
+  var fought = false
   final tradeQuest = hero.journals.values.where((journal) =>
    !journal.isFinished &&
    journal.quest != null &&
@@ -91,62 +152,65 @@ async function onAfterMove(terrain) {
   )
 
   if (tradeQuest.isEmpty) {
-    return await tryWildEncounterOnMove(terrain)
+    fought = await tryWildEncounterOnMove(terrain)
+  } else {
+    final roll = random.nextDouble()
+    let rate = Constants.terrainKindToEnemyEncounterRate[terrain.kind] ?? kEnemyEncounterRateBase
+    let er = rate * (1 - hero.rank * kEnemyEncounterRateRankFactor) * jiejiWildEncounterMul()
+    if (roll <= er) {
+      final journal = tradeQuest.first
+      journal.hasEncounteredEnemy = true
+
+      encounterEnemy(
+        rank: journal.quest.difficulty,
+        terrainKind: terrain.kind,
+        battleEndCallback: async function (result, roundCount) {
+          if (result) return
+
+          final materialLostRate = kEncounterDefeatMaterialLostBase + kEncounterDefeatMaterialLostPerRank * journal.quest.difficulty
+          final materials = hero.materials.keys.where((materialId) =>
+            hero.materials[materialId] > 0
+          ).toList()
+          if (materials.isNotEmpty) {
+            final materialId = random.nextIterable(materials)
+            final amount = hero.materials[materialId]
+            final lost = (amount * materialLostRate).ceil()
+            Player.exhaust(materialId, lost)
+            dialog.pushDialog('hint_loseMultiple', interpolations: [lost, engine.locale(materialId)])
+            await dialog.execute()
+          }
+
+          final equipmentLostRate = kEncounterDefeatEquipmentLostBase + kEncounterDefeatEquipmentLostPerRank * journal.quest.difficulty
+          let equippedIndexes = hero.equipments.keys.where((slot) =>
+            hero.equipments[slot] != null
+          ).toList()
+          final roll = random.nextDouble()
+          if (equippedIndexes.isNotEmpty && roll < equipmentLostRate) {
+            final slot = random.nextIterable(equippedIndexes)
+            final itemId = hero.equipments[slot]
+            final item = hero.inventory[itemId]
+            Player.unequip(item)
+            Player.lose(item)
+            dialog.pushDialog('hint_lose', interpolations: [item.name])
+            await dialog.execute()
+          }
+
+          if (journal.quest.kind == 'escort') {
+            Player.progressJournalById(journal.id, stage: 2)
+            final character = game.characters[journal.quest.package.characterId]
+            final escortType = journal.quest.escortType;
+            dialog.pushDialog('quest_escort_failed_${escortType}', character: character);
+            await dialog.execute()
+            Player.dismiss(character)
+          }
+      })
+
+      fought = true
+    }
   }
 
-  final roll = random.nextDouble()
-  let rate = Constants.terrainKindToEnemyEncounterRate[terrain.kind] ?? kEnemyEncounterRateBase
-  let er = rate * (1 - hero.rank * kEnemyEncounterRateRankFactor) * jiejiWildEncounterMul()
-  if (roll > er) {
-    return false
+  if (!fought) {
+    if (await tryMistRoadEventOnMove(terrain)) return true
   }
-
-  final journal = tradeQuest.first
-  journal.hasEncounteredEnemy = true
-
-  encounterEnemy(
-    rank: journal.quest.difficulty,
-    terrainKind: terrain.kind,
-    battleEndCallback: async function (result, roundCount) {
-      if (result) return
-
-      final materialLostRate = kEncounterDefeatMaterialLostBase + kEncounterDefeatMaterialLostPerRank * journal.quest.difficulty
-      final materials = hero.materials.keys.where((materialId) =>
-        hero.materials[materialId] > 0
-      ).toList()
-      if (materials.isNotEmpty) {
-        final materialId = random.nextIterable(materials)
-        final amount = hero.materials[materialId]
-        final lost = (amount * materialLostRate).ceil()
-        Player.exhaust(materialId, lost)
-        dialog.pushDialog('hint_loseMultiple', interpolations: [lost, engine.locale(materialId)])
-        await dialog.execute()
-      }
-
-      final equipmentLostRate = kEncounterDefeatEquipmentLostBase + kEncounterDefeatEquipmentLostPerRank * journal.quest.difficulty
-      let equippedIndexes = hero.equipments.keys.where((slot) =>
-        hero.equipments[slot] != null
-      ).toList()
-      final roll = random.nextDouble()
-      if (equippedIndexes.isNotEmpty && roll < equipmentLostRate) {
-        final slot = random.nextIterable(equippedIndexes)
-        final itemId = hero.equipments[slot]
-        final item = hero.inventory[itemId]
-        Player.unequip(item)
-        Player.lose(item)
-        dialog.pushDialog('hint_lose', interpolations: [item.name])
-        await dialog.execute()
-      }
-
-      if (journal.quest.kind == 'escort') {
-        Player.progressJournalById(journal.id, stage: 2)
-        final character = game.characters[journal.quest.package.characterId]
-        final escortType = journal.quest.escortType;
-        dialog.pushDialog('quest_escort_failed_${escortType}', character: character);
-        await dialog.execute()
-        Player.dismiss(character)
-      }
-  })
-  
-  return true
+  return fought
 }

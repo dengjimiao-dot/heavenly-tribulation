@@ -166,7 +166,7 @@ async function pickXianming() {
     }
     jieji.xianmingSeason = nextSeasonId
     if (selected == 'xianming_nurture') {
-      await Player.collect('worker', 5)
+      await Player.collect('worker', 8)
       await Player.collect('money', 300)
       final blank = BattleCard(genre: null, rank: 0)
       blank.isCardBlank = true
@@ -217,6 +217,10 @@ async function onJiejiSeasonStart(seasonId) {
     dialog.pushDialog('hint_jieji_omen_blood')
   } else {
     return
+  }
+  if (jieji.xianming == 'xianming_nurture') {
+    await Player.collect('worker', 2, incurIncident: false)
+    dialog.pushDialog('hint_jieji_omen_nurture_hands')
   }
   await dialog.execute()
   Game.updateUI()

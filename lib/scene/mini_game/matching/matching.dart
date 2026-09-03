@@ -15,6 +15,7 @@ import '../../../global.dart';
 import '../../../ui.dart';
 import '../../../data/game.dart';
 import '../../../logic/logic.dart';
+import '../../../logic/season.dart';
 import 'collect_panel.dart';
 import '../../../data/common.dart';
 import '../../cursor_state.dart';
@@ -344,7 +345,10 @@ class MatchingGame extends Scene with HasCursorState {
       removeObject();
       int baseAmount = resources[materialId] ?? 0;
       baseAmount *= rarity - kProductionBaseMaxRarity + 1;
-      final amount = _kProductionBaseAmount + random.nearInt(baseAmount);
+      var amount = _kProductionBaseAmount + random.nearInt(baseAmount);
+      if (isProduction) {
+        amount = SeasonLogic.scaleProduceAmount(amount, materialId);
+      }
       engine.info('在$kind生产了$amount $materialId');
       if (isProduction) {
         engine.hetu.invoke(
