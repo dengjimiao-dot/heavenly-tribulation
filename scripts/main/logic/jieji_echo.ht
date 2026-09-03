@@ -1,0 +1,171 @@
+/// 赶路「残鼓」三选：应声 / 拾皮 / 血应。隐藏、劫兆、野遇、赶路、行商、拾荒、扎营、残锋、残卷、雾灯都没中时才滚。
+const kJiejiEchoBaseRate = 0.06
+const kJiejiEchoMoveCooldown = 12
+const kJiejiEchoAnswerHerb = 1
+const kJiejiEchoAnswerLife = 4
+const kJiejiEchoTakeMoney = 20
+const kJiejiEchoTakeMoneyThunder = 10
+const kJiejiEchoTakeHerb = 1
+const kJiejiEchoTakeGongfaRate = 0.25
+const kJiejiEchoBloodLife = 2
+const kJiejiEchoBloodLifeBlood = 3
+const kJiejiEchoBloodGongfaRate = 0.55
+const kJiejiEchoBloodMoney = 45
+
+function _jiejiEchoSeasonId() {
+  if (game.jieji != null && game.jieji.seasonId != null) {
+    return game.jieji.seasonId
+  }
+  return null
+}
+
+function _jiejiEchoTutorialLocked() {
+  return game.enableTutorial && game.flags.tutorial.bountyQuest != true
+}
+
+function _jiejiEchoAnswerHerbCost(seasonId) {
+  if (seasonId == 'mist') return 0
+  return kJiejiEchoAnswerHerb
+}
+
+function _jiejiEchoTakeMoneyCost(seasonId) {
+  if (seasonId == 'thunder') return kJiejiEchoTakeMoneyThunder
+  return kJiejiEchoTakeMoney
+}
+
+function _jiejiEchoBloodLifeCost(seasonId) {
+  if (seasonId == 'blood') return kJiejiEchoBloodLifeBlood
+  return kJiejiEchoBloodLife
+}
+
+function _jiejiEchoCostLife(want) {
+  var lost = want
+  final life = hero.life ?? 1
+  if (life - lost < 1) lost = life - 1
+  if (lost < 0) lost = 0
+  if (lost > 0) {
+    Player.setLife(hero.life - lost)
+  }
+  return lost
+}
+
+function _jiejiEchoNormalizeKind(kind) {
+  if (kind == 'answer' || kind == 'jieji_echo_answer') return 'answer'
+  if (kind == 'take' || kind == 'jieji_echo_take') return 'take'
+  if (kind == 'blood' || kind == 'jieji_echo_blood') return 'blood'
+  return null
+}
+
+function _jiejiEchoChoices() {
+  return [
+    {
+      text: 'jieji_echo_answer',
+      description: 'hint_jieji_echo_answer',
+    },
+    {
+      text: 'jieji_echo_take',
+      description: 'hint_jieji_echo_take',
+    },
+    {
+      text: 'jieji_echo_blood',
+      description: 'hint_jieji_echo_blood',
+    },
+  ]
+}
+
+/// 破军未挂则挂 arrayFury；已挂则挂 feastFury。两者都有则只回血。
+function _jiejiEchoApplyAnswerFury() {
+  final jieji = ensureJiejiFlags()
+  if (jieji.arrayFury != true) {
+    jieji.arrayFury = true
+    return 'array'
+  }
+  if (jieji.feastFury != true) {
+    jieji.feastFury = true
+    return 'feast'
+  }
+  return null
+}
+
+/// 赶路残鼓三选。debug.forceJiejiEvent('echo') / forceEcho 直接走这里，仍弹出三选。
+async function playJiejiEchoEvent(terrain) {
+  if (hero == null) return false
+
+  dialog.pushDialog('hint_jieji_echo')
+  dialog.pushSelection('jiejiEcho', _jiejiEchoChoices())
+  await dialog.execute()
+  final picked = dialog.checkSelected('jiejiEcho')
+  var selected = _jiejiEchoNormalizeKind(picked)
+  if (selected == null) {
+    selected = 'answer'
+  }
+
+  final seasonId = _jiejiEchoSeasonId()
+  if (selected == 'answer') {
+    final herbNeed = _jiejiEchoAnswerHerbCost(seasonId)
+    final herbHave = hero.materials['herb'] ?? 0
+    if (herbNeed > 0 && herbHave < herbNeed) {
+      dialog.pushDialog('hint_jieji_echo_answer_broke', interpolations: [herbNeed])
+      await dialog.execute()
+    } else {
+      if (herbNeed > 0) {
+        Player.exhaust('herb', herbNeed)
+      }
+      final fury = _jiejiEchoApplyAnswerFury()
+      final healed = Player.restoreLife(kJiejiEchoAnswerLife)
+      if (fury == 'array') {
+        dialog.pushDialog('hint_jieji_echo_answer_ok_array', interpolations: [healed])
+      } else if (fury == 'feast') {
+        dialog.pushDialog('hint_jieji_echo_answer_ok_feast', interpolations: [healed])
+      } else {
+        dialog.pushDialog('hint_jieji_echo_answer_ok', interpolations: [healed])
+      }
+      await dialog.execute()
+    }
+  } else if (selected == 'take') {
+    final moneyNeed = _jiejiEchoTakeMoneyCost(seasonId)
+    final moneyHave = hero.materials['money'] ?? 0
+    if (moneyHave < moneyNeed) {
+      dialog.pushDialog('hint_jieji_echo_take_broke', interpolations: [moneyNeed])
+      await dialog.execute()
+    } else {
+      Player.exhaust('money', moneyNeed)
+      await Player.collect('herb', kJiejiEchoTakeHerb, incurIncident: false)
+      dialog.pushDialog('hint_jieji_echo_take_ok', interpolations: [kJiejiEchoTakeHerb])
+      await dialog.execute()
+      await tryDropGongfaShard(rate: kJiejiEchoTakeGongfaRate)
+    }
+  } else {
+    final lost = _jiejiEchoCostLife(_jiejiEchoBloodLifeCost(seasonId))
+    dialog.pushDialog('hint_jieji_echo_blood_ok', interpolations: [lost])
+    await dialog.execute()
+    final dropped = await tryDropGongfaShard(rate: kJiejiEchoBloodGongfaRate)
+    if (dropped != true) {
+      await Player.collect('money', kJiejiEchoBloodMoney, incurIncident: false)
+      dialog.pushDialog('hint_jieji_echo_blood_none', interpolations: [kJiejiEchoBloodMoney])
+      await dialog.execute()
+    }
+  }
+
+  Game.updateUI()
+  return true
+}
+
+/// 赶路触发：教程锁与路遇相同；冷却 12 步；约 6%。出过则返回 true。
+async function tryJiejiEchoOnMove(terrain) {
+  if (hero == null) return false
+  if (_jiejiEchoTutorialLocked()) return false
+
+  final jieji = ensureJiejiFlags()
+  final moves = jieji.worldMoves ?? 0
+  final last = jieji.lastEchoMove ?? -999
+  if (moves - last < kJiejiEchoMoveCooldown) return false
+
+  var rate = kJiejiEchoBaseRate
+  if (rate < 0) rate = 0
+  if (random.nextDouble() > rate) return false
+
+  jieji.lastEchoMove = moves
+  await playJiejiEchoEvent(terrain)
+  return true
+}
