@@ -1,4 +1,4 @@
-/// 秘境劫季切片：营地天象、精英/Boss 染色、祭坛/匣/劫泉/伏击/试剑/古钟/残页/功法冢/剑炉/镜池/灯龛/劫鼓奇遇、出口劫礼。
+/// 秘境劫季切片：营地天象、精英/Boss 染色、祭坛/匣/劫泉/伏击/试剑/古钟/残页/功法冢/剑炉/镜池/灯龛/劫鼓/残井奇遇、出口劫礼。
 /// 由 dungeon.ht 的 _prepareMap / onEnterMap / promptExit 小钩子调用。不改教程房布局。
 
 const kJiejiDungeonGuideCost = 80
@@ -108,6 +108,17 @@ const kJiejiDungeonDrumListenGongfaRate = 0.20
 const kJiejiDungeonDrumBloodLife = 2
 const kJiejiDungeonDrumBloodLifeBlood = 3
 const kJiejiDungeonDrumBloodMoney = 55
+const kJiejiDungeonWellDrawHerb = 1
+const kJiejiDungeonWellDrawLife = 7
+const kJiejiDungeonWellDrawLifeMist = 9
+const kJiejiDungeonWellDrawGongfaRate = 0.20
+const kJiejiDungeonWellSearchMoney = 30
+const kJiejiDungeonWellSearchMoneyThunder = 15
+const kJiejiDungeonWellSearchHerb = 2
+const kJiejiDungeonWellSearchGongfaRate = 0.30
+const kJiejiDungeonWellBloodLife = 2
+const kJiejiDungeonWellBloodLifeBlood = 3
+const kJiejiDungeonWellBloodMoney = 65
 const kJiejiDungeonExitPackMoney = 80
 const kJiejiDungeonExitPackMoneyThunder = 120
 const kJiejiDungeonExitPackMoneyBlood = 100
@@ -283,6 +294,8 @@ async function playJiejiDungeonEncounter() {
     await playJiejiDungeonLamp()
   } else if (kind == 'jiejiDrum') {
     await playJiejiDungeonDrum()
+  } else if (kind == 'jiejiWell') {
+    await playJiejiDungeonWell()
   }
   Game.updateUI()
 }
@@ -1247,6 +1260,75 @@ async function playJiejiDungeonDrum() {
     if (jiejiDungeonSeasonId() == 'thunder') {
       await tryDropGongfaShard(rate: kJiejiDungeonDrumTapGongfaRateThunder)
     }
+  }
+}
+
+function jiejiDungeonWellDrawLife() {
+  if (jiejiDungeonSeasonId() == 'mist') return kJiejiDungeonWellDrawLifeMist
+  return kJiejiDungeonWellDrawLife
+}
+
+function jiejiDungeonWellSearchMoney() {
+  if (jiejiDungeonSeasonId() == 'thunder') return kJiejiDungeonWellSearchMoneyThunder
+  return kJiejiDungeonWellSearchMoney
+}
+
+function jiejiDungeonWellBloodLifeLoss() {
+  if (jiejiDungeonSeasonId() == 'blood') return kJiejiDungeonWellBloodLifeBlood
+  return kJiejiDungeonWellBloodLife
+}
+
+async function playJiejiDungeonWell() {
+  dialog.pushDialog('hint_jieji_dungeon_well')
+  dialog.pushSelection('jiejiDungeonWell', [
+    'jieji_dungeon_draw',
+    'jieji_dungeon_search',
+    'jieji_dungeon_bloodwell',
+  ])
+  await dialog.execute()
+  final selected = dialog.checkSelected('jiejiDungeonWell')
+
+  if (selected == 'jieji_dungeon_search') {
+    final cost = jiejiDungeonWellSearchMoney()
+    final moneyHave = hero.materials['money'] ?? 0
+    if (moneyHave >= cost) {
+      Player.exhaust('money', cost)
+      final herb = kJiejiDungeonWellSearchHerb
+      await Player.collect('herb', herb, incurIncident: false)
+      dialog.pushDialog('hint_jieji_dungeon_search', interpolations: ['${cost}', '${herb}'])
+      await dialog.execute()
+      await tryDropGongfaShard(rate: kJiejiDungeonWellSearchGongfaRate)
+    } else {
+      dialog.pushDialog('hint_jieji_dungeon_search_broke', interpolations: ['${cost}'])
+      await dialog.execute()
+    }
+  } else if (selected == 'jieji_dungeon_bloodwell') {
+    final lost = jiejiDungeonClampLifeLoss(jiejiDungeonWellBloodLifeLoss())
+    if (lost > 0) {
+      Player.setLife(hero.life - lost)
+    }
+    dialog.pushDialog('hint_jieji_dungeon_bloodwell', interpolations: ['${lost}'])
+    await dialog.execute()
+    var ok = await tryDropGongfaShard(rate: 1)
+    if (ok != true) {
+      ok = await grantGongfaShard(null)
+    }
+    if (ok != true) {
+      final money = kJiejiDungeonWellBloodMoney
+      await Player.collect('money', money, incurIncident: false)
+      dialog.pushDialog('hint_jieji_dungeon_bloodwell_none', interpolations: ['${money}'])
+      await dialog.execute()
+    }
+  } else {
+    final herbCost = kJiejiDungeonWellDrawHerb
+    final herbHave = hero.materials['herb'] ?? 0
+    if (herbHave >= herbCost) {
+      Player.exhaust('herb', herbCost)
+    }
+    final healed = Player.restoreLife(jiejiDungeonWellDrawLife())
+    dialog.pushDialog('hint_jieji_dungeon_draw', interpolations: ['${healed}'])
+    await dialog.execute()
+    await tryDropGongfaShard(rate: kJiejiDungeonWellDrawGongfaRate)
   }
 }
 
