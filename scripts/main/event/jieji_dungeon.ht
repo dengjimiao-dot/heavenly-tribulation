@@ -1,4 +1,4 @@
-/// 秘境劫季切片：营地天象、精英/Boss 染色、祭坛/匣/劫泉/伏击/试剑/古钟/残页/功法冢/剑炉/镜池/灯龛奇遇、出口劫礼。
+/// 秘境劫季切片：营地天象、精英/Boss 染色、祭坛/匣/劫泉/伏击/试剑/古钟/残页/功法冢/剑炉/镜池/灯龛/劫鼓奇遇、出口劫礼。
 /// 由 dungeon.ht 的 _prepareMap / onEnterMap / promptExit 小钩子调用。不改教程房布局。
 
 const kJiejiDungeonGuideCost = 80
@@ -98,6 +98,16 @@ const kJiejiDungeonLampBloodLife = 2
 const kJiejiDungeonLampBloodLifeBlood = 3
 const kJiejiDungeonLampBloodGongfaRate = 0.45
 const kJiejiDungeonLampBloodMoney = 50
+const kJiejiDungeonDrumTapHerb = 1
+const kJiejiDungeonDrumTapLife = 3
+const kJiejiDungeonDrumTapGongfaRateThunder = 0.30
+const kJiejiDungeonDrumListenMoney = 20
+const kJiejiDungeonDrumListenMoneyThunder = 10
+const kJiejiDungeonDrumListenHerb = 1
+const kJiejiDungeonDrumListenGongfaRate = 0.20
+const kJiejiDungeonDrumBloodLife = 2
+const kJiejiDungeonDrumBloodLifeBlood = 3
+const kJiejiDungeonDrumBloodMoney = 55
 const kJiejiDungeonExitPackMoney = 80
 const kJiejiDungeonExitPackMoneyThunder = 120
 const kJiejiDungeonExitPackMoneyBlood = 100
@@ -271,6 +281,8 @@ async function playJiejiDungeonEncounter() {
     await playJiejiDungeonMirror()
   } else if (kind == 'jiejiLamp') {
     await playJiejiDungeonLamp()
+  } else if (kind == 'jiejiDrum') {
+    await playJiejiDungeonDrum()
   }
   Game.updateUI()
 }
@@ -1162,6 +1174,78 @@ async function playJiejiDungeonLamp() {
     } else {
       dialog.pushDialog('hint_jieji_dungeon_fill', interpolations: ['${healed}'])
       await dialog.execute()
+    }
+  }
+}
+
+function jiejiDungeonDrumListenMoney() {
+  if (jiejiDungeonSeasonId() == 'thunder') return kJiejiDungeonDrumListenMoneyThunder
+  return kJiejiDungeonDrumListenMoney
+}
+
+function jiejiDungeonDrumBloodLifeLoss() {
+  if (jiejiDungeonSeasonId() == 'blood') return kJiejiDungeonDrumBloodLifeBlood
+  return kJiejiDungeonDrumBloodLife
+}
+
+async function playJiejiDungeonDrum() {
+  dialog.pushDialog('hint_jieji_dungeon_drum')
+  dialog.pushSelection('jiejiDungeonDrum', [
+    'jieji_dungeon_tap',
+    'jieji_dungeon_hear',
+    'jieji_dungeon_blooddrum',
+  ])
+  await dialog.execute()
+  final selected = dialog.checkSelected('jiejiDungeonDrum')
+
+  if (selected == 'jieji_dungeon_hear') {
+    final cost = jiejiDungeonDrumListenMoney()
+    final moneyHave = hero.materials['money'] ?? 0
+    if (moneyHave >= cost) {
+      Player.exhaust('money', cost)
+      final herb = kJiejiDungeonDrumListenHerb
+      await Player.collect('herb', herb, incurIncident: false)
+      dialog.pushDialog('hint_jieji_dungeon_hear', interpolations: ['${cost}', '${herb}'])
+      await dialog.execute()
+      await tryDropGongfaShard(rate: kJiejiDungeonDrumListenGongfaRate)
+    } else {
+      dialog.pushDialog('hint_jieji_dungeon_hear_broke', interpolations: ['${cost}'])
+      await dialog.execute()
+    }
+  } else if (selected == 'jieji_dungeon_blooddrum') {
+    final lost = jiejiDungeonClampLifeLoss(jiejiDungeonDrumBloodLifeLoss())
+    if (lost > 0) {
+      Player.setLife(hero.life - lost)
+    }
+    dialog.pushDialog('hint_jieji_dungeon_blooddrum', interpolations: ['${lost}'])
+    await dialog.execute()
+    var ok = await tryDropGongfaShard(rate: 1)
+    if (ok != true) {
+      ok = await grantGongfaShard(null)
+    }
+    if (ok != true) {
+      final money = kJiejiDungeonDrumBloodMoney
+      await Player.collect('money', money, incurIncident: false)
+      dialog.pushDialog('hint_jieji_dungeon_blooddrum_none', interpolations: ['${money}'])
+      await dialog.execute()
+    }
+  } else {
+    final herbCost = kJiejiDungeonDrumTapHerb
+    final herbHave = hero.materials['herb'] ?? 0
+    if (herbHave >= herbCost) {
+      Player.exhaust('herb', herbCost)
+    }
+    final healed = Player.restoreLife(kJiejiDungeonDrumTapLife)
+    game.flags.jieji ??= {}
+    if (game.flags.jieji.arrayFury != true) {
+      game.flags.jieji.arrayFury = true
+    } else {
+      game.flags.jieji.feastFury = true
+    }
+    dialog.pushDialog('hint_jieji_dungeon_tap', interpolations: ['${healed}'])
+    await dialog.execute()
+    if (jiejiDungeonSeasonId() == 'thunder') {
+      await tryDropGongfaShard(rate: kJiejiDungeonDrumTapGongfaRateThunder)
     }
   }
 }

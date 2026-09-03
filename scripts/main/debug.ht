@@ -277,6 +277,9 @@ namespace debug {
     } else if (kind == 'lamp') {
       game.flags.dungeon.pendingEncounter = 'jiejiLamp'
       await playJiejiDungeonEncounter()
+    } else if (kind == 'drum') {
+      game.flags.dungeon.pendingEncounter = 'jiejiDrum'
+      await playJiejiDungeonEncounter()
     } else if (kind == 'exit') {
       await playJiejiDungeonExitGift()
     } else {
