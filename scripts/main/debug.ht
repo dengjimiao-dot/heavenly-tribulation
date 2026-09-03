@@ -268,6 +268,9 @@ namespace debug {
     } else if (kind == 'mirror') {
       game.flags.dungeon.pendingEncounter = 'jiejiMirror'
       await playJiejiDungeonEncounter()
+    } else if (kind == 'lamp') {
+      game.flags.dungeon.pendingEncounter = 'jiejiLamp'
+      await playJiejiDungeonEncounter()
     } else if (kind == 'exit') {
       await playJiejiDungeonExitGift()
     } else {
