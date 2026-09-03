@@ -1,4 +1,4 @@
-/// 秘境劫季切片：营地天象、精英/Boss 染色、祭坛/匣/劫泉/伏击/试剑奇遇、出口劫礼。
+/// 秘境劫季切片：营地天象、精英/Boss 染色、祭坛/匣/劫泉/伏击/试剑/古钟奇遇、出口劫礼。
 /// 由 dungeon.ht 的 _prepareMap / onEnterMap / promptExit 小钩子调用。不改教程房布局。
 
 const kJiejiDungeonGuideCost = 80
@@ -42,6 +42,15 @@ const kJiejiDungeonTrialGongfaRate = 0.22
 const kJiejiDungeonTrialLoseLife = 5
 const kJiejiDungeonTrialWatchLife = 3
 const kJiejiDungeonTrialWatchHerbMist = 1
+const kJiejiDungeonBellStrikeLife = 5
+const kJiejiDungeonBellStrikeLifeThunder = 7
+const kJiejiDungeonBellStrikeBlankChance = 0.20
+const kJiejiDungeonBellListenMoney = 60
+const kJiejiDungeonBellListenHerbMist = 1
+const kJiejiDungeonBellBloodLife = 2
+const kJiejiDungeonBellBloodLifeBlood = 3
+const kJiejiDungeonBellBloodMoney = 120
+const kJiejiDungeonBellBloodGongfaRate = 0.20
 const kJiejiDungeonExitPackMoney = 80
 const kJiejiDungeonExitPackMoneyThunder = 120
 const kJiejiDungeonExitPackMoneyBlood = 100
@@ -203,6 +212,8 @@ async function playJiejiDungeonEncounter() {
     await playJiejiDungeonAmbush()
   } else if (kind == 'jiejiTrial') {
     await playJiejiDungeonTrial()
+  } else if (kind == 'jiejiBell') {
+    await playJiejiDungeonBell()
   }
   Game.updateUI()
 }
@@ -686,6 +697,60 @@ async function playJiejiDungeonTrial() {
     }
   } else {
     await _playJiejiDungeonTrialFight()
+  }
+}
+
+function jiejiDungeonBellStrikeLife() {
+  if (jiejiDungeonSeasonId() == 'thunder') return kJiejiDungeonBellStrikeLifeThunder
+  return kJiejiDungeonBellStrikeLife
+}
+
+function jiejiDungeonBellBloodLifeLoss() {
+  if (jiejiDungeonSeasonId() == 'blood') return kJiejiDungeonBellBloodLifeBlood
+  return kJiejiDungeonBellBloodLife
+}
+
+async function playJiejiDungeonBell() {
+  dialog.pushDialog('hint_jieji_dungeon_bell')
+  dialog.pushSelection('jiejiDungeonBell', [
+    'jieji_dungeon_strike',
+    'jieji_dungeon_listen',
+    'jieji_dungeon_blood',
+  ])
+  await dialog.execute()
+  final selected = dialog.checkSelected('jiejiDungeonBell')
+
+  if (selected == 'jieji_dungeon_listen') {
+    final money = kJiejiDungeonBellListenMoney
+    await Player.collect('money', money, incurIncident: false)
+    if (jiejiDungeonSeasonId() == 'mist') {
+      final herb = kJiejiDungeonBellListenHerbMist
+      await Player.collect('herb', herb, incurIncident: false)
+      dialog.pushDialog('hint_jieji_dungeon_listen_mist', interpolations: ['${money}', '${herb}'])
+      await dialog.execute()
+    } else {
+      dialog.pushDialog('hint_jieji_dungeon_listen', interpolations: ['${money}'])
+      await dialog.execute()
+    }
+  } else if (selected == 'jieji_dungeon_blood') {
+    final lost = jiejiDungeonClampLifeLoss(jiejiDungeonBellBloodLifeLoss())
+    if (lost > 0) {
+      Player.setLife(hero.life - lost)
+    }
+    final money = kJiejiDungeonBellBloodMoney
+    await Player.collect('money', money, incurIncident: false)
+    await tryDropGongfaShard(rate: kJiejiDungeonBellBloodGongfaRate)
+    dialog.pushDialog('hint_jieji_dungeon_blood', interpolations: ['${lost}', '${money}'])
+    await dialog.execute()
+  } else {
+    final healed = Player.restoreLife(jiejiDungeonBellStrikeLife())
+    if (random.nextDouble() < kJiejiDungeonBellStrikeBlankChance) {
+      jiejiDungeonGrantBlank()
+      dialog.pushDialog('hint_jieji_dungeon_strike_blank', interpolations: ['${healed}'])
+    } else {
+      dialog.pushDialog('hint_jieji_dungeon_strike', interpolations: ['${healed}'])
+    }
+    await dialog.execute()
   }
 }
 
