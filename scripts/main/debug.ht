@@ -161,4 +161,21 @@ namespace debug {
       await playJiejiThunderRoadEvent(terrain)
     }
   }
+
+  async function forceDungeonJieji(kind) {
+    game.flags.dungeon ??= {}
+    if (kind == 'encamp') {
+      game.flags.dungeon.pendingEncampOmen = true
+      await playJiejiDungeonEncampOmen()
+    } else if (kind == 'altar') {
+      game.flags.dungeon.pendingEncounter = 'jiejiAltar'
+      await playJiejiDungeonEncounter()
+    } else if (kind == 'cache') {
+      game.flags.dungeon.pendingEncounter = 'jiejiCache'
+      await playJiejiDungeonEncounter()
+    } else {
+      game.flags.dungeon.pendingEncampOmen = true
+      await playJiejiDungeonEncampOmen()
+    }
+  }
 }
