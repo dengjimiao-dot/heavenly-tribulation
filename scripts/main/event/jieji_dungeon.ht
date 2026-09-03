@@ -1,4 +1,4 @@
-/// 秘境劫季切片：营地天象、精英/Boss 染色、祭坛/匣/劫泉/伏击/试剑/古钟/残页/功法冢奇遇、出口劫礼。
+/// 秘境劫季切片：营地天象、精英/Boss 染色、祭坛/匣/劫泉/伏击/试剑/古钟/残页/功法冢/剑炉奇遇、出口劫礼。
 /// 由 dungeon.ht 的 _prepareMap / onEnterMap / promptExit 小钩子调用。不改教程房布局。
 
 const kJiejiDungeonGuideCost = 80
@@ -69,6 +69,15 @@ const kJiejiDungeonVaultLootGongfaRate = 0.20
 const kJiejiDungeonVaultSmearLife = 2
 const kJiejiDungeonVaultSmearLifeBlood = 3
 const kJiejiDungeonVaultSmearMoney = 80
+const kJiejiDungeonForgeQuenchMoney = 40
+const kJiejiDungeonForgeQuenchMoneyThunder = 20
+const kJiejiDungeonForgeQuenchLife = 4
+const kJiejiDungeonForgeQuenchGongfaRate = 0.25
+const kJiejiDungeonForgeBlankHerb = 1
+const kJiejiDungeonForgeBlankMistMoney = 20
+const kJiejiDungeonForgeBloodLife = 2
+const kJiejiDungeonForgeBloodLifeBlood = 3
+const kJiejiDungeonForgeBloodMoney = 60
 const kJiejiDungeonExitPackMoney = 80
 const kJiejiDungeonExitPackMoneyThunder = 120
 const kJiejiDungeonExitPackMoneyBlood = 100
@@ -236,6 +245,8 @@ async function playJiejiDungeonEncounter() {
     await playJiejiDungeonLeaf()
   } else if (kind == 'jiejiVault') {
     await playJiejiDungeonVault()
+  } else if (kind == 'jiejiForge') {
+    await playJiejiDungeonForge()
   }
   Game.updateUI()
 }
@@ -897,6 +908,88 @@ async function playJiejiDungeonVault() {
       final money = kJiejiDungeonVaultStudyMoney
       await Player.collect('money', money, incurIncident: false)
       dialog.pushDialog('hint_jieji_dungeon_scroll', interpolations: ['${money}'])
+      await dialog.execute()
+    }
+  }
+}
+
+function jiejiDungeonForgeQuenchMoney() {
+  if (jiejiDungeonSeasonId() == 'thunder') return kJiejiDungeonForgeQuenchMoneyThunder
+  return kJiejiDungeonForgeQuenchMoney
+}
+
+function jiejiDungeonForgeBloodLifeLoss() {
+  if (jiejiDungeonSeasonId() == 'blood') return kJiejiDungeonForgeBloodLifeBlood
+  return kJiejiDungeonForgeBloodLife
+}
+
+function jiejiDungeonForgeApplyFury() {
+  game.flags.jieji ??= {}
+  if (game.flags.jieji.arrayFury != true) {
+    game.flags.jieji.arrayFury = true
+  } else {
+    game.flags.jieji.feastFury = true
+  }
+}
+
+async function playJiejiDungeonForge() {
+  dialog.pushDialog('hint_jieji_dungeon_forge')
+  dialog.pushSelection('jiejiDungeonForge', [
+    'jieji_dungeon_temper',
+    'jieji_dungeon_blank',
+    'jieji_dungeon_bleed',
+  ])
+  await dialog.execute()
+  final selected = dialog.checkSelected('jiejiDungeonForge')
+
+  if (selected == 'jieji_dungeon_blank') {
+    final herbCost = kJiejiDungeonForgeBlankHerb
+    final herbHave = hero.materials['herb'] ?? 0
+    if (herbHave >= herbCost) {
+      Player.exhaust('herb', herbCost)
+      jiejiDungeonGrantBlank()
+      if (jiejiDungeonSeasonId() == 'mist') {
+        final money = kJiejiDungeonForgeBlankMistMoney
+        await Player.collect('money', money, incurIncident: false)
+        dialog.pushDialog('hint_jieji_dungeon_blank_mist', interpolations: ['${herbCost}', '${money}'])
+        await dialog.execute()
+      } else {
+        dialog.pushDialog('hint_jieji_dungeon_blank', interpolations: ['${herbCost}'])
+        await dialog.execute()
+      }
+    } else {
+      dialog.pushDialog('hint_jieji_dungeon_blank_broke', interpolations: ['${herbCost}'])
+      await dialog.execute()
+    }
+  } else if (selected == 'jieji_dungeon_bleed') {
+    final lost = jiejiDungeonClampLifeLoss(jiejiDungeonForgeBloodLifeLoss())
+    if (lost > 0) {
+      Player.setLife(hero.life - lost)
+    }
+    dialog.pushDialog('hint_jieji_dungeon_bleed', interpolations: ['${lost}'])
+    await dialog.execute()
+    var ok = await tryDropGongfaShard(rate: 1)
+    if (ok != true) {
+      ok = await grantGongfaShard(null)
+    }
+    if (ok != true) {
+      final money = kJiejiDungeonForgeBloodMoney
+      await Player.collect('money', money, incurIncident: false)
+      dialog.pushDialog('hint_jieji_dungeon_bleed_none', interpolations: ['${money}'])
+      await dialog.execute()
+    }
+  } else {
+    final cost = jiejiDungeonForgeQuenchMoney()
+    final moneyHave = hero.materials['money'] ?? 0
+    if (moneyHave >= cost) {
+      Player.exhaust('money', cost)
+      final healed = Player.restoreLife(kJiejiDungeonForgeQuenchLife)
+      jiejiDungeonForgeApplyFury()
+      dialog.pushDialog('hint_jieji_dungeon_temper', interpolations: ['${cost}', '${healed}'])
+      await dialog.execute()
+      await tryDropGongfaShard(rate: kJiejiDungeonForgeQuenchGongfaRate)
+    } else {
+      dialog.pushDialog('hint_jieji_dungeon_temper_broke', interpolations: ['${cost}'])
       await dialog.execute()
     }
   }
