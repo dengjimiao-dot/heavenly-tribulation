@@ -350,6 +350,17 @@ class LocationScene extends Scene with HasCursorState {
         };
         siteList.tryAddCard(brewCard);
         world.add(brewCard);
+        final tasteCard = GameData.createSiteCard(
+          spriteId: 'location/card/alchemylab.png',
+          title: engine.locale('tasteJiejiPotion'),
+          onPreviewed: _onPreviewSiteCard,
+          onUnpreviewed: _onUnpreviewSiteCard,
+        );
+        tasteCard.onTap = (button, position) async {
+          await GameLogic.heroTasteJiejiPotion(location);
+        };
+        siteList.tryAddCard(tasteCard);
+        world.add(tasteCard);
       case 'runelab':
         final siteCard = GameData.createSiteCard(
           spriteId: 'location/card/runelab.png',

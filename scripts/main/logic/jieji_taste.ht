@@ -1,0 +1,198 @@
+/// 丹房「试药」三选：清丸 / 雷丹 / 猛药。不替换炼丹成牌。
+const kJiejiTasteCooldownDays = 1
+const kJiejiTasteClearHerb = 2
+const kJiejiTasteClearHerbMist = 1
+const kJiejiTasteClearLife = 8
+const kJiejiTasteThunderHerb = 3
+const kJiejiTasteThunderMoney = 40
+const kJiejiTasteThunderMoneyThunder = 20
+const kJiejiTasteThunderLife = 5
+const kJiejiTasteRiskLife = 2
+const kJiejiTasteRiskLifeBlood = 3
+const kJiejiTasteRiskHeal = 12
+const kJiejiTasteRiskMoney = 80
+const kJiejiTasteRiskHealRate = 0.50
+
+function _jiejiTasteSeasonId() {
+  if (game.jieji != null && game.jieji.seasonId != null) {
+    return game.jieji.seasonId
+  }
+  return 'thunder'
+}
+
+function _jiejiTasteCurrentDay() {
+  if (game.timestamp == null) return null
+  if (Constants.ticksPerDay == null) return null
+  if (Constants.ticksPerDay <= 0) return null
+  return game.timestamp ~/ Constants.ticksPerDay
+}
+
+function _jiejiTasteOnCooldown() {
+  final jieji = ensureJiejiFlags()
+  final day = _jiejiTasteCurrentDay()
+  if (day == null) return false
+  if (jieji.lastTasteDay == null) return false
+  if (day - jieji.lastTasteDay < kJiejiTasteCooldownDays) return true
+  return false
+}
+
+function _jiejiTasteMark() {
+  final jieji = ensureJiejiFlags()
+  jieji.lastTasteDay = _jiejiTasteCurrentDay()
+}
+
+function _jiejiTasteCostLife(want) {
+  var lost = want
+  final life = hero.life ?? 1
+  if (life - lost < 1) lost = life - 1
+  if (lost < 0) lost = 0
+  if (lost > 0) {
+    Player.setLife(hero.life - lost)
+  }
+  return lost
+}
+
+function _jiejiTasteClearHerbCost(seasonId) {
+  if (seasonId == 'mist') return kJiejiTasteClearHerbMist
+  return kJiejiTasteClearHerb
+}
+
+function _jiejiTasteThunderMoneyCost(seasonId) {
+  if (seasonId == 'thunder') return kJiejiTasteThunderMoneyThunder
+  return kJiejiTasteThunderMoney
+}
+
+function _jiejiTasteRiskLifeCost(seasonId) {
+  if (seasonId == 'blood') return kJiejiTasteRiskLifeBlood
+  return kJiejiTasteRiskLife
+}
+
+function _jiejiTasteNormalizeKind(kind) {
+  if (kind == 'clear' || kind == 'jieji_taste_clear') return 'clear'
+  if (kind == 'thunder' || kind == 'jieji_taste_thunder') return 'thunder'
+  if (kind == 'risk' || kind == 'jieji_taste_risk') return 'risk'
+  return null
+}
+
+function _jiejiTasteChoices() {
+  return [
+    {
+      text: 'jieji_taste_clear',
+      description: 'hint_jieji_taste_clear',
+    },
+    {
+      text: 'jieji_taste_thunder',
+      description: 'hint_jieji_taste_thunder',
+    },
+    {
+      text: 'jieji_taste_risk',
+      description: 'hint_jieji_taste_risk',
+    },
+    'cancel',
+  ]
+}
+
+function _jiejiTasteHerbNeed(selected, seasonId) {
+  if (selected == 'clear') return _jiejiTasteClearHerbCost(seasonId)
+  if (selected == 'thunder') return kJiejiTasteThunderHerb
+  return 0
+}
+
+function _jiejiTasteMoneyNeed(selected, seasonId) {
+  if (selected == 'thunder') return _jiejiTasteThunderMoneyCost(seasonId)
+  return 0
+}
+
+/// 破军未挂则挂 arrayFury；已挂则挂 feastFury。两者都有则只回血。
+function _jiejiTasteApplyThunderFury() {
+  final jieji = ensureJiejiFlags()
+  if (jieji.arrayFury != true) {
+    jieji.arrayFury = true
+    return 'array'
+  }
+  if (jieji.feastFury != true) {
+    jieji.feastFury = true
+    return 'feast'
+  }
+  return null
+}
+
+/// 丹房试药三选。free 为 true 时不扣费、不检查冷却（debug），仍弹出三选。
+/// 返回 'ok' | 'cooldown' | 'poor' | 'cancel'。
+async function tasteJiejiPotion({ free = false }) {
+  if (hero == null) return 'cancel'
+  if (free != true && _jiejiTasteOnCooldown()) {
+    return 'cooldown'
+  }
+
+  dialog.pushDialog('hint_tasteJiejiPotion')
+  dialog.pushSelection('jiejiTaste', _jiejiTasteChoices())
+  await dialog.execute()
+  final picked = dialog.checkSelected('jiejiTaste')
+  var selected = null
+  if (picked == null || picked == 'cancel') {
+    if (free == true && picked == null) {
+      selected = 'clear'
+    } else {
+      return 'cancel'
+    }
+  } else {
+    selected = _jiejiTasteNormalizeKind(picked)
+  }
+  if (selected == null) return 'cancel'
+
+  final seasonId = _jiejiTasteSeasonId()
+  if (free != true) {
+    final herbNeed = _jiejiTasteHerbNeed(selected, seasonId)
+    final moneyNeed = _jiejiTasteMoneyNeed(selected, seasonId)
+    final herbHave = hero.materials['herb'] ?? 0
+    final moneyHave = hero.materials['money'] ?? 0
+    if (herbHave < herbNeed || moneyHave < moneyNeed) {
+      return 'poor'
+    }
+  }
+
+  if (free != true) {
+    final herbNeed = _jiejiTasteHerbNeed(selected, seasonId)
+    final moneyNeed = _jiejiTasteMoneyNeed(selected, seasonId)
+    if (herbNeed > 0) {
+      Player.exhaust('herb', herbNeed)
+    }
+    if (moneyNeed > 0) {
+      Player.exhaust('money', moneyNeed)
+    }
+    if (selected == 'risk') {
+      _jiejiTasteCostLife(_jiejiTasteRiskLifeCost(seasonId))
+    }
+    _jiejiTasteMark()
+  }
+
+  if (selected == 'thunder') {
+    Player.restoreLife(kJiejiTasteThunderLife)
+    final fury = _jiejiTasteApplyThunderFury()
+    if (fury == 'array') {
+      dialog.pushDialog('hint_tasteJiejiPotion_thunder_array')
+    } else if (fury == 'feast') {
+      dialog.pushDialog('hint_tasteJiejiPotion_thunder_feast')
+    } else {
+      dialog.pushDialog('hint_tasteJiejiPotion_thunder')
+    }
+    await dialog.execute()
+  } else if (selected == 'risk') {
+    if (random.nextDouble() < kJiejiTasteRiskHealRate) {
+      Player.restoreLife(kJiejiTasteRiskHeal)
+      dialog.pushDialog('hint_tasteJiejiPotion_risk_heal')
+    } else {
+      await Player.collect('money', kJiejiTasteRiskMoney, incurIncident: false)
+      dialog.pushDialog('hint_tasteJiejiPotion_risk_money')
+    }
+    await dialog.execute()
+  } else {
+    Player.restoreLife(kJiejiTasteClearLife)
+    dialog.pushDialog('hint_tasteJiejiPotion_clear')
+    await dialog.execute()
+  }
+
+  Game.updateUI()
+  return 'ok'
+}
