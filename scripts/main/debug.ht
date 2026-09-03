@@ -228,6 +228,8 @@ namespace debug {
       await playJiejiBladeEvent(terrain)
     } else if (kind == 'scroll') {
       await playJiejiScrollEvent(terrain)
+    } else if (kind == 'lantern') {
+      await playJiejiLanternEvent(terrain)
     } else {
       await playJiejiThunderRoadEvent(terrain)
     }
@@ -502,6 +504,11 @@ namespace debug {
   /// 忽略几率与冷却，仍弹出赶路劫纹残卷三选。
   async function forceScroll() {
     return await playJiejiScrollEvent({ kind: 'plain' })
+  }
+
+  /// 忽略几率与冷却，仍弹出赶路雾灯三选。
+  async function forceLantern() {
+    return await playJiejiLanternEvent({ kind: 'plain' })
   }
 
   /// 忽略费用与冷却，直接挂上迷障（下次野遇糊弄过去）。

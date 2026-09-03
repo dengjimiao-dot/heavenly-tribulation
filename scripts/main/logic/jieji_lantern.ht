@@ -1,0 +1,153 @@
+/// 赶路「雾灯」三选：随灯 / 摘灯 / 血灯。隐藏、劫兆、野遇、赶路、行商、拾荒、扎营、残锋、残卷都没中时才滚。
+const kJiejiLanternBaseRate = 0.07
+const kJiejiLanternMoveCooldown = 10
+const kJiejiLanternFollowHerb = 1
+const kJiejiLanternFollowLife = 4
+const kJiejiLanternTakeMoney = 20
+const kJiejiLanternTakeMoneyThunder = 10
+const kJiejiLanternTakeHerb = 2
+const kJiejiLanternTakeGongfaRate = 0.25
+const kJiejiLanternBloodLife = 2
+const kJiejiLanternBloodLifeBlood = 3
+const kJiejiLanternBloodGongfaRate = 0.5
+const kJiejiLanternBloodMoney = 40
+
+function _jiejiLanternSeasonId() {
+  if (game.jieji != null && game.jieji.seasonId != null) {
+    return game.jieji.seasonId
+  }
+  return null
+}
+
+function _jiejiLanternTutorialLocked() {
+  return game.enableTutorial && game.flags.tutorial.bountyQuest != true
+}
+
+function _jiejiLanternFollowHerbCost(seasonId) {
+  if (seasonId == 'mist') return 0
+  return kJiejiLanternFollowHerb
+}
+
+function _jiejiLanternTakeMoneyCost(seasonId) {
+  if (seasonId == 'thunder') return kJiejiLanternTakeMoneyThunder
+  return kJiejiLanternTakeMoney
+}
+
+function _jiejiLanternBloodLifeCost(seasonId) {
+  if (seasonId == 'blood') return kJiejiLanternBloodLifeBlood
+  return kJiejiLanternBloodLife
+}
+
+function _jiejiLanternCostLife(want) {
+  var lost = want
+  final life = hero.life ?? 1
+  if (life - lost < 1) lost = life - 1
+  if (lost < 0) lost = 0
+  if (lost > 0) {
+    Player.setLife(hero.life - lost)
+  }
+  return lost
+}
+
+function _jiejiLanternNormalizeKind(kind) {
+  if (kind == 'follow' || kind == 'jieji_lantern_follow') return 'follow'
+  if (kind == 'take' || kind == 'jieji_lantern_take') return 'take'
+  if (kind == 'blood' || kind == 'jieji_lantern_blood') return 'blood'
+  return null
+}
+
+function _jiejiLanternChoices() {
+  return [
+    {
+      text: 'jieji_lantern_follow',
+      description: 'hint_jieji_lantern_follow',
+    },
+    {
+      text: 'jieji_lantern_take',
+      description: 'hint_jieji_lantern_take',
+    },
+    {
+      text: 'jieji_lantern_blood',
+      description: 'hint_jieji_lantern_blood',
+    },
+  ]
+}
+
+/// 赶路雾灯三选。debug.forceJiejiEvent('lantern') / forceLantern 直接走这里，仍弹出三选。
+async function playJiejiLanternEvent(terrain) {
+  if (hero == null) return false
+
+  dialog.pushDialog('hint_jieji_lantern')
+  dialog.pushSelection('jiejiLantern', _jiejiLanternChoices())
+  await dialog.execute()
+  final picked = dialog.checkSelected('jiejiLantern')
+  var selected = _jiejiLanternNormalizeKind(picked)
+  if (selected == null) {
+    selected = 'follow'
+  }
+
+  final seasonId = _jiejiLanternSeasonId()
+  if (selected == 'follow') {
+    final herbNeed = _jiejiLanternFollowHerbCost(seasonId)
+    final herbHave = hero.materials['herb'] ?? 0
+    if (herbNeed > 0 && herbHave < herbNeed) {
+      dialog.pushDialog('hint_jieji_lantern_follow_broke', interpolations: [herbNeed])
+      await dialog.execute()
+    } else {
+      if (herbNeed > 0) {
+        Player.exhaust('herb', herbNeed)
+      }
+      final jieji = ensureJiejiFlags()
+      jieji.illusionVeil = true
+      final healed = Player.restoreLife(kJiejiLanternFollowLife)
+      dialog.pushDialog('hint_jieji_lantern_follow_ok', interpolations: [healed])
+      await dialog.execute()
+    }
+  } else if (selected == 'take') {
+    final moneyNeed = _jiejiLanternTakeMoneyCost(seasonId)
+    final moneyHave = hero.materials['money'] ?? 0
+    if (moneyHave < moneyNeed) {
+      dialog.pushDialog('hint_jieji_lantern_take_broke', interpolations: [moneyNeed])
+      await dialog.execute()
+    } else {
+      Player.exhaust('money', moneyNeed)
+      await Player.collect('herb', kJiejiLanternTakeHerb, incurIncident: false)
+      dialog.pushDialog('hint_jieji_lantern_take_ok', interpolations: [kJiejiLanternTakeHerb])
+      await dialog.execute()
+      await tryDropGongfaShard(rate: kJiejiLanternTakeGongfaRate)
+    }
+  } else {
+    final lost = _jiejiLanternCostLife(_jiejiLanternBloodLifeCost(seasonId))
+    dialog.pushDialog('hint_jieji_lantern_blood_ok', interpolations: [lost])
+    await dialog.execute()
+    final dropped = await tryDropGongfaShard(rate: kJiejiLanternBloodGongfaRate)
+    if (dropped != true) {
+      await Player.collect('money', kJiejiLanternBloodMoney, incurIncident: false)
+      dialog.pushDialog('hint_jieji_lantern_blood_none', interpolations: [kJiejiLanternBloodMoney])
+      await dialog.execute()
+    }
+    await grantKarmaCard('lantern')
+  }
+
+  Game.updateUI()
+  return true
+}
+
+/// 赶路触发：教程锁与路遇相同；冷却 10 步；约 7%。出过则返回 true。
+async function tryJiejiLanternOnMove(terrain) {
+  if (hero == null) return false
+  if (_jiejiLanternTutorialLocked()) return false
+
+  final jieji = ensureJiejiFlags()
+  final moves = jieji.worldMoves ?? 0
+  final last = jieji.lastLanternMove ?? -999
+  if (moves - last < kJiejiLanternMoveCooldown) return false
+
+  var rate = kJiejiLanternBaseRate
+  if (rate < 0) rate = 0
+  if (random.nextDouble() > rate) return false
+
+  jieji.lastLanternMove = moves
+  await playJiejiLanternEvent(terrain)
+  return true
+}
