@@ -249,6 +249,10 @@ namespace debug {
     return await riteJiejiHarvest(free: true)
   }
 
+  async function forceRest(kind) {
+    return await restJiejiSite(kind, free: true)
+  }
+
   /// 忽略几率与冷却，在当前地形开一场劫纹精英（未知则平原）。
   async function forceWildElite() {
     if (hero == null) return

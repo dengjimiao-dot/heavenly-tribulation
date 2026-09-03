@@ -1912,6 +1912,30 @@ Future<void> _heroRiteJiejiHarvest(dynamic location) async {
   }
 }
 
+Future<void> _heroRestJiejiSite(dynamic location) async {
+  final kind = location['kind'] == 'hotel' ? 'hotel' : 'home';
+  final result = await engine.hetu.invoke(
+    'restJiejiSite',
+    positionalArgs: [kind],
+  );
+  if (result == 'cooldown') {
+    dialog.pushDialog(
+      'hint_restJiejiSite_cooldown',
+      npcId: location['npcId'],
+    );
+    await dialog.execute();
+    return;
+  }
+  if (result == 'poor') {
+    dialog.pushDialog(
+      'hint_restJiejiSite_notEnough',
+      npcId: location['npcId'],
+    );
+    await dialog.execute();
+    return;
+  }
+}
+
 Future<void> _heroShowKarmaCodex(dynamic location) async {
   final text = engine.hetu.invoke('formatKarmaCodex');
   dialog.pushDialog(
@@ -1984,6 +2008,17 @@ Future<void> _onInteractSite(
       'text': 'recruitJiejiAid',
       'description': 'hint_recruitJiejiAid_description',
     });
+    if (siteKind == 'home') {
+      siteOptions.add({
+        'text': 'restJiejiSite',
+        'description': 'hint_restJiejiSite_description',
+      });
+    }
+  } else if (siteKind == 'hotel') {
+    siteOptions.add({
+      'text': 'restJiejiSite',
+      'description': 'hint_restJiejiSite_description',
+    });
   } else if (siteKind == 'divinationaltar') {
     siteOptions.add('divination');
   } else if (siteKind == 'arena') {
@@ -2048,6 +2083,8 @@ Future<void> _onInteractSite(
       await _heroConsultXianming(location);
     case 'riteJiejiHarvest':
       await _heroRiteJiejiHarvest(location);
+    case 'restJiejiSite':
+      await _heroRestJiejiSite(location);
     case 'about_dungeon':
       dialog.pushDialog(
         'hint_dungeonEntrance',

@@ -119,6 +119,20 @@ class LocationScene extends Scene with HasCursorState {
     world.add(recruitCard);
   }
 
+  void _addRestJiejiCard() {
+    final restCard = GameData.createSiteCard(
+      spriteId: 'location/card/bed.png',
+      title: engine.locale('restJiejiSite'),
+      onPreviewed: _onPreviewSiteCard,
+      onUnpreviewed: _onUnpreviewSiteCard,
+    );
+    restCard.onTap = (button, position) async {
+      await GameLogic.heroRestJiejiSite(location);
+    };
+    siteList.tryAddCard(restCard);
+    world.add(restCard);
+  }
+
   void _addVisitResidenceCard() {
     final visitCard = GameData.createSiteCard(
       spriteId: 'location/card/residence.png',
@@ -167,6 +181,7 @@ class LocationScene extends Scene with HasCursorState {
           siteList.tryAddCard(depositCard);
           world.add(depositCard);
           _addRecruitAidCard();
+          _addRestJiejiCard();
         }
       case 'residence':
         _addRecruitAidCard();
@@ -242,6 +257,7 @@ class LocationScene extends Scene with HasCursorState {
         };
         siteList.tryAddCard(siteCard);
         world.add(siteCard);
+        _addRestJiejiCard();
       case 'alchemylab':
         final siteCard = GameData.createSiteCard(
           spriteId: 'location/card/alchemylab.png',

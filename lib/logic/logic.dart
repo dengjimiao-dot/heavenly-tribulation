@@ -1698,6 +1698,9 @@ final class GameLogic {
   static Future<void> heroConsultXianming(dynamic location) =>
       _heroConsultXianming(location);
 
+  static Future<void> heroRestJiejiSite(dynamic location) =>
+      _heroRestJiejiSite(location);
+
   static void onInteractRunelabWorkbench({dynamic location}) =>
       _onInteractRunelabWorkbench(location: location);
 

@@ -1,0 +1,204 @@
+/// 歇息三选：家/酒楼当季短休。不另扣生机税；酒楼 40 铜钱，家免费。
+const kJiejiRestHotelMoney = 40
+const kJiejiRestWineHotel = 60
+const kJiejiRestWineHome = 30
+const kJiejiRestWineHerb = 2
+const kJiejiRestListenBlankRate = 0.30
+const kJiejiRestListenMoney = 50
+const kJiejiRestMeditateThunder = 8
+const kJiejiRestMeditateMist = 6
+const kJiejiRestMeditateBlood = 5
+const kJiejiRestBloodLife = 2
+const kJiejiRestCooldownDays = 1
+
+function _jiejiRestSeasonId() {
+  if (game.jieji != null && game.jieji.seasonId != null) {
+    return game.jieji.seasonId
+  }
+  return 'thunder'
+}
+
+function _jiejiRestKind(kind) {
+  if (kind == 'hotel') return 'hotel'
+  return 'home'
+}
+
+function _jiejiRestCurrentDay() {
+  if (game.timestamp == null) return null
+  if (Constants.ticksPerDay == null) return null
+  if (Constants.ticksPerDay <= 0) return null
+  return game.timestamp ~/ Constants.ticksPerDay
+}
+
+function _jiejiRestOnCooldown() {
+  final jieji = ensureJiejiFlags()
+  final day = _jiejiRestCurrentDay()
+  if (day == null) return false
+  if (jieji.lastRestDay == null) return false
+  if (day - jieji.lastRestDay < kJiejiRestCooldownDays) return true
+  return false
+}
+
+function _jiejiRestMark() {
+  final jieji = ensureJiejiFlags()
+  jieji.lastRestDay = _jiejiRestCurrentDay()
+}
+
+function _jiejiRestCostLife(want) {
+  var lost = want
+  final life = hero.life ?? 1
+  if (life - lost < 1) lost = life - 1
+  if (lost < 0) lost = 0
+  if (lost > 0) {
+    Player.setLife(hero.life - lost)
+  }
+  return lost
+}
+
+function _jiejiRestGrantBlank() {
+  final card = BattleCard(rank: 0)
+  card.isCardBlank = true
+  Player.acquireCard(card)
+  return card
+}
+
+function _jiejiRestMeditateAmount(seasonId) {
+  if (seasonId == 'mist') return kJiejiRestMeditateMist
+  if (seasonId == 'blood') return kJiejiRestMeditateBlood
+  return kJiejiRestMeditateThunder
+}
+
+function _jiejiRestWineCost(kind) {
+  if (kind == 'hotel') return kJiejiRestWineHotel
+  return kJiejiRestWineHome
+}
+
+function _jiejiRestActionCost(selected, kind) {
+  if (selected == 'jieji_rest_wine') return _jiejiRestWineCost(kind)
+  if (kind == 'hotel') return kJiejiRestHotelMoney
+  return 0
+}
+
+function _jiejiRestChoices(seasonId, kind) {
+  if (seasonId == 'mist') {
+    var wineDesc = 'hint_jieji_rest_wine_home'
+    if (kind == 'hotel') wineDesc = 'hint_jieji_rest_wine_hotel'
+    return [
+      {
+        text: 'jieji_rest_meditate',
+        description: 'hint_jieji_rest_meditate_mist',
+      },
+      {
+        text: 'jieji_rest_wine',
+        description: wineDesc,
+      },
+      'jieji_rest_leave',
+    ]
+  }
+  if (seasonId == 'blood') {
+    return [
+      {
+        text: 'jieji_rest_meditate',
+        description: 'hint_jieji_rest_meditate_blood',
+      },
+      {
+        text: 'jieji_rest_bloodwine',
+        description: 'hint_jieji_rest_bloodwine',
+      },
+      'jieji_rest_leave',
+    ]
+  }
+  return [
+    {
+      text: 'jieji_rest_meditate',
+      description: 'hint_jieji_rest_meditate_thunder',
+    },
+    {
+      text: 'jieji_rest_listen',
+      description: 'hint_jieji_rest_listen',
+    },
+    'jieji_rest_leave',
+  ]
+}
+
+/// 家/酒楼歇息三选。free 为 true 时不扣费、不检查冷却（debug）。
+/// 返回 'ok' | 'cooldown' | 'poor' | 'cancel'。
+async function restJiejiSite(kind, { free = false }) {
+  if (hero == null) return 'cancel'
+  final restKind = _jiejiRestKind(kind)
+  if (free != true && _jiejiRestOnCooldown()) {
+    return 'cooldown'
+  }
+
+  final seasonId = _jiejiRestSeasonId()
+  var introKey = 'hint_restJiejiSite_thunder'
+  if (seasonId == 'mist') introKey = 'hint_restJiejiSite_mist'
+  if (seasonId == 'blood') introKey = 'hint_restJiejiSite_blood'
+  dialog.pushDialog(introKey)
+  dialog.pushSelection('jiejiRest', _jiejiRestChoices(seasonId, restKind))
+  await dialog.execute()
+  var selected = dialog.checkSelected('jiejiRest')
+  if (selected == null || selected == 'cancel' || selected == 'jieji_rest_leave') {
+    if (free == true && selected == null) {
+      selected = 'jieji_rest_meditate'
+    } else {
+      return 'cancel'
+    }
+  }
+
+  if (free != true) {
+    final moneyNeed = _jiejiRestActionCost(selected, restKind)
+    if (moneyNeed > 0) {
+      final moneyHave = hero.materials['money'] ?? 0
+      if (moneyHave < moneyNeed) {
+        return 'poor'
+      }
+    }
+  }
+
+  if (free != true) {
+    final moneyNeed = _jiejiRestActionCost(selected, restKind)
+    if (moneyNeed > 0) {
+      Player.exhaust('money', moneyNeed)
+    }
+    if (selected == 'jieji_rest_bloodwine') {
+      _jiejiRestCostLife(kJiejiRestBloodLife)
+    }
+    await Game.updateGame(tick: Constants.ticksPerDay)
+    _jiejiRestMark()
+  }
+
+  var resultKey = 'hint_restJiejiSite_meditate_thunder'
+  if (selected == 'jieji_rest_listen') {
+    if (random.nextDouble() < kJiejiRestListenBlankRate) {
+      _jiejiRestGrantBlank()
+      resultKey = 'hint_restJiejiSite_listen_blank'
+    } else {
+      await Player.collect('money', kJiejiRestListenMoney, incurIncident: false)
+      resultKey = 'hint_restJiejiSite_listen_money'
+    }
+  } else if (selected == 'jieji_rest_wine') {
+    if (hero.life < hero.stats.lifeMax) {
+      Player.rejuvenate()
+      resultKey = 'hint_restJiejiSite_wine_full'
+    } else {
+      await Player.collect('herb', kJiejiRestWineHerb, incurIncident: false)
+      resultKey = 'hint_restJiejiSite_wine_herb'
+    }
+  } else if (selected == 'jieji_rest_bloodwine') {
+    final jieji = ensureJiejiFlags()
+    jieji.restBloodFury = true
+    resultKey = 'hint_restJiejiSite_bloodwine'
+  } else {
+    final heal = _jiejiRestMeditateAmount(seasonId)
+    Player.restoreLife(heal)
+    resultKey = 'hint_restJiejiSite_meditate_thunder'
+    if (seasonId == 'mist') resultKey = 'hint_restJiejiSite_meditate_mist'
+    if (seasonId == 'blood') resultKey = 'hint_restJiejiSite_meditate_blood'
+  }
+
+  dialog.pushDialog(resultKey)
+  await dialog.execute()
+  Game.updateUI()
+  return 'ok'
+}

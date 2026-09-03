@@ -20,6 +20,9 @@ final class SeasonLogic {
   /// trySettleJieji 正在执行，防止重入。
   static bool settlementInFlight = false;
 
+  /// 血酒：本场英雄造成伤害 +0.06。开战时从 flags.jieji.restBloodFury 锁入，打完清掉。
+  static bool restBloodFuryThisFight = false;
+
   static int get dayIndexInYear {
     // month/day are 1-based after calculateTimestamp
     return (GameLogic.month - 1) * 30 + GameLogic.day;
@@ -382,6 +385,36 @@ final class SeasonLogic {
     if (selfIsHero && holdsGongfa('gongfa_guard')) {
       damageDetails['percentageChange3'] -= 0.06;
     }
+    if (!selfIsHero) {
+      if (!restBloodFuryThisFight) {
+        try {
+          final jieji = _jiejiFlags();
+          if (jieji != null && jieji['restBloodFury'] == true) {
+            restBloodFuryThisFight = true;
+            jieji['restBloodFury'] = false;
+          }
+        } catch (_) {}
+      }
+      if (restBloodFuryThisFight) {
+        damageDetails['percentageChange3'] += 0.06;
+      }
+    }
+  }
+
+  static void beginRestBloodFuryFight() {
+    restBloodFuryThisFight = false;
+    try {
+      final jieji = _jiejiFlags();
+      if (jieji == null) return;
+      if (jieji['restBloodFury'] == true) {
+        restBloodFuryThisFight = true;
+        jieji['restBloodFury'] = false;
+      }
+    } catch (_) {}
+  }
+
+  static void endRestBloodFuryFight() {
+    restBloodFuryThisFight = false;
   }
 
   static String hudLine() {

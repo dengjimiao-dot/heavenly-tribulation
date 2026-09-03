@@ -631,6 +631,9 @@ class BattleScene extends Scene {
     battleStarted = true;
     battleEnded = false;
     battleResult = null;
+    if (!isPractice) {
+      SeasonLogic.beginRestBloodFuryFight();
+    }
     hero.reset();
     enemy.reset();
 
@@ -1140,6 +1143,9 @@ class BattleScene extends Scene {
   Future<void> _onBattleEnd() async {
     battleEnded = true;
     endButton.isVisible = true;
+    if (!isPractice) {
+      SeasonLogic.endRestBloodFuryFight();
+    }
 
     if (battleResult == true) {
       victoryPrompt.isVisible = true;
