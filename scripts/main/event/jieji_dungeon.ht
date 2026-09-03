@@ -1,4 +1,4 @@
-/// 秘境劫季切片：营地天象、精英/Boss 染色、祭坛/匣/劫泉/伏击/试剑/古钟/残页奇遇、出口劫礼。
+/// 秘境劫季切片：营地天象、精英/Boss 染色、祭坛/匣/劫泉/伏击/试剑/古钟/残页/功法冢奇遇、出口劫礼。
 /// 由 dungeon.ht 的 _prepareMap / onEnterMap / promptExit 小钩子调用。不改教程房布局。
 
 const kJiejiDungeonGuideCost = 80
@@ -59,6 +59,16 @@ const kJiejiDungeonLeafTakeHerb = 2
 const kJiejiDungeonLeafTakeHerbMist = 3
 const kJiejiDungeonLeafSmearLife = 2
 const kJiejiDungeonLeafSmearLifeBlood = 3
+const kJiejiDungeonVaultStudyHerb = 1
+const kJiejiDungeonVaultStudyGongfaRate = 0.50
+const kJiejiDungeonVaultStudyGongfaRateThunder = 0.70
+const kJiejiDungeonVaultStudyMoney = 40
+const kJiejiDungeonVaultLootHerb = 2
+const kJiejiDungeonVaultLootHerbMist = 3
+const kJiejiDungeonVaultLootGongfaRate = 0.20
+const kJiejiDungeonVaultSmearLife = 2
+const kJiejiDungeonVaultSmearLifeBlood = 3
+const kJiejiDungeonVaultSmearMoney = 80
 const kJiejiDungeonExitPackMoney = 80
 const kJiejiDungeonExitPackMoneyThunder = 120
 const kJiejiDungeonExitPackMoneyBlood = 100
@@ -224,6 +234,8 @@ async function playJiejiDungeonEncounter() {
     await playJiejiDungeonBell()
   } else if (kind == 'jiejiLeaf') {
     await playJiejiDungeonLeaf()
+  } else if (kind == 'jiejiVault') {
+    await playJiejiDungeonVault()
   }
   Game.updateUI()
 }
@@ -819,6 +831,72 @@ async function playJiejiDungeonLeaf() {
       final money = kJiejiDungeonLeafStudyMoney
       await Player.collect('money', money, incurIncident: false)
       dialog.pushDialog('hint_jieji_dungeon_study', interpolations: ['${money}'])
+      await dialog.execute()
+    }
+  }
+}
+
+function jiejiDungeonVaultStudyGongfaRate() {
+  if (jiejiDungeonSeasonId() == 'thunder') return kJiejiDungeonVaultStudyGongfaRateThunder
+  return kJiejiDungeonVaultStudyGongfaRate
+}
+
+function jiejiDungeonVaultLootHerb() {
+  if (jiejiDungeonSeasonId() == 'mist') return kJiejiDungeonVaultLootHerbMist
+  return kJiejiDungeonVaultLootHerb
+}
+
+function jiejiDungeonVaultSmearLifeLoss() {
+  if (jiejiDungeonSeasonId() == 'blood') return kJiejiDungeonVaultSmearLifeBlood
+  return kJiejiDungeonVaultSmearLife
+}
+
+async function playJiejiDungeonVault() {
+  dialog.pushDialog('hint_jieji_dungeon_vault')
+  dialog.pushSelection('jiejiDungeonVault', [
+    'jieji_dungeon_scroll',
+    'jieji_dungeon_loot',
+    'jieji_dungeon_seal',
+  ])
+  await dialog.execute()
+  final selected = dialog.checkSelected('jiejiDungeonVault')
+
+  if (selected == 'jieji_dungeon_loot') {
+    final herb = jiejiDungeonVaultLootHerb()
+    await Player.collect('herb', herb, incurIncident: false)
+    dialog.pushDialog('hint_jieji_dungeon_loot', interpolations: ['${herb}'])
+    await dialog.execute()
+    await tryDropGongfaShard(rate: kJiejiDungeonVaultLootGongfaRate)
+  } else if (selected == 'jieji_dungeon_seal') {
+    final lost = jiejiDungeonClampLifeLoss(jiejiDungeonVaultSmearLifeLoss())
+    if (lost > 0) {
+      Player.setLife(hero.life - lost)
+    }
+    dialog.pushDialog('hint_jieji_dungeon_seal', interpolations: ['${lost}'])
+    await dialog.execute()
+    var ok = await tryDropGongfaShard(rate: 1)
+    if (ok != true) {
+      ok = await grantGongfaShard(null)
+    }
+    if (ok != true) {
+      final money = kJiejiDungeonVaultSmearMoney
+      await Player.collect('money', money, incurIncident: false)
+      dialog.pushDialog('hint_jieji_dungeon_seal_none', interpolations: ['${money}'])
+      await dialog.execute()
+    }
+  } else {
+    final herbHave = hero.materials['herb'] ?? 0
+    if (herbHave >= kJiejiDungeonVaultStudyHerb) {
+      Player.exhaust('herb', kJiejiDungeonVaultStudyHerb)
+    }
+    var dropped = false
+    if (random.nextDouble() < jiejiDungeonVaultStudyGongfaRate()) {
+      dropped = await tryDropGongfaShard(rate: 1)
+    }
+    if (dropped != true) {
+      final money = kJiejiDungeonVaultStudyMoney
+      await Player.collect('money', money, incurIncident: false)
+      dialog.pushDialog('hint_jieji_dungeon_scroll', interpolations: ['${money}'])
       await dialog.execute()
     }
   }

@@ -2817,6 +2817,10 @@ Future<void> _onInteractSite(
     });
   } else if (siteKind == 'dungeon') {
     siteOptions.add('about_dungeon');
+    siteOptions.add({
+      'text': 'visitJiejiTomb',
+      'description': 'hint_visitJiejiTomb_description',
+    });
   }
   siteOptions.add('cancel');
 
