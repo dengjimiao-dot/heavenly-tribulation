@@ -2118,6 +2118,51 @@ Future<void> _heroBidJiejiBlackLot(dynamic location) async {
   }
 }
 
+
+Future<void> _heroSparkJiejiEnchant(dynamic location) async {
+  final isRented = await GameLogic.checkRented(location);
+  if (!isRented) return;
+
+  final result = await engine.hetu.invoke('sparkJiejiEnchant');
+  if (result == 'cooldown') {
+    dialog.pushDialog(
+      'hint_sparkJiejiEnchant_cooldown',
+      npcId: location['npcId'],
+    );
+    await dialog.execute();
+    return;
+  }
+  if (result == 'poor') {
+    var herbCost = 2;
+    var moneyCost = 80;
+    var lifeCost = 1;
+    try {
+      final costs = engine.hetu.invoke('jiejiEnchantCosts');
+      if (costs != null) {
+        herbCost = (costs['herb'] as num?)?.toInt() ?? herbCost;
+        moneyCost = (costs['money'] as num?)?.toInt() ?? moneyCost;
+        lifeCost = (costs['life'] as num?)?.toInt() ?? lifeCost;
+      }
+    } catch (_) {}
+    dialog.pushDialog(
+      'hint_sparkJiejiEnchant_notEnough',
+      npcId: location['npcId'],
+      interpolations: [herbCost, moneyCost, lifeCost],
+    );
+    await dialog.execute();
+    return;
+  }
+  if (result == 'empty') {
+    dialog.pushDialog(
+      'hint_sparkJiejiEnchant_empty',
+      npcId: location['npcId'],
+    );
+    await dialog.execute();
+    return;
+  }
+}
+
+
 Future<void> _heroShowKarmaCodex(dynamic location) async {
   final text = engine.hetu.invoke('formatKarmaCodex');
   dialog.pushDialog(
@@ -2180,6 +2225,11 @@ Future<void> _onInteractSite(
     siteOptions.add({
       'text': 'karmaCodex',
       'description': 'hint_karmaCodex_description',
+    });
+  } else if (siteKind == 'enchantshop') {
+    siteOptions.add({
+      'text': 'sparkJiejiEnchant',
+      'description': 'hint_sparkJiejiEnchant_description',
     });
   } else if (siteKind == 'alchemylab') {
     siteOptions.add({
@@ -2276,6 +2326,8 @@ Future<void> _onInteractSite(
       await _heroForgeCardBlank(location, advanced: true);
     case 'karmaCodex':
       await _heroShowKarmaCodex(location);
+    case 'sparkJiejiEnchant':
+      await _heroSparkJiejiEnchant(location);
     case 'brewPotionCard':
       await _heroBrewPotionCard(location);
     case 'scribeJiejiTalisman':

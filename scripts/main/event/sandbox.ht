@@ -8,6 +8,7 @@ async function onNewGame() {
   ensureHomeFarmland()
   ensureHomeDivinationAltar()
   ensureHomeAuction()
+  ensureHomeEnchantShop()
   final xitong = game.npcs['xitong']
 
   // final itemsInfo = [

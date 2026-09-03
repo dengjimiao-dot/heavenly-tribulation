@@ -275,6 +275,15 @@ namespace debug {
     return await bidJiejiBlackLot(free: true)
   }
 
+  async function forceEnchantSpark() {
+    final result = await sparkJiejiEnchant(free: true)
+    if (result == 'empty') {
+      dialog.pushDialog('hint_sparkJiejiEnchant_empty')
+      await dialog.execute()
+    }
+    return result
+  }
+
   /// 忽略几率与冷却，在当前地形开一场劫纹精英（未知则平原）。
   async function forceWildElite() {
     if (hero == null) return

@@ -1,0 +1,184 @@
+/// 灌灵池「点化」：给牌库里一张牌胚或成牌必出火花词缀。不替换原灌灵 UI。
+const kJiejiEnchantHerbCost = 2
+const kJiejiEnchantMoneyCost = 80
+const kJiejiEnchantLifeCost = 1
+const kJiejiEnchantHerbCostMist = 1
+const kJiejiEnchantHerbCostBlood = 3
+const kJiejiEnchantMoneyCostThunder = 50
+const kJiejiEnchantCooldownDays = 1
+
+function _jiejiEnchantSeasonId() {
+  if (game.jieji != null && game.jieji.seasonId != null) {
+    return game.jieji.seasonId
+  }
+  return null
+}
+
+function jiejiEnchantCosts() {
+  var herb = kJiejiEnchantHerbCost
+  var money = kJiejiEnchantMoneyCost
+  var life = kJiejiEnchantLifeCost
+  final seasonId = _jiejiEnchantSeasonId()
+  if (seasonId == 'thunder') {
+    money = kJiejiEnchantMoneyCostThunder
+  } else if (seasonId == 'mist') {
+    herb = kJiejiEnchantHerbCostMist
+  } else if (seasonId == 'blood') {
+    herb = kJiejiEnchantHerbCostBlood
+  }
+  return {
+    herb: herb,
+    money: money,
+    life: life,
+  }
+}
+
+function ensureHomeEnchantShop() {
+  if (hero == null) return
+  final city = getHeroHomeCity()
+  if (city == null) return
+  final siteIds = city.siteIds ?? []
+  for (final siteId in siteIds) {
+    final site = game.locations[siteId]
+    if (site != null && site.kind == kLocationKindEnchantShop) return
+  }
+  Location(
+    category: 'site',
+    kind: kLocationKindEnchantShop,
+    atCity: city,
+    sectId: city.sectId,
+    development: 0,
+    npcId: Constants.siteKindToNpcId[kLocationKindEnchantShop],
+  )
+}
+
+function _jiejiEnchantCurrentDay() {
+  if (game.timestamp == null) return null
+  if (Constants.ticksPerDay == null) return null
+  if (Constants.ticksPerDay <= 0) return null
+  return game.timestamp ~/ Constants.ticksPerDay
+}
+
+function _jiejiEnchantOnCooldown() {
+  final jieji = ensureJiejiFlags()
+  final day = _jiejiEnchantCurrentDay()
+  if (day == null) return false
+  if (jieji.lastEnchantDay == null) return false
+  if (day - jieji.lastEnchantDay < kJiejiEnchantCooldownDays) return true
+  return false
+}
+
+function _jiejiEnchantMark() {
+  final jieji = ensureJiejiFlags()
+  jieji.lastEnchantDay = _jiejiEnchantCurrentDay()
+}
+
+function _jiejiEnchantPickBlank() {
+  if (hero == null) return null
+  if (hero.cardLibrary == null) return null
+  let pool = []
+  for (final card in hero.cardLibrary.values) {
+    if (card == null) continue
+    if (card.isCardBlank == true) {
+      pool.add(card)
+    }
+  }
+  if (pool.isEmpty) return null
+  return random.nextIterable(pool)
+}
+
+function _jiejiEnchantPickFinished() {
+  if (hero == null) return null
+  if (hero.cardLibrary == null) return null
+  let pool = []
+  for (final card in hero.cardLibrary.values) {
+    if (card == null) continue
+    if (card.isCardBlank == true) continue
+    if (card.isKarma == true) continue
+    pool.add(card)
+  }
+  if (pool.isEmpty) return null
+  return random.nextIterable(pool)
+}
+
+function _jiejiEnchantChoices() {
+  return [
+    {
+      text: 'jieji_enchant_blank',
+      description: 'hint_jieji_enchant_blank',
+    },
+    {
+      text: 'jieji_enchant_card',
+      description: 'hint_jieji_enchant_card',
+    },
+    'jieji_enchant_leave',
+  ]
+}
+
+function _jiejiEnchantSpark(card) {
+  if (card == null) return null
+  jiejiTryForgeSpark(card, 1.0)
+  var sparkName = card.jiejiSparkName
+  if (sparkName == null || sparkName == '') {
+    sparkName = engine.locale('jieji_forge_spark_mystery')
+  }
+  return sparkName
+}
+
+/// 灌灵池点化三选。free 为 true 时不扣费、不检查冷却（debug）。
+/// 返回 'ok' | 'cooldown' | 'poor' | 'empty' | 'cancel'。
+async function sparkJiejiEnchant({ free = false }) {
+  if (hero == null) return 'cancel'
+  if (free != true && _jiejiEnchantOnCooldown()) {
+    return 'cooldown'
+  }
+
+  if (free != true) {
+    final costs = jiejiEnchantCosts()
+    final herbHave = hero.materials['herb'] ?? 0
+    final moneyHave = hero.materials['money'] ?? 0
+    if (herbHave < costs.herb || moneyHave < costs.money) {
+      return 'poor'
+    }
+  }
+
+  dialog.pushDialog('hint_sparkJiejiEnchant')
+  dialog.pushSelection('jiejiEnchant', _jiejiEnchantChoices())
+  await dialog.execute()
+  var selected = dialog.checkSelected('jiejiEnchant')
+  if (selected == null || selected == 'cancel' || selected == 'jieji_enchant_leave') {
+    if (free == true && selected == null) {
+      selected = 'jieji_enchant_blank'
+    } else {
+      return 'cancel'
+    }
+  }
+
+  var card = null
+  if (selected == 'jieji_enchant_blank') {
+    card = _jiejiEnchantPickBlank()
+  } else if (selected == 'jieji_enchant_card') {
+    card = _jiejiEnchantPickFinished()
+  } else {
+    return 'cancel'
+  }
+  if (card == null) {
+    return 'empty'
+  }
+
+  if (free != true) {
+    final costs = jiejiEnchantCosts()
+    Player.exhaust('herb', costs.herb)
+    Player.exhaust('money', costs.money)
+    var nextLife = (hero.life ?? 1) - (costs.life ?? kJiejiEnchantLifeCost)
+    if (nextLife < 1) nextLife = 1
+    Player.setLife(nextLife)
+    _jiejiEnchantMark()
+  }
+
+  final sparkName = _jiejiEnchantSpark(card)
+  dialog.pushDialog('hint_sparkJiejiEnchant_done', interpolations: [sparkName])
+  await dialog.execute()
+  Game.updateUI()
+  return 'ok'
+}
