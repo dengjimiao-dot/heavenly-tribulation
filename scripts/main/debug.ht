@@ -447,6 +447,11 @@ namespace debug {
     return await insightJiejiStele(free: true)
   }
 
+  /// 忽略冷却与花费，仍弹出问道碑夜碑三选。
+  async function forceWatch() {
+    return await watchJiejiStele(free: true)
+  }
+
   async function forceSwapGoods() {
     return await swapJiejiGoods(free: true)
   }

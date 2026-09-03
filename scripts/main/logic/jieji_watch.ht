@@ -1,0 +1,196 @@
+/// 问道碑「夜碑」：温碑 / 借杀 / 血拓。不替换悟道。
+const kJiejiWatchCooldownDays = 1
+const kJiejiWatchWarmHerb = 1
+const kJiejiWatchWarmHerbMist = 0
+const kJiejiWatchWarmLife = 6
+const kJiejiWatchBorrowMoney = 40
+const kJiejiWatchBorrowMoneyThunder = 20
+const kJiejiWatchBorrowLife = 4
+const kJiejiWatchBloodLife = 2
+const kJiejiWatchBloodLifeBlood = 3
+const kJiejiWatchBloodGongfaRate = 0.35
+const kJiejiWatchBloodMoney = 40
+
+function _jiejiWatchSeasonId() {
+  if (game.jieji != null && game.jieji.seasonId != null) {
+    return game.jieji.seasonId
+  }
+  return null
+}
+
+function _jiejiWatchCurrentDay() {
+  if (game.timestamp == null) return null
+  if (Constants.ticksPerDay == null) return null
+  if (Constants.ticksPerDay <= 0) return null
+  return game.timestamp ~/ Constants.ticksPerDay
+}
+
+function _jiejiWatchOnCooldown() {
+  final jieji = ensureJiejiFlags()
+  final day = _jiejiWatchCurrentDay()
+  if (day == null) return false
+  if (jieji.lastWatchDay == null) return false
+  if (day - jieji.lastWatchDay < kJiejiWatchCooldownDays) return true
+  return false
+}
+
+function _jiejiWatchMark() {
+  final jieji = ensureJiejiFlags()
+  jieji.lastWatchDay = _jiejiWatchCurrentDay()
+}
+
+function _jiejiWatchCostLife(want) {
+  var lost = want
+  final life = hero.life ?? 1
+  if (life - lost < 1) lost = life - 1
+  if (lost < 0) lost = 0
+  if (lost > 0) {
+    Player.setLife(hero.life - lost)
+  }
+  return lost
+}
+
+function _jiejiWatchWarmHerbCost(seasonId) {
+  if (seasonId == 'mist') return kJiejiWatchWarmHerbMist
+  return kJiejiWatchWarmHerb
+}
+
+function _jiejiWatchBorrowMoneyCost(seasonId) {
+  if (seasonId == 'thunder') return kJiejiWatchBorrowMoneyThunder
+  return kJiejiWatchBorrowMoney
+}
+
+function _jiejiWatchBloodLifeCost(seasonId) {
+  if (seasonId == 'blood') return kJiejiWatchBloodLifeBlood
+  return kJiejiWatchBloodLife
+}
+
+function _jiejiWatchNormalizeKind(kind) {
+  if (kind == 'warm' || kind == 'jieji_watch_warm') return 'warm'
+  if (kind == 'borrow' || kind == 'jieji_watch_borrow') return 'borrow'
+  if (kind == 'blood' || kind == 'jieji_watch_blood') return 'blood'
+  return null
+}
+
+function _jiejiWatchChoices() {
+  return [
+    {
+      text: 'jieji_watch_warm',
+      description: 'hint_jieji_watch_warm',
+    },
+    {
+      text: 'jieji_watch_borrow',
+      description: 'hint_jieji_watch_borrow',
+    },
+    {
+      text: 'jieji_watch_blood',
+      description: 'hint_jieji_watch_blood',
+    },
+    'cancel',
+  ]
+}
+
+function _jiejiWatchHerbNeed(selected, seasonId) {
+  if (selected == 'warm') return _jiejiWatchWarmHerbCost(seasonId)
+  return 0
+}
+
+function _jiejiWatchMoneyNeed(selected, seasonId) {
+  if (selected == 'borrow') return _jiejiWatchBorrowMoneyCost(seasonId)
+  return 0
+}
+
+/// 破军未挂则挂 arrayFury；已挂则挂 feastFury。两者都有则只回血。不退护身阵。
+function _jiejiWatchApplyBorrow() {
+  final jieji = ensureJiejiFlags()
+  if (jieji.arrayFury != true) {
+    jieji.arrayFury = true
+    return 'array'
+  }
+  if (jieji.feastFury != true) {
+    jieji.feastFury = true
+    return 'feast'
+  }
+  return null
+}
+
+/// 问道碑夜碑三选。free 为 true 时不扣费、不检查冷却（debug），仍弹出三选。
+/// 返回 'ok' | 'cooldown' | 'poor' | 'cancel'。
+async function watchJiejiStele({ free = false }) {
+  if (hero == null) return 'cancel'
+  if (free != true && _jiejiWatchOnCooldown()) {
+    return 'cooldown'
+  }
+
+  dialog.pushDialog('hint_watchJiejiStele')
+  dialog.pushSelection('jiejiWatch', _jiejiWatchChoices())
+  await dialog.execute()
+  final picked = dialog.checkSelected('jiejiWatch')
+  var selected = null
+  if (picked == null || picked == 'cancel') {
+    if (free == true && picked == null) {
+      selected = 'warm'
+    } else {
+      return 'cancel'
+    }
+  } else {
+    selected = _jiejiWatchNormalizeKind(picked)
+  }
+  if (selected == null) return 'cancel'
+
+  final seasonId = _jiejiWatchSeasonId()
+  if (free != true) {
+    final herbNeed = _jiejiWatchHerbNeed(selected, seasonId)
+    final moneyNeed = _jiejiWatchMoneyNeed(selected, seasonId)
+    final herbHave = hero.materials['herb'] ?? 0
+    final moneyHave = hero.materials['money'] ?? 0
+    if (herbHave < herbNeed || moneyHave < moneyNeed) {
+      return 'poor'
+    }
+  }
+
+  if (free != true) {
+    final herbNeed = _jiejiWatchHerbNeed(selected, seasonId)
+    final moneyNeed = _jiejiWatchMoneyNeed(selected, seasonId)
+    if (herbNeed > 0) {
+      Player.exhaust('herb', herbNeed)
+    }
+    if (moneyNeed > 0) {
+      Player.exhaust('money', moneyNeed)
+    }
+    if (selected == 'blood') {
+      _jiejiWatchCostLife(_jiejiWatchBloodLifeCost(seasonId))
+    }
+    _jiejiWatchMark()
+  }
+
+  if (selected == 'borrow') {
+    final borrow = _jiejiWatchApplyBorrow()
+    if (borrow == 'array') {
+      dialog.pushDialog('hint_watchJiejiStele_borrow_array')
+    } else if (borrow == 'feast') {
+      dialog.pushDialog('hint_watchJiejiStele_borrow_feast')
+    } else {
+      Player.restoreLife(kJiejiWatchBorrowLife)
+      dialog.pushDialog('hint_watchJiejiStele_borrow_life')
+    }
+    await dialog.execute()
+  } else if (selected == 'blood') {
+    final dropped = await tryDropGongfaShard(rate: kJiejiWatchBloodGongfaRate)
+    if (dropped != true) {
+      await Player.collect('money', kJiejiWatchBloodMoney, incurIncident: false)
+      dialog.pushDialog('hint_watchJiejiStele_blood_money')
+      await dialog.execute()
+    } else {
+      dialog.pushDialog('hint_watchJiejiStele_blood')
+      await dialog.execute()
+    }
+  } else {
+    Player.restoreLife(kJiejiWatchWarmLife)
+    dialog.pushDialog('hint_watchJiejiStele_warm')
+    await dialog.execute()
+  }
+
+  Game.updateUI()
+  return 'ok'
+}
