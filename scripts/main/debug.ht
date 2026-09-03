@@ -470,6 +470,11 @@ namespace debug {
     return await assayJiejiBlank(free: true)
   }
 
+  /// 忽略冷却与花费，仍弹出客栈劫宵三选。
+  async function forceNight() {
+    return await nightJiejiHotel(free: true)
+  }
+
   async function forceArray(kind) {
     var k = kind
     if (k != 'ward' && k != 'fury' && k != 'mist') {

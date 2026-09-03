@@ -1,0 +1,175 @@
+/// 客栈「劫宵」三选：温宵 / 听宵 / 血宵。仅客栈；不替换歇脚与劫宴。
+const kJiejiNightCooldownDays = 1
+const kJiejiNightWarmHerb = 1
+const kJiejiNightWarmHerbMist = 0
+const kJiejiNightWarmLife = 8
+const kJiejiNightListenMoney = 40
+const kJiejiNightListenMoneyThunder = 20
+const kJiejiNightBloodLife = 2
+const kJiejiNightBloodLifeBlood = 3
+const kJiejiNightBloodGongfaRate = 0.30
+const kJiejiNightBloodMoney = 40
+
+function _jiejiNightSeasonId() {
+  if (game.jieji != null && game.jieji.seasonId != null) {
+    return game.jieji.seasonId
+  }
+  return null
+}
+
+function _jiejiNightCurrentDay() {
+  if (game.timestamp == null) return null
+  if (Constants.ticksPerDay == null) return null
+  if (Constants.ticksPerDay <= 0) return null
+  return game.timestamp ~/ Constants.ticksPerDay
+}
+
+function _jiejiNightOnCooldown() {
+  final jieji = ensureJiejiFlags()
+  final day = _jiejiNightCurrentDay()
+  if (day == null) return false
+  if (jieji.lastNightDay == null) return false
+  if (day - jieji.lastNightDay < kJiejiNightCooldownDays) return true
+  return false
+}
+
+function _jiejiNightMark() {
+  final jieji = ensureJiejiFlags()
+  jieji.lastNightDay = _jiejiNightCurrentDay()
+}
+
+function _jiejiNightCostLife(want) {
+  var lost = want
+  final life = hero.life ?? 1
+  if (life - lost < 1) lost = life - 1
+  if (lost < 0) lost = 0
+  if (lost > 0) {
+    Player.setLife(hero.life - lost)
+  }
+  return lost
+}
+
+function _jiejiNightWarmHerbCost(seasonId) {
+  if (seasonId == 'mist') return kJiejiNightWarmHerbMist
+  return kJiejiNightWarmHerb
+}
+
+function _jiejiNightListenMoneyCost(seasonId) {
+  if (seasonId == 'thunder') return kJiejiNightListenMoneyThunder
+  return kJiejiNightListenMoney
+}
+
+function _jiejiNightBloodLifeCost(seasonId) {
+  if (seasonId == 'blood') return kJiejiNightBloodLifeBlood
+  return kJiejiNightBloodLife
+}
+
+function _jiejiNightNormalizeKind(kind) {
+  if (kind == 'warm' || kind == 'jieji_night_warm') return 'warm'
+  if (kind == 'listen' || kind == 'jieji_night_listen') return 'listen'
+  if (kind == 'blood' || kind == 'jieji_night_blood') return 'blood'
+  return null
+}
+
+function _jiejiNightChoices() {
+  return [
+    {
+      text: 'jieji_night_warm',
+      description: 'hint_jieji_night_warm',
+    },
+    {
+      text: 'jieji_night_listen',
+      description: 'hint_jieji_night_listen',
+    },
+    {
+      text: 'jieji_night_blood',
+      description: 'hint_jieji_night_blood',
+    },
+    'cancel',
+  ]
+}
+
+function _jiejiNightHerbNeed(selected, seasonId) {
+  if (selected == 'warm') return _jiejiNightWarmHerbCost(seasonId)
+  return 0
+}
+
+function _jiejiNightMoneyNeed(selected, seasonId) {
+  if (selected == 'listen') return _jiejiNightListenMoneyCost(seasonId)
+  return 0
+}
+
+/// 客栈劫宵三选。free 为 true 时不扣费、不检查冷却（debug），仍弹出三选。
+/// 返回 'ok' | 'cooldown' | 'poor' | 'cancel'。
+async function nightJiejiHotel({ free = false }) {
+  if (hero == null) return 'cancel'
+  if (free != true && _jiejiNightOnCooldown()) {
+    return 'cooldown'
+  }
+
+  dialog.pushDialog('hint_nightJiejiHotel')
+  dialog.pushSelection('jiejiNight', _jiejiNightChoices())
+  await dialog.execute()
+  final picked = dialog.checkSelected('jiejiNight')
+  var selected = null
+  if (picked == null || picked == 'cancel') {
+    if (free == true && picked == null) {
+      selected = 'warm'
+    } else {
+      return 'cancel'
+    }
+  } else {
+    selected = _jiejiNightNormalizeKind(picked)
+  }
+  if (selected == null) return 'cancel'
+
+  final seasonId = _jiejiNightSeasonId()
+  if (free != true) {
+    final herbNeed = _jiejiNightHerbNeed(selected, seasonId)
+    final moneyNeed = _jiejiNightMoneyNeed(selected, seasonId)
+    final herbHave = hero.materials['herb'] ?? 0
+    final moneyHave = hero.materials['money'] ?? 0
+    if (herbHave < herbNeed || moneyHave < moneyNeed) {
+      return 'poor'
+    }
+  }
+
+  if (free != true) {
+    final herbNeed = _jiejiNightHerbNeed(selected, seasonId)
+    final moneyNeed = _jiejiNightMoneyNeed(selected, seasonId)
+    if (herbNeed > 0) {
+      Player.exhaust('herb', herbNeed)
+    }
+    if (moneyNeed > 0) {
+      Player.exhaust('money', moneyNeed)
+    }
+    if (selected == 'blood') {
+      _jiejiNightCostLife(_jiejiNightBloodLifeCost(seasonId))
+    }
+    _jiejiNightMark()
+  }
+
+  if (selected == 'listen') {
+    final jieji = ensureJiejiFlags()
+    jieji.illusionVeil = true
+    dialog.pushDialog('hint_nightJiejiHotel_listen')
+    await dialog.execute()
+  } else if (selected == 'blood') {
+    final dropped = await tryDropGongfaShard(rate: kJiejiNightBloodGongfaRate)
+    if (dropped != true) {
+      await Player.collect('money', kJiejiNightBloodMoney, incurIncident: false)
+      dialog.pushDialog('hint_nightJiejiHotel_blood_money')
+      await dialog.execute()
+    } else {
+      dialog.pushDialog('hint_nightJiejiHotel_blood')
+      await dialog.execute()
+    }
+  } else {
+    Player.restoreLife(kJiejiNightWarmLife)
+    dialog.pushDialog('hint_nightJiejiHotel_warm')
+    await dialog.execute()
+  }
+
+  Game.updateUI()
+  return 'ok'
+}
