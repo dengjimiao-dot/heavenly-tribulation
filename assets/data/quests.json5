@@ -83,5 +83,21 @@
     contribution: 14,
     rank: 1,
   },
+  hidden_gongfa_cache: {
+    id: "hidden_gongfa_cache",
+    policy: null,
+    isBounty: false,
+    isHidden: true,
+    contribution: 13,
+    rank: 0,
+  },
+  hidden_herb_grove: {
+    id: "hidden_herb_grove",
+    policy: null,
+    isBounty: false,
+    isHidden: true,
+    contribution: 11,
+    rank: 0,
+  },
 
 }

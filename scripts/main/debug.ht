@@ -148,6 +148,37 @@ namespace debug {
     }
   }
 
+  async function forceHiddenQuest(kind) {
+    if (hero == null) return false
+    final fromSite = game.locations[hero.homeLocationId] ?? game.locations[hero.homeSiteId]
+    if (fromSite == null) return false
+    var questKind = 'hidden_gongfa_cache'
+    if (kind == 'grove') {
+      questKind = 'hidden_herb_grove'
+    }
+    final ctor = Quests[questKind]
+    if (ctor == null) return false
+    final quest = ctor(fromSite, difficulty: 0)
+    if (quest == null) return false
+    game.flags.jieji ??= {}
+    game.flags.jieji.firstHiddenSpawned = true
+    final journal = Player.createJournalByQuest(quest)
+    final kindKey = 'quest_' + quest.kind
+    var where = ''
+    if (quest.interpolations != null && quest.interpolations.isNotEmpty) {
+      where = quest.interpolations[0]
+    }
+    dialog.pushDialog('quest_hidden_rumor', interpolations: [
+      engine.locale(kindKey),
+      where,
+    ])
+    await dialog.execute()
+    if (journal != null) {
+      await Game.promptJournal(journal)
+    }
+    return true
+  }
+
   async function forceJiejiEvent(kind) {
     game.flags.jieji ??= {}
     final terrain = { kind: 'plain' }

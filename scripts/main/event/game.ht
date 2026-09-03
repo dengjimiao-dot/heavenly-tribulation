@@ -414,6 +414,53 @@ async function onAfterEnterLocation(location) -> bool {
           )
           return true
         }
+        case 'hidden_gongfa_cache': {
+          if (isLate) {
+            Player.progressJournalById(journal.id, stage: 2)
+            dialog.pushDialog('quest_hidden_late_failed', interpolations: [journal.title])
+            await dialog.execute()
+          } else {
+            Player.progressJournalById(journal.id)
+            var locName = ''
+            final loc = game.locations[journal.quest.targetLocationId]
+            if (loc != null) {
+              locName = loc.name
+            }
+            dialog.pushDialog('quest_hidden_gongfa_cache_complete', interpolations: [
+              journal.title,
+              locName,
+            ])
+            await dialog.execute()
+            final items = await Player.loot(journal.quest.reward)
+            Game.promptItems(items)
+            await grantGongfaShard(null)
+            await grantJiejiHiddenQuestExtra('gongfa')
+          }
+          return true
+        }
+        case 'hidden_herb_grove': {
+          if (isLate) {
+            Player.progressJournalById(journal.id, stage: 2)
+            dialog.pushDialog('quest_hidden_late_failed', interpolations: [journal.title])
+            await dialog.execute()
+          } else {
+            Player.progressJournalById(journal.id)
+            var locName = ''
+            final loc = game.locations[journal.quest.targetLocationId]
+            if (loc != null) {
+              locName = loc.name
+            }
+            dialog.pushDialog('quest_hidden_herb_grove_complete', interpolations: [
+              journal.title,
+              locName,
+            ])
+            await dialog.execute()
+            final items = await Player.loot(journal.quest.reward)
+            Game.promptItems(items)
+            await grantJiejiHiddenQuestExtra('grove')
+          }
+          return true
+        }
       }
     }
   }
@@ -495,5 +542,35 @@ async function grantJiejiHiddenQuestExtra(kind) {
     await Player.collect('money', 120, incurIncident: false)
     dialog.pushDialog('hint_jieji_blood_extra')
     await dialog.execute()
+    return
+  }
+  if (kind == 'gongfa') {
+    if (seasonId == 'thunder') {
+      await Player.collect('money', 40, incurIncident: false)
+      dialog.pushDialog('hint_jieji_gongfa_cache_extra_money')
+      await dialog.execute()
+    } else if (seasonId == 'blood') {
+      if (random.nextDouble() < 0.15) {
+        await grantKarmaCard('shrine')
+        dialog.pushDialog('hint_jieji_gongfa_cache_extra_karma')
+        await dialog.execute()
+      }
+    }
+    return
+  }
+  if (kind == 'grove') {
+    if (seasonId == 'mist') {
+      await Player.collect('herb', 2, incurIncident: false)
+      dialog.pushDialog('hint_jieji_grove_extra')
+      await dialog.execute()
+    } else if (seasonId == 'thunder') {
+      if (random.nextDouble() < 0.2) {
+        final card = BattleCard(rank: 0)
+        card.isCardBlank = true
+        Player.acquireCard(card)
+        dialog.pushDialog('hint_jieji_grove_extra_blank')
+        await dialog.execute()
+      }
+    }
   }
 }
