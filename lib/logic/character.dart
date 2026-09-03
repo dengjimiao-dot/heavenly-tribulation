@@ -1907,6 +1907,28 @@ Future<void> _heroScribeJiejiTalisman(dynamic location) async {
   }
 }
 
+Future<void> _heroPasteJiejiTalisman(dynamic location) async {
+  final isRented = await GameLogic.checkRented(location);
+  if (!isRented) return;
+
+  final result = await engine.hetu.invoke('pasteJiejiTalisman');
+  if (result == 'cooldown') {
+    dialog.pushDialog(
+      'hint_pasteJiejiTalisman_cooldown',
+      npcId: location['npcId'],
+    );
+    await dialog.execute();
+    return;
+  }
+  if (result == 'poor') {
+    dialog.pushDialog(
+      'hint_pasteJiejiTalisman_notEnough',
+      npcId: location['npcId'],
+    );
+    await dialog.execute();
+    return;
+  }
+}
 
 Future<void> _heroRecruitJiejiAid(dynamic location) async {
   final isRented = await GameLogic.checkRented(location);
@@ -2660,6 +2682,10 @@ Future<void> _onInteractSite(
       'text': 'scribeJiejiTalisman',
       'description': 'hint_scribeJiejiTalisman_description',
     });
+    siteOptions.add({
+      'text': 'pasteJiejiTalisman',
+      'description': 'hint_pasteJiejiTalisman_description',
+    });
   } else if (siteKind == 'library') {
     siteOptions.add({
       'text': 'consultXianming',
@@ -2823,6 +2849,8 @@ Future<void> _onInteractSite(
       await _heroTasteJiejiPotion(location);
     case 'scribeJiejiTalisman':
       await _heroScribeJiejiTalisman(location);
+    case 'pasteJiejiTalisman':
+      await _heroPasteJiejiTalisman(location);
     case 'recruitJiejiAid':
       await _heroRecruitJiejiAid(location);
     case 'patrolJiejiResidence':

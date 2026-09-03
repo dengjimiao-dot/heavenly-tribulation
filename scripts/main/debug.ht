@@ -287,6 +287,11 @@ namespace debug {
     return card
   }
 
+  /// 忽略冷却与花费，仍弹出符法所贴符三选。
+  async function forcePaste() {
+    return await pasteJiejiTalisman(free: true)
+  }
+
   async function forceRecruitAid(genre) {
     final result = recruitJiejiAid(genre, free: true)
     if (result == null || result == 'cooldown') {

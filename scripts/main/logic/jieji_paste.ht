@@ -1,0 +1,191 @@
+/// 符法所「贴符」三选：护符 / 遁符 / 血符。不替换抄符成牌。
+const kJiejiPasteCooldownDays = 1
+const kJiejiPasteWardHerb = 2
+const kJiejiPasteWardMoney = 40
+const kJiejiPasteWardMoneyThunder = 20
+const kJiejiPasteFleeHerb = 1
+const kJiejiPasteFleeHerbMist = 0
+const kJiejiPasteBloodLife = 2
+const kJiejiPasteBloodLifeBlood = 3
+const kJiejiPasteBloodHeal = 6
+const kJiejiPasteBloodGongfaRate = 0.20
+
+function _jiejiPasteSeasonId() {
+  if (game.jieji != null && game.jieji.seasonId != null) {
+    return game.jieji.seasonId
+  }
+  return null
+}
+
+function _jiejiPasteCurrentDay() {
+  if (game.timestamp == null) return null
+  if (Constants.ticksPerDay == null) return null
+  if (Constants.ticksPerDay <= 0) return null
+  return game.timestamp ~/ Constants.ticksPerDay
+}
+
+function _jiejiPasteOnCooldown() {
+  final jieji = ensureJiejiFlags()
+  final day = _jiejiPasteCurrentDay()
+  if (day == null) return false
+  if (jieji.lastPasteDay == null) return false
+  if (day - jieji.lastPasteDay < kJiejiPasteCooldownDays) return true
+  return false
+}
+
+function _jiejiPasteMark() {
+  final jieji = ensureJiejiFlags()
+  jieji.lastPasteDay = _jiejiPasteCurrentDay()
+}
+
+function _jiejiPasteCostLife(want) {
+  var lost = want
+  final life = hero.life ?? 1
+  if (life - lost < 1) lost = life - 1
+  if (lost < 0) lost = 0
+  if (lost > 0) {
+    Player.setLife(hero.life - lost)
+  }
+  return lost
+}
+
+function _jiejiPasteWardMoneyCost(seasonId) {
+  if (seasonId == 'thunder') return kJiejiPasteWardMoneyThunder
+  return kJiejiPasteWardMoney
+}
+
+function _jiejiPasteFleeHerbCost(seasonId) {
+  if (seasonId == 'mist') return kJiejiPasteFleeHerbMist
+  return kJiejiPasteFleeHerb
+}
+
+function _jiejiPasteBloodLifeCost(seasonId) {
+  if (seasonId == 'blood') return kJiejiPasteBloodLifeBlood
+  return kJiejiPasteBloodLife
+}
+
+function _jiejiPasteNormalizeKind(kind) {
+  if (kind == 'ward' || kind == 'jieji_paste_ward') return 'ward'
+  if (kind == 'flee' || kind == 'jieji_paste_flee') return 'flee'
+  if (kind == 'blood' || kind == 'jieji_paste_blood') return 'blood'
+  return null
+}
+
+function _jiejiPasteChoices() {
+  return [
+    {
+      text: 'jieji_paste_ward',
+      description: 'hint_jieji_paste_ward',
+    },
+    {
+      text: 'jieji_paste_flee',
+      description: 'hint_jieji_paste_flee',
+    },
+    {
+      text: 'jieji_paste_blood',
+      description: 'hint_jieji_paste_blood',
+    },
+    'cancel',
+  ]
+}
+
+function _jiejiPasteHerbNeed(selected, seasonId) {
+  if (selected == 'ward') return kJiejiPasteWardHerb
+  if (selected == 'flee') return _jiejiPasteFleeHerbCost(seasonId)
+  return 0
+}
+
+function _jiejiPasteMoneyNeed(selected, seasonId) {
+  if (selected == 'ward') return _jiejiPasteWardMoneyCost(seasonId)
+  return 0
+}
+
+/// 护身阵未挂则挂 arrayWard；已挂则挂 theurgyWard。两者都有则只贴符。
+function _jiejiPasteApplyWard() {
+  final jieji = ensureJiejiFlags()
+  if (jieji.arrayWard != true) {
+    jieji.arrayWard = true
+    return 'array'
+  }
+  if (jieji.theurgyWard != true) {
+    jieji.theurgyWard = true
+    return 'theurgy'
+  }
+  return null
+}
+
+/// 符法所贴符三选。free 为 true 时不扣费、不检查冷却（debug），仍弹出三选。
+/// 返回 'ok' | 'cooldown' | 'poor' | 'cancel'。
+async function pasteJiejiTalisman({ free = false }) {
+  if (hero == null) return 'cancel'
+  if (free != true && _jiejiPasteOnCooldown()) {
+    return 'cooldown'
+  }
+
+  dialog.pushDialog('hint_pasteJiejiTalisman')
+  dialog.pushSelection('jiejiPaste', _jiejiPasteChoices())
+  await dialog.execute()
+  final picked = dialog.checkSelected('jiejiPaste')
+  var selected = null
+  if (picked == null || picked == 'cancel') {
+    if (free == true && picked == null) {
+      selected = 'ward'
+    } else {
+      return 'cancel'
+    }
+  } else {
+    selected = _jiejiPasteNormalizeKind(picked)
+  }
+  if (selected == null) return 'cancel'
+
+  final seasonId = _jiejiPasteSeasonId()
+  if (free != true) {
+    final herbNeed = _jiejiPasteHerbNeed(selected, seasonId)
+    final moneyNeed = _jiejiPasteMoneyNeed(selected, seasonId)
+    final herbHave = hero.materials['herb'] ?? 0
+    final moneyHave = hero.materials['money'] ?? 0
+    if (herbHave < herbNeed || moneyHave < moneyNeed) {
+      return 'poor'
+    }
+  }
+
+  if (free != true) {
+    final herbNeed = _jiejiPasteHerbNeed(selected, seasonId)
+    final moneyNeed = _jiejiPasteMoneyNeed(selected, seasonId)
+    if (herbNeed > 0) {
+      Player.exhaust('herb', herbNeed)
+    }
+    if (moneyNeed > 0) {
+      Player.exhaust('money', moneyNeed)
+    }
+    if (selected == 'blood') {
+      _jiejiPasteCostLife(_jiejiPasteBloodLifeCost(seasonId))
+    }
+    _jiejiPasteMark()
+  }
+
+  if (selected == 'flee') {
+    final jieji = ensureJiejiFlags()
+    jieji.illusionVeil = true
+    dialog.pushDialog('hint_pasteJiejiTalisman_flee')
+    await dialog.execute()
+  } else if (selected == 'blood') {
+    Player.restoreLife(kJiejiPasteBloodHeal)
+    dialog.pushDialog('hint_pasteJiejiTalisman_blood')
+    await dialog.execute()
+    await tryDropGongfaShard(rate: kJiejiPasteBloodGongfaRate)
+  } else {
+    final ward = _jiejiPasteApplyWard()
+    if (ward == 'array') {
+      dialog.pushDialog('hint_pasteJiejiTalisman_ward')
+    } else if (ward == 'theurgy') {
+      dialog.pushDialog('hint_pasteJiejiTalisman_ward_theurgy')
+    } else {
+      dialog.pushDialog('hint_pasteJiejiTalisman_ward_already')
+    }
+    await dialog.execute()
+  }
+
+  Game.updateUI()
+  return 'ok'
+}
