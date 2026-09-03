@@ -1,4 +1,4 @@
-/// 秘境劫季切片：营地天象、精英/Boss 染色、祭坛/匣/劫泉/伏击奇遇。
+/// 秘境劫季切片：营地天象、精英/Boss 染色、祭坛/匣/劫泉/伏击/试剑奇遇。
 /// 由 dungeon.ht 的 _prepareMap / onEnterMap 小钩子调用。不改教程房布局。
 
 const kJiejiDungeonGuideCost = 80
@@ -32,6 +32,16 @@ const kJiejiDungeonAmbushGongfaRate = 0.15
 const kJiejiDungeonAmbushLoseLife = 4
 const kJiejiDungeonAmbushDetourLife = 3
 const kJiejiDungeonAmbushDetourHerbMist = 1
+const kJiejiDungeonTrialOfferMoney = 60
+const kJiejiDungeonTrialOfferMoneyMist = 40
+const kJiejiDungeonTrialOfferHerb = 2
+const kJiejiDungeonTrialOfferLifeBlood = 2
+const kJiejiDungeonTrialWinMoneyMin = 90
+const kJiejiDungeonTrialWinMoneySpan = 71
+const kJiejiDungeonTrialGongfaRate = 0.22
+const kJiejiDungeonTrialLoseLife = 5
+const kJiejiDungeonTrialWatchLife = 3
+const kJiejiDungeonTrialWatchHerbMist = 1
 
 function jiejiDungeonEnsureFlags() {
   game.flags.dungeon ??= {}
@@ -183,6 +193,8 @@ async function playJiejiDungeonEncounter() {
     await playJiejiDungeonSpring()
   } else if (kind == 'jiejiAmbush') {
     await playJiejiDungeonAmbush()
+  } else if (kind == 'jiejiTrial') {
+    await playJiejiDungeonTrial()
   }
   Game.updateUI()
 }
@@ -540,3 +552,132 @@ async function playJiejiDungeonAmbush() {
     await _playJiejiDungeonAmbushFight()
   }
 }
+
+function jiejiDungeonTrialOfferMoney() {
+  if (jiejiDungeonSeasonId() == 'mist') return kJiejiDungeonTrialOfferMoneyMist
+  return kJiejiDungeonTrialOfferMoney
+}
+
+function _jiejiDungeonTrialFoeRank() {
+  var rank = hero.rank ?? 0
+  if (rank < kCultivationRankMax) {
+    rank = rank + 1
+  }
+  if (jiejiDungeonSeasonId() == 'blood' && rank < kCultivationRankMax) {
+    rank = rank + 1
+  }
+  return rank
+}
+
+function _jiejiDungeonTrialFoeLevel(rank) {
+  final minLevel = minLevelForRank(rank)
+  final maxLevel = maxLevelForRank(rank)
+  var level = (hero.level ?? 1) + 2 + random.nextInt(4)
+  if (level < minLevel) level = minLevel
+  if (level > maxLevel) level = maxLevel
+  return level
+}
+
+async function _playJiejiDungeonTrialFight() {
+  final rank = _jiejiDungeonTrialFoeRank()
+  final level = _jiejiDungeonTrialFoeLevel(rank)
+  final enemy = BattleEntity(name: engine.locale('jieji_dungeon_trial_foe'), rank: rank, level: level)
+
+  Game.updateUI()
+  Game.showPrebattle(enemy,
+    background: 'battle/scene/dungeon_night.png',
+    loseOnEscape: true,
+    onBattleEnd: async function [onJiejiDungeonTrialEnd] (result, roundCount) {
+      if (result) {
+        final money = kJiejiDungeonTrialWinMoneyMin + random.nextInt(kJiejiDungeonTrialWinMoneySpan)
+        await Player.collect('money', money, incurIncident: false)
+        jiejiDungeonGrantBlank()
+        await tryDropGongfaShard(rate: kJiejiDungeonTrialGongfaRate)
+        if (jiejiDungeonSeasonId() == 'thunder') {
+          dialog.pushDialog('hint_jieji_dungeon_duel_win_thunder', interpolations: ['${money}'])
+        } else {
+          dialog.pushDialog('hint_jieji_dungeon_duel_win', interpolations: ['${money}'])
+        }
+        await dialog.execute()
+      } else {
+        final lost = jiejiDungeonClampLifeLoss(kJiejiDungeonTrialLoseLife)
+        if (lost > 0) {
+          Player.setLife(hero.life - lost)
+        }
+        dialog.pushDialog('hint_jieji_dungeon_duel_lose', interpolations: ['${lost}'])
+        await dialog.execute()
+      }
+      Game.updateUI()
+    }
+  )
+}
+
+async function _playJiejiDungeonTrialOffer() {
+  final seasonId = jiejiDungeonSeasonId()
+  if (seasonId == 'blood') {
+    final lost = jiejiDungeonClampLifeLoss(kJiejiDungeonTrialOfferLifeBlood)
+    if (lost > 0) {
+      Player.setLife(hero.life - lost)
+    }
+    jiejiDungeonGrantBlank()
+    dialog.pushDialog('hint_jieji_dungeon_offer_blade_blood', interpolations: ['${lost}'])
+    await dialog.execute()
+    if (random.nextDouble() < 0.25 + jiejiKarmaChanceBonus()) {
+      await grantKarmaCard(jiejiDungeonKarmaSource())
+    }
+    return
+  }
+
+  final moneyCost = jiejiDungeonTrialOfferMoney()
+  final herbHave = hero.materials['herb'] ?? 0
+  final moneyHave = hero.materials['money'] ?? 0
+  if (seasonId == 'mist' && herbHave >= kJiejiDungeonTrialOfferHerb) {
+    final herbCost = kJiejiDungeonTrialOfferHerb
+    Player.exhaust('herb', herbCost)
+    jiejiDungeonGrantBlank()
+    dialog.pushDialog('hint_jieji_dungeon_offer_blade_herb', interpolations: ['${herbCost}'])
+    await dialog.execute()
+    return
+  }
+  if (moneyHave >= moneyCost) {
+    Player.exhaust('money', moneyCost)
+    jiejiDungeonGrantBlank()
+    final dungeon = jiejiDungeonEnsureFlags()
+    dungeon.jiejiLootBonus = true
+    dialog.pushDialog('hint_jieji_dungeon_offer_blade_money', interpolations: ['${moneyCost}'])
+    await dialog.execute()
+    return
+  }
+  dialog.pushDialog('hint_jieji_dungeon_offer_blade_broke')
+  await dialog.execute()
+  await _playJiejiDungeonTrialFight()
+}
+
+async function playJiejiDungeonTrial() {
+  dialog.pushDialog('hint_jieji_dungeon_trial')
+  dialog.pushSelection('jiejiDungeonTrial', [
+    'jieji_dungeon_duel',
+    'jieji_dungeon_offer_blade',
+    'jieji_dungeon_watch',
+  ])
+  await dialog.execute()
+  final selected = dialog.checkSelected('jiejiDungeonTrial')
+
+  if (selected == 'jieji_dungeon_offer_blade') {
+    await _playJiejiDungeonTrialOffer()
+  } else if (selected == 'jieji_dungeon_watch') {
+    final healed = Player.restoreLife(kJiejiDungeonTrialWatchLife)
+    if (jiejiDungeonSeasonId() == 'mist') {
+      final herb = kJiejiDungeonTrialWatchHerbMist
+      await Player.collect('herb', herb, incurIncident: false)
+      dialog.pushDialog('hint_jieji_dungeon_watch_mist', interpolations: ['${healed}', '${herb}'])
+      await dialog.execute()
+    } else {
+      dialog.pushDialog('hint_jieji_dungeon_watch', interpolations: ['${healed}'])
+      await dialog.execute()
+    }
+  } else {
+    await _playJiejiDungeonTrialFight()
+  }
+}
+

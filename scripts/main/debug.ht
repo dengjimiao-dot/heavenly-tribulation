@@ -228,6 +228,9 @@ namespace debug {
     } else if (kind == 'ambush') {
       game.flags.dungeon.pendingEncounter = 'jiejiAmbush'
       await playJiejiDungeonEncounter()
+    } else if (kind == 'trial') {
+      game.flags.dungeon.pendingEncounter = 'jiejiTrial'
+      await playJiejiDungeonEncounter()
     } else {
       game.flags.dungeon.pendingEncampOmen = true
       await playJiejiDungeonEncampOmen()
