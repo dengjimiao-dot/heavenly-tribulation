@@ -2193,6 +2193,32 @@ Future<void> _heroWashJiejiCurse(dynamic location) async {
 
 
 
+
+
+Future<void> _heroCultivateJiejiArray(dynamic location) async {
+  final isRented = await GameLogic.checkRented(location);
+  if (!isRented) return;
+
+  final result = await engine.hetu.invoke('cultivateJiejiArray');
+  if (result == 'cooldown') {
+    dialog.pushDialog(
+      'hint_cultivateJiejiArray_cooldown',
+      npcId: location['npcId'],
+    );
+    await dialog.execute();
+    return;
+  }
+  if (result == 'poor') {
+    dialog.pushDialog(
+      'hint_cultivateJiejiArray_notEnough',
+      npcId: location['npcId'],
+    );
+    await dialog.execute();
+    return;
+  }
+}
+
+
 Future<void> _heroShowKarmaCodex(dynamic location) async {
   final text = engine.hetu.invoke('formatKarmaCodex');
   dialog.pushDialog(
@@ -2309,6 +2335,11 @@ Future<void> _onInteractSite(
       'text': 'washJiejiCurse',
       'description': 'hint_washJiejiCurse_description',
     });
+  } else if (siteKind == 'exparray') {
+    siteOptions.add({
+      'text': 'cultivateJiejiArray',
+      'description': 'hint_cultivateJiejiArray_description',
+    });
   } else if (siteKind == 'dungeon') {
     siteOptions.add('about_dungeon');
   }
@@ -2365,6 +2396,8 @@ Future<void> _onInteractSite(
       await _heroSparkJiejiEnchant(location);
     case 'washJiejiCurse':
       await _heroWashJiejiCurse(location);
+    case 'cultivateJiejiArray':
+      await _heroCultivateJiejiArray(location);
     case 'brewPotionCard':
       await _heroBrewPotionCard(location);
     case 'scribeJiejiTalisman':

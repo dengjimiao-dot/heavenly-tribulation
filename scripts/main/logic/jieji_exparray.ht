@@ -1,0 +1,203 @@
+/// 聚灵阵「吐纳」：盘坐换一份修为。不替换原打坐冥想。
+const kJiejiCultivateLifeCost = 1
+const kJiejiCultivateRushLifeCost = 1
+const kJiejiCultivateBloodLifeCost = 3
+const kJiejiCultivateMistHerb = 2
+const kJiejiCultivateCooldownDays = 1
+const kJiejiCultivateExpRate = 0.04
+const kJiejiCultivateExpRateThunder = 0.05
+const kJiejiCultivateExpMin = 8
+const kJiejiCultivateExpMax = 80
+const kJiejiCultivateRushMul = 1.3
+const kJiejiCultivateBloodMul = 1.5
+
+function _jiejiCultivateSeasonId() {
+  if (game.jieji != null && game.jieji.seasonId != null) {
+    return game.jieji.seasonId
+  }
+  return 'thunder'
+}
+
+function ensureHomeExpArray() {
+  if (hero == null) return
+  final city = getHeroHomeCity()
+  if (city == null) return
+  final siteIds = city.siteIds ?? []
+  for (final siteId in siteIds) {
+    final site = game.locations[siteId]
+    if (site != null && site.kind == kLocationKindExpArray) return
+  }
+  Location(
+    category: 'site',
+    kind: kLocationKindExpArray,
+    atCity: city,
+    sectId: city.sectId,
+    development: 0,
+    npcId: Constants.siteKindToNpcId[kLocationKindExpArray],
+  )
+}
+
+function _jiejiCultivateCurrentDay() {
+  if (game.timestamp == null) return null
+  if (Constants.ticksPerDay == null) return null
+  if (Constants.ticksPerDay <= 0) return null
+  return game.timestamp ~/ Constants.ticksPerDay
+}
+
+function _jiejiCultivateOnCooldown() {
+  final jieji = ensureJiejiFlags()
+  final day = _jiejiCultivateCurrentDay()
+  if (day == null) return false
+  if (jieji.lastCultivateDay == null) return false
+  if (day - jieji.lastCultivateDay < kJiejiCultivateCooldownDays) return true
+  return false
+}
+
+function _jiejiCultivateMark() {
+  final jieji = ensureJiejiFlags()
+  jieji.lastCultivateDay = _jiejiCultivateCurrentDay()
+}
+
+function _jiejiCultivateCostLife(want) {
+  var lost = want
+  final life = hero.life ?? 1
+  if (life - lost < 1) lost = life - 1
+  if (lost < 0) lost = 0
+  if (lost > 0) {
+    Player.setLife(hero.life - lost)
+  }
+  return lost
+}
+
+function jiejiCultivateBaseExp() {
+  var rate = kJiejiCultivateExpRate
+  if (_jiejiCultivateSeasonId() == 'thunder') {
+    rate = kJiejiCultivateExpRateThunder
+  }
+  var n = (expForLevel(hero.level ?? 0) * rate).round()
+  n = n.clamp(kJiejiCultivateExpMin, kJiejiCultivateExpMax)
+  if (n < 1) n = 1
+  return n
+}
+
+function _jiejiCultivateChoices(seasonId) {
+  if (seasonId == 'mist') {
+    return [
+      {
+        text: 'jieji_cultivate_plain',
+        description: 'hint_jieji_cultivate_plain',
+      },
+      {
+        text: 'jieji_cultivate_mist',
+        description: 'hint_jieji_cultivate_mist',
+      },
+      'jieji_cultivate_leave',
+    ]
+  }
+  if (seasonId == 'blood') {
+    return [
+      {
+        text: 'jieji_cultivate_plain',
+        description: 'hint_jieji_cultivate_plain',
+      },
+      {
+        text: 'jieji_cultivate_blood',
+        description: 'hint_jieji_cultivate_blood',
+      },
+      'jieji_cultivate_leave',
+    ]
+  }
+  return [
+    {
+      text: 'jieji_cultivate_rush',
+      description: 'hint_jieji_cultivate_rush',
+    },
+    {
+      text: 'jieji_cultivate_plain',
+      description: 'hint_jieji_cultivate_plain',
+    },
+    'jieji_cultivate_leave',
+  ]
+}
+
+function _jiejiCultivateIntroKey(seasonId) {
+  if (seasonId == 'mist') return 'hint_cultivateJiejiArray_mist'
+  if (seasonId == 'blood') return 'hint_cultivateJiejiArray_blood'
+  return 'hint_cultivateJiejiArray_thunder'
+}
+
+function _jiejiCultivateLifeCost(selected) {
+  if (selected == 'jieji_cultivate_blood') return kJiejiCultivateBloodLifeCost
+  if (selected == 'jieji_cultivate_rush') {
+    return kJiejiCultivateLifeCost + kJiejiCultivateRushLifeCost
+  }
+  return kJiejiCultivateLifeCost
+}
+
+function _jiejiCultivateExpAmount(selected, baseExp) {
+  var n = baseExp
+  if (selected == 'jieji_cultivate_rush') {
+    n = (baseExp * kJiejiCultivateRushMul).round()
+  } else if (selected == 'jieji_cultivate_blood') {
+    n = (baseExp * kJiejiCultivateBloodMul).round()
+  }
+  if (n < 1) n = 1
+  return n
+}
+
+/// 聚灵阵吐纳三选。free 为 true 时不扣生机、不检查冷却（debug）。
+/// 返回 'ok' | 'cooldown' | 'poor' | 'cancel'。
+async function cultivateJiejiArray({ free = false }) {
+  if (hero == null) return 'cancel'
+  if (free != true && _jiejiCultivateOnCooldown()) {
+    return 'cooldown'
+  }
+
+  final seasonId = _jiejiCultivateSeasonId()
+  final baseExp = jiejiCultivateBaseExp()
+  dialog.pushDialog(_jiejiCultivateIntroKey(seasonId), interpolations: [baseExp])
+  dialog.pushSelection('jiejiCultivate', _jiejiCultivateChoices(seasonId))
+  await dialog.execute()
+  var selected = dialog.checkSelected('jiejiCultivate')
+  if (selected == null || selected == 'cancel' || selected == 'jieji_cultivate_leave') {
+    if (free == true && selected == null) {
+      selected = 'jieji_cultivate_plain'
+    } else {
+      return 'cancel'
+    }
+  }
+  if (selected != 'jieji_cultivate_rush' && selected != 'jieji_cultivate_plain' && selected != 'jieji_cultivate_mist' && selected != 'jieji_cultivate_blood') {
+    return 'cancel'
+  }
+  if (seasonId == 'mist' && selected == 'jieji_cultivate_rush') {
+    return 'cancel'
+  }
+  if (seasonId == 'blood' && selected == 'jieji_cultivate_rush') {
+    return 'cancel'
+  }
+  if (seasonId != 'mist' && selected == 'jieji_cultivate_mist') {
+    return 'cancel'
+  }
+  if (seasonId != 'blood' && selected == 'jieji_cultivate_blood') {
+    return 'cancel'
+  }
+
+  if (free != true) {
+    _jiejiCultivateCostLife(_jiejiCultivateLifeCost(selected))
+    _jiejiCultivateMark()
+  }
+
+  final gained = _jiejiCultivateExpAmount(selected, baseExp)
+  assert(gained > 0)
+  Player.gainExp(gained)
+
+  if (selected == 'jieji_cultivate_mist') {
+    await Player.collect('herb', kJiejiCultivateMistHerb, incurIncident: false)
+    dialog.pushDialog('hint_cultivateJiejiArray_done_herb', interpolations: [gained, kJiejiCultivateMistHerb])
+  } else {
+    dialog.pushDialog('hint_cultivateJiejiArray_done', interpolations: [gained])
+  }
+  await dialog.execute()
+  Game.updateUI()
+  return 'ok'
+}

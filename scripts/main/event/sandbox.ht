@@ -10,6 +10,7 @@ async function onNewGame() {
   ensureHomeAuction()
   ensureHomeEnchantShop()
   ensureHomeJusticeHall()
+  ensureHomeExpArray()
   final xitong = game.npcs['xitong']
 
   // final itemsInfo = [
