@@ -1,0 +1,152 @@
+/// 赶路「汲泉」三选：捧饮 / 灌袋 / 血汲。隐藏、劫兆、野遇、赶路、行商、拾荒、扎营、残锋、残卷、雾灯、残鼓都没中时才滚。
+const kJiejiDrawBaseRate = 0.06
+const kJiejiDrawMoveCooldown = 12
+const kJiejiDrawDrinkHerb = 1
+const kJiejiDrawDrinkLife = 8
+const kJiejiDrawDrinkGongfaRate = 0.15
+const kJiejiDrawFillMoney = 20
+const kJiejiDrawFillMoneyThunder = 10
+const kJiejiDrawFillHerb = 2
+const kJiejiDrawFillLife = 3
+const kJiejiDrawBloodLife = 2
+const kJiejiDrawBloodLifeBlood = 3
+const kJiejiDrawBloodGongfaRate = 0.5
+const kJiejiDrawBloodMoney = 40
+
+function _jiejiDrawSeasonId() {
+  if (game.jieji != null && game.jieji.seasonId != null) {
+    return game.jieji.seasonId
+  }
+  return null
+}
+
+function _jiejiDrawTutorialLocked() {
+  return game.enableTutorial && game.flags.tutorial.bountyQuest != true
+}
+
+function _jiejiDrawDrinkHerbCost(seasonId) {
+  if (seasonId == 'mist') return 0
+  return kJiejiDrawDrinkHerb
+}
+
+function _jiejiDrawFillMoneyCost(seasonId) {
+  if (seasonId == 'thunder') return kJiejiDrawFillMoneyThunder
+  return kJiejiDrawFillMoney
+}
+
+function _jiejiDrawBloodLifeCost(seasonId) {
+  if (seasonId == 'blood') return kJiejiDrawBloodLifeBlood
+  return kJiejiDrawBloodLife
+}
+
+function _jiejiDrawCostLife(want) {
+  var lost = want
+  final life = hero.life ?? 1
+  if (life - lost < 1) lost = life - 1
+  if (lost < 0) lost = 0
+  if (lost > 0) {
+    Player.setLife(hero.life - lost)
+  }
+  return lost
+}
+
+function _jiejiDrawNormalizeKind(kind) {
+  if (kind == 'drink' || kind == 'jieji_draw_drink') return 'drink'
+  if (kind == 'fill' || kind == 'jieji_draw_fill') return 'fill'
+  if (kind == 'blood' || kind == 'jieji_draw_blood') return 'blood'
+  return null
+}
+
+function _jiejiDrawChoices() {
+  return [
+    {
+      text: 'jieji_draw_drink',
+      description: 'hint_jieji_draw_drink',
+    },
+    {
+      text: 'jieji_draw_fill',
+      description: 'hint_jieji_draw_fill',
+    },
+    {
+      text: 'jieji_draw_blood',
+      description: 'hint_jieji_draw_blood',
+    },
+  ]
+}
+
+/// 赶路汲泉三选。debug.forceJiejiEvent('draw') / forceDraw 直接走这里，仍弹出三选。
+async function playJiejiDrawEvent(terrain) {
+  if (hero == null) return false
+
+  dialog.pushDialog('hint_jieji_draw')
+  dialog.pushSelection('jiejiDraw', _jiejiDrawChoices())
+  await dialog.execute()
+  final picked = dialog.checkSelected('jiejiDraw')
+  var selected = _jiejiDrawNormalizeKind(picked)
+  if (selected == null) {
+    selected = 'drink'
+  }
+
+  final seasonId = _jiejiDrawSeasonId()
+  if (selected == 'drink') {
+    final herbNeed = _jiejiDrawDrinkHerbCost(seasonId)
+    final herbHave = hero.materials['herb'] ?? 0
+    if (herbNeed > 0 && herbHave < herbNeed) {
+      dialog.pushDialog('hint_jieji_draw_drink_broke', interpolations: [herbNeed])
+      await dialog.execute()
+    } else {
+      if (herbNeed > 0) {
+        Player.exhaust('herb', herbNeed)
+      }
+      final healed = Player.restoreLife(kJiejiDrawDrinkLife)
+      dialog.pushDialog('hint_jieji_draw_drink_ok', interpolations: [healed])
+      await dialog.execute()
+      await tryDropGongfaShard(rate: kJiejiDrawDrinkGongfaRate)
+    }
+  } else if (selected == 'fill') {
+    final moneyNeed = _jiejiDrawFillMoneyCost(seasonId)
+    final moneyHave = hero.materials['money'] ?? 0
+    if (moneyHave < moneyNeed) {
+      dialog.pushDialog('hint_jieji_draw_fill_broke', interpolations: [moneyNeed])
+      await dialog.execute()
+    } else {
+      Player.exhaust('money', moneyNeed)
+      await Player.collect('herb', kJiejiDrawFillHerb, incurIncident: false)
+      final healed = Player.restoreLife(kJiejiDrawFillLife)
+      dialog.pushDialog('hint_jieji_draw_fill_ok', interpolations: [kJiejiDrawFillHerb, healed])
+      await dialog.execute()
+    }
+  } else {
+    final lost = _jiejiDrawCostLife(_jiejiDrawBloodLifeCost(seasonId))
+    dialog.pushDialog('hint_jieji_draw_blood_ok', interpolations: [lost])
+    await dialog.execute()
+    final dropped = await tryDropGongfaShard(rate: kJiejiDrawBloodGongfaRate)
+    if (dropped != true) {
+      await Player.collect('money', kJiejiDrawBloodMoney, incurIncident: false)
+      dialog.pushDialog('hint_jieji_draw_blood_none', interpolations: [kJiejiDrawBloodMoney])
+      await dialog.execute()
+    }
+  }
+
+  Game.updateUI()
+  return true
+}
+
+/// 赶路触发：教程锁与路遇相同；冷却 12 步；约 6%。出过则返回 true。
+async function tryJiejiDrawOnMove(terrain) {
+  if (hero == null) return false
+  if (_jiejiDrawTutorialLocked()) return false
+
+  final jieji = ensureJiejiFlags()
+  final moves = jieji.worldMoves ?? 0
+  final last = jieji.lastDrawMove ?? -999
+  if (moves - last < kJiejiDrawMoveCooldown) return false
+
+  var rate = kJiejiDrawBaseRate
+  if (rate < 0) rate = 0
+  if (random.nextDouble() > rate) return false
+
+  jieji.lastDrawMove = moves
+  await playJiejiDrawEvent(terrain)
+  return true
+}
