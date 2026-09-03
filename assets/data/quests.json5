@@ -147,5 +147,13 @@
     contribution: 13,
     rank: 0,
   },
+  hidden_mirror_ruins: {
+    id: "hidden_mirror_ruins",
+    policy: null,
+    isBounty: false,
+    isHidden: true,
+    contribution: 11,
+    rank: 0,
+  },
 
 }
