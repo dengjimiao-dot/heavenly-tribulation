@@ -53,6 +53,8 @@ final class SeasonLogic {
       if (jieji == null) {
         jieji = <String, dynamic>{
           'curseSlots': <dynamic>[],
+          'shards': <dynamic>[],
+          'gongfa': <dynamic>[],
         };
         flags['jieji'] = jieji;
       }
@@ -72,6 +74,86 @@ final class SeasonLogic {
       if (n < 0) return 0;
       if (n > 3) return 3;
       return n;
+    } catch (_) {
+      return 0;
+    }
+  }
+
+  static List<String> _listStringIds(dynamic raw) {
+    final ids = <String>[];
+    if (raw == null) return ids;
+    try {
+      if (raw is Iterable) {
+        for (final e in raw) {
+          final s = e?.toString();
+          if (s != null && s.isNotEmpty && s != 'null') ids.add(s);
+        }
+        return ids;
+      }
+      final n = raw.length as int;
+      for (var i = 0; i < n; i++) {
+        final s = raw[i]?.toString();
+        if (s != null && s.isNotEmpty && s != 'null') ids.add(s);
+      }
+    } catch (_) {}
+    return ids;
+  }
+
+  static List<String> _seasonalShardIds() {
+    final ids = <String>[];
+    try {
+      final jieji = _jiejiFlags();
+      if (jieji == null) return ids;
+      final raw = jieji['shards'];
+      if (raw == null) return ids;
+      void take(dynamic e) {
+        if (e == null) return;
+        String? id;
+        try {
+          if (e is Map) {
+            id = e['id']?.toString();
+          } else {
+            id = e['id']?.toString();
+          }
+        } catch (_) {
+          id = e.toString();
+        }
+        if (id != null && id.isNotEmpty && id != 'null') ids.add(id);
+      }
+
+      if (raw is Iterable) {
+        for (final e in raw) {
+          take(e);
+        }
+        return ids;
+      }
+      final n = raw.length as int;
+      for (var i = 0; i < n; i++) {
+        take(raw[i]);
+      }
+    } catch (_) {}
+    return ids;
+  }
+
+  static List<String> _permanentGongfaIds() {
+    try {
+      return _listStringIds(_jiejiFlags()?['gongfa']);
+    } catch (_) {
+      return const [];
+    }
+  }
+
+  /// 当季残页 + 永久功法，同一 id 只算一次。
+  static Set<String> heldGongfaIds() {
+    return {..._permanentGongfaIds(), ..._seasonalShardIds()};
+  }
+
+  static bool holdsGongfa(String id) => heldGongfaIds().contains(id);
+
+  /// HUD「功N」：当季残页数 + 永久功法数。
+  static int get gongfaHeldCount {
+    try {
+      return _permanentGongfaIds().length + _seasonalShardIds().length;
     } catch (_) {
       return 0;
     }
@@ -112,6 +194,7 @@ final class SeasonLogic {
             'lifeStealBonus': lifeStealBonus,
             'tribulationStrictness': tribulationStrictness,
             'curseCount': curseCount,
+            'gongfaCount': gongfaHeldCount,
             'pendingSettle': pendingSettlement,
             'xianming': xianming,
             'xianmingSeason': _jiejiFlags()?['xianmingSeason'],
@@ -201,8 +284,23 @@ final class SeasonLogic {
 
   static double get damageDealtMul => _mod('damageDealtMul');
   static double get damageTakenMul => _mod('damageTakenMul');
-  static double get wildEncounterMul => _mod('wildEncounterMul');
-  static double get lifeStealBonus => _mod('lifeStealBonus', 0.0);
+  static double get wildEncounterMul {
+    var m = _mod('wildEncounterMul');
+    if (holdsGongfa('gongfa_mist')) {
+      m -= 0.15;
+      if (m < 0.3) m = 0.3;
+    }
+    if (m < 0) return 0.0;
+    return m;
+  }
+
+  static double get lifeStealBonus {
+    var v = _mod('lifeStealBonus', 0.0);
+    if (holdsGongfa('gongfa_blood')) {
+      v += 0.05;
+    }
+    return v;
+  }
   static double get tribulationStrictness => _mod('tribulationStrictness');
 
   static int get cardCostJitter {
@@ -234,6 +332,9 @@ final class SeasonLogic {
     var m = _mod('lootMul');
     if (xianmingActiveThisSeason && xianming == 'xianming_nurture') {
       m += 0.15;
+    }
+    if (holdsGongfa('gongfa_harvest')) {
+      m += 0.12;
     }
     return m < 0 ? 0.0 : m;
   }
@@ -275,6 +376,12 @@ final class SeasonLogic {
         damageDetails['percentageChange3'] += 0.10;
       }
     }
+    if (!selfIsHero && holdsGongfa('gongfa_thunder')) {
+      damageDetails['percentageChange3'] += 0.08;
+    }
+    if (selfIsHero && holdsGongfa('gongfa_guard')) {
+      damageDetails['percentageChange3'] -= 0.06;
+    }
   }
 
   static String hudLine() {
@@ -285,6 +392,9 @@ final class SeasonLogic {
     }
     if (curseCount > 0) {
       line += ' · 咒$curseCount';
+    }
+    if (gongfaHeldCount > 0) {
+      line += ' · 功$gongfaHeldCount';
     }
     return line;
   }

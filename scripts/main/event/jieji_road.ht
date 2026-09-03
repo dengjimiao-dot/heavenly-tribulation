@@ -144,7 +144,15 @@ async function playJiejiMistRoadEvent(terrain) {
   } else if (selected == 'jieji_mist_charge') {
     dialog.pushDialog('hint_jieji_mist_charge')
     await dialog.execute()
-    await encounterEnemy(rank: hero.rank, terrainKind: _jiejiRoadTerrainKind(terrain))
+    await encounterEnemy(
+      rank: hero.rank,
+      terrainKind: _jiejiRoadTerrainKind(terrain),
+      battleEndCallback: async function (result, roundCount) {
+        if (result) {
+          await tryDropGongfaShard()
+        }
+      },
+    )
   } else {
     final cost = kMistRoadEventGuideCost
     final money = hero.materials['money'] ?? 0
@@ -155,7 +163,7 @@ async function playJiejiMistRoadEvent(terrain) {
     } else {
       dialog.pushDialog('hint_jieji_mist_guide_broke')
       await dialog.execute()
-      if (random.nextDouble() < 0.30) {
+      if (random.nextDouble() < 0.30 + jiejiKarmaChanceBonus()) {
         await grantKarmaCard('mist')
       }
     }
@@ -201,13 +209,14 @@ async function playJiejiThunderRoadEvent(terrain) {
           await Player.collect('money', extra, incurIncident: false)
           dialog.pushDialog('hint_jieji_road_thunder_elite_loot', interpolations: ['${extra}'])
           await dialog.execute()
+          await tryDropGongfaShard()
         }
       },
     )
   } else {
     dialog.pushDialog('hint_jieji_road_thunder_temple')
     await dialog.execute()
-    if (random.nextDouble() < kThunderTempleKarmaChance) {
+    if (random.nextDouble() < kThunderTempleKarmaChance + jiejiKarmaChanceBonus()) {
       await grantKarmaCard('temple')
     }
   }
@@ -229,7 +238,7 @@ async function playJiejiBloodRoadEvent(terrain) {
     if (lost > 0) {
       Player.setLife(hero.life - lost)
     }
-    if (random.nextDouble() < 0.50) {
+    if (random.nextDouble() < 0.50 - jiejiKarmaChanceBonus()) {
       final money = 80 + random.nextInt(71)
       await Player.collect('money', money, incurIncident: false)
       dialog.pushDialog('hint_jieji_road_blood_rite_money', interpolations: ['${lost}', '${money}'])
@@ -238,11 +247,20 @@ async function playJiejiBloodRoadEvent(terrain) {
       dialog.pushDialog('hint_jieji_road_blood_rite_karma', interpolations: ['${lost}'])
       await dialog.execute()
       await grantKarmaCard('blood')
+      await tryDropGongfaShard()
     }
   } else if (selected == 'jieji_blood_hunt') {
     dialog.pushDialog('hint_jieji_road_blood_hunt')
     await dialog.execute()
-    await encounterEnemy(rank: hero.rank, terrainKind: _jiejiRoadTerrainKind(terrain))
+    await encounterEnemy(
+      rank: hero.rank,
+      terrainKind: _jiejiRoadTerrainKind(terrain),
+      battleEndCallback: async function (result, roundCount) {
+        if (result) {
+          await tryDropGongfaShard()
+        }
+      },
+    )
   } else {
     dialog.pushDialog('hint_jieji_road_blood_detour')
     await dialog.execute()
@@ -290,8 +308,9 @@ async function playJiejiMerchantEvent() {
       await dialog.execute()
     }
   } else if (selected == 'jieji_merchant_box') {
-    if (random.nextDouble() < kJiejiMerchantBoxKarmaChance) {
+    if (random.nextDouble() < kJiejiMerchantBoxKarmaChance + jiejiKarmaChanceBonus()) {
       await grantKarmaCard('blackmarket')
+      await tryDropGongfaShard(rate: kGongfaMerchantDropRate)
     } else {
       final money = hero.materials['money'] ?? 0
       var lost = kJiejiMerchantBoxFailCost

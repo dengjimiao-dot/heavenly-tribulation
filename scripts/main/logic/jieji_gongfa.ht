@@ -1,0 +1,155 @@
+/// 功法碎片：当季残页 + 季末铭刻入功法树（最多 3）。
+/// 掉落由赶路硬选择 / 黑市匣成功触发；效果在 Dart SeasonLogic 与此处业力掷骰。
+
+const kGongfaShardIds = [
+  'gongfa_thunder',
+  'gongfa_guard',
+  'gongfa_blood',
+  'gongfa_harvest',
+  'gongfa_mist',
+  'gongfa_karma',
+]
+const kGongfaMax = 3
+const kGongfaRoadDropRate = 0.18
+const kGongfaMerchantDropRate = 0.25
+const kGongfaKarmaChanceBonus = 0.15
+
+function ensureGongfaFlags() {
+  game.flags.jieji ??= {}
+  game.flags.jieji.shards ??= []
+  game.flags.jieji.gongfa ??= []
+  return game.flags.jieji
+}
+
+function _jiejiGongfaTutorialLocked() {
+  return game.enableTutorial && game.flags.tutorial.bountyQuest != true
+}
+
+function listHeldGongfaIds() {
+  final jieji = ensureGongfaFlags()
+  let held = []
+  for (final id in jieji.gongfa) {
+    held.add(id)
+  }
+  for (final s in jieji.shards) {
+    if (s != null && s.id != null) {
+      held.add(s.id)
+    }
+  }
+  return held
+}
+
+function hasGongfaHeld(id) {
+  if (id == null || id == '') return false
+  return listHeldGongfaIds().contains(id)
+}
+
+function pickUnheldGongfaId() {
+  final held = listHeldGongfaIds()
+  let pool = []
+  for (final id in kGongfaShardIds) {
+    if (!held.contains(id)) {
+      pool.add(id)
+    }
+  }
+  if (pool.isEmpty) return null
+  return random.nextIterable(pool)
+}
+
+function jiejiKarmaChanceBonus() {
+  if (hasGongfaHeld('gongfa_karma')) return kGongfaKarmaChanceBonus
+  return 0
+}
+
+function _gongfaSeasonId() {
+  if (game.jieji != null && game.jieji.seasonId != null) {
+    return game.jieji.seasonId
+  }
+  return 'thunder'
+}
+
+/// 授予一枚当季残页。id 为空则随机未持有。已持有或无效则返回 false。
+async function grantGongfaShard(id) {
+  if (hero == null) return false
+  var shardId = id
+  if (shardId == null || shardId == '') {
+    shardId = pickUnheldGongfaId()
+  }
+  if (shardId == null || shardId == '') return false
+  if (!kGongfaShardIds.contains(shardId)) return false
+  if (hasGongfaHeld(shardId)) return false
+
+  final jieji = ensureGongfaFlags()
+  jieji.shards.add({
+    id: shardId,
+    seasonId: _gongfaSeasonId(),
+  })
+
+  final name = engine.locale(shardId)
+  final effectKey = 'hint_jieji_' + shardId
+  final effect = engine.locale(effectKey)
+  dialog.pushDialog('hint_jieji_gongfa_pickup', interpolations: [name, effect])
+  await dialog.execute()
+  Game.updateUI()
+  return true
+}
+
+async function tryDropGongfaShard({ rate }) {
+  if (hero == null) return false
+  if (_jiejiGongfaTutorialLocked()) return false
+  var r = rate
+  if (r == null) r = kGongfaRoadDropRate
+  if (pickUnheldGongfaId() == null) return false
+  if (random.nextDouble() > r) return false
+  return await grantGongfaShard(null)
+}
+
+/// 季末：铭刻一枚入永久功法树，其余当季残页消散。功法已满 3 则全部消散。
+async function tryOfferGongfaEngrave() {
+  if (hero == null) return
+  final jieji = ensureGongfaFlags()
+  if (jieji.shards.isEmpty) return
+
+  if (jieji.gongfa.length >= kGongfaMax) {
+    jieji.shards = []
+    dialog.pushDialog('hint_jieji_gongfa_fade')
+    await dialog.execute()
+    Game.updateUI()
+    return
+  }
+
+  let choices = []
+  for (final s in jieji.shards) {
+    if (s == null || s.id == null) continue
+    final effectKey = 'hint_jieji_' + s.id
+    choices.add({
+      text: s.id,
+      description: effectKey,
+    })
+  }
+  if (choices.isEmpty) {
+    jieji.shards = []
+    return
+  }
+
+  dialog.pushDialog('hint_jieji_gongfa_engrave')
+  dialog.pushSelection('jiejiGongfaEngrave', choices)
+  await dialog.execute()
+  final selected = dialog.checkSelected('jiejiGongfaEngrave')
+  var engraved = null
+  if (selected != null && kGongfaShardIds.contains(selected)) {
+    if (!jieji.gongfa.contains(selected) && jieji.gongfa.length < kGongfaMax) {
+      jieji.gongfa.add(selected)
+      engraved = selected
+    }
+  }
+  jieji.shards = []
+  if (engraved != null) {
+    final name = engine.locale(engraved)
+    dialog.pushDialog('hint_jieji_gongfa_engraved', interpolations: [name])
+  } else {
+    dialog.pushDialog('hint_jieji_gongfa_skip')
+  }
+  await dialog.execute()
+  Game.updateUI()
+}

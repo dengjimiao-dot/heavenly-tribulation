@@ -12,6 +12,8 @@ const _kJiejiKeepSiteKinds = {
 function ensureJiejiFlags() {
   game.flags.jieji ??= {}
   game.flags.jieji.curseSlots ??= []
+  game.flags.jieji.shards ??= []
+  game.flags.jieji.gongfa ??= []
   return game.flags.jieji
 }
 
@@ -182,6 +184,7 @@ async function finishJiejiSeason(endedId) {
   jieji.lastSettledSeasonId = endedId
   jieji.pendingEndedSeasonId = null
   jieji.fighting = false
+  await tryOfferGongfaEngrave()
   await pickXianming()
   // 仅在劫季 id 已切换（Dart 写入 pendingOmenSeasonId）时弹入季天象征兆。
   final omenId = jieji.pendingOmenSeasonId

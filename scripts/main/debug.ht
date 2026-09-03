@@ -140,6 +140,14 @@ namespace debug {
   //   }
   // }
 
+  async function forceGongfa(id) {
+    final ok = await grantGongfaShard(id)
+    if (!ok) {
+      dialog.pushDialog('hint_jieji_gongfa_none')
+      await dialog.execute()
+    }
+  }
+
   async function forceJiejiEvent(kind) {
     game.flags.jieji ??= {}
     final terrain = { kind: 'plain' }
