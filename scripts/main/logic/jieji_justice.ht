@@ -1,0 +1,163 @@
+/// 镇魔司「洗咒」：纳金 / 献药 / 血誓清一层诅咒。不另做悬赏。
+const kJiejiWashMoneyCost = 200
+const kJiejiWashMoneyCostThunder = 150
+const kJiejiWashHerbCost = 8
+const kJiejiWashHerbCostMist = 5
+const kJiejiWashLifeCost = 6
+const kJiejiWashLifeCostBlood = 4
+const kJiejiWashKarmaRate = 0.20
+
+function _jiejiWashSeasonId() {
+  if (game.jieji != null && game.jieji.seasonId != null) {
+    return game.jieji.seasonId
+  }
+  return null
+}
+
+function jiejiWashCosts() {
+  var money = kJiejiWashMoneyCost
+  var herb = kJiejiWashHerbCost
+  var life = kJiejiWashLifeCost
+  var karmaRate = kJiejiWashKarmaRate
+  final seasonId = _jiejiWashSeasonId()
+  if (seasonId == 'thunder') {
+    money = kJiejiWashMoneyCostThunder
+  } else if (seasonId == 'mist') {
+    herb = kJiejiWashHerbCostMist
+  } else if (seasonId == 'blood') {
+    life = kJiejiWashLifeCostBlood
+    karmaRate = 0
+  }
+  return {
+    money: money,
+    herb: herb,
+    life: life,
+    karmaRate: karmaRate,
+  }
+}
+
+function ensureHomeJusticeHall() {
+  if (hero == null) return
+  final city = getHeroHomeCity()
+  if (city == null) return
+  final siteIds = city.siteIds ?? []
+  for (final siteId in siteIds) {
+    final site = game.locations[siteId]
+    if (site != null && site.kind == kLocationKindJusticeHall) return
+  }
+  Location(
+    category: 'site',
+    kind: kLocationKindJusticeHall,
+    atCity: city,
+    sectId: city.sectId,
+    development: 0,
+    npcId: Constants.siteKindToNpcId[kLocationKindJusticeHall],
+  )
+}
+
+function _jiejiWashOnCooldown() {
+  final jieji = ensureJiejiFlags()
+  final seasonId = _jiejiWashSeasonId()
+  if (seasonId == null) return false
+  if (jieji.lastWashSeasonId == null) return false
+  return jieji.lastWashSeasonId == seasonId
+}
+
+function _jiejiWashMark() {
+  final jieji = ensureJiejiFlags()
+  final seasonId = _jiejiWashSeasonId()
+  if (seasonId == null) return
+  jieji.lastWashSeasonId = seasonId
+}
+
+function _jiejiWashCostLife(want) {
+  var lost = want
+  final life = hero.life ?? 1
+  if (life - lost < 1) lost = life - 1
+  if (lost < 0) lost = 0
+  if (lost > 0) {
+    Player.setLife(hero.life - lost)
+  }
+  return lost
+}
+
+function _jiejiWashChoices(seasonId) {
+  var moneyDesc = 'hint_jieji_wash_money'
+  var herbDesc = 'hint_jieji_wash_herb'
+  var bloodDesc = 'hint_jieji_wash_blood'
+  if (seasonId == 'thunder') moneyDesc = 'hint_jieji_wash_money_thunder'
+  if (seasonId == 'mist') herbDesc = 'hint_jieji_wash_herb_mist'
+  if (seasonId == 'blood') bloodDesc = 'hint_jieji_wash_blood_blood'
+  return [
+    {
+      text: 'jieji_wash_money',
+      description: moneyDesc,
+    },
+    {
+      text: 'jieji_wash_herb',
+      description: herbDesc,
+    },
+    {
+      text: 'jieji_wash_blood',
+      description: bloodDesc,
+    },
+    'jieji_wash_leave',
+  ]
+}
+
+/// 镇魔司洗咒三选。free 为 true 时不扣费、不检查冷却（debug）。
+/// 返回 'ok' | 'cooldown' | 'empty' | 'poor' | 'cancel'。
+async function washJiejiCurse({ free = false }) {
+  if (hero == null) return 'cancel'
+  if (jiejiCurseCount() == 0) {
+    return 'empty'
+  }
+  if (free != true && _jiejiWashOnCooldown()) {
+    return 'cooldown'
+  }
+
+  final seasonId = _jiejiWashSeasonId()
+  dialog.pushDialog('hint_washJiejiCurse')
+  dialog.pushSelection('jiejiWash', _jiejiWashChoices(seasonId))
+  await dialog.execute()
+  var selected = dialog.checkSelected('jiejiWash')
+  if (selected == null || selected == 'cancel' || selected == 'jieji_wash_leave') {
+    if (free == true && selected == null) {
+      selected = 'jieji_wash_money'
+    } else {
+      return 'cancel'
+    }
+  }
+
+  final costs = jiejiWashCosts()
+  if (free != true) {
+    if (selected == 'jieji_wash_money') {
+      final moneyHave = hero.materials['money'] ?? 0
+      if (moneyHave < costs.money) return 'poor'
+      Player.exhaust('money', costs.money)
+    } else if (selected == 'jieji_wash_herb') {
+      final herbHave = hero.materials['herb'] ?? 0
+      if (herbHave < costs.herb) return 'poor'
+      Player.exhaust('herb', costs.herb)
+    } else if (selected == 'jieji_wash_blood') {
+      _jiejiWashCostLife(costs.life)
+    } else {
+      return 'cancel'
+    }
+    _jiejiWashMark()
+  }
+
+  clearOneJiejiCurse()
+  final remaining = jiejiCurseCount()
+  dialog.pushDialog('hint_washJiejiCurse_done', interpolations: [remaining])
+  await dialog.execute()
+
+  if (free != true && selected == 'jieji_wash_blood') {
+    if ((costs.karmaRate ?? 0) > 0 && random.nextDouble() < costs.karmaRate) {
+      await grantKarmaCard('shrine')
+    }
+  }
+
+  Game.updateUI()
+  return 'ok'
+}

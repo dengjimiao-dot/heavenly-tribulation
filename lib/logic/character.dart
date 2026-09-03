@@ -2163,6 +2163,36 @@ Future<void> _heroSparkJiejiEnchant(dynamic location) async {
 }
 
 
+Future<void> _heroWashJiejiCurse(dynamic location) async {
+  final result = await engine.hetu.invoke('washJiejiCurse');
+  if (result == 'cooldown') {
+    dialog.pushDialog(
+      'hint_washJiejiCurse_cooldown',
+      npcId: location['npcId'],
+    );
+    await dialog.execute();
+    return;
+  }
+  if (result == 'empty') {
+    dialog.pushDialog(
+      'hint_washJiejiCurse_empty',
+      npcId: location['npcId'],
+    );
+    await dialog.execute();
+    return;
+  }
+  if (result == 'poor') {
+    dialog.pushDialog(
+      'hint_washJiejiCurse_notEnough',
+      npcId: location['npcId'],
+    );
+    await dialog.execute();
+    return;
+  }
+}
+
+
+
 Future<void> _heroShowKarmaCodex(dynamic location) async {
   final text = engine.hetu.invoke('formatKarmaCodex');
   dialog.pushDialog(
@@ -2274,6 +2304,11 @@ Future<void> _onInteractSite(
       'text': 'duelJiejiArena',
       'description': 'hint_duelJiejiArena_description',
     });
+  } else if (siteKind == 'justicehall') {
+    siteOptions.add({
+      'text': 'washJiejiCurse',
+      'description': 'hint_washJiejiCurse_description',
+    });
   } else if (siteKind == 'dungeon') {
     siteOptions.add('about_dungeon');
   }
@@ -2328,6 +2363,8 @@ Future<void> _onInteractSite(
       await _heroShowKarmaCodex(location);
     case 'sparkJiejiEnchant':
       await _heroSparkJiejiEnchant(location);
+    case 'washJiejiCurse':
+      await _heroWashJiejiCurse(location);
     case 'brewPotionCard':
       await _heroBrewPotionCard(location);
     case 'scribeJiejiTalisman':

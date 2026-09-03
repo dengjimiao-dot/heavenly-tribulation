@@ -27,6 +27,7 @@ const _kJiejiKeepSiteKinds = {
   'arena': true,
   'auctionhouse': true,
   'enchantshop': true,
+  'justicehall': true,
 }
 
 function ensureJiejiFlags() {
@@ -174,6 +175,7 @@ function migrateSect() {
   ensureHomeDivinationAltar()
   ensureHomeAuction()
   ensureHomeEnchantShop()
+  ensureHomeJusticeHall()
   engine.info('季末迁徙：拆除据点 ${removed}，城市规模 ${city.development}')
   return removed
 }
