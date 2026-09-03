@@ -333,6 +333,11 @@ namespace debug {
     return await consultJiejiXianming(free: true)
   }
 
+  /// 忽略冷却与花费，仍弹出藏经阁夜读三选。
+  async function forceRead() {
+    return await readJiejiNight(free: true)
+  }
+
   async function forceHarvestRite() {
     return await riteJiejiHarvest(free: true)
   }

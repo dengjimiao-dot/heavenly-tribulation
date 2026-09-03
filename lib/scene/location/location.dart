@@ -290,6 +290,17 @@ class LocationScene extends Scene with HasCursorState {
         };
         siteList.tryAddCard(consultCard);
         world.add(consultCard);
+        final readCard = GameData.createSiteCard(
+          spriteId: 'location/card/library.png',
+          title: engine.locale('readJiejiNight'),
+          onPreviewed: _onPreviewSiteCard,
+          onUnpreviewed: _onUnpreviewSiteCard,
+        );
+        readCard.onTap = (button, position) async {
+          await GameLogic.heroReadJiejiNight(location);
+        };
+        siteList.tryAddCard(readCard);
+        world.add(readCard);
       case 'hotel':
         final siteCard = GameData.createSiteCard(
           spriteId: 'location/card/bed.png',
