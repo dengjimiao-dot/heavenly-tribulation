@@ -1804,6 +1804,16 @@
   "jieji_dungeon_next_encampment": "营地",
   "jieji_dungeon_next_unknown": "前路不明",
 
+  "jiejiDungeonExitGift": "劫礼",
+  "hint_jieji_dungeon_exit": "出口处劫气未散。你可以清点行囊、包扎伤口，或疾行离开。",
+  "jieji_dungeon_pack": "清点",
+  "jieji_dungeon_bind": "包扎",
+  "jieji_dungeon_dash": "疾行",
+  "hint_jieji_dungeon_pack": "你清点了行囊。多了 {0} 铜钱。",
+  "hint_jieji_dungeon_bind": "你包扎了伤口。生机回了 {0} 点。",
+  "hint_jieji_dungeon_dash": "你赶了一日近路。生机回了 {0} 点，还摸到 {1} 药材。",
+  "hint_jieji_dungeon_dash_noday": "你抄近路出了秘境。生机回了 {0} 点，还摸到 {1} 药材。",
+
   "jiejiMenpaiDemo": "劫季门派 · Demo",
   "jiejiMenpaiPitch": "带着业力赶天劫的门派肉鸽",
   "knownIssues": "已知问题",

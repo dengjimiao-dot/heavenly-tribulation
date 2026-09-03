@@ -1,5 +1,5 @@
-/// 秘境劫季切片：营地天象、精英/Boss 染色、祭坛/匣/劫泉/伏击/试剑奇遇。
-/// 由 dungeon.ht 的 _prepareMap / onEnterMap 小钩子调用。不改教程房布局。
+/// 秘境劫季切片：营地天象、精英/Boss 染色、祭坛/匣/劫泉/伏击/试剑奇遇、出口劫礼。
+/// 由 dungeon.ht 的 _prepareMap / onEnterMap / promptExit 小钩子调用。不改教程房布局。
 
 const kJiejiDungeonGuideCost = 80
 const kJiejiDungeonAltarHerbCost = 3
@@ -42,6 +42,14 @@ const kJiejiDungeonTrialGongfaRate = 0.22
 const kJiejiDungeonTrialLoseLife = 5
 const kJiejiDungeonTrialWatchLife = 3
 const kJiejiDungeonTrialWatchHerbMist = 1
+const kJiejiDungeonExitPackMoney = 80
+const kJiejiDungeonExitPackMoneyThunder = 120
+const kJiejiDungeonExitPackMoneyBlood = 100
+const kJiejiDungeonExitPackGongfaRate = 0.15
+const kJiejiDungeonExitBindLife = 6
+const kJiejiDungeonExitBindLifeMist = 8
+const kJiejiDungeonExitDashLife = 3
+const kJiejiDungeonExitDashHerb = 1
 
 function jiejiDungeonEnsureFlags() {
   game.flags.dungeon ??= {}
@@ -681,3 +689,64 @@ async function playJiejiDungeonTrial() {
   }
 }
 
+function jiejiDungeonExitPackMoney() {
+  final seasonId = jiejiDungeonSeasonId()
+  if (seasonId == 'thunder') return kJiejiDungeonExitPackMoneyThunder
+  if (seasonId == 'blood') return kJiejiDungeonExitPackMoneyBlood
+  return kJiejiDungeonExitPackMoney
+}
+
+function jiejiDungeonExitBindLife() {
+  if (jiejiDungeonSeasonId() == 'mist') return kJiejiDungeonExitBindLifeMist
+  return kJiejiDungeonExitBindLife
+}
+
+/// 有赶路耗日辅助则耗 1 日；与 _jiejiRoadSpendDay 同一套 Game.updateGame。不可见则跳过。
+async function _jiejiDungeonExitSpendDay() {
+  if (Constants.ticksPerDay == null) return false
+  if (Constants.ticksPerDay <= 0) return false
+  await Game.updateGame(tick: Constants.ticksPerDay)
+  return true
+}
+
+async function _playJiejiDungeonExitPack() {
+  final money = jiejiDungeonExitPackMoney()
+  await Player.collect('money', money, incurIncident: false)
+  await tryDropGongfaShard(rate: kJiejiDungeonExitPackGongfaRate)
+  dialog.pushDialog('hint_jieji_dungeon_pack', interpolations: ['${money}'])
+  await dialog.execute()
+}
+
+/// 秘境出口劫礼。须在 unlockDungeonDeck / 清空 dungeon flags 之前调用。
+async function playJiejiDungeonExitGift() {
+  if (hero == null) return
+
+  dialog.pushDialog('hint_jieji_dungeon_exit')
+  dialog.pushSelection('jiejiDungeonExitGift', [
+    'jieji_dungeon_pack',
+    'jieji_dungeon_bind',
+    'jieji_dungeon_dash',
+  ])
+  await dialog.execute()
+  final selected = dialog.checkSelected('jiejiDungeonExitGift')
+
+  if (selected == 'jieji_dungeon_bind') {
+    final healed = Player.restoreLife(jiejiDungeonExitBindLife())
+    dialog.pushDialog('hint_jieji_dungeon_bind', interpolations: ['${healed}'])
+    await dialog.execute()
+  } else if (selected == 'jieji_dungeon_dash') {
+    final spentDay = await _jiejiDungeonExitSpendDay()
+    final healed = Player.restoreLife(kJiejiDungeonExitDashLife)
+    final herb = kJiejiDungeonExitDashHerb
+    await Player.collect('herb', herb, incurIncident: false)
+    if (spentDay) {
+      dialog.pushDialog('hint_jieji_dungeon_dash', interpolations: ['${healed}', '${herb}'])
+    } else {
+      dialog.pushDialog('hint_jieji_dungeon_dash_noday', interpolations: ['${healed}', '${herb}'])
+    }
+    await dialog.execute()
+  } else {
+    await _playJiejiDungeonExitPack()
+  }
+  Game.updateUI()
+}

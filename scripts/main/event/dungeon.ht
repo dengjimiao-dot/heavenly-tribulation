@@ -600,6 +600,7 @@ async function promptExit() {
   final selected = dialog.checkSelected('exitDungeon')
   if (selected == 'exitDungeon') {
     engine.info('地牢已经完成，准备退出')
+    await playJiejiDungeonExitGift()
     unlockDungeonDeck()
     game.flags.dungeon = null
     Game.updateDungeon(null)
