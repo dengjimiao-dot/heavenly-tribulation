@@ -159,6 +159,8 @@ namespace debug {
       questKind = 'hidden_ore_vein'
     } else if (kind == 'ferry') {
       questKind = 'hidden_ferry_lantern'
+    } else if (kind == 'well') {
+      questKind = 'hidden_storm_well'
     }
     final ctor = Quests[questKind]
     if (ctor == null) return false

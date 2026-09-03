@@ -115,5 +115,13 @@
     contribution: 10,
     rank: 0,
   },
+  hidden_storm_well: {
+    id: "hidden_storm_well",
+    policy: null,
+    isBounty: false,
+    isHidden: true,
+    contribution: 12,
+    rank: 0,
+  },
 
 }
