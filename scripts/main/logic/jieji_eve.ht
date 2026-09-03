@@ -1,0 +1,137 @@
+/// 季末前夜「劫兆」三选：备粮 / 祭刀 / 闭门。赶路触发，一季一次。不改夜巡、迷障、渡劫 Boss。
+const kJiejiEveStockMoney = 80
+const kJiejiEveStockMoneyThunder = 50
+const kJiejiEveStockHerb = 3
+const kJiejiEveStockLife = 4
+const kJiejiEveRiteLife = 2
+const kJiejiEveHideLife = 8
+
+function _jiejiEveSeasonId() {
+  if (game.jieji != null && game.jieji.seasonId != null) {
+    return game.jieji.seasonId
+  }
+  return null
+}
+
+function _jiejiEveStockMoneyCost(seasonId) {
+  if (seasonId == 'thunder') return kJiejiEveStockMoneyThunder
+  return kJiejiEveStockMoney
+}
+
+function _jiejiEveCostLife(want) {
+  var lost = want
+  final life = hero.life ?? 1
+  if (life - lost < 1) lost = life - 1
+  if (lost < 0) lost = 0
+  if (lost > 0) {
+    Player.setLife(hero.life - lost)
+  }
+  return lost
+}
+
+function _jiejiEveNormalizeKind(kind) {
+  if (kind == 'stock' || kind == 'jieji_eve_stock') return 'stock'
+  if (kind == 'rite' || kind == 'jieji_eve_rite') return 'rite'
+  if (kind == 'hide' || kind == 'jieji_eve_hide') return 'hide'
+  return null
+}
+
+function _jiejiEveChoices() {
+  return [
+    {
+      text: 'jieji_eve_stock',
+      description: 'hint_jieji_eve_stock',
+    },
+    {
+      text: 'jieji_eve_rite',
+      description: 'hint_jieji_eve_rite',
+    },
+    {
+      text: 'jieji_eve_hide',
+      description: 'hint_jieji_eve_hide',
+    },
+  ]
+}
+
+function _jiejiEveApplyRiteFury() {
+  final jieji = ensureJiejiFlags()
+  if (jieji.arrayFury == true) {
+    jieji.feastFury = true
+    return 'feast'
+  }
+  jieji.arrayFury = true
+  return 'array'
+}
+
+function _jiejiEveMark() {
+  final jieji = ensureJiejiFlags()
+  final seasonId = _jiejiEveSeasonId()
+  if (seasonId == null) return
+  jieji.lastEveSeasonId = seasonId
+}
+
+/// 季末前夜劫兆三选。debug.forceEve 直接走这里，仍弹出三选。
+async function playJiejiSeasonEve() {
+  if (hero == null) return false
+
+  _jiejiEveMark()
+
+  dialog.pushDialog('hint_jieji_season_eve')
+  dialog.pushSelection('jiejiSeasonEve', _jiejiEveChoices())
+  await dialog.execute()
+  final picked = dialog.checkSelected('jiejiSeasonEve')
+  var selected = _jiejiEveNormalizeKind(picked)
+  if (selected == null) {
+    selected = 'hide'
+  }
+
+  final seasonId = _jiejiEveSeasonId()
+  if (selected == 'stock') {
+    final cost = _jiejiEveStockMoneyCost(seasonId)
+    final moneyHave = hero.materials['money'] ?? 0
+    if (moneyHave < cost) {
+      dialog.pushDialog('hint_jieji_season_eve_stock_broke', interpolations: [cost])
+      await dialog.execute()
+    } else {
+      Player.exhaust('money', cost)
+      await Player.collect('herb', kJiejiEveStockHerb, incurIncident: false)
+      final healed = Player.restoreLife(kJiejiEveStockLife)
+      dialog.pushDialog('hint_jieji_season_eve_stock', interpolations: [
+        cost,
+        kJiejiEveStockHerb,
+        healed,
+      ])
+      await dialog.execute()
+    }
+  } else if (selected == 'rite') {
+    final lost = _jiejiEveCostLife(kJiejiEveRiteLife)
+    _jiejiEveApplyRiteFury()
+    dialog.pushDialog('hint_jieji_season_eve_rite', interpolations: [lost])
+    await dialog.execute()
+  } else {
+    final healed = Player.restoreLife(kJiejiEveHideLife)
+    final jieji = ensureJiejiFlags()
+    jieji.illusionVeil = true
+    dialog.pushDialog('hint_jieji_season_eve_hide', interpolations: [healed])
+    await dialog.execute()
+  }
+
+  Game.updateUI()
+  return true
+}
+
+/// 赶路触发：当季余日 1～2，且本季还没出过劫兆。出过则返回 true，本步不再滚野遇/赶路/行商。
+async function tryJiejiSeasonEveOnMove() {
+  if (hero == null) return false
+  if (game.jieji == null) return false
+  final remain = game.jieji.daysRemaining
+  if (remain == null) return false
+  if (remain > 2) return false
+  if (remain <= 0) return false
+  final seasonId = _jiejiEveSeasonId()
+  if (seasonId == null) return false
+  final jieji = ensureJiejiFlags()
+  if (jieji.lastEveSeasonId == seasonId) return false
+  await playJiejiSeasonEve()
+  return true
+}

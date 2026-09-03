@@ -122,6 +122,9 @@ async function onAfterMove(terrain) {
   // 先尝试隐藏任务，避免开局十步保证被野遇吃掉。
   if (await trySpawnHiddenQuestOnMove(terrain)) return true
 
+  // 季末前夜劫兆：余日 1～2 赶路必出，占掉本步野遇/赶路/行商。
+  if (await tryJiejiSeasonEveOnMove()) return true
+
   var fought = false
   final tradeQuest = hero.journals.values.where((journal) =>
    !journal.isFinished &&
