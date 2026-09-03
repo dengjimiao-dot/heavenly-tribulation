@@ -1,4 +1,4 @@
-/// 劫季赶路事件：雷/雾/血三季分叉（表 A/B 各一套）+ 残碑稀有事件 + 行脚商人。
+/// 劫季赶路事件：雷/雾/血三季分叉（表 A/B/C 各一套）+ 残碑稀有事件 + 行脚商人。
 /// 由 sandbox onAfterMove 在隐藏任务与野遇都没触发时调用。
 /// 大地图野遇成功后可升格为当季具名劫纹精英（见 tryJiejiWildEliteOnWildEncounter）。
 
@@ -18,7 +18,22 @@ const kJiejiMerchantBoxKarmaChance = 0.40
 const kThunderTempleKarmaChance = 0.20
 const kThunderPrayBlankChance = 0.30
 const kJiejiRoadSteleRate = 0.25
-const kJiejiRoadTableBRate = 0.50
+const kJiejiRoadTableCRate = 0.33
+const kJiejiRoadTableBRate = 0.33
+const kJiejiRoadThunder3GongfaChance = 0.20
+const kJiejiRoadThunder3PrayHeal = 5
+const kJiejiRoadThunder3PrayBlankChance = 0.20
+const kJiejiRoadMist3HerbCost = 2
+const kJiejiRoadMist3IncenseHeal = 6
+const kJiejiRoadMist3KarmaChance = 0.15
+const kJiejiRoadMist3CabinetHerb = 3
+const kJiejiRoadMist3CabinetLifeLoss = 3
+const kJiejiRoadBlood3FordLifeLoss = 3
+const kJiejiRoadBlood3FordMoney = 120
+const kJiejiRoadBlood3GongfaChance = 0.25
+const kJiejiRoadBlood3BoatCost = 80
+const kJiejiRoadBlood3BoatHeal = 4
+const kJiejiRoadBlood3DetourLifeLoss = 1
 const kJiejiRoadOilCost = 80
 const kJiejiRoadOilHeal = 6
 const kJiejiRoadOilHerb = 2
@@ -79,7 +94,7 @@ function _jiejiRoadGrantBlank() {
   Player.acquireCard(card)
 }
 
-/// 耗 1 日。血月绕路已用 Game.updateGame(tick: ticksPerDay)，表 B 绕谷/绕开复用。
+/// 耗 1 日。血月绕路已用 Game.updateGame(tick: ticksPerDay)，表 B/C 绕谷/绕开复用。
 async function _jiejiRoadSpendDay() {
   await Game.updateGame(tick: Constants.ticksPerDay)
 }
@@ -89,21 +104,29 @@ async function _playJiejiPickedRoadEvent(seasonId, terrain) {
     await playJiejiSteleRoadEvent()
     return
   }
-  final tableB = random.nextDouble() < kJiejiRoadTableBRate
+  final roll = random.nextDouble()
+  final tableC = roll < kJiejiRoadTableCRate
+  final tableB = !tableC && roll < kJiejiRoadTableCRate + kJiejiRoadTableBRate
   if (seasonId == 'mist') {
-    if (tableB) {
+    if (tableC) {
+      await playJiejiMistRoadEvent3(terrain)
+    } else if (tableB) {
       await playJiejiMistRoadEvent2(terrain)
     } else {
       await playJiejiMistRoadEvent(terrain)
     }
   } else if (seasonId == 'thunder') {
-    if (tableB) {
+    if (tableC) {
+      await playJiejiThunderRoadEvent3(terrain)
+    } else if (tableB) {
       await playJiejiThunderRoadEvent2(terrain)
     } else {
       await playJiejiThunderRoadEvent(terrain)
     }
   } else if (seasonId == 'blood') {
-    if (tableB) {
+    if (tableC) {
+      await playJiejiBloodRoadEvent3(terrain)
+    } else if (tableB) {
       await playJiejiBloodRoadEvent2(terrain)
     } else {
       await playJiejiBloodRoadEvent(terrain)
@@ -532,6 +555,132 @@ async function playJiejiBloodRoadEvent2(terrain) {
     }
   } else {
     dialog.pushDialog('hint_jieji_road_blood2_detour')
+    await dialog.execute()
+    await _jiejiRoadSpendDay()
+  }
+  Game.updateUI()
+}
+
+async function playJiejiThunderRoadEvent3(terrain) {
+  dialog.pushDialog('hint_jieji_road_thunder3')
+  dialog.pushSelection('jiejiThunderRoad3', [
+    'jieji_thunder3_iron',
+    'jieji_thunder3_pray',
+    'jieji_thunder3_detour',
+  ])
+  await dialog.execute()
+  final selected = dialog.checkSelected('jiejiThunderRoad3')
+
+  if (selected == 'jieji_thunder3_iron') {
+    final money = 60 + random.nextInt(41)
+    await Player.collect('money', money, incurIncident: false)
+    dialog.pushDialog('hint_jieji_road_thunder3_iron', interpolations: ['${money}'])
+    await dialog.execute()
+    await tryDropGongfaShard(rate: kJiejiRoadThunder3GongfaChance)
+  } else if (selected == 'jieji_thunder3_pray') {
+    final healed = Player.restoreLife(kJiejiRoadThunder3PrayHeal)
+    if (random.nextDouble() < kJiejiRoadThunder3PrayBlankChance) {
+      _jiejiRoadGrantBlank()
+      dialog.pushDialog('hint_jieji_road_thunder3_pray_blank', interpolations: ['${healed}'])
+      await dialog.execute()
+    } else {
+      dialog.pushDialog('hint_jieji_road_thunder3_pray', interpolations: ['${healed}'])
+      await dialog.execute()
+    }
+    await _jiejiRoadSpendDay()
+  } else {
+    dialog.pushDialog('hint_jieji_road_thunder3_detour')
+    await dialog.execute()
+    await _jiejiRoadSpendDay()
+  }
+  Game.updateUI()
+}
+
+async function playJiejiMistRoadEvent3(terrain) {
+  dialog.pushDialog('hint_jieji_road_mist3')
+  dialog.pushSelection('jiejiMistRoad3', [
+    'jieji_mist3_incense',
+    'jieji_mist3_cabinet',
+    'jieji_mist3_detour',
+  ])
+  await dialog.execute()
+  final selected = dialog.checkSelected('jiejiMistRoad3')
+
+  if (selected == 'jieji_mist3_incense') {
+    final cost = kJiejiRoadMist3HerbCost
+    final herb = hero.materials['herb'] ?? 0
+    if (herb >= cost) {
+      Player.exhaust('herb', cost)
+      final healed = Player.restoreLife(kJiejiRoadMist3IncenseHeal)
+      dialog.pushDialog('hint_jieji_road_mist3_incense', interpolations: ['${cost}', '${healed}'])
+      await dialog.execute()
+      if (random.nextDouble() < kJiejiRoadMist3KarmaChance + jiejiKarmaChanceBonus()) {
+        await grantKarmaCard('mist3')
+      }
+    } else {
+      dialog.pushDialog('hint_jieji_road_mist3_incense_broke', interpolations: ['${cost}'])
+      await dialog.execute()
+    }
+  } else if (selected == 'jieji_mist3_cabinet') {
+    if (random.nextDouble() < 0.50) {
+      final herb = kJiejiRoadMist3CabinetHerb
+      await Player.collect('herb', herb, incurIncident: false)
+      dialog.pushDialog('hint_jieji_road_mist3_cabinet_herb', interpolations: ['${herb}'])
+      await dialog.execute()
+    } else {
+      final lost = _jiejiRoadClampLifeLoss(kJiejiRoadMist3CabinetLifeLoss)
+      if (lost > 0) {
+        Player.setLife(hero.life - lost)
+      }
+      dialog.pushDialog('hint_jieji_road_mist3_cabinet_hurt', interpolations: ['${lost}'])
+      await dialog.execute()
+    }
+  } else {
+    dialog.pushDialog('hint_jieji_road_mist3_detour')
+    await dialog.execute()
+    await _jiejiRoadSpendDay()
+  }
+  Game.updateUI()
+}
+
+async function playJiejiBloodRoadEvent3(terrain) {
+  dialog.pushDialog('hint_jieji_road_blood3')
+  dialog.pushSelection('jiejiBloodRoad3', [
+    'jieji_blood3_ford',
+    'jieji_blood3_boat',
+    'jieji_blood3_detour',
+  ])
+  await dialog.execute()
+  final selected = dialog.checkSelected('jiejiBloodRoad3')
+
+  if (selected == 'jieji_blood3_ford') {
+    final lost = _jiejiRoadClampLifeLoss(kJiejiRoadBlood3FordLifeLoss)
+    if (lost > 0) {
+      Player.setLife(hero.life - lost)
+    }
+    final money = kJiejiRoadBlood3FordMoney
+    await Player.collect('money', money, incurIncident: false)
+    dialog.pushDialog('hint_jieji_road_blood3_ford', interpolations: ['${lost}', '${money}'])
+    await dialog.execute()
+    await tryDropGongfaShard(rate: kJiejiRoadBlood3GongfaChance)
+  } else if (selected == 'jieji_blood3_boat') {
+    final cost = kJiejiRoadBlood3BoatCost
+    final money = hero.materials['money'] ?? 0
+    if (money >= cost) {
+      Player.exhaust('money', cost)
+      final healed = Player.restoreLife(kJiejiRoadBlood3BoatHeal)
+      dialog.pushDialog('hint_jieji_road_blood3_boat', interpolations: ['${cost}', '${healed}'])
+      await dialog.execute()
+    } else {
+      dialog.pushDialog('hint_jieji_road_blood3_boat_broke', interpolations: ['${cost}'])
+      await dialog.execute()
+    }
+  } else {
+    final lost = _jiejiRoadClampLifeLoss(kJiejiRoadBlood3DetourLifeLoss)
+    if (lost > 0) {
+      Player.setLife(hero.life - lost)
+    }
+    dialog.pushDialog('hint_jieji_road_blood3_detour', interpolations: ['${lost}'])
     await dialog.execute()
     await _jiejiRoadSpendDay()
   }
