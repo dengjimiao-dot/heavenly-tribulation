@@ -1529,43 +1529,67 @@ final class GameLogic {
   /// 时间流逝结束后弹出季末结算。时间流内只排队，不打断每一 tick。
   static void scheduleJiejiSettlement() {
     SeasonLogic.restorePendingFromFlags();
-    if (!SeasonLogic.pendingSettlement) return;
     if (SeasonLogic.settlementInFlight) return;
     if (SeasonLogic.timeflowActive) return;
+    if (!SeasonLogic.pendingSettlement) {
+      Future.microtask(flushJiejiSeasonStart);
+      return;
+    }
     Future.microtask(flushJiejiSettlement);
   }
 
   static Future<void> flushJiejiSettlement() async {
     SeasonLogic.restorePendingFromFlags();
-    if (!SeasonLogic.pendingSettlement) return;
-    if (SeasonLogic.settlementInFlight) return;
-    if (GameData.hero == null) return;
+    if (SeasonLogic.pendingSettlement &&
+        !SeasonLogic.settlementInFlight &&
+        GameData.hero != null) {
+      try {
+        final jieji = GameData.flags?['jieji'];
+        if (jieji != null && jieji['fighting'] == true) {
+          if (engine.scene?.id != Scenes.battle) {
+            jieji['fighting'] = false;
+          }
+        }
+      } catch (_) {}
 
+      SeasonLogic.settlementInFlight = true;
+      try {
+        final result = await engine.hetu.invoke(
+          'trySettleJieji',
+          namedArgs: {'endedSeasonId': SeasonLogic.pendingEndedSeasonId},
+        );
+        if (result == 'deferred') {
+          SeasonLogic.pendingSettlement = true;
+        } else {
+          SeasonLogic.restorePendingFromFlags();
+        }
+      } catch (e, st) {
+        debugPrint('trySettleJieji failed: $e\n$st');
+        SeasonLogic.restorePendingFromFlags();
+      } finally {
+        SeasonLogic.settlementInFlight = false;
+      }
+    }
+    await flushJiejiSeasonStart();
+  }
+
+  /// 入季天象征兆。等旧季 trySettleJieji 结束（或无需结算）后再弹，不替代结算。
+  static Future<void> flushJiejiSeasonStart() async {
+    if (SeasonLogic.timeflowActive) return;
+    if (SeasonLogic.pendingSettlement || SeasonLogic.settlementInFlight) {
+      return;
+    }
+    if (GameData.hero == null) return;
     try {
       final jieji = GameData.flags?['jieji'];
-      if (jieji != null && jieji['fighting'] == true) {
-        if (engine.scene?.id != Scenes.battle) {
-          jieji['fighting'] = false;
-        }
-      }
-    } catch (_) {}
-
-    SeasonLogic.settlementInFlight = true;
-    try {
-      final result = await engine.hetu.invoke(
-        'trySettleJieji',
-        namedArgs: {'endedSeasonId': SeasonLogic.pendingEndedSeasonId},
+      final pending = jieji?['pendingOmenSeasonId']?.toString();
+      if (pending == null || pending.isEmpty) return;
+      await engine.hetu.invoke(
+        'onJiejiSeasonStart',
+        positionalArgs: [pending],
       );
-      if (result == 'deferred') {
-        SeasonLogic.pendingSettlement = true;
-      } else {
-        SeasonLogic.restorePendingFromFlags();
-      }
     } catch (e, st) {
-      debugPrint('trySettleJieji failed: $e\n$st');
-      SeasonLogic.restorePendingFromFlags();
-    } finally {
-      SeasonLogic.settlementInFlight = false;
+      debugPrint('onJiejiSeasonStart failed: $e\n$st');
     }
   }
 

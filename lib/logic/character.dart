@@ -1584,7 +1584,7 @@ Future<void> _cityhallMoveHere(
 }
 
 
-Future<void> _heroForgeCardBlank(dynamic location) async {
+Future<void> _heroForgeCardBlank(dynamic location, {bool advanced = false}) async {
   final isRented = await GameLogic.checkRented(location);
   if (!isRented) return;
 
@@ -1597,8 +1597,9 @@ Future<void> _heroForgeCardBlank(dynamic location) async {
     return;
   }
 
-  const herbCost = 8;
-  const moneyCost = 200;
+  final herbCost = advanced ? 20 : 8;
+  final moneyCost = advanced ? 500 : 200;
+  final days = advanced ? 2 : 1;
   final herb = (GameData.hero['materials']['herb'] as num?)?.toInt() ?? 0;
   final money = (GameData.hero['materials']['money'] as num?)?.toInt() ?? 0;
   if (herb < herbCost || money < moneyCost) {
@@ -1623,7 +1624,7 @@ Future<void> _heroForgeCardBlank(dynamic location) async {
 
   final genre = selected == 'cardforge_genre_none' ? 'none' : selected;
   final card = engine.hetu.invoke(
-    'forgeCardBlank',
+    advanced ? 'forgeCardBlankAdvanced' : 'forgeCardBlank',
     positionalArgs: [genre],
   );
   if (card == null) {
@@ -1636,14 +1637,14 @@ Future<void> _heroForgeCardBlank(dynamic location) async {
     return;
   }
 
-  GameLogic.updateGame(ticks: kTicksPerDay);
+  GameLogic.updateGame(ticks: kTicksPerDay * days);
   var cardName = '牌胚';
   try {
     final n = card['name'];
     if (n != null) cardName = '$n';
   } catch (_) {}
   dialog.pushDialog(
-    'hint_cardforge_done',
+    advanced ? 'hint_cardforge_advanced_done' : 'hint_cardforge_done',
     npcId: location['npcId'],
     interpolations: [cardName],
   );
@@ -1693,6 +1694,10 @@ Future<void> _onInteractSite(
     siteOptions.add({
       'text': 'forgeCardBlank',
       'description': 'hint_forgeCardBlank_description',
+    });
+    siteOptions.add({
+      'text': 'forgeCardBlankAdvanced',
+      'description': 'hint_forgeCardBlankAdvanced_description',
     });
     siteOptions.add({
       'text': 'karmaCodex',
@@ -1750,6 +1755,8 @@ Future<void> _onInteractSite(
       );
     case 'forgeCardBlank':
       await _heroForgeCardBlank(location);
+    case 'forgeCardBlankAdvanced':
+      await _heroForgeCardBlank(location, advanced: true);
     case 'karmaCodex':
       await _heroShowKarmaCodex(location);
     case 'about_dungeon':

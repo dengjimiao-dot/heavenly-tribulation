@@ -183,6 +183,42 @@ async function finishJiejiSeason(endedId) {
   jieji.pendingEndedSeasonId = null
   jieji.fighting = false
   await pickXianming()
+  // 仅在劫季 id 已切换（Dart 写入 pendingOmenSeasonId）时弹入季天象征兆。
+  final omenId = jieji.pendingOmenSeasonId
+  if (omenId != null && omenId != '') {
+    await onJiejiSeasonStart(omenId)
+  }
+  Game.updateUI()
+}
+
+/// 入季天象征兆。每个 seasonId 只发一次小礼物并弹一句说明。
+async function onJiejiSeasonStart(seasonId) {
+  if (hero == null) return
+  if (seasonId == null || seasonId == '') return
+  final jieji = ensureJiejiFlags()
+  jieji.pendingOmenSeasonId = null
+  if (jieji.lastOmenSeasonId == seasonId) return
+  jieji.lastOmenSeasonId = seasonId
+
+  if (seasonId == 'thunder') {
+    await Player.collect('money', 150, incurIncident: false)
+    dialog.pushDialog('hint_jieji_omen_thunder')
+  } else if (seasonId == 'mist') {
+    await Player.collect('herb', 4, incurIncident: false)
+    dialog.pushDialog('hint_jieji_omen_mist')
+  } else if (seasonId == 'blood') {
+    var healed = 0
+    if (hero.life < hero.stats.lifeMax) {
+      healed = Player.restoreLife(8)
+    }
+    if (healed <= 0) {
+      await Player.collect('money', 80, incurIncident: false)
+    }
+    dialog.pushDialog('hint_jieji_omen_blood')
+  } else {
+    return
+  }
+  await dialog.execute()
   Game.updateUI()
 }
 

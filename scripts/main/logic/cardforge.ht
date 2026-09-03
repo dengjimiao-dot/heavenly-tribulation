@@ -1,6 +1,9 @@
 const kCardforgeHerbCost = 8
 const kCardforgeMoneyCost = 200
 const kCardforgeStaminaCost = 1
+const kCardforgeAdvancedHerbCost = 20
+const kCardforgeAdvancedMoneyCost = 500
+const kCardforgeAdvancedStaminaCost = 1
 
 function ensureHomeCardforge() {
   if (hero == null) return
@@ -46,6 +49,33 @@ function forgeCardBlank(genre) {
   final card = BattleCard(
     genre: cardGenre,
     rank: cardGenre == null ? 0 : 1,
+  )
+  card.isCardBlank = true
+  Player.acquireCard(card)
+  return card
+}
+
+function forgeCardBlankAdvanced(genre) {
+  if (hero == null) return null
+  final herbHave = hero.materials['herb'] ?? 0
+  final moneyHave = hero.materials['money'] ?? 0
+  if (herbHave < kCardforgeAdvancedHerbCost || moneyHave < kCardforgeAdvancedMoneyCost) {
+    return null
+  }
+  Player.exhaust('herb', kCardforgeAdvancedHerbCost)
+  Player.exhaust('money', kCardforgeAdvancedMoneyCost)
+
+  var nextLife = hero.life - kCardforgeAdvancedStaminaCost
+  if (nextLife < 1) nextLife = 1
+  Player.setLife(nextLife)
+
+  var cardGenre = genre
+  if (genre == null || genre == 'none' || genre == '') {
+    cardGenre = random.nextIterable(Constants.cultivationGenres)
+  }
+  final card = BattleCard(
+    genre: cardGenre,
+    rank: 1,
   )
   card.isCardBlank = true
   Player.acquireCard(card)

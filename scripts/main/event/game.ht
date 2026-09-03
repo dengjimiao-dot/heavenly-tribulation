@@ -356,6 +356,7 @@ async function onAfterEnterLocation(location) -> bool {
             await dialog.execute()
             final items = await Player.loot(journal.quest.reward)
             Game.promptItems(items)
+            await grantJiejiHiddenQuestExtra('ruins')
           }
           return true
         }
@@ -379,6 +380,7 @@ async function onAfterEnterLocation(location) -> bool {
             final items = await Player.loot(journal.quest.reward)
             Game.promptItems(items)
             await grantKarmaCard('shrine')
+            await grantJiejiHiddenQuestExtra('shrine')
           }
           return true
         }
@@ -407,6 +409,7 @@ async function onAfterEnterLocation(location) -> bool {
               await dialog.execute()
               final items = await Player.loot(journal.quest.reward)
               Game.promptItems(items)
+              await grantJiejiHiddenQuestExtra('blood')
             }
           )
           return true
@@ -456,3 +459,41 @@ async function onDying() {
   return false
 }
 
+function currentJiejiSeasonId() {
+  if (game.jieji != null && game.jieji.seasonId != null) {
+    return game.jieji.seasonId
+  }
+  return ''
+}
+
+/// 隐藏任务按时成功时的季象额外奖励。迟到不发。
+async function grantJiejiHiddenQuestExtra(kind) {
+  final seasonId = currentJiejiSeasonId()
+  if (kind == 'shrine' && seasonId == 'thunder') {
+    if (random.nextDouble() < 0.3) {
+      await grantKarmaCard('shrine')
+      dialog.pushDialog('hint_jieji_shrine_extra_karma')
+      await dialog.execute()
+    } else {
+      await Player.collect('money', 100, incurIncident: false)
+      dialog.pushDialog('hint_jieji_shrine_extra_money')
+      await dialog.execute()
+    }
+    return
+  }
+  if (kind == 'ruins' && seasonId == 'mist') {
+    if (random.nextDouble() < 0.5) {
+      await Player.collect('money', 80, incurIncident: false)
+    } else {
+      await Player.collect('herb', 3, incurIncident: false)
+    }
+    dialog.pushDialog('hint_jieji_ruins_extra')
+    await dialog.execute()
+    return
+  }
+  if (kind == 'blood' && seasonId == 'blood') {
+    await Player.collect('money', 120, incurIncident: false)
+    dialog.pushDialog('hint_jieji_blood_extra')
+    await dialog.execute()
+  }
+}

@@ -147,11 +147,15 @@ final class SeasonLogic {
     final newId = currentId;
     if (previousSeasonId != newId) {
       final settled = jieji['lastSettledSeasonId']?.toString();
-      if (settled == previousSeasonId) return;
-      pendingEndedSeasonId = previousSeasonId;
-      jieji['pendingEndedSeasonId'] = previousSeasonId;
-      jieji['endedTribulationStrictness'] = _strictnessForSeason(previousSeasonId);
-      pendingSettlement = true;
+      if (settled != previousSeasonId) {
+        pendingEndedSeasonId = previousSeasonId;
+        jieji['pendingEndedSeasonId'] = previousSeasonId;
+        jieji['endedTribulationStrictness'] =
+            _strictnessForSeason(previousSeasonId);
+        pendingSettlement = true;
+      }
+      // 新季入季天象征兆：在旧季结算排队之后标记，不替代 trySettleJieji。
+      queueSeasonStartOmen(newId);
       return;
     }
 
@@ -164,6 +168,17 @@ final class SeasonLogic {
       jieji['endedTribulationStrictness'] = _strictnessForSeason(newId);
       pendingSettlement = true;
     }
+  }
+
+  /// 入季天象征兆：每个 seasonId 只弹一次。
+  static void queueSeasonStartOmen(String seasonId) {
+    if (GameData.hero == null) return;
+    final jieji = _jiejiFlags();
+    if (jieji == null) return;
+    if (seasonId.isEmpty) return;
+    final last = jieji['lastOmenSeasonId']?.toString();
+    if (last == seasonId) return;
+    jieji['pendingOmenSeasonId'] = seasonId;
   }
 
   static double _mod(String key, [double fallback = 1.0]) {
