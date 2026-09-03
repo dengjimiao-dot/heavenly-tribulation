@@ -130,9 +130,9 @@ async function tryMistRoadEventOnMove(terrain) {
     } else {
       dialog.pushDialog('hint_jieji_mist_guide_broke')
       await dialog.execute()
-    }
-    if (random.nextDouble() < 0.30) {
-      await grantKarmaCard('mist')
+      if (random.nextDouble() < 0.30) {
+        await grantKarmaCard('mist')
+      }
     }
   }
   Game.updateUI()
