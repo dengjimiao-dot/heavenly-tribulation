@@ -1042,6 +1042,14 @@
   "hint_jieji_aid_failed": "外援未至。",
   "visitResidence": "拜访住户",
   "residenceHome": "外门寮",
+  "consultXianming": "问道",
+  "hint_consultXianming": "藏书阁可改当季仙命，立刻生效。守故城：迁徙少拆、战斗少受伤。破天劫：这一季打得更狠，下一次渡劫 Boss 弱一截。养门徒：这一季掉落更好；若本季还没选过养门徒，会来 2 名人手。每季只能问一次。",
+  "hint_consultXianming_description": "耗费药材与铜钱，问一次当季仙命。每季一次。雷月铜钱更省，雾月药材更省，血月再耗一线生机。改的是当前这一季，立刻生效。",
+  "hint_consultXianming_notEnough": "问道需要 {0} 药材和 {1} 铜钱。",
+  "hint_consultXianming_cooldown": "本季已经问过一次道。待下一季再来。",
+  "hint_consultXianming_picked": "你改定为<yellow>{0}</>。效力即刻作用于当季。",
+  "hint_consultXianming_nurture": "养门徒：这一季掉落再加 15%。若本季尚未选过养门徒，立刻来 2 名人手。",
+  "hint_consultXianming_nurture_hands": "养门徒的人手到了。来了 2 名劳工。",
 
 
   "hint_dungeon_need_deck": "进秘境前先指定一套出战卡组。没有卡组，锁门也锁不住。",

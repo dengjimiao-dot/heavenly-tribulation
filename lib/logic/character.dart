@@ -1854,6 +1854,40 @@ Future<void> _heroRecruitJiejiAid(dynamic location) async {
   }
 }
 
+
+Future<void> _heroConsultXianming(dynamic location) async {
+  final isRented = await GameLogic.checkRented(location);
+  if (!isRented) return;
+
+  final result = await engine.hetu.invoke('consultJiejiXianming');
+  if (result == 'cooldown') {
+    dialog.pushDialog(
+      'hint_consultXianming_cooldown',
+      npcId: location['npcId'],
+    );
+    await dialog.execute();
+    return;
+  }
+  if (result == 'poor') {
+    var herbCost = 4;
+    var moneyCost = 100;
+    try {
+      final costs = engine.hetu.invoke('jiejiConsultCosts');
+      if (costs != null) {
+        herbCost = (costs['herb'] as num?)?.toInt() ?? herbCost;
+        moneyCost = (costs['money'] as num?)?.toInt() ?? moneyCost;
+      }
+    } catch (_) {}
+    dialog.pushDialog(
+      'hint_consultXianming_notEnough',
+      npcId: location['npcId'],
+      interpolations: [herbCost, moneyCost],
+    );
+    await dialog.execute();
+    return;
+  }
+}
+
 Future<void> _heroShowKarmaCodex(dynamic location) async {
   final text = engine.hetu.invoke('formatKarmaCodex');
   dialog.pushDialog(
@@ -1909,6 +1943,11 @@ Future<void> _onInteractSite(
     siteOptions.add({
       'text': 'brewPotionCard',
       'description': 'hint_brewPotionCard_description',
+    });
+  } else if (siteKind == 'library') {
+    siteOptions.add({
+      'text': 'consultXianming',
+      'description': 'hint_consultXianming_description',
     });
   } else if (siteKind == 'residence' || siteKind == 'home') {
     siteOptions.add({
@@ -1975,6 +2014,8 @@ Future<void> _onInteractSite(
       await _heroBrewPotionCard(location);
     case 'recruitJiejiAid':
       await _heroRecruitJiejiAid(location);
+    case 'consultXianming':
+      await _heroConsultXianming(location);
     case 'about_dungeon':
       dialog.pushDialog(
         'hint_dungeonEntrance',

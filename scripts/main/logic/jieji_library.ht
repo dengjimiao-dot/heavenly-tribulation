@@ -1,0 +1,133 @@
+/// 藏书阁：当季问道，改写当前劫季仙命。不发季末养门徒的 8 劳工/铜钱/牌胚。
+const kJiejiConsultHerbCost = 4
+const kJiejiConsultMoneyCost = 100
+const kJiejiConsultHerbCostMist = 3
+const kJiejiConsultMoneyCostThunder = 80
+const kJiejiConsultLifeCostBlood = 1
+
+function _jiejiConsultSeasonId() {
+  if (game.jieji != null && game.jieji.seasonId != null) {
+    return game.jieji.seasonId
+  }
+  return null
+}
+
+function jiejiConsultCosts() {
+  var herb = kJiejiConsultHerbCost
+  var money = kJiejiConsultMoneyCost
+  var life = 0
+  final seasonId = _jiejiConsultSeasonId()
+  if (seasonId == 'thunder') {
+    money = kJiejiConsultMoneyCostThunder
+  } else if (seasonId == 'mist') {
+    herb = kJiejiConsultHerbCostMist
+  } else if (seasonId == 'blood') {
+    life = kJiejiConsultLifeCostBlood
+  }
+  return {
+    herb: herb,
+    money: money,
+    life: life,
+  }
+}
+
+function ensureHomeLibrary() {
+  if (hero == null) return
+  final city = getHeroHomeCity()
+  if (city == null) return
+  final siteIds = city.siteIds ?? []
+  for (final siteId in siteIds) {
+    final site = game.locations[siteId]
+    if (site != null && site.kind == kLocationKindLibrary) return
+  }
+  Location(
+    category: 'site',
+    kind: kLocationKindLibrary,
+    atCity: city,
+    sectId: city.sectId,
+    development: 0,
+    npcId: Constants.siteKindToNpcId[kLocationKindLibrary],
+  )
+}
+
+function _applyJiejiConsultPick(selected, seasonId) {
+  final jieji = ensureJiejiFlags()
+  final alreadyNurtureThisSeason = jieji.xianming == 'xianming_nurture' && jieji.xianmingSeason == seasonId
+  jieji.xianming = selected
+  jieji.xianmingSeason = seasonId
+  if (game.jieji != null) {
+    game.jieji.xianming = selected
+    game.jieji.xianmingSeason = seasonId
+  }
+  return alreadyNurtureThisSeason != true
+}
+
+/// 藏书阁问道：只写当季仙命旗标，不发季末养门徒大礼。
+/// free 为 true 时不扣费、不检查冷却（debug）。
+/// 返回 'ok' | 'cooldown' | 'poor' | 'cancel'。
+async function consultJiejiXianming({ free = false }) {
+  if (hero == null) return 'cancel'
+  final seasonId = _jiejiConsultSeasonId()
+  final jieji = ensureJiejiFlags()
+  if (free != true && seasonId != null && jieji.lastConsultSeasonId == seasonId) {
+    return 'cooldown'
+  }
+
+  if (free != true) {
+    final costs = jiejiConsultCosts()
+    final herbHave = hero.materials['herb'] ?? 0
+    final moneyHave = hero.materials['money'] ?? 0
+    if (herbHave < costs.herb || moneyHave < costs.money) {
+      return 'poor'
+    }
+  }
+
+  dialog.pushDialog('hint_consultXianming')
+  dialog.pushSelection('jiejiXianming', [
+    'xianming_guard',
+    'xianming_break',
+    {
+      text: 'xianming_nurture',
+      description: 'hint_consultXianming_nurture',
+    },
+    'cancel',
+  ])
+  await dialog.execute()
+  var selected = dialog.checkSelected('jiejiXianming')
+  if (selected == null || selected == 'cancel') {
+    if (free == true && selected == null) {
+      selected = 'xianming_guard'
+    } else {
+      return 'cancel'
+    }
+  }
+  if (selected != 'xianming_guard' && selected != 'xianming_break' && selected != 'xianming_nurture') {
+    return 'cancel'
+  }
+
+  if (free != true) {
+    final costs = jiejiConsultCosts()
+    Player.exhaust('herb', costs.herb)
+    Player.exhaust('money', costs.money)
+    if (costs.life > 0) {
+      var nextLife = (hero.life ?? 1) - costs.life
+      if (nextLife < 1) nextLife = 1
+      Player.setLife(nextLife)
+    }
+    if (seasonId != null) {
+      jieji.lastConsultSeasonId = seasonId
+    }
+  }
+
+  final grantNurtureHands = _applyJiejiConsultPick(selected, seasonId)
+  if (selected == 'xianming_nurture' && grantNurtureHands) {
+    await Player.collect('worker', 2, incurIncident: false)
+    dialog.pushDialog('hint_consultXianming_nurture_hands')
+    await dialog.execute()
+  }
+  final pickedName = engine.locale(selected)
+  dialog.pushDialog('hint_consultXianming_picked', interpolations: [pickedName])
+  await dialog.execute()
+  Game.updateUI()
+  return 'ok'
+}

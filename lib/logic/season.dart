@@ -396,6 +396,16 @@ final class SeasonLogic {
     if (gongfaHeldCount > 0) {
       line += ' · 功$gongfaHeldCount';
     }
+    if (xianmingActiveThisSeason) {
+      final xm = xianming;
+      if (xm == 'xianming_guard') {
+        line += ' · 守故城';
+      } else if (xm == 'xianming_break') {
+        line += ' · 破天劫';
+      } else if (xm == 'xianming_nurture') {
+        line += ' · 养门徒';
+      }
+    }
     return line;
   }
 }

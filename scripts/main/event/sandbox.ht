@@ -3,6 +3,7 @@ async function onNewGame() {
   ensureHomeCardforge()
   ensureHomeAlchemylab()
   ensureHomeResidence()
+  ensureHomeLibrary()
   final xitong = game.npcs['xitong']
 
   // final itemsInfo = [

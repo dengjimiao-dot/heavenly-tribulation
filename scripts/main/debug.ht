@@ -210,6 +210,10 @@ namespace debug {
     return result
   }
 
+  async function forceConsultXianming() {
+    return await consultJiejiXianming(free: true)
+  }
+
   /// 沙盒立刻打指定季的渡劫 Boss（含前兆三选）。会走 trySettleJieji。
   async function forceTribulation(seasonId) {
     var id = seasonId

@@ -219,6 +219,17 @@ class LocationScene extends Scene with HasCursorState {
         };
         siteList.tryAddCard(siteCard);
         world.add(siteCard);
+        final consultCard = GameData.createSiteCard(
+          spriteId: 'location/card/library.png',
+          title: engine.locale('consultXianming'),
+          onPreviewed: _onPreviewSiteCard,
+          onUnpreviewed: _onUnpreviewSiteCard,
+        );
+        consultCard.onTap = (button, position) async {
+          await GameLogic.heroConsultXianming(location);
+        };
+        siteList.tryAddCard(consultCard);
+        world.add(consultCard);
       case 'hotel':
         final siteCard = GameData.createSiteCard(
           spriteId: 'location/card/bed.png',
@@ -419,6 +430,9 @@ class LocationScene extends Scene with HasCursorState {
     if (location['category'] == 'city') {
       try {
         engine.hetu.invoke('ensureHomeResidence');
+      } catch (_) {}
+      try {
+        engine.hetu.invoke('ensureHomeLibrary');
       } catch (_) {}
     }
     _loadSites();
