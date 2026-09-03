@@ -2118,6 +2118,26 @@ Future<void> _heroBidJiejiBlackLot(dynamic location) async {
   }
 }
 
+Future<void> _heroSwapJiejiGoods(dynamic location) async {
+  final result = await engine.hetu.invoke('swapJiejiGoods');
+  if (result == 'cooldown') {
+    dialog.pushDialog(
+      'hint_swapJiejiGoods_cooldown',
+      npcId: location['npcId'],
+    );
+    await dialog.execute();
+    return;
+  }
+  if (result == 'poor') {
+    dialog.pushDialog(
+      'hint_swapJiejiGoods_notEnough',
+      npcId: location['npcId'],
+    );
+    await dialog.execute();
+    return;
+  }
+}
+
 
 Future<void> _heroSparkJiejiEnchant(dynamic location) async {
   final isRented = await GameLogic.checkRented(location);
@@ -2278,6 +2298,12 @@ Future<void> _onInteractSite(
     siteOptions.add({
       'text': 'bidJiejiBlackLot',
       'description': 'hint_bidJiejiBlackLot_description',
+    });
+  }
+  if (siteKind == 'tradinghouse') {
+    siteOptions.add({
+      'text': 'swapJiejiGoods',
+      'description': 'hint_swapJiejiGoods_description',
     });
   }
   if (siteKind == 'tradinghouse' || kProductionSiteKinds.contains(siteKind)) {
@@ -2448,6 +2474,8 @@ Future<void> _onInteractSite(
       await _heroDuelJiejiArena(location);
     case 'bidJiejiBlackLot':
       await _heroBidJiejiBlackLot(location);
+    case 'swapJiejiGoods':
+      await _heroSwapJiejiGoods(location);
     case 'divination':
       await _heroDivination(location);
     case 'consultJiejiStars':

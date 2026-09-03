@@ -301,6 +301,10 @@ namespace debug {
     return await insightJiejiStele(free: true)
   }
 
+  async function forceSwapGoods() {
+    return await swapJiejiGoods(free: true)
+  }
+
   /// 忽略几率与冷却，在当前地形开一场劫纹精英（未知则平原）。
   async function forceWildElite() {
     if (hero == null) return

@@ -20,6 +20,7 @@ const _kJiejiKeepSiteKinds = {
   'runelab': true,
   'library': true,
   'cityhall': true,
+  'tradinghouse': true,
   'headquarters': true,
   'residence': true,
   'farmland': true,

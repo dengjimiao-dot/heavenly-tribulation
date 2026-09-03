@@ -1,0 +1,160 @@
+/// 交易所「劫季换货」：按当季牌价换药材、铜钱、粮食。不替换原交易/贸易。
+const kJiejiSwapHerbAmount = 3
+const kJiejiSwapGrainAmount = 4
+const kJiejiSwapGrainHerb = 3
+const kJiejiSwapGrainHerbMist = 4
+const kJiejiSwapSellThunder = 90
+const kJiejiSwapSellMist = 70
+const kJiejiSwapSellBlood = 80
+const kJiejiSwapBuyThunder = 70
+const kJiejiSwapBuyMist = 90
+const kJiejiSwapBuyBlood = 80
+const kJiejiSwapCooldownDays = 1
+
+function _jiejiSwapSeasonId() {
+  if (game.jieji != null && game.jieji.seasonId != null) {
+    return game.jieji.seasonId
+  }
+  return 'thunder'
+}
+
+function jiejiSwapRates() {
+  var sellMoney = kJiejiSwapSellThunder
+  var buyMoney = kJiejiSwapBuyThunder
+  var grainHerb = kJiejiSwapGrainHerb
+  final seasonId = _jiejiSwapSeasonId()
+  if (seasonId == 'mist') {
+    sellMoney = kJiejiSwapSellMist
+    buyMoney = kJiejiSwapBuyMist
+    grainHerb = kJiejiSwapGrainHerbMist
+  } else if (seasonId == 'blood') {
+    sellMoney = kJiejiSwapSellBlood
+    buyMoney = kJiejiSwapBuyBlood
+  }
+  return {
+    sellMoney: sellMoney,
+    buyMoney: buyMoney,
+    grainHerb: grainHerb,
+    herbAmount: kJiejiSwapHerbAmount,
+    grainAmount: kJiejiSwapGrainAmount,
+  }
+}
+
+function _jiejiSwapCurrentDay() {
+  if (game.timestamp == null) return null
+  if (Constants.ticksPerDay == null) return null
+  if (Constants.ticksPerDay <= 0) return null
+  return game.timestamp ~/ Constants.ticksPerDay
+}
+
+function _jiejiSwapOnCooldown() {
+  final jieji = ensureJiejiFlags()
+  final day = _jiejiSwapCurrentDay()
+  if (day == null) return false
+  if (jieji.lastSwapGoodsDay == null) return false
+  if (day - jieji.lastSwapGoodsDay < kJiejiSwapCooldownDays) return true
+  return false
+}
+
+function _jiejiSwapMark() {
+  final jieji = ensureJiejiFlags()
+  jieji.lastSwapGoodsDay = _jiejiSwapCurrentDay()
+}
+
+function _jiejiSwapChoices(rates) {
+  return {
+    jieji_swap_sell: {
+      text: engine.locale('jieji_swap_sell'),
+      description: engine.locale('hint_jieji_swap_sell', interpolations: [
+        rates.herbAmount,
+        rates.sellMoney,
+      ]),
+    },
+    jieji_swap_buy: {
+      text: engine.locale('jieji_swap_buy'),
+      description: engine.locale('hint_jieji_swap_buy', interpolations: [
+        rates.buyMoney,
+        rates.herbAmount,
+      ]),
+    },
+    jieji_swap_grain: {
+      text: engine.locale('jieji_swap_grain'),
+      description: engine.locale('hint_jieji_swap_grain', interpolations: [
+        rates.grainAmount,
+        rates.grainHerb,
+      ]),
+    },
+  }
+}
+
+/// 交易所劫季换货三选。free 为 true 时不扣物资、不检查冷却（debug）。
+/// 返回 'ok' | 'cooldown' | 'poor' | 'cancel'。
+async function swapJiejiGoods({ free = false }) {
+  if (hero == null) return 'cancel'
+  if (free != true && _jiejiSwapOnCooldown()) {
+    return 'cooldown'
+  }
+
+  final rates = jiejiSwapRates()
+  dialog.pushDialog('hint_swapJiejiGoods', interpolations: [
+    rates.sellMoney,
+    rates.buyMoney,
+    rates.grainHerb,
+  ])
+  dialog.pushSelectionRaw({
+    id: 'jiejiSwap',
+    selections: _jiejiSwapChoices(rates),
+  })
+  await dialog.execute()
+  var selected = dialog.checkSelected('jiejiSwap')
+  if (selected == null || selected == 'cancel') {
+    if (free == true && selected == null) {
+      selected = 'jieji_swap_sell'
+    } else {
+      return 'cancel'
+    }
+  }
+  if (selected != 'jieji_swap_sell' && selected != 'jieji_swap_buy' && selected != 'jieji_swap_grain') {
+    return 'cancel'
+  }
+
+  if (free != true) {
+    if (selected == 'jieji_swap_sell') {
+      final herbHave = hero.materials['herb'] ?? 0
+      if (herbHave < rates.herbAmount) return 'poor'
+      Player.exhaust('herb', rates.herbAmount)
+    } else if (selected == 'jieji_swap_buy') {
+      final moneyHave = hero.materials['money'] ?? 0
+      if (moneyHave < rates.buyMoney) return 'poor'
+      Player.exhaust('money', rates.buyMoney)
+    } else {
+      final grainHave = hero.materials['grain'] ?? 0
+      if (grainHave < rates.grainAmount) return 'poor'
+      Player.exhaust('grain', rates.grainAmount)
+    }
+    _jiejiSwapMark()
+  }
+
+  if (selected == 'jieji_swap_sell') {
+    await Player.collect('money', rates.sellMoney, incurIncident: false)
+    dialog.pushDialog('hint_swapJiejiGoods_done_sell', interpolations: [
+      rates.herbAmount,
+      rates.sellMoney,
+    ])
+  } else if (selected == 'jieji_swap_buy') {
+    await Player.collect('herb', rates.herbAmount, incurIncident: false)
+    dialog.pushDialog('hint_swapJiejiGoods_done_buy', interpolations: [
+      rates.buyMoney,
+      rates.herbAmount,
+    ])
+  } else {
+    await Player.collect('herb', rates.grainHerb, incurIncident: false)
+    dialog.pushDialog('hint_swapJiejiGoods_done_grain', interpolations: [
+      rates.grainAmount,
+      rates.grainHerb,
+    ])
+  }
+  await dialog.execute()
+  Game.updateUI()
+  return 'ok'
+}
