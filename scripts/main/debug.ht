@@ -394,6 +394,11 @@ namespace debug {
     return result
   }
 
+  /// 忽略冷却与花费，仍弹出镇魔司示众三选。
+  async function forceShame() {
+    return await shameJiejiCrowd(free: true)
+  }
+
   async function forceCultivate() {
     return await cultivateJiejiArray(free: true)
   }

@@ -1,0 +1,179 @@
+/// 镇魔司「示众」：围观 / 告发 / 血证。不替换洗咒。
+const kJiejiShameCooldownDays = 1
+const kJiejiShameWatchMoney = 20
+const kJiejiShameWatchMoneyThunder = 10
+const kJiejiShameWatchHerb = 1
+const kJiejiShameWatchGongfaRate = 0.20
+const kJiejiShameTellHerb = 1
+const kJiejiShameTellMoney = 50
+const kJiejiShameTellMoneyMistExtra = 20
+const kJiejiShameBloodLife = 2
+const kJiejiShameBloodLifeBlood = 3
+const kJiejiShameBloodMoney = 80
+const kJiejiShameBloodGongfaRate = 0.30
+
+function _jiejiShameSeasonId() {
+  if (game.jieji != null && game.jieji.seasonId != null) {
+    return game.jieji.seasonId
+  }
+  return null
+}
+
+function _jiejiShameCurrentDay() {
+  if (game.timestamp == null) return null
+  if (Constants.ticksPerDay == null) return null
+  if (Constants.ticksPerDay <= 0) return null
+  return game.timestamp ~/ Constants.ticksPerDay
+}
+
+function _jiejiShameOnCooldown() {
+  final jieji = ensureJiejiFlags()
+  final day = _jiejiShameCurrentDay()
+  if (day == null) return false
+  if (jieji.lastShameDay == null) return false
+  if (day - jieji.lastShameDay < kJiejiShameCooldownDays) return true
+  return false
+}
+
+function _jiejiShameMark() {
+  final jieji = ensureJiejiFlags()
+  jieji.lastShameDay = _jiejiShameCurrentDay()
+}
+
+function _jiejiShameCostLife(want) {
+  var lost = want
+  final life = hero.life ?? 1
+  if (life - lost < 1) lost = life - 1
+  if (lost < 0) lost = 0
+  if (lost > 0) {
+    Player.setLife(hero.life - lost)
+  }
+  return lost
+}
+
+function _jiejiShameWatchMoneyCost(seasonId) {
+  if (seasonId == 'thunder') return kJiejiShameWatchMoneyThunder
+  return kJiejiShameWatchMoney
+}
+
+function _jiejiShameTellMoneyGain(seasonId) {
+  if (seasonId == 'mist') return kJiejiShameTellMoney + kJiejiShameTellMoneyMistExtra
+  return kJiejiShameTellMoney
+}
+
+function _jiejiShameBloodLifeCost(seasonId) {
+  if (seasonId == 'blood') return kJiejiShameBloodLifeBlood
+  return kJiejiShameBloodLife
+}
+
+function _jiejiShameNormalizeKind(kind) {
+  if (kind == 'watch' || kind == 'jieji_shame_watch') return 'watch'
+  if (kind == 'tell' || kind == 'jieji_shame_tell') return 'tell'
+  if (kind == 'blood' || kind == 'jieji_shame_blood') return 'blood'
+  return null
+}
+
+function _jiejiShameChoices() {
+  return [
+    {
+      text: 'jieji_shame_watch',
+      description: 'hint_jieji_shame_watch',
+    },
+    {
+      text: 'jieji_shame_tell',
+      description: 'hint_jieji_shame_tell',
+    },
+    {
+      text: 'jieji_shame_blood',
+      description: 'hint_jieji_shame_blood',
+    },
+    'cancel',
+  ]
+}
+
+function _jiejiShameHerbNeed(selected) {
+  if (selected == 'tell') return kJiejiShameTellHerb
+  return 0
+}
+
+function _jiejiShameMoneyNeed(selected, seasonId) {
+  if (selected == 'watch') return _jiejiShameWatchMoneyCost(seasonId)
+  return 0
+}
+
+/// 镇魔司示众三选。free 为 true 时不扣费、不检查冷却（debug），仍弹出三选。
+/// 返回 'ok' | 'cooldown' | 'poor' | 'cancel'。
+async function shameJiejiCrowd({ free = false }) {
+  if (hero == null) return 'cancel'
+  if (free != true && _jiejiShameOnCooldown()) {
+    return 'cooldown'
+  }
+
+  dialog.pushDialog('hint_shameJiejiCrowd')
+  dialog.pushSelection('jiejiShame', _jiejiShameChoices())
+  await dialog.execute()
+  final picked = dialog.checkSelected('jiejiShame')
+  var selected = null
+  if (picked == null || picked == 'cancel') {
+    if (free == true && picked == null) {
+      selected = 'watch'
+    } else {
+      return 'cancel'
+    }
+  } else {
+    selected = _jiejiShameNormalizeKind(picked)
+  }
+  if (selected == null) return 'cancel'
+
+  final seasonId = _jiejiShameSeasonId()
+  if (free != true) {
+    final herbNeed = _jiejiShameHerbNeed(selected)
+    final moneyNeed = _jiejiShameMoneyNeed(selected, seasonId)
+    final herbHave = hero.materials['herb'] ?? 0
+    final moneyHave = hero.materials['money'] ?? 0
+    if (herbHave < herbNeed || moneyHave < moneyNeed) {
+      return 'poor'
+    }
+  }
+
+  if (free != true) {
+    final herbNeed = _jiejiShameHerbNeed(selected)
+    final moneyNeed = _jiejiShameMoneyNeed(selected, seasonId)
+    if (herbNeed > 0) {
+      Player.exhaust('herb', herbNeed)
+    }
+    if (moneyNeed > 0) {
+      Player.exhaust('money', moneyNeed)
+    }
+    if (selected == 'blood') {
+      _jiejiShameCostLife(_jiejiShameBloodLifeCost(seasonId))
+    }
+    _jiejiShameMark()
+  }
+
+  if (selected == 'tell') {
+    await Player.collect('money', _jiejiShameTellMoneyGain(seasonId), incurIncident: false)
+    final jieji = ensureJiejiFlags()
+    jieji.illusionVeil = true
+    if (seasonId == 'mist') {
+      dialog.pushDialog('hint_shameJiejiCrowd_tell_mist')
+    } else {
+      dialog.pushDialog('hint_shameJiejiCrowd_tell')
+    }
+    await dialog.execute()
+  } else if (selected == 'blood') {
+    await Player.collect('money', kJiejiShameBloodMoney, incurIncident: false)
+    dialog.pushDialog('hint_shameJiejiCrowd_blood')
+    await dialog.execute()
+    await tryDropGongfaShard(rate: kJiejiShameBloodGongfaRate)
+    await grantKarmaCard('shame')
+  } else {
+    await Player.collect('herb', kJiejiShameWatchHerb, incurIncident: false)
+    dialog.pushDialog('hint_shameJiejiCrowd_watch')
+    await dialog.execute()
+    await tryDropGongfaShard(rate: kJiejiShameWatchGongfaRate)
+  }
+
+  Game.updateUI()
+  return 'ok'
+}
