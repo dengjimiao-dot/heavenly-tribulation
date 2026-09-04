@@ -4061,6 +4061,22 @@
   "hint_jieji_bead_bloodbead_none": "血珠下去，珠影却散了。袋里多了 {0} 铜钱。",
 
 
+  "jiejiBrooch": "劫钗",
+  "hint_jieji_brooch": "路遇一支劫钗。你可以佩钗、折钗，或以血染钗。",
+  "jieji_brooch_wearbrooch": "佩钗",
+  "jieji_brooch_foldbrooch": "折钗",
+  "jieji_brooch_bloodbrooch": "血染钗",
+  "hint_jieji_brooch_wearbrooch": "佩钗：耗 1 药材（雾月不耗）。回 5 命，八厘摸残页。药材不够则空手。",
+  "hint_jieji_brooch_foldbrooch": "折钗：花 8 铜钱（雷月 4）。得 2 药材，并回 3 命。袋里不够则空手。",
+  "hint_jieji_brooch_bloodbrooch": "血染：扣 2 点生机（至少留 1，血月 3）。二成六摸残页，不成则得 16 铜钱。",
+  "hint_jieji_brooch_wearbrooch_ok": "你佩上劫钗。生机回了 {0} 点。",
+  "hint_jieji_brooch_wearbrooch_broke": "佩钗要 {0} 药材。你拿不出来。",
+  "hint_jieji_brooch_foldbrooch_ok": "你折起劫钗。得了 {0} 药材，生机回了 {1} 点。",
+  "hint_jieji_brooch_foldbrooch_broke": "折钗要 {0} 铜钱。袋里不够。",
+  "hint_jieji_brooch_bloodbrooch_ok": "你割了 {0} 点生机去染劫钗。",
+  "hint_jieji_brooch_bloodbrooch_none": "血钗下去，钗影却散了。袋里多了 {0} 铜钱。",
+
+
   "jiejiMenpaiDemo": "劫季门派 · Demo",
   "jiejiMenpaiPitch": "带着业力赶天劫的门派肉鸽",
   "knownIssues": "已知问题",

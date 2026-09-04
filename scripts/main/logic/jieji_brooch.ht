@@ -1,0 +1,152 @@
+/// 赶路「劫钗」三选：佩钗 / 折钗 / 血染。隐藏、劫兆、野遇、赶路、行商、拾荒、扎营、残锋、残卷、雾灯、残鼓、汲泉、劫幡、劫铃、劫符、劫旌、劫烛、劫角、劫笛、劫笠、劫带、劫履、劫氅、劫扇、劫杖、劫伞、劫面、劫帔、劫手套、劫戒、劫镜、劫鼓、劫炬、劫梳、劫勺、劫碗、劫杯、劫罐、劫瓶、劫墨、劫袍、劫带、劫簪、劫笔、劫针、劫扣、劫绳、劫珠都没中时才滚。
+const kJiejiBroochBaseRate = 0.002
+const kJiejiBroochMoveCooldown = 24
+const kJiejiBroochWearbroochHerb = 1
+const kJiejiBroochWearbroochLife = 5
+const kJiejiBroochWearbroochGongfaRate = 0.08
+const kJiejiBroochFoldbroochMoney = 8
+const kJiejiBroochFoldbroochMoneyThunder = 4
+const kJiejiBroochFoldbroochHerb = 2
+const kJiejiBroochFoldbroochLife = 3
+const kJiejiBroochBloodLife = 2
+const kJiejiBroochBloodLifeBlood = 3
+const kJiejiBroochBloodGongfaRate = 0.26
+const kJiejiBroochBloodMoney = 16
+
+function _jiejiBroochSeasonId() {
+  if (game.jieji != null && game.jieji.seasonId != null) {
+    return game.jieji.seasonId
+  }
+  return null
+}
+
+function _jiejiBroochTutorialLocked() {
+  return game.enableTutorial && game.flags.tutorial.bountyQuest != true
+}
+
+function _jiejiBroochWearbroochHerbCost(seasonId) {
+  if (seasonId == 'mist') return 0
+  return kJiejiBroochWearbroochHerb
+}
+
+function _jiejiBroochFoldbroochMoneyCost(seasonId) {
+  if (seasonId == 'thunder') return kJiejiBroochFoldbroochMoneyThunder
+  return kJiejiBroochFoldbroochMoney
+}
+
+function _jiejiBroochBloodLifeCost(seasonId) {
+  if (seasonId == 'blood') return kJiejiBroochBloodLifeBlood
+  return kJiejiBroochBloodLife
+}
+
+function _jiejiBroochCostLife(want) {
+  var lost = want
+  final life = hero.life ?? 1
+  if (life - lost < 1) lost = life - 1
+  if (lost < 0) lost = 0
+  if (lost > 0) {
+    Player.setLife(hero.life - lost)
+  }
+  return lost
+}
+
+function _jiejiBroochNormalizeKind(kind) {
+  if (kind == 'wearbrooch' || kind == 'jieji_brooch_wearbrooch') return 'wearbrooch'
+  if (kind == 'foldbrooch' || kind == 'jieji_brooch_foldbrooch') return 'foldbrooch'
+  if (kind == 'bloodbrooch' || kind == 'jieji_brooch_bloodbrooch') return 'bloodbrooch'
+  return null
+}
+
+function _jiejiBroochChoices() {
+  return [
+    {
+      text: 'jieji_brooch_wearbrooch',
+      description: 'hint_jieji_brooch_wearbrooch',
+    },
+    {
+      text: 'jieji_brooch_foldbrooch',
+      description: 'hint_jieji_brooch_foldbrooch',
+    },
+    {
+      text: 'jieji_brooch_bloodbrooch',
+      description: 'hint_jieji_brooch_bloodbrooch',
+    },
+  ]
+}
+
+/// 赶路劫钗三选。debug.forceJiejiEvent('brooch') / forceBrooch 直接走这里，仍弹出三选。
+async function playJiejiBroochEvent(terrain) {
+  if (hero == null) return false
+
+  dialog.pushDialog('hint_jieji_brooch')
+  dialog.pushSelection('jiejiBrooch', _jiejiBroochChoices())
+  await dialog.execute()
+  final picked = dialog.checkSelected('jiejiBrooch')
+  var selected = _jiejiBroochNormalizeKind(picked)
+  if (selected == null) {
+    selected = 'wearbrooch'
+  }
+
+  final seasonId = _jiejiBroochSeasonId()
+  if (selected == 'wearbrooch') {
+    final herbNeed = _jiejiBroochWearbroochHerbCost(seasonId)
+    final herbHave = hero.materials['herb'] ?? 0
+    if (herbNeed > 0 && herbHave < herbNeed) {
+      dialog.pushDialog('hint_jieji_brooch_wearbrooch_broke', interpolations: [herbNeed])
+      await dialog.execute()
+    } else {
+      if (herbNeed > 0) {
+        Player.exhaust('herb', herbNeed)
+      }
+      final healed = Player.restoreLife(kJiejiBroochWearbroochLife)
+      dialog.pushDialog('hint_jieji_brooch_wearbrooch_ok', interpolations: [healed])
+      await dialog.execute()
+      await tryDropGongfaShard(rate: kJiejiBroochWearbroochGongfaRate)
+    }
+  } else if (selected == 'foldbrooch') {
+    final moneyNeed = _jiejiBroochFoldbroochMoneyCost(seasonId)
+    final moneyHave = hero.materials['money'] ?? 0
+    if (moneyHave < moneyNeed) {
+      dialog.pushDialog('hint_jieji_brooch_foldbrooch_broke', interpolations: [moneyNeed])
+      await dialog.execute()
+    } else {
+      Player.exhaust('money', moneyNeed)
+      await Player.collect('herb', kJiejiBroochFoldbroochHerb, incurIncident: false)
+      final healed = Player.restoreLife(kJiejiBroochFoldbroochLife)
+      dialog.pushDialog('hint_jieji_brooch_foldbrooch_ok', interpolations: [kJiejiBroochFoldbroochHerb, healed])
+      await dialog.execute()
+    }
+  } else {
+    final lost = _jiejiBroochCostLife(_jiejiBroochBloodLifeCost(seasonId))
+    dialog.pushDialog('hint_jieji_brooch_bloodbrooch_ok', interpolations: [lost])
+    await dialog.execute()
+    final dropped = await tryDropGongfaShard(rate: kJiejiBroochBloodGongfaRate)
+    if (dropped != true) {
+      await Player.collect('money', kJiejiBroochBloodMoney, incurIncident: false)
+      dialog.pushDialog('hint_jieji_brooch_bloodbrooch_none', interpolations: [kJiejiBroochBloodMoney])
+      await dialog.execute()
+    }
+  }
+
+  Game.updateUI()
+  return true
+}
+
+/// 赶路触发：教程锁与路遇相同；冷却 24 步；约 0.2%。出过则返回 true。
+async function tryJiejiBroochOnMove(terrain) {
+  if (hero == null) return false
+  if (_jiejiBroochTutorialLocked()) return false
+
+  final jieji = ensureJiejiFlags()
+  final moves = jieji.worldMoves ?? 0
+  final last = jieji.lastBroochMove ?? -999
+  if (moves - last < kJiejiBroochMoveCooldown) return false
+
+  var rate = kJiejiBroochBaseRate
+  if (rate < 0) rate = 0
+  if (random.nextDouble() > rate) return false
+
+  jieji.lastBroochMove = moves
+  await playJiejiBroochEvent(terrain)
+  return true
+}
