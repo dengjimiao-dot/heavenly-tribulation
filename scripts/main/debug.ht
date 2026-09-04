@@ -225,6 +225,8 @@ namespace debug {
       questKind = 'hidden_thunder_post'
     } else if (kind == 'ford') {
       questKind = 'hidden_mist_ford'
+    } else if (kind == 'canal') {
+      questKind = 'hidden_blood_canal'
     }
     final ctor = Quests[questKind]
     if (ctor == null) return false
