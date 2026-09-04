@@ -2091,6 +2091,25 @@
   "hint_againJiejiStars_notEnough": "温星要 1 药材（雾月免），借杀要 40 铜钱（雷月 20）。",
 
 
+  "castJiejiStars": "再占",
+  "jiejiCast": "再占",
+  "hint_castJiejiStars_description": "卜算台另可再占。一日一次，与再星分开计。再温耗 1 药材（雾月免）回 6 命；再借耗 40 铜钱（雷月 20）两成残页，没掉则回 4 命；血占扣 2 命（血月 3）三成五残页，没掉则得 40 铜钱。",
+  "hint_castJiejiStars": "台上另开一卦。再温、再借、血占，择一。一日一次。与问劫、再星各不挡。",
+  "jieji_cast_warm": "再温",
+  "jieji_cast_borrow": "再借",
+  "jieji_cast_blood": "血占",
+  "hint_jieji_cast_warm": "再温：耗 1 药材（雾月免）。回复 6 点生机。",
+  "hint_jieji_cast_borrow": "再借：耗 40 铜钱（雷月 20）。两成得残页；没残页则回复 4 点生机。",
+  "hint_jieji_cast_blood": "血占：扣 2 点生机（至少留 1；血月 3）。三成五得残页；没残页则得 40 铜钱。",
+  "hint_castJiejiStars_warm": "再温已了。卦火还暖，生机回了 6 点。",
+  "hint_castJiejiStars_borrow": "再借应了。残页已入袖。",
+  "hint_castJiejiStars_borrow_life": "再借应了。残页未现，星息回流，生机回了 4 点。",
+  "hint_castJiejiStars_blood": "血占落成。残页已入袖。",
+  "hint_castJiejiStars_blood_money": "血占落成。残页未现，袖里多了 40 铜钱。",
+  "hint_castJiejiStars_cooldown": "卦象余辉未散。过一日再来再占。",
+  "hint_castJiejiStars_notEnough": "再温要 1 药材（雾月免），再借要 40 铜钱（雷月 20）。",
+
+
   "duelJiejiArena": "劫季切磋",
   "hint_duelJiejiArena_description": "花铜钱上台，与当季具名对手切磋。四程或一日才能再打。雷月入场 20，平常 40，血月 60。胜了拿彩头，败了只伤生机，不会丧命。",
   "hint_duelJiejiArena": "台下有人应了你的名帖。点到为止，败了也不过伤些筋骨。",

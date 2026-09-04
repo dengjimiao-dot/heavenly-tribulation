@@ -2362,6 +2362,29 @@ Future<void> _heroAgainJiejiStars(dynamic location) async {
   }
 }
 
+Future<void> _heroCastJiejiStars(dynamic location) async {
+  final isRented = await GameLogic.checkRented(location);
+  if (!isRented) return;
+
+  final result = await engine.hetu.invoke('castJiejiStars');
+  if (result == 'cooldown') {
+    dialog.pushDialog(
+      'hint_castJiejiStars_cooldown',
+      npcId: location['npcId'],
+    );
+    await dialog.execute();
+    return;
+  }
+  if (result == 'poor') {
+    dialog.pushDialog(
+      'hint_castJiejiStars_notEnough',
+      npcId: location['npcId'],
+    );
+    await dialog.execute();
+    return;
+  }
+}
+
 Future<void> _heroRestJiejiSite(dynamic location) async {
   final kind = location['kind'] == 'hotel' ? 'hotel' : 'home';
   final result = await engine.hetu.invoke(
@@ -3703,6 +3726,10 @@ Future<void> _onInteractSite(
       'text': 'againJiejiStars',
       'description': 'hint_againJiejiStars_description',
     });
+    siteOptions.add({
+      'text': 'castJiejiStars',
+      'description': 'hint_castJiejiStars_description',
+    });
   } else if (siteKind == 'arena') {
     siteOptions.add('about_arena');
     siteOptions.add({
@@ -4031,6 +4058,8 @@ Future<void> _onInteractSite(
       await _heroConsultJiejiStars(location);
     case 'againJiejiStars':
       await _heroAgainJiejiStars(location);
+    case 'castJiejiStars':
+      await _heroCastJiejiStars(location);
   }
 }
 

@@ -450,6 +450,11 @@ namespace debug {
     return await againJiejiStars(free: true)
   }
 
+  /// 忽略冷却与花费，仍弹出卜算台再占三选。不与 forceAgainStars / forceConsultXianming / forceDeep 撞名。
+  async function forceCast() {
+    return await castJiejiStars(free: true)
+  }
+
   async function forceArenaDuel() {
     return await duelJiejiArena(free: true)
   }

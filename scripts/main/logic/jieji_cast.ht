@@ -1,0 +1,183 @@
+/// 卜算台「再占」三选：再温 / 再借 / 血占。不替换问劫与再星。
+const kJiejiCastCooldownDays = 1
+const kJiejiCastWarmHerb = 1
+const kJiejiCastWarmHerbMist = 0
+const kJiejiCastWarmLife = 6
+const kJiejiCastBorrowMoney = 40
+const kJiejiCastBorrowMoneyThunder = 20
+const kJiejiCastBorrowGongfaRate = 0.20
+const kJiejiCastBorrowLife = 4
+const kJiejiCastBloodLife = 2
+const kJiejiCastBloodLifeBlood = 3
+const kJiejiCastBloodGongfaRate = 0.35
+const kJiejiCastBloodMoney = 40
+
+function _jiejiCastSeasonId() {
+  if (game.jieji != null && game.jieji.seasonId != null) {
+    return game.jieji.seasonId
+  }
+  return null
+}
+
+function _jiejiCastCurrentDay() {
+  if (game.timestamp == null) return null
+  if (Constants.ticksPerDay == null) return null
+  if (Constants.ticksPerDay <= 0) return null
+  return game.timestamp ~/ Constants.ticksPerDay
+}
+
+function _jiejiCastOnCooldown() {
+  final jieji = ensureJiejiFlags()
+  final day = _jiejiCastCurrentDay()
+  if (day == null) return false
+  if (jieji.lastCastDay == null) return false
+  if (day - jieji.lastCastDay < kJiejiCastCooldownDays) return true
+  return false
+}
+
+function _jiejiCastMark() {
+  final jieji = ensureJiejiFlags()
+  jieji.lastCastDay = _jiejiCastCurrentDay()
+}
+
+function _jiejiCastCostLife(want) {
+  var lost = want
+  final life = hero.life ?? 1
+  if (life - lost < 1) lost = life - 1
+  if (lost < 0) lost = 0
+  if (lost > 0) {
+    Player.setLife(hero.life - lost)
+  }
+  return lost
+}
+
+function _jiejiCastWarmHerbCost(seasonId) {
+  if (seasonId == 'mist') return kJiejiCastWarmHerbMist
+  return kJiejiCastWarmHerb
+}
+
+function _jiejiCastBorrowMoneyCost(seasonId) {
+  if (seasonId == 'thunder') return kJiejiCastBorrowMoneyThunder
+  return kJiejiCastBorrowMoney
+}
+
+function _jiejiCastBloodLifeCost(seasonId) {
+  if (seasonId == 'blood') return kJiejiCastBloodLifeBlood
+  return kJiejiCastBloodLife
+}
+
+function _jiejiCastNormalizeKind(kind) {
+  if (kind == 'warm' || kind == 'jieji_cast_warm') return 'warm'
+  if (kind == 'borrow' || kind == 'jieji_cast_borrow') return 'borrow'
+  if (kind == 'blood' || kind == 'jieji_cast_blood') return 'blood'
+  return null
+}
+
+function _jiejiCastChoices() {
+  return [
+    {
+      text: 'jieji_cast_warm',
+      description: 'hint_jieji_cast_warm',
+    },
+    {
+      text: 'jieji_cast_borrow',
+      description: 'hint_jieji_cast_borrow',
+    },
+    {
+      text: 'jieji_cast_blood',
+      description: 'hint_jieji_cast_blood',
+    },
+    'cancel',
+  ]
+}
+
+function _jiejiCastHerbNeed(selected, seasonId) {
+  if (selected == 'warm') return _jiejiCastWarmHerbCost(seasonId)
+  return 0
+}
+
+function _jiejiCastMoneyNeed(selected, seasonId) {
+  if (selected == 'borrow') return _jiejiCastBorrowMoneyCost(seasonId)
+  return 0
+}
+
+/// 卜算台再占三选。free 为 true 时不扣费、不检查冷却（debug），仍弹出三选。
+/// null 选择在 free 时默认再温。
+/// 返回 'ok' | 'cooldown' | 'poor' | 'cancel'。
+async function castJiejiStars({ free = false }) {
+  if (hero == null) return 'cancel'
+  if (free != true && _jiejiCastOnCooldown()) {
+    return 'cooldown'
+  }
+
+  dialog.pushDialog('hint_castJiejiStars')
+  dialog.pushSelection('jiejiCast', _jiejiCastChoices())
+  await dialog.execute()
+  final picked = dialog.checkSelected('jiejiCast')
+  var selected = null
+  if (picked == null || picked == 'cancel') {
+    if (free == true && picked == null) {
+      selected = 'warm'
+    } else {
+      return 'cancel'
+    }
+  } else {
+    selected = _jiejiCastNormalizeKind(picked)
+  }
+  if (selected == null) return 'cancel'
+
+  final seasonId = _jiejiCastSeasonId()
+  if (free != true) {
+    final herbNeed = _jiejiCastHerbNeed(selected, seasonId)
+    final moneyNeed = _jiejiCastMoneyNeed(selected, seasonId)
+    final herbHave = hero.materials['herb'] ?? 0
+    final moneyHave = hero.materials['money'] ?? 0
+    if (herbHave < herbNeed || moneyHave < moneyNeed) {
+      return 'poor'
+    }
+  }
+
+  if (free != true) {
+    final herbNeed = _jiejiCastHerbNeed(selected, seasonId)
+    final moneyNeed = _jiejiCastMoneyNeed(selected, seasonId)
+    if (herbNeed > 0) {
+      Player.exhaust('herb', herbNeed)
+    }
+    if (moneyNeed > 0) {
+      Player.exhaust('money', moneyNeed)
+    }
+    if (selected == 'blood') {
+      _jiejiCastCostLife(_jiejiCastBloodLifeCost(seasonId))
+    }
+    _jiejiCastMark()
+  }
+
+  if (selected == 'borrow') {
+    final dropped = await tryDropGongfaShard(rate: kJiejiCastBorrowGongfaRate)
+    if (dropped == true) {
+      dialog.pushDialog('hint_castJiejiStars_borrow')
+      await dialog.execute()
+    } else {
+      Player.restoreLife(kJiejiCastBorrowLife)
+      dialog.pushDialog('hint_castJiejiStars_borrow_life')
+      await dialog.execute()
+    }
+  } else if (selected == 'blood') {
+    final dropped = await tryDropGongfaShard(rate: kJiejiCastBloodGongfaRate)
+    if (dropped != true) {
+      await Player.collect('money', kJiejiCastBloodMoney, incurIncident: false)
+      dialog.pushDialog('hint_castJiejiStars_blood_money')
+      await dialog.execute()
+    } else {
+      dialog.pushDialog('hint_castJiejiStars_blood')
+      await dialog.execute()
+    }
+  } else {
+    Player.restoreLife(kJiejiCastWarmLife)
+    dialog.pushDialog('hint_castJiejiStars_warm')
+    await dialog.execute()
+  }
+
+  Game.updateUI()
+  return 'ok'
+}
