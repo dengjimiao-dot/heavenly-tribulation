@@ -2824,6 +2824,35 @@ namespace Quests {
   function hidden_blood_pit(cityhall, {
     difficulty = 0,
     sect,
+  }) {
+    final target = _pickVisitCity(cityhall)
+    if (target == null) return
+    final money = ((kBaseReward * (difficulty + 1) * 1.1).round() * 0.4).round()
+    return Quest(
+      kind: 'hidden_blood_pit',
+      difficulty: difficulty,
+      timeLimit: _createTimeLimit(difficulty),
+      acquiredFromSiteId: cityhall.id,
+      targetLocationId: target.id,
+      reward: [
+        {
+          type: 'material',
+          kind: 'money',
+          amount: money,
+        },
+        {
+          type: 'material',
+          kind: 'herb',
+          amount: 2,
+        },
+      ],
+      reportSiteId: target.id,
+      interpolations: [target.name],
+      sectId: sect?.id,
+      orderly: 0,
+      idealistic: 0,
+      goodwill: 0,
+    )
   }
 
   function hidden_thunder_spike(cityhall, {
