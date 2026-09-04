@@ -1,0 +1,152 @@
+/// 赶路「劫穗」三选：拈穗 / 解穗 / 血穗。隐藏、劫兆、野遇、赶路、行商、拾荒、扎营、残锋、残卷、雾灯、残鼓、汲泉、劫幡、劫铃、劫符、劫旌、劫烛、劫角、劫笛、劫笠、劫带、劫履、劫氅、劫扇、劫杖、劫伞、劫面、劫帔、劫手套、劫戒、劫镜、劫鼓、劫炬、劫梳、劫勺、劫碗、劫杯、劫罐、劫瓶、劫墨、劫袍、劫带、劫簪、劫笔、劫针、劫扣、劫绳、劫珠、劫钗、劫绦都没中时才滚。
+const kJiejiTasselBaseRate = 0.0012
+const kJiejiTasselMoveCooldown = 24
+const kJiejiTasselPintasselHerb = 1
+const kJiejiTasselPintasselLife = 4
+const kJiejiTasselPintasselGongfaRate = 0.06
+const kJiejiTasselLoostasselMoney = 6
+const kJiejiTasselLoostasselMoneyThunder = 3
+const kJiejiTasselLoostasselHerb = 2
+const kJiejiTasselLoostasselLife = 2
+const kJiejiTasselBloodLife = 2
+const kJiejiTasselBloodLifeBlood = 3
+const kJiejiTasselBloodGongfaRate = 0.22
+const kJiejiTasselBloodMoney = 12
+
+function _jiejiTasselSeasonId() {
+  if (game.jieji != null && game.jieji.seasonId != null) {
+    return game.jieji.seasonId
+  }
+  return null
+}
+
+function _jiejiTasselTutorialLocked() {
+  return game.enableTutorial && game.flags.tutorial.bountyQuest != true
+}
+
+function _jiejiTasselPintasselHerbCost(seasonId) {
+  if (seasonId == 'mist') return 0
+  return kJiejiTasselPintasselHerb
+}
+
+function _jiejiTasselLoostasselMoneyCost(seasonId) {
+  if (seasonId == 'thunder') return kJiejiTasselLoostasselMoneyThunder
+  return kJiejiTasselLoostasselMoney
+}
+
+function _jiejiTasselBloodLifeCost(seasonId) {
+  if (seasonId == 'blood') return kJiejiTasselBloodLifeBlood
+  return kJiejiTasselBloodLife
+}
+
+function _jiejiTasselCostLife(want) {
+  var lost = want
+  final life = hero.life ?? 1
+  if (life - lost < 1) lost = life - 1
+  if (lost < 0) lost = 0
+  if (lost > 0) {
+    Player.setLife(hero.life - lost)
+  }
+  return lost
+}
+
+function _jiejiTasselNormalizeKind(kind) {
+  if (kind == 'pintassel' || kind == 'jieji_tassel_pintassel') return 'pintassel'
+  if (kind == 'loostassel' || kind == 'jieji_tassel_loostassel') return 'loostassel'
+  if (kind == 'bloodtassel' || kind == 'jieji_tassel_bloodtassel') return 'bloodtassel'
+  return null
+}
+
+function _jiejiTasselChoices() {
+  return [
+    {
+      text: 'jieji_tassel_pintassel',
+      description: 'hint_jieji_tassel_pintassel',
+    },
+    {
+      text: 'jieji_tassel_loostassel',
+      description: 'hint_jieji_tassel_loostassel',
+    },
+    {
+      text: 'jieji_tassel_bloodtassel',
+      description: 'hint_jieji_tassel_bloodtassel',
+    },
+  ]
+}
+
+/// 赶路劫穗三选。debug.forceJiejiEvent('tassel') / forceTassel 直接走这里，仍弹出三选。
+async function playJiejiTasselEvent(terrain) {
+  if (hero == null) return false
+
+  dialog.pushDialog('hint_jieji_tassel')
+  dialog.pushSelection('jiejiTassel', _jiejiTasselChoices())
+  await dialog.execute()
+  final picked = dialog.checkSelected('jiejiTassel')
+  var selected = _jiejiTasselNormalizeKind(picked)
+  if (selected == null) {
+    selected = 'pintassel'
+  }
+
+  final seasonId = _jiejiTasselSeasonId()
+  if (selected == 'pintassel') {
+    final herbNeed = _jiejiTasselPintasselHerbCost(seasonId)
+    final herbHave = hero.materials['herb'] ?? 0
+    if (herbNeed > 0 && herbHave < herbNeed) {
+      dialog.pushDialog('hint_jieji_tassel_pintassel_broke', interpolations: [herbNeed])
+      await dialog.execute()
+    } else {
+      if (herbNeed > 0) {
+        Player.exhaust('herb', herbNeed)
+      }
+      final healed = Player.restoreLife(kJiejiTasselPintasselLife)
+      dialog.pushDialog('hint_jieji_tassel_pintassel_ok', interpolations: [healed])
+      await dialog.execute()
+      await tryDropGongfaShard(rate: kJiejiTasselPintasselGongfaRate)
+    }
+  } else if (selected == 'loostassel') {
+    final moneyNeed = _jiejiTasselLoostasselMoneyCost(seasonId)
+    final moneyHave = hero.materials['money'] ?? 0
+    if (moneyHave < moneyNeed) {
+      dialog.pushDialog('hint_jieji_tassel_loostassel_broke', interpolations: [moneyNeed])
+      await dialog.execute()
+    } else {
+      Player.exhaust('money', moneyNeed)
+      await Player.collect('herb', kJiejiTasselLoostasselHerb, incurIncident: false)
+      final healed = Player.restoreLife(kJiejiTasselLoostasselLife)
+      dialog.pushDialog('hint_jieji_tassel_loostassel_ok', interpolations: [kJiejiTasselLoostasselHerb, healed])
+      await dialog.execute()
+    }
+  } else {
+    final lost = _jiejiTasselCostLife(_jiejiTasselBloodLifeCost(seasonId))
+    dialog.pushDialog('hint_jieji_tassel_bloodtassel_ok', interpolations: [lost])
+    await dialog.execute()
+    final dropped = await tryDropGongfaShard(rate: kJiejiTasselBloodGongfaRate)
+    if (dropped != true) {
+      await Player.collect('money', kJiejiTasselBloodMoney, incurIncident: false)
+      dialog.pushDialog('hint_jieji_tassel_bloodtassel_none', interpolations: [kJiejiTasselBloodMoney])
+      await dialog.execute()
+    }
+  }
+
+  Game.updateUI()
+  return true
+}
+
+/// 赶路触发：教程锁与路遇相同；冷却 24 步；约 0.12%。出过则返回 true。
+async function tryJiejiTasselOnMove(terrain) {
+  if (hero == null) return false
+  if (_jiejiTasselTutorialLocked()) return false
+
+  final jieji = ensureJiejiFlags()
+  final moves = jieji.worldMoves ?? 0
+  final last = jieji.lastTasselMove ?? -999
+  if (moves - last < kJiejiTasselMoveCooldown) return false
+
+  var rate = kJiejiTasselBaseRate
+  if (rate < 0) rate = 0
+  if (random.nextDouble() > rate) return false
+
+  jieji.lastTasselMove = moves
+  await playJiejiTasselEvent(terrain)
+  return true
+}
