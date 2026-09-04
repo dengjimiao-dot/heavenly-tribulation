@@ -279,6 +279,8 @@ namespace debug {
       questKind = 'hidden_thunder_spike'
     } else if (kind == 'marsh') {
       questKind = 'hidden_mist_marsh'
+    } else if (kind == 'welt') {
+      questKind = 'hidden_blood_welt'
     }
     final ctor = Quests[questKind]
     if (ctor == null) return false

@@ -589,4 +589,13 @@
     rank: 0,
   },
 
+  hidden_blood_welt: {
+    id: "hidden_blood_welt",
+    policy: null,
+    isBounty: false,
+    isHidden: true,
+    contribution: 11,
+    rank: 0,
+  },
+
 }
