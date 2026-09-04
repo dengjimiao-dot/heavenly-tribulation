@@ -2252,6 +2252,41 @@ async function onAfterEnterLocation(location) -> bool {
         }
 
 
+        case 'hidden_blood_mire': {
+          if (isLate) {
+            Player.progressJournalById(journal.id, stage: 2)
+            dialog.pushDialog('quest_hidden_late_failed', interpolations: [journal.title])
+            await dialog.execute()
+          } else {
+            Player.progressJournalById(journal.id)
+            var locName = ''
+            final loc = game.locations[journal.quest.targetLocationId]
+            if (loc != null) {
+              locName = loc.name
+            }
+            dialog.pushDialog('quest_hidden_blood_mire_complete', interpolations: [
+              journal.title,
+              locName,
+            ])
+            await dialog.execute()
+            final items = await Player.loot(journal.quest.reward)
+            Game.promptItems(items)
+            if (random.nextDouble() < 0.5) {
+              await Player.collect('herb', 2, incurIncident: false)
+            } else {
+              await Player.collect('money', 40, incurIncident: false)
+            }
+            Player.restoreLife(4)
+            dialog.pushDialog('hint_jieji_blood_mire_extra')
+            await dialog.execute()
+            await tryDropGongfaShard(rate: 0.25)
+            await grantJiejiHiddenQuestExtra('mire')
+          }
+          return true
+        }
+
+
+
 
 
 
@@ -2960,6 +2995,23 @@ async function grantJiejiHiddenQuestExtra(kind) {
       await dialog.execute()
     }
   }
+
+
+  if (kind == 'mire') {
+    if (seasonId == 'blood') {
+      final r = random.nextDouble()
+      if (r < 0.34) {
+        await Player.collect('herb', 1, incurIncident: false)
+      } else if (r < 0.67) {
+        await Player.collect('money', 25, incurIncident: false)
+      } else {
+        await grantKarmaCard('blood')
+      }
+      dialog.pushDialog('hint_jieji_blood_mire_extra_blood')
+      await dialog.execute()
+    }
+  }
+
 
 
 
