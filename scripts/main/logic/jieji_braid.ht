@@ -1,0 +1,152 @@
+/// 赶路「劫辫」三选：系辫 / 解辫 / 血辫。隐藏、劫兆、野遇、赶路、行商、拾荒、扎营、残锋、残卷、雾灯、残鼓、汲泉、劫幡、劫铃、劫符、劫旌、劫烛、劫角、劫笛、劫笠、劫带、劫履、劫氅、劫扇、劫杖、劫伞、劫面、劫帔、劫手套、劫戒、劫镜、劫鼓、劫炬、劫梳、劫勺、劫碗、劫杯、劫罐、劫瓶、劫墨、劫袍、劫带、劫簪、劫笔、劫针、劫扣、劫绳、劫珠、劫钗、劫绦、劫穗、劫缎、劫缨、劫袖、劫领、劫缘都没中时才滚。
+const kJiejiBraidBaseRate = 0.0003
+const kJiejiBraidMoveCooldown = 24
+const kJiejiBraidTiebraidHerb = 1
+const kJiejiBraidTiebraidLife = 1
+const kJiejiBraidTiebraidGongfaRate = 0.02
+const kJiejiBraidLoosebraidMoney = 2
+const kJiejiBraidLoosebraidMoneyThunder = 1
+const kJiejiBraidLoosebraidHerb = 1
+const kJiejiBraidLoosebraidLife = 1
+const kJiejiBraidBloodLife = 1
+const kJiejiBraidBloodLifeBlood = 2
+const kJiejiBraidBloodGongfaRate = 0.10
+const kJiejiBraidBloodMoney = 3
+
+function _jiejiBraidSeasonId() {
+  if (game.jieji != null && game.jieji.seasonId != null) {
+    return game.jieji.seasonId
+  }
+  return null
+}
+
+function _jiejiBraidTutorialLocked() {
+  return game.enableTutorial && game.flags.tutorial.bountyQuest != true
+}
+
+function _jiejiBraidTiebraidHerbCost(seasonId) {
+  if (seasonId == 'mist') return 0
+  return kJiejiBraidTiebraidHerb
+}
+
+function _jiejiBraidLoosebraidMoneyCost(seasonId) {
+  if (seasonId == 'thunder') return kJiejiBraidLoosebraidMoneyThunder
+  return kJiejiBraidLoosebraidMoney
+}
+
+function _jiejiBraidBloodLifeCost(seasonId) {
+  if (seasonId == 'blood') return kJiejiBraidBloodLifeBlood
+  return kJiejiBraidBloodLife
+}
+
+function _jiejiBraidCostLife(want) {
+  var lost = want
+  final life = hero.life ?? 1
+  if (life - lost < 1) lost = life - 1
+  if (lost < 0) lost = 0
+  if (lost > 0) {
+    Player.setLife(hero.life - lost)
+  }
+  return lost
+}
+
+function _jiejiBraidNormalizeKind(kind) {
+  if (kind == 'tiebraid' || kind == 'jieji_braid_tiebraid') return 'tiebraid'
+  if (kind == 'loosebraid' || kind == 'jieji_braid_loosebraid') return 'loosebraid'
+  if (kind == 'bloodbraid' || kind == 'jieji_braid_bloodbraid') return 'bloodbraid'
+  return null
+}
+
+function _jiejiBraidChoices() {
+  return [
+    {
+      text: 'jieji_braid_tiebraid',
+      description: 'hint_jieji_braid_tiebraid',
+    },
+    {
+      text: 'jieji_braid_loosebraid',
+      description: 'hint_jieji_braid_loosebraid',
+    },
+    {
+      text: 'jieji_braid_bloodbraid',
+      description: 'hint_jieji_braid_bloodbraid',
+    },
+  ]
+}
+
+/// 赶路劫辫三选。debug.forceJiejiEvent('braid') / forceBraid 直接走这里，仍弹出三选。
+async function playJiejiBraidEvent(terrain) {
+  if (hero == null) return false
+
+  dialog.pushDialog('hint_jieji_braid')
+  dialog.pushSelection('jiejiBraid', _jiejiBraidChoices())
+  await dialog.execute()
+  final picked = dialog.checkSelected('jiejiBraid')
+  var selected = _jiejiBraidNormalizeKind(picked)
+  if (selected == null) {
+    selected = 'tiebraid'
+  }
+
+  final seasonId = _jiejiBraidSeasonId()
+  if (selected == 'tiebraid') {
+    final herbNeed = _jiejiBraidTiebraidHerbCost(seasonId)
+    final herbHave = hero.materials['herb'] ?? 0
+    if (herbNeed > 0 && herbHave < herbNeed) {
+      dialog.pushDialog('hint_jieji_braid_tiebraid_broke', interpolations: [herbNeed])
+      await dialog.execute()
+    } else {
+      if (herbNeed > 0) {
+        Player.exhaust('herb', herbNeed)
+      }
+      final healed = Player.restoreLife(kJiejiBraidTiebraidLife)
+      dialog.pushDialog('hint_jieji_braid_tiebraid_ok', interpolations: [healed])
+      await dialog.execute()
+      await tryDropGongfaShard(rate: kJiejiBraidTiebraidGongfaRate)
+    }
+  } else if (selected == 'loosebraid') {
+    final moneyNeed = _jiejiBraidLoosebraidMoneyCost(seasonId)
+    final moneyHave = hero.materials['money'] ?? 0
+    if (moneyHave < moneyNeed) {
+      dialog.pushDialog('hint_jieji_braid_loosebraid_broke', interpolations: [moneyNeed])
+      await dialog.execute()
+    } else {
+      Player.exhaust('money', moneyNeed)
+      await Player.collect('herb', kJiejiBraidLoosebraidHerb, incurIncident: false)
+      final healed = Player.restoreLife(kJiejiBraidLoosebraidLife)
+      dialog.pushDialog('hint_jieji_braid_loosebraid_ok', interpolations: [kJiejiBraidLoosebraidHerb, healed])
+      await dialog.execute()
+    }
+  } else {
+    final lost = _jiejiBraidCostLife(_jiejiBraidBloodLifeCost(seasonId))
+    dialog.pushDialog('hint_jieji_braid_bloodbraid_ok', interpolations: [lost])
+    await dialog.execute()
+    final dropped = await tryDropGongfaShard(rate: kJiejiBraidBloodGongfaRate)
+    if (dropped != true) {
+      await Player.collect('money', kJiejiBraidBloodMoney, incurIncident: false)
+      dialog.pushDialog('hint_jieji_braid_bloodbraid_none', interpolations: [kJiejiBraidBloodMoney])
+      await dialog.execute()
+    }
+  }
+
+  Game.updateUI()
+  return true
+}
+
+/// 赶路触发：教程锁与路遇相同；冷却 24 步；约 0.03%。出过则返回 true。
+async function tryJiejiBraidOnMove(terrain) {
+  if (hero == null) return false
+  if (_jiejiBraidTutorialLocked()) return false
+
+  final jieji = ensureJiejiFlags()
+  final moves = jieji.worldMoves ?? 0
+  final last = jieji.lastBraidMove ?? -999
+  if (moves - last < kJiejiBraidMoveCooldown) return false
+
+  var rate = kJiejiBraidBaseRate
+  if (rate < 0) rate = 0
+  if (random.nextDouble() > rate) return false
+
+  jieji.lastBraidMove = moves
+  await playJiejiBraidEvent(terrain)
+  return true
+}
