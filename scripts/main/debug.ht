@@ -401,6 +401,9 @@ namespace debug {
     } else if (kind == 'niche') {
       game.flags.dungeon.pendingEncounter = 'jiejiNiche'
       await playJiejiDungeonEncounter()
+    } else if (kind == 'cabinet') {
+      game.flags.dungeon.pendingEncounter = 'jiejiCabinet'
+      await playJiejiDungeonEncounter()
     } else if (kind == 'exit') {
       await playJiejiDungeonExitGift()
     } else {

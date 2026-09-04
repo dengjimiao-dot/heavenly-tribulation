@@ -147,6 +147,7 @@ const _kEncounterKinds = [
   'jiejiPedestal',
   'jiejiCrate',
   'jiejiNiche',
+  'jiejiCabinet',
 ]
 
 function _addEncampment() {
@@ -543,6 +544,9 @@ function _prepareMap() {
               }
               'jiejiNiche': {
                 markJiejiDungeonEncounter('jiejiNiche')
+              }
+              'jiejiCabinet': {
+                markJiejiDungeonEncounter('jiejiCabinet')
               }
             }
           }
