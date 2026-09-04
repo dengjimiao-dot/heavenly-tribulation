@@ -419,6 +419,16 @@ const kJiejiDungeonCurtainBloodLife = 2
 const kJiejiDungeonCurtainBloodLifeBlood = 3
 const kJiejiDungeonCurtainBloodGongfaRate = 0.35
 const kJiejiDungeonCurtainBloodMoney = 55
+const kJiejiDungeonLoomRunloomHerb = 1
+const kJiejiDungeonLoomRunloomMistMoney = 20
+const kJiejiDungeonLoomSealMoney = 30
+const kJiejiDungeonLoomSealMoneyThunder = 15
+const kJiejiDungeonLoomSealLife = 4
+const kJiejiDungeonLoomSealGongfaRate = 0.25
+const kJiejiDungeonLoomBloodLife = 2
+const kJiejiDungeonLoomBloodLifeBlood = 3
+const kJiejiDungeonLoomBloodGongfaRate = 0.35
+const kJiejiDungeonLoomBloodMoney = 55
 const kJiejiDungeonExitPackMoney = 80
 const kJiejiDungeonExitPackMoneyThunder = 120
 const kJiejiDungeonExitPackMoneyBlood = 100
@@ -656,6 +666,8 @@ async function playJiejiDungeonEncounter() {
     await playJiejiDungeonPillar()
   } else if (kind == 'jiejiCurtain') {
     await playJiejiDungeonCurtain()
+  } else if (kind == 'jiejiLoom') {
+    await playJiejiDungeonLoom()
   }
   Game.updateUI()
 }
@@ -4103,6 +4115,87 @@ async function playJiejiDungeonCurtain() {
       }
     } else {
       dialog.pushDialog('hint_jieji_dungeon_liftcurtain_broke', interpolations: ['${herbCost}'])
+      await dialog.execute()
+    }
+  }
+}
+
+
+function jiejiDungeonLoomSealMoney() {
+  if (jiejiDungeonSeasonId() == 'thunder') return kJiejiDungeonLoomSealMoneyThunder
+  return kJiejiDungeonLoomSealMoney
+}
+
+function jiejiDungeonLoomBloodLifeLoss() {
+  if (jiejiDungeonSeasonId() == 'blood') return kJiejiDungeonLoomBloodLifeBlood
+  return kJiejiDungeonLoomBloodLife
+}
+
+function jiejiDungeonLoomApplyWard() {
+  game.flags.jieji ??= {}
+  if (game.flags.jieji.arrayWard != true) {
+    game.flags.jieji.arrayWard = true
+  } else {
+    game.flags.jieji.feastFury = true
+  }
+}
+
+async function playJiejiDungeonLoom() {
+  dialog.pushDialog('hint_jieji_dungeon_loom_room')
+  dialog.pushSelection('jiejiDungeonLoom', [
+    'jieji_dungeon_runloom',
+    'jieji_dungeon_sealloom',
+    'jieji_dungeon_bloodloom',
+  ])
+  await dialog.execute()
+  final selected = dialog.checkSelected('jiejiDungeonLoom')
+
+  if (selected == 'jieji_dungeon_sealloom') {
+    final cost = jiejiDungeonLoomSealMoney()
+    final moneyHave = hero.materials['money'] ?? 0
+    if (moneyHave >= cost) {
+      Player.exhaust('money', cost)
+      final healed = Player.restoreLife(kJiejiDungeonLoomSealLife)
+      jiejiDungeonLoomApplyWard()
+      dialog.pushDialog('hint_jieji_dungeon_sealloom', interpolations: ['${cost}', '${healed}'])
+      await dialog.execute()
+      await tryDropGongfaShard(rate: kJiejiDungeonLoomSealGongfaRate)
+    } else {
+      dialog.pushDialog('hint_jieji_dungeon_sealloom_broke', interpolations: ['${cost}'])
+      await dialog.execute()
+    }
+  } else if (selected == 'jieji_dungeon_bloodloom') {
+    final lost = jiejiDungeonClampLifeLoss(jiejiDungeonLoomBloodLifeLoss())
+    if (lost > 0) {
+      Player.setLife(hero.life - lost)
+    }
+    dialog.pushDialog('hint_jieji_dungeon_bloodloom', interpolations: ['${lost}'])
+    await dialog.execute()
+    await grantKarmaCard(jiejiDungeonKarmaSource())
+    var ok = await tryDropGongfaShard(rate: kJiejiDungeonLoomBloodGongfaRate)
+    if (ok != true) {
+      final money = kJiejiDungeonLoomBloodMoney
+      await Player.collect('money', money, incurIncident: false)
+      dialog.pushDialog('hint_jieji_dungeon_bloodloom_none', interpolations: ['${money}'])
+      await dialog.execute()
+    }
+  } else {
+    final herbCost = kJiejiDungeonLoomRunloomHerb
+    final herbHave = hero.materials['herb'] ?? 0
+    if (herbHave >= herbCost) {
+      Player.exhaust('herb', herbCost)
+      jiejiDungeonGrantBlank()
+      if (jiejiDungeonSeasonId() == 'mist') {
+        final money = kJiejiDungeonLoomRunloomMistMoney
+        await Player.collect('money', money, incurIncident: false)
+        dialog.pushDialog('hint_jieji_dungeon_runloom_mist', interpolations: ['${herbCost}', '${money}'])
+        await dialog.execute()
+      } else {
+        dialog.pushDialog('hint_jieji_dungeon_runloom', interpolations: ['${herbCost}'])
+        await dialog.execute()
+      }
+    } else {
+      dialog.pushDialog('hint_jieji_dungeon_runloom_broke', interpolations: ['${herbCost}'])
       await dialog.execute()
     }
   }
