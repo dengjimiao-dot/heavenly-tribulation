@@ -293,6 +293,8 @@ namespace debug {
       questKind = 'hidden_mist_hollow'
     } else if (kind == 'blot') {
       questKind = 'hidden_blood_blot'
+    } else if (kind == 'spark') {
+      questKind = 'hidden_thunder_spark'
     }
     final ctor = Quests[questKind]
     if (ctor == null) return false

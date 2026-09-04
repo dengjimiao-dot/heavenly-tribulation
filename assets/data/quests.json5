@@ -652,4 +652,13 @@
     rank: 0,
   },
 
+  hidden_thunder_spark: {
+    id: "hidden_thunder_spark",
+    policy: null,
+    isBounty: false,
+    isHidden: true,
+    contribution: 11,
+    rank: 0,
+  },
+
 }
