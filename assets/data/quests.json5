@@ -625,4 +625,13 @@
     rank: 0,
   },
 
+  hidden_thunder_fang: {
+    id: "hidden_thunder_fang",
+    policy: null,
+    isBounty: false,
+    isHidden: true,
+    contribution: 11,
+    rank: 0,
+  },
+
 }
