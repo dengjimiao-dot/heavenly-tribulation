@@ -231,6 +231,8 @@ namespace debug {
       questKind = 'hidden_thunder_arch'
     } else if (kind == 'quay') {
       questKind = 'hidden_mist_quay'
+    } else if (kind == 'vat') {
+      questKind = 'hidden_blood_vat'
     }
     final ctor = Quests[questKind]
     if (ctor == null) return false

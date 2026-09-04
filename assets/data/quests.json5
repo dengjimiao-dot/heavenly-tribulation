@@ -395,5 +395,13 @@
     contribution: 11,
     rank: 0,
   },
+  hidden_blood_vat: {
+    id: "hidden_blood_vat",
+    policy: null,
+    isBounty: false,
+    isHidden: true,
+    contribution: 11,
+    rank: 0,
+  },
 
 }
