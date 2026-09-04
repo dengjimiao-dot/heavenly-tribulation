@@ -1,0 +1,152 @@
+/// 赶路「劫伞」三选：撑伞 / 收伞 / 血伞。隐藏、劫兆、野遇、赶路、行商、拾荒、扎营、残锋、残卷、雾灯、残鼓、汲泉、劫幡、劫铃、劫符、劫旌、劫烛、劫角、劫笛、劫笠、劫带、劫履、劫氅、劫扇、劫杖都没中时才滚。
+const kJiejiUmbrellaBaseRate = 0.023
+const kJiejiUmbrellaMoveCooldown = 24
+const kJiejiUmbrellaOpenumbHerb = 1
+const kJiejiUmbrellaOpenumbLife = 5
+const kJiejiUmbrellaOpenumbGongfaRate = 0.08
+const kJiejiUmbrellaStowumbMoney = 8
+const kJiejiUmbrellaStowumbMoneyThunder = 4
+const kJiejiUmbrellaStowumbHerb = 2
+const kJiejiUmbrellaStowumbLife = 3
+const kJiejiUmbrellaBloodLife = 2
+const kJiejiUmbrellaBloodLifeBlood = 3
+const kJiejiUmbrellaBloodGongfaRate = 0.26
+const kJiejiUmbrellaBloodMoney = 16
+
+function _jiejiUmbrellaSeasonId() {
+  if (game.jieji != null && game.jieji.seasonId != null) {
+    return game.jieji.seasonId
+  }
+  return null
+}
+
+function _jiejiUmbrellaTutorialLocked() {
+  return game.enableTutorial && game.flags.tutorial.bountyQuest != true
+}
+
+function _jiejiUmbrellaOpenumbHerbCost(seasonId) {
+  if (seasonId == 'mist') return 0
+  return kJiejiUmbrellaOpenumbHerb
+}
+
+function _jiejiUmbrellaStowumbMoneyCost(seasonId) {
+  if (seasonId == 'thunder') return kJiejiUmbrellaStowumbMoneyThunder
+  return kJiejiUmbrellaStowumbMoney
+}
+
+function _jiejiUmbrellaBloodLifeCost(seasonId) {
+  if (seasonId == 'blood') return kJiejiUmbrellaBloodLifeBlood
+  return kJiejiUmbrellaBloodLife
+}
+
+function _jiejiUmbrellaCostLife(want) {
+  var lost = want
+  final life = hero.life ?? 1
+  if (life - lost < 1) lost = life - 1
+  if (lost < 0) lost = 0
+  if (lost > 0) {
+    Player.setLife(hero.life - lost)
+  }
+  return lost
+}
+
+function _jiejiUmbrellaNormalizeKind(kind) {
+  if (kind == 'openumb' || kind == 'jieji_umbrella_openumb') return 'openumb'
+  if (kind == 'stowumb' || kind == 'jieji_umbrella_stowumb') return 'stowumb'
+  if (kind == 'bloodumb' || kind == 'jieji_umbrella_bloodumb') return 'bloodumb'
+  return null
+}
+
+function _jiejiUmbrellaChoices() {
+  return [
+    {
+      text: 'jieji_umbrella_openumb',
+      description: 'hint_jieji_umbrella_openumb',
+    },
+    {
+      text: 'jieji_umbrella_stowumb',
+      description: 'hint_jieji_umbrella_stowumb',
+    },
+    {
+      text: 'jieji_umbrella_bloodumb',
+      description: 'hint_jieji_umbrella_bloodumb',
+    },
+  ]
+}
+
+/// 赶路劫伞三选。debug.forceJiejiEvent('umbrella') / forceUmbrella 直接走这里，仍弹出三选。
+async function playJiejiUmbrellaEvent(terrain) {
+  if (hero == null) return false
+
+  dialog.pushDialog('hint_jieji_umbrella')
+  dialog.pushSelection('jiejiUmbrella', _jiejiUmbrellaChoices())
+  await dialog.execute()
+  final picked = dialog.checkSelected('jiejiUmbrella')
+  var selected = _jiejiUmbrellaNormalizeKind(picked)
+  if (selected == null) {
+    selected = 'openumb'
+  }
+
+  final seasonId = _jiejiUmbrellaSeasonId()
+  if (selected == 'openumb') {
+    final herbNeed = _jiejiUmbrellaOpenumbHerbCost(seasonId)
+    final herbHave = hero.materials['herb'] ?? 0
+    if (herbNeed > 0 && herbHave < herbNeed) {
+      dialog.pushDialog('hint_jieji_umbrella_openumb_broke', interpolations: [herbNeed])
+      await dialog.execute()
+    } else {
+      if (herbNeed > 0) {
+        Player.exhaust('herb', herbNeed)
+      }
+      final healed = Player.restoreLife(kJiejiUmbrellaOpenumbLife)
+      dialog.pushDialog('hint_jieji_umbrella_openumb_ok', interpolations: [healed])
+      await dialog.execute()
+      await tryDropGongfaShard(rate: kJiejiUmbrellaOpenumbGongfaRate)
+    }
+  } else if (selected == 'stowumb') {
+    final moneyNeed = _jiejiUmbrellaStowumbMoneyCost(seasonId)
+    final moneyHave = hero.materials['money'] ?? 0
+    if (moneyHave < moneyNeed) {
+      dialog.pushDialog('hint_jieji_umbrella_stowumb_broke', interpolations: [moneyNeed])
+      await dialog.execute()
+    } else {
+      Player.exhaust('money', moneyNeed)
+      await Player.collect('herb', kJiejiUmbrellaStowumbHerb, incurIncident: false)
+      final healed = Player.restoreLife(kJiejiUmbrellaStowumbLife)
+      dialog.pushDialog('hint_jieji_umbrella_stowumb_ok', interpolations: [kJiejiUmbrellaStowumbHerb, healed])
+      await dialog.execute()
+    }
+  } else {
+    final lost = _jiejiUmbrellaCostLife(_jiejiUmbrellaBloodLifeCost(seasonId))
+    dialog.pushDialog('hint_jieji_umbrella_bloodumb_ok', interpolations: [lost])
+    await dialog.execute()
+    final dropped = await tryDropGongfaShard(rate: kJiejiUmbrellaBloodGongfaRate)
+    if (dropped != true) {
+      await Player.collect('money', kJiejiUmbrellaBloodMoney, incurIncident: false)
+      dialog.pushDialog('hint_jieji_umbrella_bloodumb_none', interpolations: [kJiejiUmbrellaBloodMoney])
+      await dialog.execute()
+    }
+  }
+
+  Game.updateUI()
+  return true
+}
+
+/// 赶路触发：教程锁与路遇相同；冷却 24 步；约 2.3%。出过则返回 true。
+async function tryJiejiUmbrellaOnMove(terrain) {
+  if (hero == null) return false
+  if (_jiejiUmbrellaTutorialLocked()) return false
+
+  final jieji = ensureJiejiFlags()
+  final moves = jieji.worldMoves ?? 0
+  final last = jieji.lastUmbrellaMove ?? -999
+  if (moves - last < kJiejiUmbrellaMoveCooldown) return false
+
+  var rate = kJiejiUmbrellaBaseRate
+  if (rate < 0) rate = 0
+  if (random.nextDouble() > rate) return false
+
+  jieji.lastUmbrellaMove = moves
+  await playJiejiUmbrellaEvent(terrain)
+  return true
+}
