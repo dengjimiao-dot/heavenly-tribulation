@@ -491,5 +491,13 @@
     contribution: 11,
     rank: 0,
   },
+  hidden_blood_gore: {
+    id: "hidden_blood_gore",
+    policy: null,
+    isBounty: false,
+    isHidden: true,
+    contribution: 11,
+    rank: 0,
+  },
 
 }
