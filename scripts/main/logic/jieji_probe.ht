@@ -1,0 +1,191 @@
+/// 秘境入口「再探」三选：再摸 / 再掘 / 血探。不替换剑冢与探穴。
+const kJiejiProbeCooldownDays = 1
+const kJiejiProbeTouchMoney = 25
+const kJiejiProbeTouchMoneyThunder = 12
+const kJiejiProbeTouchLife = 5
+const kJiejiProbeTouchMistHerb = 1
+const kJiejiProbeDigHerb = 1
+const kJiejiProbeDigGongfaRate = 0.20
+const kJiejiProbeDigLife = 4
+const kJiejiProbeDigMistMoney = 15
+const kJiejiProbeBloodLife = 2
+const kJiejiProbeBloodLifeBlood = 3
+const kJiejiProbeBloodGongfaRate = 0.30
+const kJiejiProbeBloodMoney = 45
+
+function _jiejiProbeSeasonId() {
+  if (game.jieji != null && game.jieji.seasonId != null) {
+    return game.jieji.seasonId
+  }
+  return null
+}
+
+function _jiejiProbeCurrentDay() {
+  if (game.timestamp == null) return null
+  if (Constants.ticksPerDay == null) return null
+  if (Constants.ticksPerDay <= 0) return null
+  return game.timestamp ~/ Constants.ticksPerDay
+}
+
+function _jiejiProbeOnCooldown() {
+  final jieji = ensureJiejiFlags()
+  final day = _jiejiProbeCurrentDay()
+  if (day == null) return false
+  if (jieji.lastProbeDay == null) return false
+  if (day - jieji.lastProbeDay < kJiejiProbeCooldownDays) return true
+  return false
+}
+
+function _jiejiProbeMark() {
+  final jieji = ensureJiejiFlags()
+  jieji.lastProbeDay = _jiejiProbeCurrentDay()
+}
+
+function _jiejiProbeCostLife(want) {
+  var lost = want
+  final life = hero.life ?? 1
+  if (life - lost < 1) lost = life - 1
+  if (lost < 0) lost = 0
+  if (lost > 0) {
+    Player.setLife(hero.life - lost)
+  }
+  return lost
+}
+
+function _jiejiProbeTouchMoneyCost(seasonId) {
+  if (seasonId == 'thunder') return kJiejiProbeTouchMoneyThunder
+  return kJiejiProbeTouchMoney
+}
+
+function _jiejiProbeBloodLifeCost(seasonId) {
+  if (seasonId == 'blood') return kJiejiProbeBloodLifeBlood
+  return kJiejiProbeBloodLife
+}
+
+function _jiejiProbeNormalizeKind(kind) {
+  if (kind == 'touch' || kind == 'jieji_probe_touch') return 'touch'
+  if (kind == 'dig' || kind == 'jieji_probe_dig') return 'dig'
+  if (kind == 'blood' || kind == 'jieji_probe_blood') return 'blood'
+  return null
+}
+
+function _jiejiProbeChoices() {
+  return [
+    {
+      text: 'jieji_probe_touch',
+      description: 'hint_jieji_probe_touch',
+    },
+    {
+      text: 'jieji_probe_dig',
+      description: 'hint_jieji_probe_dig',
+    },
+    {
+      text: 'jieji_probe_blood',
+      description: 'hint_jieji_probe_blood',
+    },
+    'cancel',
+  ]
+}
+
+function _jiejiProbeHerbNeed(selected) {
+  if (selected == 'dig') return kJiejiProbeDigHerb
+  return 0
+}
+
+function _jiejiProbeMoneyNeed(selected, seasonId) {
+  if (selected == 'touch') return _jiejiProbeTouchMoneyCost(seasonId)
+  return 0
+}
+
+/// 秘境入口再探三选。free 为 true 时不扣费、不检查冷却（debug），仍弹出三选。
+/// kind 为空则弹窗；null 选择在 free 时默认再摸。
+/// 返回 'cooldown' | 'poor' | 'cancel' | 'touch' | 'dig' | 'blood'。
+async function probeJiejiTomb({ free = false, kind = null }) {
+  if (hero == null) return 'cancel'
+  if (free != true && _jiejiProbeOnCooldown()) {
+    return 'cooldown'
+  }
+
+  var selected = _jiejiProbeNormalizeKind(kind)
+  if (selected == null) {
+    dialog.pushDialog('hint_probeJiejiTomb')
+    dialog.pushSelection('jiejiProbe', _jiejiProbeChoices())
+    await dialog.execute()
+    final picked = dialog.checkSelected('jiejiProbe')
+    if (picked == null || picked == 'cancel') {
+      if (free == true && picked == null) {
+        selected = 'touch'
+      } else {
+        return 'cancel'
+      }
+    } else {
+      selected = _jiejiProbeNormalizeKind(picked)
+    }
+  }
+  if (selected == null) return 'cancel'
+
+  final seasonId = _jiejiProbeSeasonId()
+  if (free != true) {
+    final herbNeed = _jiejiProbeHerbNeed(selected)
+    final moneyNeed = _jiejiProbeMoneyNeed(selected, seasonId)
+    final herbHave = hero.materials['herb'] ?? 0
+    final moneyHave = hero.materials['money'] ?? 0
+    if (herbHave < herbNeed || moneyHave < moneyNeed) {
+      return 'poor'
+    }
+  }
+
+  if (free != true) {
+    final herbNeed = _jiejiProbeHerbNeed(selected)
+    final moneyNeed = _jiejiProbeMoneyNeed(selected, seasonId)
+    if (herbNeed > 0) {
+      Player.exhaust('herb', herbNeed)
+    }
+    if (moneyNeed > 0) {
+      Player.exhaust('money', moneyNeed)
+    }
+    if (selected == 'blood') {
+      _jiejiProbeCostLife(_jiejiProbeBloodLifeCost(seasonId))
+    }
+    _jiejiProbeMark()
+  }
+
+  if (selected == 'touch') {
+    Player.restoreLife(kJiejiProbeTouchLife)
+    if (seasonId == 'mist') {
+      await Player.collect('herb', kJiejiProbeTouchMistHerb, incurIncident: false)
+      dialog.pushDialog('hint_probeJiejiTomb_touch_mist')
+    } else {
+      dialog.pushDialog('hint_probeJiejiTomb_touch')
+    }
+    await dialog.execute()
+  } else if (selected == 'dig') {
+    final ok = await tryDropGongfaShard(rate: kJiejiProbeDigGongfaRate)
+    if (ok == true) {
+      dialog.pushDialog('hint_probeJiejiTomb_dig')
+      await dialog.execute()
+    } else {
+      Player.restoreLife(kJiejiProbeDigLife)
+      if (seasonId == 'mist') {
+        await Player.collect('money', kJiejiProbeDigMistMoney, incurIncident: false)
+        dialog.pushDialog('hint_probeJiejiTomb_dig_mist')
+      } else {
+        dialog.pushDialog('hint_probeJiejiTomb_dig_life')
+      }
+      await dialog.execute()
+    }
+  } else if (selected == 'blood') {
+    final dropped = await tryDropGongfaShard(rate: kJiejiProbeBloodGongfaRate)
+    if (dropped == true) {
+      dialog.pushDialog('hint_probeJiejiTomb_blood')
+      await dialog.execute()
+    } else {
+      await Player.collect('money', kJiejiProbeBloodMoney, incurIncident: false)
+      dialog.pushDialog('hint_probeJiejiTomb_blood_money')
+      await dialog.execute()
+    }
+  }
+
+  Game.updateUI()
+  return selected
+}
