@@ -541,6 +541,9 @@ namespace debug {
     } else if (kind == 'hearth') {
       game.flags.dungeon.pendingEncounter = 'jiejiHearth'
       await playJiejiDungeonEncounter()
+    } else if (kind == 'throne') {
+      game.flags.dungeon.pendingEncounter = 'jiejiThrone'
+      await playJiejiDungeonEncounter()
     } else if (kind == 'exit') {
       await playJiejiDungeonExitGift()
     } else {
