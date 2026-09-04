@@ -1279,6 +1279,10 @@ Future<void> _onInteractCityhall(
     'text': 'claimJiejiBounty',
     'description': 'hint_claimJiejiBounty_description',
   });
+  siteOptions.add({
+    'text': 'reclaimJiejiBounty',
+    'description': 'hint_reclaimJiejiBounty_description',
+  });
   if (sect == null) {
     if (GameData.hero['sectId'] == null) {
       siteOptions.add('createSect2');
@@ -1344,6 +1348,8 @@ Future<void> _onInteractCityhall(
       }
     case 'claimJiejiBounty':
       await _heroClaimJiejiBounty(location);
+    case 'reclaimJiejiBounty':
+      await _heroReclaimJiejiBounty(location);
     case 'donate':
       final alreadyDonated = GameData.checkMonthly('donated', location['id']);
       if (alreadyDonated) {
@@ -2705,6 +2711,26 @@ Future<void> _heroClaimJiejiBounty(dynamic location) async {
   if (result == 'poor') {
     dialog.pushDialog(
       'hint_claimJiejiBounty_notEnough',
+      npcId: location['npcId'],
+    );
+    await dialog.execute();
+    return;
+  }
+}
+
+Future<void> _heroReclaimJiejiBounty(dynamic location) async {
+  final result = await engine.hetu.invoke('reclaimJiejiBounty');
+  if (result == 'cooldown') {
+    dialog.pushDialog(
+      'hint_reclaimJiejiBounty_cooldown',
+      npcId: location['npcId'],
+    );
+    await dialog.execute();
+    return;
+  }
+  if (result == 'poor') {
+    dialog.pushDialog(
+      'hint_reclaimJiejiBounty_notEnough',
       npcId: location['npcId'],
     );
     await dialog.execute();

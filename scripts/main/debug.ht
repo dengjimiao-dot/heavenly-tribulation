@@ -705,6 +705,11 @@ namespace debug {
     return await claimJiejiBounty(free: true, kind: k)
   }
 
+  /// 忽略冷却与花费，仍弹出议事厅再赏三选。不与 forceBounty 撞名。
+  async function forceReclaim() {
+    return await reclaimJiejiBounty(free: true)
+  }
+
   /// 忽略一季一次与花费，仍弹出劫令三选。
   async function forceEdict() {
     return await issueJiejiEdict(free: true)

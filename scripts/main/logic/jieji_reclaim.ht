@@ -1,0 +1,198 @@
+/// 议事厅「再赏」：再缉 / 再搜 / 血赏。不替换劫赏。
+/// 与劫赏（jieji_bounty.ht / lastBountySeasonId）分开；本文件用 lastReclaimDay（一日冷却）。
+const kJiejiReclaimCooldownDays = 1
+const kJiejiReclaimHuntMoney = 40
+const kJiejiReclaimHuntMoneyThunder = 20
+const kJiejiReclaimHuntReward = 80
+const kJiejiReclaimHuntRewardThunder = 120
+const kJiejiReclaimSearchHerb = 1
+const kJiejiReclaimSearchHerbMist = 0
+const kJiejiReclaimSearchReward = 80
+const kJiejiReclaimSearchRewardThunder = 120
+const kJiejiReclaimBloodLife = 2
+const kJiejiReclaimBloodLifeBlood = 3
+const kJiejiReclaimBloodGongfaRate = 0.25
+const kJiejiReclaimBloodMoney = 160
+const kJiejiReclaimBloodMoneyBlood = 200
+
+function _jiejiReclaimSeasonId() {
+  if (game.jieji != null && game.jieji.seasonId != null) {
+    return game.jieji.seasonId
+  }
+  return null
+}
+
+function _jiejiReclaimCurrentDay() {
+  if (game.timestamp == null) return null
+  if (Constants.ticksPerDay == null) return null
+  if (Constants.ticksPerDay <= 0) return null
+  return game.timestamp ~/ Constants.ticksPerDay
+}
+
+function _jiejiReclaimOnCooldown() {
+  final jieji = ensureJiejiFlags()
+  final day = _jiejiReclaimCurrentDay()
+  if (day == null) return false
+  if (jieji.lastReclaimDay == null) return false
+  if (day - jieji.lastReclaimDay < kJiejiReclaimCooldownDays) return true
+  return false
+}
+
+function _jiejiReclaimMark() {
+  final jieji = ensureJiejiFlags()
+  jieji.lastReclaimDay = _jiejiReclaimCurrentDay()
+}
+
+function _jiejiReclaimCostLife(want) {
+  var lost = want
+  final life = hero.life ?? 1
+  if (life - lost < 1) lost = life - 1
+  if (lost < 0) lost = 0
+  if (lost > 0) {
+    Player.setLife(hero.life - lost)
+  }
+  return lost
+}
+
+function _jiejiReclaimHuntMoneyCost(seasonId) {
+  if (seasonId == 'thunder') return kJiejiReclaimHuntMoneyThunder
+  return kJiejiReclaimHuntMoney
+}
+
+function _jiejiReclaimHuntReward(seasonId) {
+  if (seasonId == 'thunder') return kJiejiReclaimHuntRewardThunder
+  return kJiejiReclaimHuntReward
+}
+
+function _jiejiReclaimSearchHerbCost(seasonId) {
+  if (seasonId == 'mist') return kJiejiReclaimSearchHerbMist
+  return kJiejiReclaimSearchHerb
+}
+
+function _jiejiReclaimSearchReward(seasonId) {
+  if (seasonId == 'thunder') return kJiejiReclaimSearchRewardThunder
+  return kJiejiReclaimSearchReward
+}
+
+function _jiejiReclaimBloodLifeCost(seasonId) {
+  if (seasonId == 'blood') return kJiejiReclaimBloodLifeBlood
+  return kJiejiReclaimBloodLife
+}
+
+function _jiejiReclaimBloodMoney(seasonId) {
+  if (seasonId == 'blood') return kJiejiReclaimBloodMoneyBlood
+  return kJiejiReclaimBloodMoney
+}
+
+function _jiejiReclaimNormalizeKind(kind) {
+  if (kind == 'hunt' || kind == 'jieji_reclaim_hunt') return 'hunt'
+  if (kind == 'search' || kind == 'jieji_reclaim_search') return 'search'
+  if (kind == 'blood' || kind == 'jieji_reclaim_blood') return 'blood'
+  return null
+}
+
+function _jiejiReclaimChoices() {
+  return [
+    {
+      text: 'jieji_reclaim_hunt',
+      description: 'hint_jieji_reclaim_hunt',
+    },
+    {
+      text: 'jieji_reclaim_search',
+      description: 'hint_jieji_reclaim_search',
+    },
+    {
+      text: 'jieji_reclaim_blood',
+      description: 'hint_jieji_reclaim_blood',
+    },
+    'cancel',
+  ]
+}
+
+function _jiejiReclaimHerbNeed(selected, seasonId) {
+  if (selected == 'search') return _jiejiReclaimSearchHerbCost(seasonId)
+  return 0
+}
+
+function _jiejiReclaimMoneyNeed(selected, seasonId) {
+  if (selected == 'hunt') return _jiejiReclaimHuntMoneyCost(seasonId)
+  return 0
+}
+
+/// 议事厅再赏三选。free 为 true 时不扣费、不检查冷却（debug），仍弹出三选。
+/// null 选择在 free 时默认再缉。
+/// 返回 'ok' | 'cooldown' | 'poor' | 'cancel'。
+async function reclaimJiejiBounty({ free = false }) {
+  if (hero == null) return 'cancel'
+  if (free != true && _jiejiReclaimOnCooldown()) {
+    return 'cooldown'
+  }
+
+  dialog.pushDialog('hint_reclaimJiejiBounty')
+  dialog.pushSelection('jiejiReclaim', _jiejiReclaimChoices())
+  await dialog.execute()
+  final picked = dialog.checkSelected('jiejiReclaim')
+  var selected = null
+  if (picked == null || picked == 'cancel') {
+    if (free == true && picked == null) {
+      selected = 'hunt'
+    } else {
+      return 'cancel'
+    }
+  } else {
+    selected = _jiejiReclaimNormalizeKind(picked)
+  }
+  if (selected == null) return 'cancel'
+
+  final seasonId = _jiejiReclaimSeasonId()
+  if (free != true) {
+    final herbNeed = _jiejiReclaimHerbNeed(selected, seasonId)
+    final moneyNeed = _jiejiReclaimMoneyNeed(selected, seasonId)
+    final herbHave = hero.materials['herb'] ?? 0
+    final moneyHave = hero.materials['money'] ?? 0
+    if (herbHave < herbNeed || moneyHave < moneyNeed) {
+      return 'poor'
+    }
+  }
+
+  if (free != true) {
+    final herbNeed = _jiejiReclaimHerbNeed(selected, seasonId)
+    final moneyNeed = _jiejiReclaimMoneyNeed(selected, seasonId)
+    if (herbNeed > 0) {
+      Player.exhaust('herb', herbNeed)
+    }
+    if (moneyNeed > 0) {
+      Player.exhaust('money', moneyNeed)
+    }
+    if (selected == 'blood') {
+      _jiejiReclaimCostLife(_jiejiReclaimBloodLifeCost(seasonId))
+    }
+    _jiejiReclaimMark()
+  }
+
+  if (selected == 'search') {
+    final money = _jiejiReclaimSearchReward(seasonId)
+    await Player.collect('money', money, incurIncident: false)
+    dialog.pushDialog('hint_reclaimJiejiBounty_search', interpolations: [money])
+    await dialog.execute()
+  } else if (selected == 'blood') {
+    final dropped = await tryDropGongfaShard(rate: kJiejiReclaimBloodGongfaRate)
+    if (dropped == true) {
+      dialog.pushDialog('hint_reclaimJiejiBounty_blood')
+      await dialog.execute()
+    } else {
+      final money = _jiejiReclaimBloodMoney(seasonId)
+      await Player.collect('money', money, incurIncident: false)
+      dialog.pushDialog('hint_reclaimJiejiBounty_blood_money', interpolations: [money])
+      await dialog.execute()
+    }
+  } else {
+    final money = _jiejiReclaimHuntReward(seasonId)
+    await Player.collect('money', money, incurIncident: false)
+    dialog.pushDialog('hint_reclaimJiejiBounty_hunt', interpolations: [money])
+    await dialog.execute()
+  }
+
+  Game.updateUI()
+  return 'ok'
+}
