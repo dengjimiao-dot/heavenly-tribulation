@@ -1,0 +1,152 @@
+/// 赶路「劫笠」三选：戴笠 / 收笠 / 血笠。隐藏、劫兆、野遇、赶路、行商、拾荒、扎营、残锋、残卷、雾灯、残鼓、汲泉、劫幡、劫铃、劫符、劫旌、劫烛、劫角、劫笛都没中时才滚。
+const kJiejiHatBaseRate = 0.032
+const kJiejiHatMoveCooldown = 21
+const kJiejiHatWearHerb = 1
+const kJiejiHatWearLife = 6
+const kJiejiHatWearGongfaRate = 0.11
+const kJiejiHatStowMoney = 12
+const kJiejiHatStowMoneyThunder = 6
+const kJiejiHatStowHerb = 2
+const kJiejiHatStowLife = 3
+const kJiejiHatBloodLife = 2
+const kJiejiHatBloodLifeBlood = 3
+const kJiejiHatBloodGongfaRate = 0.32
+const kJiejiHatBloodMoney = 22
+
+function _jiejiHatSeasonId() {
+  if (game.jieji != null && game.jieji.seasonId != null) {
+    return game.jieji.seasonId
+  }
+  return null
+}
+
+function _jiejiHatTutorialLocked() {
+  return game.enableTutorial && game.flags.tutorial.bountyQuest != true
+}
+
+function _jiejiHatWearHerbCost(seasonId) {
+  if (seasonId == 'mist') return 0
+  return kJiejiHatWearHerb
+}
+
+function _jiejiHatStowMoneyCost(seasonId) {
+  if (seasonId == 'thunder') return kJiejiHatStowMoneyThunder
+  return kJiejiHatStowMoney
+}
+
+function _jiejiHatBloodLifeCost(seasonId) {
+  if (seasonId == 'blood') return kJiejiHatBloodLifeBlood
+  return kJiejiHatBloodLife
+}
+
+function _jiejiHatCostLife(want) {
+  var lost = want
+  final life = hero.life ?? 1
+  if (life - lost < 1) lost = life - 1
+  if (lost < 0) lost = 0
+  if (lost > 0) {
+    Player.setLife(hero.life - lost)
+  }
+  return lost
+}
+
+function _jiejiHatNormalizeKind(kind) {
+  if (kind == 'wear' || kind == 'jieji_hat_wear') return 'wear'
+  if (kind == 'stow' || kind == 'jieji_hat_stow') return 'stow'
+  if (kind == 'bloodhat' || kind == 'jieji_hat_bloodhat') return 'bloodhat'
+  return null
+}
+
+function _jiejiHatChoices() {
+  return [
+    {
+      text: 'jieji_hat_wear',
+      description: 'hint_jieji_hat_wear',
+    },
+    {
+      text: 'jieji_hat_stow',
+      description: 'hint_jieji_hat_stow',
+    },
+    {
+      text: 'jieji_hat_bloodhat',
+      description: 'hint_jieji_hat_bloodhat',
+    },
+  ]
+}
+
+/// 赶路劫笠三选。debug.forceJiejiEvent('hat') / forceHat 直接走这里，仍弹出三选。
+async function playJiejiHatEvent(terrain) {
+  if (hero == null) return false
+
+  dialog.pushDialog('hint_jieji_hat')
+  dialog.pushSelection('jiejiHat', _jiejiHatChoices())
+  await dialog.execute()
+  final picked = dialog.checkSelected('jiejiHat')
+  var selected = _jiejiHatNormalizeKind(picked)
+  if (selected == null) {
+    selected = 'wear'
+  }
+
+  final seasonId = _jiejiHatSeasonId()
+  if (selected == 'wear') {
+    final herbNeed = _jiejiHatWearHerbCost(seasonId)
+    final herbHave = hero.materials['herb'] ?? 0
+    if (herbNeed > 0 && herbHave < herbNeed) {
+      dialog.pushDialog('hint_jieji_hat_wear_broke', interpolations: [herbNeed])
+      await dialog.execute()
+    } else {
+      if (herbNeed > 0) {
+        Player.exhaust('herb', herbNeed)
+      }
+      final healed = Player.restoreLife(kJiejiHatWearLife)
+      dialog.pushDialog('hint_jieji_hat_wear_ok', interpolations: [healed])
+      await dialog.execute()
+      await tryDropGongfaShard(rate: kJiejiHatWearGongfaRate)
+    }
+  } else if (selected == 'stow') {
+    final moneyNeed = _jiejiHatStowMoneyCost(seasonId)
+    final moneyHave = hero.materials['money'] ?? 0
+    if (moneyHave < moneyNeed) {
+      dialog.pushDialog('hint_jieji_hat_stow_broke', interpolations: [moneyNeed])
+      await dialog.execute()
+    } else {
+      Player.exhaust('money', moneyNeed)
+      await Player.collect('herb', kJiejiHatStowHerb, incurIncident: false)
+      final healed = Player.restoreLife(kJiejiHatStowLife)
+      dialog.pushDialog('hint_jieji_hat_stow_ok', interpolations: [kJiejiHatStowHerb, healed])
+      await dialog.execute()
+    }
+  } else {
+    final lost = _jiejiHatCostLife(_jiejiHatBloodLifeCost(seasonId))
+    dialog.pushDialog('hint_jieji_hat_bloodhat_ok', interpolations: [lost])
+    await dialog.execute()
+    final dropped = await tryDropGongfaShard(rate: kJiejiHatBloodGongfaRate)
+    if (dropped != true) {
+      await Player.collect('money', kJiejiHatBloodMoney, incurIncident: false)
+      dialog.pushDialog('hint_jieji_hat_bloodhat_none', interpolations: [kJiejiHatBloodMoney])
+      await dialog.execute()
+    }
+  }
+
+  Game.updateUI()
+  return true
+}
+
+/// 赶路触发：教程锁与路遇相同；冷却 21 步；约 3.2%。出过则返回 true。
+async function tryJiejiHatOnMove(terrain) {
+  if (hero == null) return false
+  if (_jiejiHatTutorialLocked()) return false
+
+  final jieji = ensureJiejiFlags()
+  final moves = jieji.worldMoves ?? 0
+  final last = jieji.lastHatMove ?? -999
+  if (moves - last < kJiejiHatMoveCooldown) return false
+
+  var rate = kJiejiHatBaseRate
+  if (rate < 0) rate = 0
+  if (random.nextDouble() > rate) return false
+
+  jieji.lastHatMove = moves
+  await playJiejiHatEvent(terrain)
+  return true
+}

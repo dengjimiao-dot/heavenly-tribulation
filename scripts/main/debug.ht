@@ -296,6 +296,8 @@ namespace debug {
       await playJiejiHornEvent(terrain)
     } else if (kind == 'flute') {
       await playJiejiFluteEvent(terrain)
+    } else if (kind == 'hat') {
+      await playJiejiHatEvent(terrain)
     } else {
       await playJiejiThunderRoadEvent(terrain)
     }
@@ -851,6 +853,11 @@ namespace debug {
   /// 忽略几率与冷却，仍弹出赶路劫笛三选。
   async function forceFlute() {
     return await playJiejiFluteEvent({ kind: 'plain' })
+  }
+
+  /// 忽略几率与冷却，仍弹出赶路劫笠三选。
+  async function forceHat() {
+    return await playJiejiHatEvent({ kind: 'plain' })
   }
 
   /// 忽略冷却与花费，仍弹出幻术祭坛入幻三选。
