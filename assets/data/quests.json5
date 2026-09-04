@@ -598,4 +598,13 @@
     rank: 0,
   },
 
+  hidden_thunder_bolt: {
+    id: "hidden_thunder_bolt",
+    policy: null,
+    isBounty: false,
+    isHidden: true,
+    contribution: 11,
+    rank: 0,
+  },
+
 }
