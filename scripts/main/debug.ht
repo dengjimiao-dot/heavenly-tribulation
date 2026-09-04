@@ -301,6 +301,8 @@ namespace debug {
       questKind = 'hidden_blood_stain'
     } else if (kind == 'flare') {
       questKind = 'hidden_thunder_flare'
+    } else if (kind == 'haze') {
+      questKind = 'hidden_mist_haze'
     }
     final ctor = Quests[questKind]
     if (ctor == null) return false
