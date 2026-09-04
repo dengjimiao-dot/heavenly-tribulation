@@ -1,0 +1,152 @@
+/// 赶路「劫轭」三选：系轭 / 解轭 / 血轭。隐藏、劫兆、野遇、赶路、行商、拾荒、扎营、残锋、残卷、雾灯、残鼓、汲泉、劫幡、劫铃、劫符、劫旌、劫烛、劫角、劫笛、劫笠、劫带、劫履、劫氅、劫扇、劫杖、劫伞、劫面、劫帔、劫手套、劫戒、劫镜、劫鼓、劫炬、劫梳、劫勺、劫碗、劫杯、劫罐、劫瓶、劫墨、劫袍、劫带、劫簪、劫笔、劫针、劫扣、劫绳、劫珠、劫钗、劫绦、劫穗、劫缎、劫缨、劫袖、劫领、劫缘、劫辫、劫翎、劫裹都没中时才滚。
+const kJiejiYokeBaseRate = 0.00015
+const kJiejiYokeMoveCooldown = 24
+const kJiejiYokeTieyokeHerb = 1
+const kJiejiYokeTieyokeLife = 1
+const kJiejiYokeTieyokeGongfaRate = 0.01
+const kJiejiYokeLooseyokeMoney = 1
+const kJiejiYokeLooseyokeMoneyThunder = 1
+const kJiejiYokeLooseyokeHerb = 1
+const kJiejiYokeLooseyokeLife = 1
+const kJiejiYokeBloodLife = 1
+const kJiejiYokeBloodLifeBlood = 2
+const kJiejiYokeBloodGongfaRate = 0.07
+const kJiejiYokeBloodMoney = 2
+
+function _jiejiYokeSeasonId() {
+  if (game.jieji != null && game.jieji.seasonId != null) {
+    return game.jieji.seasonId
+  }
+  return null
+}
+
+function _jiejiYokeTutorialLocked() {
+  return game.enableTutorial && game.flags.tutorial.bountyQuest != true
+}
+
+function _jiejiYokeTieyokeHerbCost(seasonId) {
+  if (seasonId == 'mist') return 0
+  return kJiejiYokeTieyokeHerb
+}
+
+function _jiejiYokeLooseyokeMoneyCost(seasonId) {
+  if (seasonId == 'thunder') return kJiejiYokeLooseyokeMoneyThunder
+  return kJiejiYokeLooseyokeMoney
+}
+
+function _jiejiYokeBloodLifeCost(seasonId) {
+  if (seasonId == 'blood') return kJiejiYokeBloodLifeBlood
+  return kJiejiYokeBloodLife
+}
+
+function _jiejiYokeCostLife(want) {
+  var lost = want
+  final life = hero.life ?? 1
+  if (life - lost < 1) lost = life - 1
+  if (lost < 0) lost = 0
+  if (lost > 0) {
+    Player.setLife(hero.life - lost)
+  }
+  return lost
+}
+
+function _jiejiYokeNormalizeKind(kind) {
+  if (kind == 'tieyoke' || kind == 'jieji_yoke_tieyoke') return 'tieyoke'
+  if (kind == 'looseyoke' || kind == 'jieji_yoke_looseyoke') return 'looseyoke'
+  if (kind == 'bloodyoke' || kind == 'jieji_yoke_bloodyoke') return 'bloodyoke'
+  return null
+}
+
+function _jiejiYokeChoices() {
+  return [
+    {
+      text: 'jieji_yoke_tieyoke',
+      description: 'hint_jieji_yoke_tieyoke',
+    },
+    {
+      text: 'jieji_yoke_looseyoke',
+      description: 'hint_jieji_yoke_looseyoke',
+    },
+    {
+      text: 'jieji_yoke_bloodyoke',
+      description: 'hint_jieji_yoke_bloodyoke',
+    },
+  ]
+}
+
+/// 赶路劫轭三选。debug.forceJiejiEvent('yoke') / forceYoke 直接走这里，仍弹出三选。
+async function playJiejiYokeEvent(terrain) {
+  if (hero == null) return false
+
+  dialog.pushDialog('hint_jieji_yoke')
+  dialog.pushSelection('jiejiYoke', _jiejiYokeChoices())
+  await dialog.execute()
+  final picked = dialog.checkSelected('jiejiYoke')
+  var selected = _jiejiYokeNormalizeKind(picked)
+  if (selected == null) {
+    selected = 'tieyoke'
+  }
+
+  final seasonId = _jiejiYokeSeasonId()
+  if (selected == 'tieyoke') {
+    final herbNeed = _jiejiYokeTieyokeHerbCost(seasonId)
+    final herbHave = hero.materials['herb'] ?? 0
+    if (herbNeed > 0 && herbHave < herbNeed) {
+      dialog.pushDialog('hint_jieji_yoke_tieyoke_broke', interpolations: [herbNeed])
+      await dialog.execute()
+    } else {
+      if (herbNeed > 0) {
+        Player.exhaust('herb', herbNeed)
+      }
+      final healed = Player.restoreLife(kJiejiYokeTieyokeLife)
+      dialog.pushDialog('hint_jieji_yoke_tieyoke_ok', interpolations: [healed])
+      await dialog.execute()
+      await tryDropGongfaShard(rate: kJiejiYokeTieyokeGongfaRate)
+    }
+  } else if (selected == 'looseyoke') {
+    final moneyNeed = _jiejiYokeLooseyokeMoneyCost(seasonId)
+    final moneyHave = hero.materials['money'] ?? 0
+    if (moneyHave < moneyNeed) {
+      dialog.pushDialog('hint_jieji_yoke_looseyoke_broke', interpolations: [moneyNeed])
+      await dialog.execute()
+    } else {
+      Player.exhaust('money', moneyNeed)
+      await Player.collect('herb', kJiejiYokeLooseyokeHerb, incurIncident: false)
+      final healed = Player.restoreLife(kJiejiYokeLooseyokeLife)
+      dialog.pushDialog('hint_jieji_yoke_looseyoke_ok', interpolations: [kJiejiYokeLooseyokeHerb, healed])
+      await dialog.execute()
+    }
+  } else {
+    final lost = _jiejiYokeCostLife(_jiejiYokeBloodLifeCost(seasonId))
+    dialog.pushDialog('hint_jieji_yoke_bloodyoke_ok', interpolations: [lost])
+    await dialog.execute()
+    final dropped = await tryDropGongfaShard(rate: kJiejiYokeBloodGongfaRate)
+    if (dropped != true) {
+      await Player.collect('money', kJiejiYokeBloodMoney, incurIncident: false)
+      dialog.pushDialog('hint_jieji_yoke_bloodyoke_none', interpolations: [kJiejiYokeBloodMoney])
+      await dialog.execute()
+    }
+  }
+
+  Game.updateUI()
+  return true
+}
+
+/// 赶路触发：教程锁与路遇相同；冷却 24 步；约 0.015%。出过则返回 true。
+async function tryJiejiYokeOnMove(terrain) {
+  if (hero == null) return false
+  if (_jiejiYokeTutorialLocked()) return false
+
+  final jieji = ensureJiejiFlags()
+  final moves = jieji.worldMoves ?? 0
+  final last = jieji.lastYokeMove ?? -999
+  if (moves - last < kJiejiYokeMoveCooldown) return false
+
+  var rate = kJiejiYokeBaseRate
+  if (rate < 0) rate = 0
+  if (random.nextDouble() > rate) return false
+
+  jieji.lastYokeMove = moves
+  await playJiejiYokeEvent(terrain)
+  return true
+}

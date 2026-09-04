@@ -4380,6 +4380,20 @@
   "hint_jieji_wrap_bloodwrap_ok": "你割了 {0} 点生机去染劫裹。",
   "hint_jieji_wrap_bloodwrap_none": "血裹下去，裹影却散了。袋里多了 {0} 铜钱。",
 
+  "hint_jieji_yoke": "路遇一道劫轭。你可以系轭、解轭，或以血染轭。",
+  "jieji_yoke_tieyoke": "系轭",
+  "jieji_yoke_looseyoke": "解轭",
+  "jieji_yoke_bloodyoke": "血轭",
+  "hint_jieji_yoke_tieyoke": "系轭：耗 1 药材（雾月不耗）。回 1 命，一厘摸残页。药材不够则空手。",
+  "hint_jieji_yoke_looseyoke": "解轭：花 1 铜钱（雷月 1）。得 1 药材，并回 1 命。袋里不够则空手。",
+  "hint_jieji_yoke_bloodyoke": "血轭：扣 1 点生机（至少留 1，血月 2）。七厘摸残页，不成则得 2 铜钱。",
+  "hint_jieji_yoke_tieyoke_ok": "你系上劫轭。生机回了 {0} 点。",
+  "hint_jieji_yoke_tieyoke_broke": "系轭要 {0} 药材。你拿不出来。",
+  "hint_jieji_yoke_looseyoke_ok": "你解开劫轭。得了 {0} 药材，生机回了 {1} 点。",
+  "hint_jieji_yoke_looseyoke_broke": "解轭要 {0} 铜钱。袋里不够。",
+  "hint_jieji_yoke_bloodyoke_ok": "你割了 {0} 点生机去染劫轭。",
+  "hint_jieji_yoke_bloodyoke_none": "血轭下去，轭影却散了。袋里多了 {0} 铜钱。",
+
 
   "jiejiMenpaiDemo": "劫季门派 · Demo",
   "jiejiMenpaiPitch": "带着业力赶天劫的门派肉鸽",
