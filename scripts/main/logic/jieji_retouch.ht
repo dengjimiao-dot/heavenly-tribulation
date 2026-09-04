@@ -1,0 +1,202 @@
+/// 纹身铺「再补」：再温 / 再改 / 血再。不替换季纹与补纹。
+const kJiejiRetouchCooldownDays = 1
+const kJiejiRetouchWarmMoney = 20
+const kJiejiRetouchWarmMoneyThunder = 10
+const kJiejiRetouchWarmLife = 5
+const kJiejiRetouchWarmHerbMist = 1
+const kJiejiRetouchKillHerb = 1
+const kJiejiRetouchKillGongfaRate = 0.15
+const kJiejiRetouchKillLife = 4
+const kJiejiRetouchBloodLife = 2
+const kJiejiRetouchBloodLifeBlood = 3
+const kJiejiRetouchBloodGongfaRate = 0.30
+const kJiejiRetouchBloodMoney = 40
+
+function _jiejiRetouchSeasonId() {
+  if (game.jieji != null && game.jieji.seasonId != null) {
+    return game.jieji.seasonId
+  }
+  return null
+}
+
+function _jiejiRetouchCurrentDay() {
+  if (game.timestamp == null) return null
+  if (Constants.ticksPerDay == null) return null
+  if (Constants.ticksPerDay <= 0) return null
+  return game.timestamp ~/ Constants.ticksPerDay
+}
+
+function _jiejiRetouchOnCooldown() {
+  final jieji = ensureJiejiFlags()
+  final day = _jiejiRetouchCurrentDay()
+  if (day == null) return false
+  if (jieji.lastRetouchDay == null) return false
+  if (day - jieji.lastRetouchDay < kJiejiRetouchCooldownDays) return true
+  return false
+}
+
+function _jiejiRetouchMark() {
+  final jieji = ensureJiejiFlags()
+  jieji.lastRetouchDay = _jiejiRetouchCurrentDay()
+}
+
+function _jiejiRetouchCostLife(want) {
+  var lost = want
+  final life = hero.life ?? 1
+  if (life - lost < 1) lost = life - 1
+  if (lost < 0) lost = 0
+  if (lost > 0) {
+    Player.setLife(hero.life - lost)
+  }
+  return lost
+}
+
+function _jiejiRetouchWarmMoneyCost(seasonId) {
+  if (seasonId == 'thunder') return kJiejiRetouchWarmMoneyThunder
+  return kJiejiRetouchWarmMoney
+}
+
+function _jiejiRetouchBloodLifeCost(seasonId) {
+  if (seasonId == 'blood') return kJiejiRetouchBloodLifeBlood
+  return kJiejiRetouchBloodLife
+}
+
+function _jiejiRetouchNormalizeKind(kind) {
+  if (kind == 'warm' || kind == 'jieji_retouch_warm') return 'warm'
+  if (kind == 'kill' || kind == 'jieji_retouch_kill') return 'kill'
+  if (kind == 'blood' || kind == 'jieji_retouch_blood') return 'blood'
+  return null
+}
+
+function _jiejiRetouchChoices() {
+  return [
+    {
+      text: 'jieji_retouch_warm',
+      description: 'hint_jieji_retouch_warm',
+    },
+    {
+      text: 'jieji_retouch_kill',
+      description: 'hint_jieji_retouch_kill',
+    },
+    {
+      text: 'jieji_retouch_blood',
+      description: 'hint_jieji_retouch_blood',
+    },
+    'cancel',
+  ]
+}
+
+function _jiejiRetouchMoneyNeed(selected, seasonId) {
+  if (selected == 'warm') return _jiejiRetouchWarmMoneyCost(seasonId)
+  return 0
+}
+
+function _jiejiRetouchHerbNeed(selected) {
+  if (selected == 'kill') return kJiejiRetouchKillHerb
+  return 0
+}
+
+/// 破军未挂则挂 arrayFury；已挂则挂 feastFury。两者都有则只回血。
+function _jiejiRetouchApplyFury() {
+  final jieji = ensureJiejiFlags()
+  if (jieji.arrayFury != true) {
+    jieji.arrayFury = true
+    return 'array'
+  }
+  if (jieji.feastFury != true) {
+    jieji.feastFury = true
+    return 'feast'
+  }
+  return null
+}
+
+/// 纹身铺再补三选。free 为 true 时不扣费、不检查冷却（debug），仍弹出三选。
+/// kind 为空则弹窗；null 选择在 free 时默认再温。
+/// 返回 'cooldown' | 'poor' | 'cancel' | 'warm' | 'kill' | 'blood'。
+async function retouchJiejiTattoo({ free = false, kind = null }) {
+  if (hero == null) return 'cancel'
+  if (free != true && _jiejiRetouchOnCooldown()) {
+    return 'cooldown'
+  }
+
+  var selected = _jiejiRetouchNormalizeKind(kind)
+  if (selected == null) {
+    dialog.pushDialog('hint_retouchJiejiTattoo')
+    dialog.pushSelection('jiejiRetouch', _jiejiRetouchChoices())
+    await dialog.execute()
+    final picked = dialog.checkSelected('jiejiRetouch')
+    if (picked == null || picked == 'cancel') {
+      if (free == true && picked == null) {
+        selected = 'warm'
+      } else {
+        return 'cancel'
+      }
+    } else {
+      selected = _jiejiRetouchNormalizeKind(picked)
+    }
+  }
+  if (selected == null) return 'cancel'
+
+  final seasonId = _jiejiRetouchSeasonId()
+  if (free != true) {
+    final moneyNeed = _jiejiRetouchMoneyNeed(selected, seasonId)
+    final herbNeed = _jiejiRetouchHerbNeed(selected)
+    final moneyHave = hero.materials['money'] ?? 0
+    final herbHave = hero.materials['herb'] ?? 0
+    if (moneyHave < moneyNeed || herbHave < herbNeed) {
+      return 'poor'
+    }
+  }
+
+  if (free != true) {
+    final moneyNeed = _jiejiRetouchMoneyNeed(selected, seasonId)
+    final herbNeed = _jiejiRetouchHerbNeed(selected)
+    if (moneyNeed > 0) {
+      Player.exhaust('money', moneyNeed)
+    }
+    if (herbNeed > 0) {
+      Player.exhaust('herb', herbNeed)
+    }
+    if (selected == 'blood') {
+      _jiejiRetouchCostLife(_jiejiRetouchBloodLifeCost(seasonId))
+    }
+    _jiejiRetouchMark()
+  }
+
+  if (selected == 'warm') {
+    final healed = Player.restoreLife(kJiejiRetouchWarmLife)
+    if (seasonId == 'mist') {
+      await Player.collect('herb', kJiejiRetouchWarmHerbMist, incurIncident: false)
+    }
+    dialog.pushDialog('hint_retouchJiejiTattoo_warm', interpolations: [healed])
+    await dialog.execute()
+  } else if (selected == 'kill') {
+    final fury = _jiejiRetouchApplyFury()
+    if (fury == 'array') {
+      dialog.pushDialog('hint_retouchJiejiTattoo_kill_array')
+      await dialog.execute()
+      await tryDropGongfaShard(rate: kJiejiRetouchKillGongfaRate)
+    } else if (fury == 'feast') {
+      dialog.pushDialog('hint_retouchJiejiTattoo_kill_feast')
+      await dialog.execute()
+      await tryDropGongfaShard(rate: kJiejiRetouchKillGongfaRate)
+    } else {
+      Player.restoreLife(kJiejiRetouchKillLife)
+      dialog.pushDialog('hint_retouchJiejiTattoo_kill')
+      await dialog.execute()
+    }
+  } else if (selected == 'blood') {
+    final dropped = await tryDropGongfaShard(rate: kJiejiRetouchBloodGongfaRate)
+    if (dropped != true) {
+      await Player.collect('money', kJiejiRetouchBloodMoney, incurIncident: false)
+      dialog.pushDialog('hint_retouchJiejiTattoo_blood_money')
+      await dialog.execute()
+    } else {
+      dialog.pushDialog('hint_retouchJiejiTattoo_blood')
+      await dialog.execute()
+    }
+  }
+
+  Game.updateUI()
+  return selected
+}

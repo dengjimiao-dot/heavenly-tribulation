@@ -1693,6 +1693,27 @@
   "hint_mendJiejiTattoo_cooldown": "针脚余温未散。过一日再来补纹。",
   "hint_mendJiejiTattoo_notEnough": "温纹要 1 药材（雾月免），改杀要 40 铜钱（雷月 20）。",
 
+
+  "retouchJiejiTattoo": "再补",
+  "jiejiRetouch": "再补",
+  "hint_retouchJiejiTattoo_description": "纹身铺另可再补。一日一次，与补纹分开计。再温耗 20 铜钱（雷月 10）回 5 命（雾月另得 1 药材）；再改耗 1 药材挂破军或拼酒劲，约一成半残页；血再扣 2 命（血月 3），三成残页，否则 40 铜钱。",
+  "hint_retouchJiejiTattoo": "纹身另可再补。再温、再改、血再，择一。一日一次。与补纹各不挡。",
+  "jieji_retouch_warm": "再温",
+  "jieji_retouch_kill": "再改",
+  "jieji_retouch_blood": "血再",
+  "hint_jieji_retouch_warm": "再温：耗 20 铜钱（雷月 10）。回复 5 点生机。雾月另得 1 药材。",
+  "hint_jieji_retouch_kill": "再改：耗 1 药材。若还没有破军，挂破军（下场出手 +8%）；已有则挂劫宴拼酒同效。约一成半残页。两者都有则只回 4 命。",
+  "hint_jieji_retouch_blood": "血再：扣 2 点生机（至少留 1；血月 3）。三成得残页；没残页则得 40 铜钱。",
+  "hint_retouchJiejiTattoo_warm": "再温有成。生机回了 {0} 点。",
+  "hint_retouchJiejiTattoo_kill_array": "再改成了。破军挂上，下一场你出手更狠。",
+  "hint_retouchJiejiTattoo_kill_feast": "再改成了。酒劲挂上，下一场你出手更狠。",
+  "hint_retouchJiejiTattoo_kill": "再改成了。破军与酒劲都在，灵息回流，生机回了 4 点。",
+  "hint_retouchJiejiTattoo_blood": "血再落成。残页已入袖。",
+  "hint_retouchJiejiTattoo_blood_money": "血再落成。残页未现，袖里多了 40 铜钱。",
+  "hint_retouchJiejiTattoo_cooldown": "针脚余纹未散。过一日再来再补。",
+  "hint_retouchJiejiTattoo_notEnough": "再温要 20 铜钱（雷月 10），再改要 1 药材。",
+
+
   "recruitJiejiAid": "招外援",
   "hint_recruitJiejiAid_description": "耗费人力与铜钱，从外门寮招来三张当季外援战牌。雷月铜钱更省，血月以人力作血税，雾月或可多一张。季末或出秘境后消散。",
   "jieji_aid_genre": "选择外援流派",
