@@ -289,6 +289,8 @@ namespace debug {
       questKind = 'hidden_blood_bruise'
     } else if (kind == 'fang') {
       questKind = 'hidden_thunder_fang'
+    } else if (kind == 'hollow') {
+      questKind = 'hidden_mist_hollow'
     }
     final ctor = Quests[questKind]
     if (ctor == null) return false
