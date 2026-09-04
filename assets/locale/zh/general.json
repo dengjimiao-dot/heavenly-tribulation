@@ -4208,6 +4208,21 @@
   "hint_jieji_fringe_bloodfringe_none": "血缨下去，缨影却散了。袋里多了 {0} 铜钱。",
 
 
+  "hint_jieji_cuff": "路遇一只劫袖。你可以系袖、解袖，或以血染袖。",
+  "jieji_cuff_tiecuff": "系袖",
+  "jieji_cuff_loosecuff": "解袖",
+  "jieji_cuff_bloodcuff": "血袖",
+  "hint_jieji_cuff_tiecuff": "系袖：耗 1 药材（雾月不耗）。回 2 命，三厘摸残页。药材不够则空手。",
+  "hint_jieji_cuff_loosecuff": "解袖：花 3 铜钱（雷月 1）。得 1 药材，并回 2 命。袋里不够则空手。",
+  "hint_jieji_cuff_bloodcuff": "血袖：扣 2 点生机（至少留 1，血月 3）。一成六摸残页，不成则得 6 铜钱。",
+  "hint_jieji_cuff_tiecuff_ok": "你系上劫袖。生机回了 {0} 点。",
+  "hint_jieji_cuff_tiecuff_broke": "系袖要 {0} 药材。你拿不出来。",
+  "hint_jieji_cuff_loosecuff_ok": "你解开劫袖。得了 {0} 药材，生机回了 {1} 点。",
+  "hint_jieji_cuff_loosecuff_broke": "解袖要 {0} 铜钱。袋里不够。",
+  "hint_jieji_cuff_bloodcuff_ok": "你割了 {0} 点生机去染劫袖。",
+  "hint_jieji_cuff_bloodcuff_none": "血袖下去，袖影却散了。袋里多了 {0} 铜钱。",
+
+
   "jiejiMenpaiDemo": "劫季门派 · Demo",
   "jiejiMenpaiPitch": "带着业力赶天劫的门派肉鸽",
   "knownIssues": "已知问题",

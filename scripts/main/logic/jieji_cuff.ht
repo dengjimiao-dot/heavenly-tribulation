@@ -1,0 +1,152 @@
+/// 赶路「劫袖」三选：系袖 / 解袖 / 血袖。隐藏、劫兆、野遇、赶路、行商、拾荒、扎营、残锋、残卷、雾灯、残鼓、汲泉、劫幡、劫铃、劫符、劫旌、劫烛、劫角、劫笛、劫笠、劫带、劫履、劫氅、劫扇、劫杖、劫伞、劫面、劫帔、劫手套、劫戒、劫镜、劫鼓、劫炬、劫梳、劫勺、劫碗、劫杯、劫罐、劫瓶、劫墨、劫袍、劫带、劫簪、劫笔、劫针、劫扣、劫绳、劫珠、劫钗、劫绦、劫穗、劫缎、劫缨都没中时才滚。
+const kJiejiCuffBaseRate = 0.0006
+const kJiejiCuffMoveCooldown = 24
+const kJiejiCuffTiecuffHerb = 1
+const kJiejiCuffTiecuffLife = 2
+const kJiejiCuffTiecuffGongfaRate = 0.03
+const kJiejiCuffLoosecuffMoney = 3
+const kJiejiCuffLoosecuffMoneyThunder = 1
+const kJiejiCuffLoosecuffHerb = 1
+const kJiejiCuffLoosecuffLife = 2
+const kJiejiCuffBloodLife = 2
+const kJiejiCuffBloodLifeBlood = 3
+const kJiejiCuffBloodGongfaRate = 0.16
+const kJiejiCuffBloodMoney = 6
+
+function _jiejiCuffSeasonId() {
+  if (game.jieji != null && game.jieji.seasonId != null) {
+    return game.jieji.seasonId
+  }
+  return null
+}
+
+function _jiejiCuffTutorialLocked() {
+  return game.enableTutorial && game.flags.tutorial.bountyQuest != true
+}
+
+function _jiejiCuffTiecuffHerbCost(seasonId) {
+  if (seasonId == 'mist') return 0
+  return kJiejiCuffTiecuffHerb
+}
+
+function _jiejiCuffLoosecuffMoneyCost(seasonId) {
+  if (seasonId == 'thunder') return kJiejiCuffLoosecuffMoneyThunder
+  return kJiejiCuffLoosecuffMoney
+}
+
+function _jiejiCuffBloodLifeCost(seasonId) {
+  if (seasonId == 'blood') return kJiejiCuffBloodLifeBlood
+  return kJiejiCuffBloodLife
+}
+
+function _jiejiCuffCostLife(want) {
+  var lost = want
+  final life = hero.life ?? 1
+  if (life - lost < 1) lost = life - 1
+  if (lost < 0) lost = 0
+  if (lost > 0) {
+    Player.setLife(hero.life - lost)
+  }
+  return lost
+}
+
+function _jiejiCuffNormalizeKind(kind) {
+  if (kind == 'tiecuff' || kind == 'jieji_cuff_tiecuff') return 'tiecuff'
+  if (kind == 'loosecuff' || kind == 'jieji_cuff_loosecuff') return 'loosecuff'
+  if (kind == 'bloodcuff' || kind == 'jieji_cuff_bloodcuff') return 'bloodcuff'
+  return null
+}
+
+function _jiejiCuffChoices() {
+  return [
+    {
+      text: 'jieji_cuff_tiecuff',
+      description: 'hint_jieji_cuff_tiecuff',
+    },
+    {
+      text: 'jieji_cuff_loosecuff',
+      description: 'hint_jieji_cuff_loosecuff',
+    },
+    {
+      text: 'jieji_cuff_bloodcuff',
+      description: 'hint_jieji_cuff_bloodcuff',
+    },
+  ]
+}
+
+/// 赶路劫袖三选。debug.forceJiejiEvent('cuff') / forceCuff 直接走这里，仍弹出三选。
+async function playJiejiCuffEvent(terrain) {
+  if (hero == null) return false
+
+  dialog.pushDialog('hint_jieji_cuff')
+  dialog.pushSelection('jiejiCuff', _jiejiCuffChoices())
+  await dialog.execute()
+  final picked = dialog.checkSelected('jiejiCuff')
+  var selected = _jiejiCuffNormalizeKind(picked)
+  if (selected == null) {
+    selected = 'tiecuff'
+  }
+
+  final seasonId = _jiejiCuffSeasonId()
+  if (selected == 'tiecuff') {
+    final herbNeed = _jiejiCuffTiecuffHerbCost(seasonId)
+    final herbHave = hero.materials['herb'] ?? 0
+    if (herbNeed > 0 && herbHave < herbNeed) {
+      dialog.pushDialog('hint_jieji_cuff_tiecuff_broke', interpolations: [herbNeed])
+      await dialog.execute()
+    } else {
+      if (herbNeed > 0) {
+        Player.exhaust('herb', herbNeed)
+      }
+      final healed = Player.restoreLife(kJiejiCuffTiecuffLife)
+      dialog.pushDialog('hint_jieji_cuff_tiecuff_ok', interpolations: [healed])
+      await dialog.execute()
+      await tryDropGongfaShard(rate: kJiejiCuffTiecuffGongfaRate)
+    }
+  } else if (selected == 'loosecuff') {
+    final moneyNeed = _jiejiCuffLoosecuffMoneyCost(seasonId)
+    final moneyHave = hero.materials['money'] ?? 0
+    if (moneyHave < moneyNeed) {
+      dialog.pushDialog('hint_jieji_cuff_loosecuff_broke', interpolations: [moneyNeed])
+      await dialog.execute()
+    } else {
+      Player.exhaust('money', moneyNeed)
+      await Player.collect('herb', kJiejiCuffLoosecuffHerb, incurIncident: false)
+      final healed = Player.restoreLife(kJiejiCuffLoosecuffLife)
+      dialog.pushDialog('hint_jieji_cuff_loosecuff_ok', interpolations: [kJiejiCuffLoosecuffHerb, healed])
+      await dialog.execute()
+    }
+  } else {
+    final lost = _jiejiCuffCostLife(_jiejiCuffBloodLifeCost(seasonId))
+    dialog.pushDialog('hint_jieji_cuff_bloodcuff_ok', interpolations: [lost])
+    await dialog.execute()
+    final dropped = await tryDropGongfaShard(rate: kJiejiCuffBloodGongfaRate)
+    if (dropped != true) {
+      await Player.collect('money', kJiejiCuffBloodMoney, incurIncident: false)
+      dialog.pushDialog('hint_jieji_cuff_bloodcuff_none', interpolations: [kJiejiCuffBloodMoney])
+      await dialog.execute()
+    }
+  }
+
+  Game.updateUI()
+  return true
+}
+
+/// 赶路触发：教程锁与路遇相同；冷却 24 步；约 0.06%。出过则返回 true。
+async function tryJiejiCuffOnMove(terrain) {
+  if (hero == null) return false
+  if (_jiejiCuffTutorialLocked()) return false
+
+  final jieji = ensureJiejiFlags()
+  final moves = jieji.worldMoves ?? 0
+  final last = jieji.lastCuffMove ?? -999
+  if (moves - last < kJiejiCuffMoveCooldown) return false
+
+  var rate = kJiejiCuffBaseRate
+  if (rate < 0) rate = 0
+  if (random.nextDouble() > rate) return false
+
+  jieji.lastCuffMove = moves
+  await playJiejiCuffEvent(terrain)
+  return true
+}

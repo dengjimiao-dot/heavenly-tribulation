@@ -432,6 +432,8 @@ namespace debug {
       await playJiejiRibbonEvent(terrain)
     } else if (kind == 'fringe') {
       await playJiejiFringeEvent(terrain)
+    } else if (kind == 'cuff') {
+      await playJiejiCuffEvent(terrain)
     } else {
       await playJiejiThunderRoadEvent(terrain)
     }
@@ -1259,6 +1261,11 @@ namespace debug {
   /// 忽略几率与冷却，仍弹出赶路劫缨三选。
   async function forceFringe() {
     return await playJiejiFringeEvent({ kind: 'plain' })
+  }
+
+  /// 忽略几率与冷却，仍弹出赶路劫袖三选。
+  async function forceCuff() {
+    return await playJiejiCuffEvent({ kind: 'plain' })
   }
 
   /// 忽略冷却与花费，仍弹出幻术祭坛入幻三选。
