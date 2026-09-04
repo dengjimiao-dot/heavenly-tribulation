@@ -1,0 +1,183 @@
+/// 灌灵池「再淬」：浸灵 / 再淬 / 血浸。不替换点化、淬灵。
+const kJiejiTemperCooldownDays = 1
+const kJiejiTemperSoakMoney = 25
+const kJiejiTemperSoakMoneyThunder = 12
+const kJiejiTemperSoakLife = 5
+const kJiejiTemperSoakHerbMist = 1
+const kJiejiTemperWardHerb = 1
+const kJiejiTemperWardGongfaRate = 0.20
+const kJiejiTemperBloodLife = 2
+const kJiejiTemperBloodLifeBlood = 3
+const kJiejiTemperBloodGongfaRate = 0.30
+const kJiejiTemperBloodMoney = 45
+
+function _jiejiTemperSeasonId() {
+  if (game.jieji != null && game.jieji.seasonId != null) {
+    return game.jieji.seasonId
+  }
+  return null
+}
+
+function _jiejiTemperCurrentDay() {
+  if (game.timestamp == null) return null
+  if (Constants.ticksPerDay == null) return null
+  if (Constants.ticksPerDay <= 0) return null
+  return game.timestamp ~/ Constants.ticksPerDay
+}
+
+function _jiejiTemperOnCooldown() {
+  final jieji = ensureJiejiFlags()
+  final day = _jiejiTemperCurrentDay()
+  if (day == null) return false
+  if (jieji.lastTemperDay == null) return false
+  if (day - jieji.lastTemperDay < kJiejiTemperCooldownDays) return true
+  return false
+}
+
+function _jiejiTemperMark() {
+  final jieji = ensureJiejiFlags()
+  jieji.lastTemperDay = _jiejiTemperCurrentDay()
+}
+
+function _jiejiTemperCostLife(want) {
+  var lost = want
+  final life = hero.life ?? 1
+  if (life - lost < 1) lost = life - 1
+  if (lost < 0) lost = 0
+  if (lost > 0) {
+    Player.setLife(hero.life - lost)
+  }
+  return lost
+}
+
+function _jiejiTemperSoakMoneyCost(seasonId) {
+  if (seasonId == 'thunder') return kJiejiTemperSoakMoneyThunder
+  return kJiejiTemperSoakMoney
+}
+
+function _jiejiTemperBloodLifeCost(seasonId) {
+  if (seasonId == 'blood') return kJiejiTemperBloodLifeBlood
+  return kJiejiTemperBloodLife
+}
+
+function _jiejiTemperNormalizeKind(kind) {
+  if (kind == 'soak' || kind == 'jieji_temper_soak') return 'soak'
+  if (kind == 'temper' || kind == 'jieji_temper_temper') return 'temper'
+  if (kind == 'blood' || kind == 'jieji_temper_blood') return 'blood'
+  return null
+}
+
+function _jiejiTemperChoices() {
+  return [
+    {
+      text: 'jieji_temper_soak',
+      description: 'hint_jieji_temper_soak',
+    },
+    {
+      text: 'jieji_temper_temper',
+      description: 'hint_jieji_temper_temper',
+    },
+    {
+      text: 'jieji_temper_blood',
+      description: 'hint_jieji_temper_blood',
+    },
+    'cancel',
+  ]
+}
+
+function _jiejiTemperMoneyNeed(selected, seasonId) {
+  if (selected == 'soak') return _jiejiTemperSoakMoneyCost(seasonId)
+  return 0
+}
+
+function _jiejiTemperHerbNeed(selected, seasonId) {
+  if (selected == 'temper') return kJiejiTemperWardHerb
+  return 0
+}
+
+/// 灌灵池再淬三选。free 为 true 时不扣费、不检查冷却（debug），仍弹出三选。
+/// kind 为空则弹窗；null 选择在 free 时默认浸灵。
+/// 返回 'cooldown' | 'poor' | 'cancel' | 'soak' | 'temper' | 'blood'。
+async function temperJiejiSpirit({ free = false, kind = null }) {
+  if (hero == null) return 'cancel'
+  if (free != true && _jiejiTemperOnCooldown()) {
+    return 'cooldown'
+  }
+
+  var selected = _jiejiTemperNormalizeKind(kind)
+  if (selected == null) {
+    dialog.pushDialog('hint_temperJiejiSpirit')
+    dialog.pushSelection('jiejiTemper', _jiejiTemperChoices())
+    await dialog.execute()
+    final picked = dialog.checkSelected('jiejiTemper')
+    if (picked == null || picked == 'cancel') {
+      if (free == true && picked == null) {
+        selected = 'soak'
+      } else {
+        return 'cancel'
+      }
+    } else {
+      selected = _jiejiTemperNormalizeKind(picked)
+    }
+  }
+  if (selected == null) return 'cancel'
+
+  final seasonId = _jiejiTemperSeasonId()
+  if (free != true) {
+    final moneyNeed = _jiejiTemperMoneyNeed(selected, seasonId)
+    final herbNeed = _jiejiTemperHerbNeed(selected, seasonId)
+    final moneyHave = hero.materials['money'] ?? 0
+    final herbHave = hero.materials['herb'] ?? 0
+    if (moneyHave < moneyNeed || herbHave < herbNeed) {
+      return 'poor'
+    }
+  }
+
+  if (free != true) {
+    final moneyNeed = _jiejiTemperMoneyNeed(selected, seasonId)
+    final herbNeed = _jiejiTemperHerbNeed(selected, seasonId)
+    if (moneyNeed > 0) {
+      Player.exhaust('money', moneyNeed)
+    }
+    if (herbNeed > 0) {
+      Player.exhaust('herb', herbNeed)
+    }
+    if (selected == 'blood') {
+      _jiejiTemperCostLife(_jiejiTemperBloodLifeCost(seasonId))
+    }
+    _jiejiTemperMark()
+  }
+
+  if (selected == 'soak') {
+    final healed = Player.restoreLife(kJiejiTemperSoakLife)
+    if (seasonId == 'mist') {
+      await Player.collect('herb', kJiejiTemperSoakHerbMist, incurIncident: false)
+    }
+    dialog.pushDialog('hint_temperJiejiSpirit_soak', interpolations: [healed])
+    await dialog.execute()
+  } else if (selected == 'temper') {
+    final jieji = ensureJiejiFlags()
+    jieji.arrayWard = true
+    final ok = await tryDropGongfaShard(rate: kJiejiTemperWardGongfaRate)
+    if (ok == true) {
+      dialog.pushDialog('hint_temperJiejiSpirit_temper')
+      await dialog.execute()
+    } else {
+      dialog.pushDialog('hint_temperJiejiSpirit_temper_plain')
+      await dialog.execute()
+    }
+  } else if (selected == 'blood') {
+    final ok = await tryDropGongfaShard(rate: kJiejiTemperBloodGongfaRate)
+    if (ok == true) {
+      dialog.pushDialog('hint_temperJiejiSpirit_blood')
+      await dialog.execute()
+    } else {
+      await Player.collect('money', kJiejiTemperBloodMoney, incurIncident: false)
+      dialog.pushDialog('hint_temperJiejiSpirit_blood_money')
+      await dialog.execute()
+    }
+  }
+
+  Game.updateUI()
+  return selected
+}

@@ -474,6 +474,11 @@ namespace debug {
     return await quenchJiejiSpirit(free: true)
   }
 
+  /// 忽略冷却与花费，仍弹出灌灵池再淬三选。
+  async function forceTemper() {
+    return await temperJiejiSpirit(free: true)
+  }
+
   async function forceWashCurse() {
     final result = await washJiejiCurse(free: true)
     if (result == 'empty') {
