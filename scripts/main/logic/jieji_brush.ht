@@ -1,0 +1,152 @@
+/// 赶路「劫笔」三选：落笔 / 折笔 / 血染。隐藏、劫兆、野遇、赶路、行商、拾荒、扎营、残锋、残卷、雾灯、残鼓、汲泉、劫幡、劫铃、劫符、劫旌、劫烛、劫角、劫笛、劫笠、劫带、劫履、劫氅、劫扇、劫杖、劫伞、劫面、劫帔、劫手套、劫戒、劫镜、劫鼓、劫炬、劫梳、劫勺、劫碗、劫杯、劫罐、劫瓶、劫墨、劫袍、劫带、劫簪都没中时才滚。
+const kJiejiBrushBaseRate = 0.005
+const kJiejiBrushMoveCooldown = 24
+const kJiejiBrushWritebrushHerb = 1
+const kJiejiBrushWritebrushLife = 5
+const kJiejiBrushWritebrushGongfaRate = 0.08
+const kJiejiBrushFoldbrushMoney = 8
+const kJiejiBrushFoldbrushMoneyThunder = 4
+const kJiejiBrushFoldbrushHerb = 2
+const kJiejiBrushFoldbrushLife = 3
+const kJiejiBrushBloodLife = 2
+const kJiejiBrushBloodLifeBlood = 3
+const kJiejiBrushBloodGongfaRate = 0.26
+const kJiejiBrushBloodMoney = 16
+
+function _jiejiBrushSeasonId() {
+  if (game.jieji != null && game.jieji.seasonId != null) {
+    return game.jieji.seasonId
+  }
+  return null
+}
+
+function _jiejiBrushTutorialLocked() {
+  return game.enableTutorial && game.flags.tutorial.bountyQuest != true
+}
+
+function _jiejiBrushWritebrushHerbCost(seasonId) {
+  if (seasonId == 'mist') return 0
+  return kJiejiBrushWritebrushHerb
+}
+
+function _jiejiBrushFoldbrushMoneyCost(seasonId) {
+  if (seasonId == 'thunder') return kJiejiBrushFoldbrushMoneyThunder
+  return kJiejiBrushFoldbrushMoney
+}
+
+function _jiejiBrushBloodLifeCost(seasonId) {
+  if (seasonId == 'blood') return kJiejiBrushBloodLifeBlood
+  return kJiejiBrushBloodLife
+}
+
+function _jiejiBrushCostLife(want) {
+  var lost = want
+  final life = hero.life ?? 1
+  if (life - lost < 1) lost = life - 1
+  if (lost < 0) lost = 0
+  if (lost > 0) {
+    Player.setLife(hero.life - lost)
+  }
+  return lost
+}
+
+function _jiejiBrushNormalizeKind(kind) {
+  if (kind == 'writebrush' || kind == 'jieji_brush_writebrush') return 'writebrush'
+  if (kind == 'foldbrush' || kind == 'jieji_brush_foldbrush') return 'foldbrush'
+  if (kind == 'bloodbrush' || kind == 'jieji_brush_bloodbrush') return 'bloodbrush'
+  return null
+}
+
+function _jiejiBrushChoices() {
+  return [
+    {
+      text: 'jieji_brush_writebrush',
+      description: 'hint_jieji_brush_writebrush',
+    },
+    {
+      text: 'jieji_brush_foldbrush',
+      description: 'hint_jieji_brush_foldbrush',
+    },
+    {
+      text: 'jieji_brush_bloodbrush',
+      description: 'hint_jieji_brush_bloodbrush',
+    },
+  ]
+}
+
+/// 赶路劫笔三选。debug.forceJiejiEvent('brush') / forceBrush 直接走这里，仍弹出三选。
+async function playJiejiBrushEvent(terrain) {
+  if (hero == null) return false
+
+  dialog.pushDialog('hint_jieji_brush')
+  dialog.pushSelection('jiejiBrush', _jiejiBrushChoices())
+  await dialog.execute()
+  final picked = dialog.checkSelected('jiejiBrush')
+  var selected = _jiejiBrushNormalizeKind(picked)
+  if (selected == null) {
+    selected = 'writebrush'
+  }
+
+  final seasonId = _jiejiBrushSeasonId()
+  if (selected == 'writebrush') {
+    final herbNeed = _jiejiBrushWritebrushHerbCost(seasonId)
+    final herbHave = hero.materials['herb'] ?? 0
+    if (herbNeed > 0 && herbHave < herbNeed) {
+      dialog.pushDialog('hint_jieji_brush_writebrush_broke', interpolations: [herbNeed])
+      await dialog.execute()
+    } else {
+      if (herbNeed > 0) {
+        Player.exhaust('herb', herbNeed)
+      }
+      final healed = Player.restoreLife(kJiejiBrushWritebrushLife)
+      dialog.pushDialog('hint_jieji_brush_writebrush_ok', interpolations: [healed])
+      await dialog.execute()
+      await tryDropGongfaShard(rate: kJiejiBrushWritebrushGongfaRate)
+    }
+  } else if (selected == 'foldbrush') {
+    final moneyNeed = _jiejiBrushFoldbrushMoneyCost(seasonId)
+    final moneyHave = hero.materials['money'] ?? 0
+    if (moneyHave < moneyNeed) {
+      dialog.pushDialog('hint_jieji_brush_foldbrush_broke', interpolations: [moneyNeed])
+      await dialog.execute()
+    } else {
+      Player.exhaust('money', moneyNeed)
+      await Player.collect('herb', kJiejiBrushFoldbrushHerb, incurIncident: false)
+      final healed = Player.restoreLife(kJiejiBrushFoldbrushLife)
+      dialog.pushDialog('hint_jieji_brush_foldbrush_ok', interpolations: [kJiejiBrushFoldbrushHerb, healed])
+      await dialog.execute()
+    }
+  } else {
+    final lost = _jiejiBrushCostLife(_jiejiBrushBloodLifeCost(seasonId))
+    dialog.pushDialog('hint_jieji_brush_bloodbrush_ok', interpolations: [lost])
+    await dialog.execute()
+    final dropped = await tryDropGongfaShard(rate: kJiejiBrushBloodGongfaRate)
+    if (dropped != true) {
+      await Player.collect('money', kJiejiBrushBloodMoney, incurIncident: false)
+      dialog.pushDialog('hint_jieji_brush_bloodbrush_none', interpolations: [kJiejiBrushBloodMoney])
+      await dialog.execute()
+    }
+  }
+
+  Game.updateUI()
+  return true
+}
+
+/// 赶路触发：教程锁与路遇相同；冷却 24 步；约 0.5%。出过则返回 true。
+async function tryJiejiBrushOnMove(terrain) {
+  if (hero == null) return false
+  if (_jiejiBrushTutorialLocked()) return false
+
+  final jieji = ensureJiejiFlags()
+  final moves = jieji.worldMoves ?? 0
+  final last = jieji.lastBrushMove ?? -999
+  if (moves - last < kJiejiBrushMoveCooldown) return false
+
+  var rate = kJiejiBrushBaseRate
+  if (rate < 0) rate = 0
+  if (random.nextDouble() > rate) return false
+
+  jieji.lastBrushMove = moves
+  await playJiejiBrushEvent(terrain)
+  return true
+}
