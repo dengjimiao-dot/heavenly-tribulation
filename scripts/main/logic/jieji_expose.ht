@@ -1,0 +1,187 @@
+/// 镇魔司「再示」：再观 / 再告 / 血示。不替换示众、洗咒。
+const kJiejiExposeCooldownDays = 1
+const kJiejiExposePeekMoney = 20
+const kJiejiExposePeekMoneyThunder = 10
+const kJiejiExposePeekHerb = 1
+const kJiejiExposePeekHerbMist = 2
+const kJiejiExposePointHerb = 1
+const kJiejiExposePointMoney = 40
+const kJiejiExposePointGongfaRate = 0.15
+const kJiejiExposeBloodLife = 2
+const kJiejiExposeBloodLifeBlood = 3
+const kJiejiExposeBloodGongfaRate = 0.30
+const kJiejiExposeBloodMoney = 50
+
+function _jiejiExposeSeasonId() {
+  if (game.jieji != null && game.jieji.seasonId != null) {
+    return game.jieji.seasonId
+  }
+  return null
+}
+
+function _jiejiExposeCurrentDay() {
+  if (game.timestamp == null) return null
+  if (Constants.ticksPerDay == null) return null
+  if (Constants.ticksPerDay <= 0) return null
+  return game.timestamp ~/ Constants.ticksPerDay
+}
+
+function _jiejiExposeOnCooldown() {
+  final jieji = ensureJiejiFlags()
+  final day = _jiejiExposeCurrentDay()
+  if (day == null) return false
+  if (jieji.lastExposeDay == null) return false
+  if (day - jieji.lastExposeDay < kJiejiExposeCooldownDays) return true
+  return false
+}
+
+function _jiejiExposeMark() {
+  final jieji = ensureJiejiFlags()
+  jieji.lastExposeDay = _jiejiExposeCurrentDay()
+}
+
+function _jiejiExposeCostLife(want) {
+  var lost = want
+  final life = hero.life ?? 1
+  if (life - lost < 1) lost = life - 1
+  if (lost < 0) lost = 0
+  if (lost > 0) {
+    Player.setLife(hero.life - lost)
+  }
+  return lost
+}
+
+function _jiejiExposePeekMoneyCost(seasonId) {
+  if (seasonId == 'thunder') return kJiejiExposePeekMoneyThunder
+  return kJiejiExposePeekMoney
+}
+
+function _jiejiExposePeekHerbGain(seasonId) {
+  if (seasonId == 'mist') return kJiejiExposePeekHerbMist
+  return kJiejiExposePeekHerb
+}
+
+function _jiejiExposeBloodLifeCost(seasonId) {
+  if (seasonId == 'blood') return kJiejiExposeBloodLifeBlood
+  return kJiejiExposeBloodLife
+}
+
+function _jiejiExposeNormalizeKind(kind) {
+  if (kind == 'peek' || kind == 'jieji_expose_peek') return 'peek'
+  if (kind == 'point' || kind == 'jieji_expose_point') return 'point'
+  if (kind == 'blood' || kind == 'jieji_expose_blood') return 'blood'
+  return null
+}
+
+function _jiejiExposeChoices() {
+  return [
+    {
+      text: 'jieji_expose_peek',
+      description: 'hint_jieji_expose_peek',
+    },
+    {
+      text: 'jieji_expose_point',
+      description: 'hint_jieji_expose_point',
+    },
+    {
+      text: 'jieji_expose_blood',
+      description: 'hint_jieji_expose_blood',
+    },
+    'cancel',
+  ]
+}
+
+function _jiejiExposeMoneyNeed(selected, seasonId) {
+  if (selected == 'peek') return _jiejiExposePeekMoneyCost(seasonId)
+  return 0
+}
+
+function _jiejiExposeHerbNeed(selected) {
+  if (selected == 'point') return kJiejiExposePointHerb
+  return 0
+}
+
+/// 镇魔司再示三选。free 为 true 时不扣费、不检查冷却（debug），仍弹出三选。
+/// kind 为空则弹窗；null 选择在 free 时默认再观。
+/// 返回 'cooldown' | 'poor' | 'cancel' | 'peek' | 'point' | 'blood'。
+async function exposeJiejiCrowd({ free = false, kind = null }) {
+  if (hero == null) return 'cancel'
+  if (free != true && _jiejiExposeOnCooldown()) {
+    return 'cooldown'
+  }
+
+  var selected = _jiejiExposeNormalizeKind(kind)
+  if (selected == null) {
+    dialog.pushDialog('hint_exposeJiejiCrowd')
+    dialog.pushSelection('jiejiExpose', _jiejiExposeChoices())
+    await dialog.execute()
+    final picked = dialog.checkSelected('jiejiExpose')
+    if (picked == null || picked == 'cancel') {
+      if (free == true && picked == null) {
+        selected = 'peek'
+      } else {
+        return 'cancel'
+      }
+    } else {
+      selected = _jiejiExposeNormalizeKind(picked)
+    }
+  }
+  if (selected == null) return 'cancel'
+
+  final seasonId = _jiejiExposeSeasonId()
+  if (free != true) {
+    final moneyNeed = _jiejiExposeMoneyNeed(selected, seasonId)
+    final herbNeed = _jiejiExposeHerbNeed(selected)
+    final moneyHave = hero.materials['money'] ?? 0
+    final herbHave = hero.materials['herb'] ?? 0
+    if (moneyHave < moneyNeed || herbHave < herbNeed) {
+      return 'poor'
+    }
+  }
+
+  if (free != true) {
+    final moneyNeed = _jiejiExposeMoneyNeed(selected, seasonId)
+    final herbNeed = _jiejiExposeHerbNeed(selected)
+    if (moneyNeed > 0) {
+      Player.exhaust('money', moneyNeed)
+    }
+    if (herbNeed > 0) {
+      Player.exhaust('herb', herbNeed)
+    }
+    if (selected == 'blood') {
+      _jiejiExposeCostLife(_jiejiExposeBloodLifeCost(seasonId))
+    }
+    _jiejiExposeMark()
+  }
+
+  if (selected == 'peek') {
+    final herbGain = _jiejiExposePeekHerbGain(seasonId)
+    await Player.collect('herb', herbGain, incurIncident: false)
+    dialog.pushDialog('hint_exposeJiejiCrowd_peek')
+    await dialog.execute()
+  } else if (selected == 'point') {
+    await Player.collect('money', kJiejiExposePointMoney, incurIncident: false)
+    final jieji = ensureJiejiFlags()
+    jieji.illusionVeil = true
+    final ok = await tryDropGongfaShard(rate: kJiejiExposePointGongfaRate)
+    if (ok == true) {
+      dialog.pushDialog('hint_exposeJiejiCrowd_point')
+    } else {
+      dialog.pushDialog('hint_exposeJiejiCrowd_point_plain')
+    }
+    await dialog.execute()
+  } else if (selected == 'blood') {
+    final ok = await tryDropGongfaShard(rate: kJiejiExposeBloodGongfaRate)
+    if (ok == true) {
+      dialog.pushDialog('hint_exposeJiejiCrowd_blood')
+      await dialog.execute()
+    } else {
+      await Player.collect('money', kJiejiExposeBloodMoney, incurIncident: false)
+      dialog.pushDialog('hint_exposeJiejiCrowd_blood_money')
+      await dialog.execute()
+    }
+  }
+
+  Game.updateUI()
+  return selected
+}

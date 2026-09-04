@@ -2753,6 +2753,28 @@ Future<void> _heroShameJiejiCrowd(dynamic location) async {
 }
 
 
+Future<void> _heroExposeJiejiCrowd(dynamic location) async {
+  final result = await engine.hetu.invoke('exposeJiejiCrowd');
+  if (result == 'cooldown') {
+    dialog.pushDialog(
+      'hint_exposeJiejiCrowd_cooldown',
+      npcId: location['npcId'],
+    );
+    await dialog.execute();
+    return;
+  }
+  if (result == 'poor') {
+    dialog.pushDialog(
+      'hint_exposeJiejiCrowd_notEnough',
+      npcId: location['npcId'],
+    );
+    await dialog.execute();
+    return;
+  }
+}
+
+
+
 
 
 
@@ -3389,6 +3411,10 @@ Future<void> _onInteractSite(
       'text': 'shameJiejiCrowd',
       'description': 'hint_shameJiejiCrowd_description',
     });
+    siteOptions.add({
+      'text': 'exposeJiejiCrowd',
+      'description': 'hint_exposeJiejiCrowd_description',
+    });
   } else if (siteKind == 'daostele') {
     siteOptions.add({
       'text': 'insightJiejiStele',
@@ -3530,6 +3556,8 @@ Future<void> _onInteractSite(
       await _heroWashJiejiCurse(location);
     case 'shameJiejiCrowd':
       await _heroShameJiejiCrowd(location);
+    case 'exposeJiejiCrowd':
+      await _heroExposeJiejiCrowd(location);
     case 'cultivateJiejiArray':
       await _heroCultivateJiejiArray(location);
     case 'blessJiejiArray':
