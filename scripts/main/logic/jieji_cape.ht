@@ -1,0 +1,152 @@
+/// 赶路「劫氅」三选：披氅 / 收氅 / 血氅。隐藏、劫兆、野遇、赶路、行商、拾荒、扎营、残锋、残卷、雾灯、残鼓、汲泉、劫幡、劫铃、劫符、劫旌、劫烛、劫角、劫笛、劫笠、劫带、劫履都没中时才滚。
+const kJiejiCapeBaseRate = 0.026
+const kJiejiCapeMoveCooldown = 24
+const kJiejiCapeDoncapeHerb = 1
+const kJiejiCapeDoncapeLife = 5
+const kJiejiCapeDoncapeGongfaRate = 0.08
+const kJiejiCapeStowcapeMoney = 8
+const kJiejiCapeStowcapeMoneyThunder = 4
+const kJiejiCapeStowcapeHerb = 2
+const kJiejiCapeStowcapeLife = 3
+const kJiejiCapeBloodLife = 2
+const kJiejiCapeBloodLifeBlood = 3
+const kJiejiCapeBloodGongfaRate = 0.26
+const kJiejiCapeBloodMoney = 16
+
+function _jiejiCapeSeasonId() {
+  if (game.jieji != null && game.jieji.seasonId != null) {
+    return game.jieji.seasonId
+  }
+  return null
+}
+
+function _jiejiCapeTutorialLocked() {
+  return game.enableTutorial && game.flags.tutorial.bountyQuest != true
+}
+
+function _jiejiCapeDoncapeHerbCost(seasonId) {
+  if (seasonId == 'mist') return 0
+  return kJiejiCapeDoncapeHerb
+}
+
+function _jiejiCapeStowcapeMoneyCost(seasonId) {
+  if (seasonId == 'thunder') return kJiejiCapeStowcapeMoneyThunder
+  return kJiejiCapeStowcapeMoney
+}
+
+function _jiejiCapeBloodLifeCost(seasonId) {
+  if (seasonId == 'blood') return kJiejiCapeBloodLifeBlood
+  return kJiejiCapeBloodLife
+}
+
+function _jiejiCapeCostLife(want) {
+  var lost = want
+  final life = hero.life ?? 1
+  if (life - lost < 1) lost = life - 1
+  if (lost < 0) lost = 0
+  if (lost > 0) {
+    Player.setLife(hero.life - lost)
+  }
+  return lost
+}
+
+function _jiejiCapeNormalizeKind(kind) {
+  if (kind == 'doncape' || kind == 'jieji_cape_doncape') return 'doncape'
+  if (kind == 'stowcape' || kind == 'jieji_cape_stowcape') return 'stowcape'
+  if (kind == 'bloodcape' || kind == 'jieji_cape_bloodcape') return 'bloodcape'
+  return null
+}
+
+function _jiejiCapeChoices() {
+  return [
+    {
+      text: 'jieji_cape_doncape',
+      description: 'hint_jieji_cape_doncape',
+    },
+    {
+      text: 'jieji_cape_stowcape',
+      description: 'hint_jieji_cape_stowcape',
+    },
+    {
+      text: 'jieji_cape_bloodcape',
+      description: 'hint_jieji_cape_bloodcape',
+    },
+  ]
+}
+
+/// 赶路劫氅三选。debug.forceJiejiEvent('cape') / forceCape 直接走这里，仍弹出三选。
+async function playJiejiCapeEvent(terrain) {
+  if (hero == null) return false
+
+  dialog.pushDialog('hint_jieji_cape')
+  dialog.pushSelection('jiejiCape', _jiejiCapeChoices())
+  await dialog.execute()
+  final picked = dialog.checkSelected('jiejiCape')
+  var selected = _jiejiCapeNormalizeKind(picked)
+  if (selected == null) {
+    selected = 'doncape'
+  }
+
+  final seasonId = _jiejiCapeSeasonId()
+  if (selected == 'doncape') {
+    final herbNeed = _jiejiCapeDoncapeHerbCost(seasonId)
+    final herbHave = hero.materials['herb'] ?? 0
+    if (herbNeed > 0 && herbHave < herbNeed) {
+      dialog.pushDialog('hint_jieji_cape_doncape_broke', interpolations: [herbNeed])
+      await dialog.execute()
+    } else {
+      if (herbNeed > 0) {
+        Player.exhaust('herb', herbNeed)
+      }
+      final healed = Player.restoreLife(kJiejiCapeDoncapeLife)
+      dialog.pushDialog('hint_jieji_cape_doncape_ok', interpolations: [healed])
+      await dialog.execute()
+      await tryDropGongfaShard(rate: kJiejiCapeDoncapeGongfaRate)
+    }
+  } else if (selected == 'stowcape') {
+    final moneyNeed = _jiejiCapeStowcapeMoneyCost(seasonId)
+    final moneyHave = hero.materials['money'] ?? 0
+    if (moneyHave < moneyNeed) {
+      dialog.pushDialog('hint_jieji_cape_stowcape_broke', interpolations: [moneyNeed])
+      await dialog.execute()
+    } else {
+      Player.exhaust('money', moneyNeed)
+      await Player.collect('herb', kJiejiCapeStowcapeHerb, incurIncident: false)
+      final healed = Player.restoreLife(kJiejiCapeStowcapeLife)
+      dialog.pushDialog('hint_jieji_cape_stowcape_ok', interpolations: [kJiejiCapeStowcapeHerb, healed])
+      await dialog.execute()
+    }
+  } else {
+    final lost = _jiejiCapeCostLife(_jiejiCapeBloodLifeCost(seasonId))
+    dialog.pushDialog('hint_jieji_cape_bloodcape_ok', interpolations: [lost])
+    await dialog.execute()
+    final dropped = await tryDropGongfaShard(rate: kJiejiCapeBloodGongfaRate)
+    if (dropped != true) {
+      await Player.collect('money', kJiejiCapeBloodMoney, incurIncident: false)
+      dialog.pushDialog('hint_jieji_cape_bloodcape_none', interpolations: [kJiejiCapeBloodMoney])
+      await dialog.execute()
+    }
+  }
+
+  Game.updateUI()
+  return true
+}
+
+/// 赶路触发：教程锁与路遇相同；冷却 24 步；约 2.6%。出过则返回 true。
+async function tryJiejiCapeOnMove(terrain) {
+  if (hero == null) return false
+  if (_jiejiCapeTutorialLocked()) return false
+
+  final jieji = ensureJiejiFlags()
+  final moves = jieji.worldMoves ?? 0
+  final last = jieji.lastCapeMove ?? -999
+  if (moves - last < kJiejiCapeMoveCooldown) return false
+
+  var rate = kJiejiCapeBaseRate
+  if (rate < 0) rate = 0
+  if (random.nextDouble() > rate) return false
+
+  jieji.lastCapeMove = moves
+  await playJiejiCapeEvent(terrain)
+  return true
+}
