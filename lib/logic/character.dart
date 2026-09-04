@@ -1808,6 +1808,30 @@ Future<void> _heroTasteJiejiPotion(dynamic location) async {
 }
 
 
+
+Future<void> _heroDecoctJiejiPotion(dynamic location) async {
+  final isRented = await GameLogic.checkRented(location);
+  if (!isRented) return;
+
+  final result = await engine.hetu.invoke('decoctJiejiPotion');
+  if (result == 'cooldown') {
+    dialog.pushDialog(
+      'hint_decoctJiejiPotion_cooldown',
+      npcId: location['npcId'],
+    );
+    await dialog.execute();
+    return;
+  }
+  if (result == 'poor') {
+    dialog.pushDialog(
+      'hint_decoctJiejiPotion_notEnough',
+      npcId: location['npcId'],
+    );
+    await dialog.execute();
+    return;
+  }
+}
+
 Future<void> _heroScribeJiejiTalisman(dynamic location) async {
   final isRented = await GameLogic.checkRented(location);
   if (!isRented) return;
@@ -3195,6 +3219,10 @@ Future<void> _onInteractSite(
       'text': 'tasteJiejiPotion',
       'description': 'hint_tasteJiejiPotion_description',
     });
+    siteOptions.add({
+      'text': 'decoctJiejiPotion',
+      'description': 'hint_decoctJiejiPotion_description',
+    });
   } else if (siteKind == 'runelab') {
     siteOptions.add({
       'text': 'scribeJiejiTalisman',
@@ -3447,6 +3475,8 @@ Future<void> _onInteractSite(
       await _heroBrewPotionCard(location);
     case 'tasteJiejiPotion':
       await _heroTasteJiejiPotion(location);
+    case 'decoctJiejiPotion':
+      await _heroDecoctJiejiPotion(location);
     case 'scribeJiejiTalisman':
       await _heroScribeJiejiTalisman(location);
     case 'pasteJiejiTalisman':

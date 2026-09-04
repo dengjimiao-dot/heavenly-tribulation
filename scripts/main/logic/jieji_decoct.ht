@@ -1,0 +1,191 @@
+/// 丹房「再炼」三选：温煎 / 猛煎 / 血炼。不替换炼丹成牌、试药。
+const kJiejiDecoctCooldownDays = 1
+const kJiejiDecoctWarmMoney = 20
+const kJiejiDecoctWarmMoneyThunder = 10
+const kJiejiDecoctWarmLife = 5
+const kJiejiDecoctWarmHerbMist = 1
+const kJiejiDecoctBoilHerb = 2
+const kJiejiDecoctBoilHerbMist = 1
+const kJiejiDecoctBoilLife = 3
+const kJiejiDecoctBoilGongfaRate = 0.20
+const kJiejiDecoctBoilMoney = 35
+const kJiejiDecoctBloodLife = 2
+const kJiejiDecoctBloodLifeBlood = 3
+const kJiejiDecoctBloodGongfaRate = 0.35
+const kJiejiDecoctBloodMoney = 50
+
+function _jiejiDecoctSeasonId() {
+  if (game.jieji != null && game.jieji.seasonId != null) {
+    return game.jieji.seasonId
+  }
+  return null
+}
+
+function _jiejiDecoctCurrentDay() {
+  if (game.timestamp == null) return null
+  if (Constants.ticksPerDay == null) return null
+  if (Constants.ticksPerDay <= 0) return null
+  return game.timestamp ~/ Constants.ticksPerDay
+}
+
+function _jiejiDecoctOnCooldown() {
+  final jieji = ensureJiejiFlags()
+  final day = _jiejiDecoctCurrentDay()
+  if (day == null) return false
+  if (jieji.lastDecoctDay == null) return false
+  if (day - jieji.lastDecoctDay < kJiejiDecoctCooldownDays) return true
+  return false
+}
+
+function _jiejiDecoctMark() {
+  final jieji = ensureJiejiFlags()
+  jieji.lastDecoctDay = _jiejiDecoctCurrentDay()
+}
+
+function _jiejiDecoctCostLife(want) {
+  var lost = want
+  final life = hero.life ?? 1
+  if (life - lost < 1) lost = life - 1
+  if (lost < 0) lost = 0
+  if (lost > 0) {
+    Player.setLife(hero.life - lost)
+  }
+  return lost
+}
+
+function _jiejiDecoctWarmMoneyCost(seasonId) {
+  if (seasonId == 'thunder') return kJiejiDecoctWarmMoneyThunder
+  return kJiejiDecoctWarmMoney
+}
+
+function _jiejiDecoctBoilHerbCost(seasonId) {
+  if (seasonId == 'mist') return kJiejiDecoctBoilHerbMist
+  return kJiejiDecoctBoilHerb
+}
+
+function _jiejiDecoctBloodLifeCost(seasonId) {
+  if (seasonId == 'blood') return kJiejiDecoctBloodLifeBlood
+  return kJiejiDecoctBloodLife
+}
+
+function _jiejiDecoctNormalizeKind(kind) {
+  if (kind == 'warm' || kind == 'jieji_decoct_warm') return 'warm'
+  if (kind == 'boil' || kind == 'jieji_decoct_boil') return 'boil'
+  if (kind == 'blood' || kind == 'jieji_decoct_blood') return 'blood'
+  return null
+}
+
+function _jiejiDecoctChoices() {
+  return [
+    {
+      text: 'jieji_decoct_warm',
+      description: 'hint_jieji_decoct_warm',
+    },
+    {
+      text: 'jieji_decoct_boil',
+      description: 'hint_jieji_decoct_boil',
+    },
+    {
+      text: 'jieji_decoct_blood',
+      description: 'hint_jieji_decoct_blood',
+    },
+    'cancel',
+  ]
+}
+
+function _jiejiDecoctMoneyNeed(selected, seasonId) {
+  if (selected == 'warm') return _jiejiDecoctWarmMoneyCost(seasonId)
+  return 0
+}
+
+function _jiejiDecoctHerbNeed(selected, seasonId) {
+  if (selected == 'boil') return _jiejiDecoctBoilHerbCost(seasonId)
+  return 0
+}
+
+/// 丹房再炼三选。free 为 true 时不扣费、不检查冷却（debug），仍弹出三选。
+/// kind 为空则弹窗；null 选择在 free 时默认温煎。
+/// 返回 'cooldown' | 'poor' | 'cancel' | 'warm' | 'boil' | 'blood'。
+async function decoctJiejiPotion({ free = false, kind = null }) {
+  if (hero == null) return 'cancel'
+  if (free != true && _jiejiDecoctOnCooldown()) {
+    return 'cooldown'
+  }
+
+  var selected = _jiejiDecoctNormalizeKind(kind)
+  if (selected == null) {
+    dialog.pushDialog('hint_decoctJiejiPotion')
+    dialog.pushSelection('jiejiDecoct', _jiejiDecoctChoices())
+    await dialog.execute()
+    final picked = dialog.checkSelected('jiejiDecoct')
+    if (picked == null || picked == 'cancel') {
+      if (free == true && picked == null) {
+        selected = 'warm'
+      } else {
+        return 'cancel'
+      }
+    } else {
+      selected = _jiejiDecoctNormalizeKind(picked)
+    }
+  }
+  if (selected == null) return 'cancel'
+
+  final seasonId = _jiejiDecoctSeasonId()
+  if (free != true) {
+    final moneyNeed = _jiejiDecoctMoneyNeed(selected, seasonId)
+    final herbNeed = _jiejiDecoctHerbNeed(selected, seasonId)
+    final moneyHave = hero.materials['money'] ?? 0
+    final herbHave = hero.materials['herb'] ?? 0
+    if (moneyHave < moneyNeed || herbHave < herbNeed) {
+      return 'poor'
+    }
+  }
+
+  if (free != true) {
+    final moneyNeed = _jiejiDecoctMoneyNeed(selected, seasonId)
+    final herbNeed = _jiejiDecoctHerbNeed(selected, seasonId)
+    if (moneyNeed > 0) {
+      Player.exhaust('money', moneyNeed)
+    }
+    if (herbNeed > 0) {
+      Player.exhaust('herb', herbNeed)
+    }
+    if (selected == 'blood') {
+      _jiejiDecoctCostLife(_jiejiDecoctBloodLifeCost(seasonId))
+    }
+    _jiejiDecoctMark()
+  }
+
+  if (selected == 'warm') {
+    final healed = Player.restoreLife(kJiejiDecoctWarmLife)
+    if (seasonId == 'mist') {
+      await Player.collect('herb', kJiejiDecoctWarmHerbMist, incurIncident: false)
+    }
+    dialog.pushDialog('hint_decoctJiejiPotion_warm', interpolations: [healed])
+    await dialog.execute()
+  } else if (selected == 'boil') {
+    final healed = Player.restoreLife(kJiejiDecoctBoilLife)
+    final ok = await tryDropGongfaShard(rate: kJiejiDecoctBoilGongfaRate)
+    if (ok == true) {
+      dialog.pushDialog('hint_decoctJiejiPotion_boil', interpolations: [healed])
+      await dialog.execute()
+    } else {
+      await Player.collect('money', kJiejiDecoctBoilMoney, incurIncident: false)
+      dialog.pushDialog('hint_decoctJiejiPotion_boil_money', interpolations: [healed])
+      await dialog.execute()
+    }
+  } else if (selected == 'blood') {
+    final ok = await tryDropGongfaShard(rate: kJiejiDecoctBloodGongfaRate)
+    if (ok == true) {
+      dialog.pushDialog('hint_decoctJiejiPotion_blood')
+      await dialog.execute()
+    } else {
+      await Player.collect('money', kJiejiDecoctBloodMoney, incurIncident: false)
+      dialog.pushDialog('hint_decoctJiejiPotion_blood_money')
+      await dialog.execute()
+    }
+  }
+
+  Game.updateUI()
+  return selected
+}

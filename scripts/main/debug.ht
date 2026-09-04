@@ -332,6 +332,11 @@ namespace debug {
     return await tasteJiejiPotion(free: true)
   }
 
+  /// 忽略冷却与花费，仍弹出丹房再炼三选。
+  async function forceDecoct() {
+    return await decoctJiejiPotion(free: true)
+  }
+
   async function forceScribeTalisman(kind) {
     final card = scribeJiejiTalisman(kind, free: true)
     if (card == null || card == 'cooldown') {
