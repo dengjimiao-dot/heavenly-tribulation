@@ -1,0 +1,152 @@
+/// 赶路「劫缨」三选：系缨 / 解缨 / 血缨。隐藏、劫兆、野遇、赶路、行商、拾荒、扎营、残锋、残卷、雾灯、残鼓、汲泉、劫幡、劫铃、劫符、劫旌、劫烛、劫角、劫笛、劫笠、劫带、劫履、劫氅、劫扇、劫杖、劫伞、劫面、劫帔、劫手套、劫戒、劫镜、劫鼓、劫炬、劫梳、劫勺、劫碗、劫杯、劫罐、劫瓶、劫墨、劫袍、劫带、劫簪、劫笔、劫针、劫扣、劫绳、劫珠、劫钗、劫绦、劫穗、劫缎都没中时才滚。
+const kJiejiFringeBaseRate = 0.0008
+const kJiejiFringeMoveCooldown = 24
+const kJiejiFringeTiefringeHerb = 1
+const kJiejiFringeTiefringeLife = 3
+const kJiejiFringeTiefringeGongfaRate = 0.04
+const kJiejiFringeLoosefringeMoney = 4
+const kJiejiFringeLoosefringeMoneyThunder = 2
+const kJiejiFringeLoosefringeHerb = 1
+const kJiejiFringeLoosefringeLife = 2
+const kJiejiFringeBloodLife = 2
+const kJiejiFringeBloodLifeBlood = 3
+const kJiejiFringeBloodGongfaRate = 0.18
+const kJiejiFringeBloodMoney = 8
+
+function _jiejiFringeSeasonId() {
+  if (game.jieji != null && game.jieji.seasonId != null) {
+    return game.jieji.seasonId
+  }
+  return null
+}
+
+function _jiejiFringeTutorialLocked() {
+  return game.enableTutorial && game.flags.tutorial.bountyQuest != true
+}
+
+function _jiejiFringeTiefringeHerbCost(seasonId) {
+  if (seasonId == 'mist') return 0
+  return kJiejiFringeTiefringeHerb
+}
+
+function _jiejiFringeLoosefringeMoneyCost(seasonId) {
+  if (seasonId == 'thunder') return kJiejiFringeLoosefringeMoneyThunder
+  return kJiejiFringeLoosefringeMoney
+}
+
+function _jiejiFringeBloodLifeCost(seasonId) {
+  if (seasonId == 'blood') return kJiejiFringeBloodLifeBlood
+  return kJiejiFringeBloodLife
+}
+
+function _jiejiFringeCostLife(want) {
+  var lost = want
+  final life = hero.life ?? 1
+  if (life - lost < 1) lost = life - 1
+  if (lost < 0) lost = 0
+  if (lost > 0) {
+    Player.setLife(hero.life - lost)
+  }
+  return lost
+}
+
+function _jiejiFringeNormalizeKind(kind) {
+  if (kind == 'tiefringe' || kind == 'jieji_fringe_tiefringe') return 'tiefringe'
+  if (kind == 'loosefringe' || kind == 'jieji_fringe_loosefringe') return 'loosefringe'
+  if (kind == 'bloodfringe' || kind == 'jieji_fringe_bloodfringe') return 'bloodfringe'
+  return null
+}
+
+function _jiejiFringeChoices() {
+  return [
+    {
+      text: 'jieji_fringe_tiefringe',
+      description: 'hint_jieji_fringe_tiefringe',
+    },
+    {
+      text: 'jieji_fringe_loosefringe',
+      description: 'hint_jieji_fringe_loosefringe',
+    },
+    {
+      text: 'jieji_fringe_bloodfringe',
+      description: 'hint_jieji_fringe_bloodfringe',
+    },
+  ]
+}
+
+/// 赶路劫缨三选。debug.forceJiejiEvent('fringe') / forceFringe 直接走这里，仍弹出三选。
+async function playJiejiFringeEvent(terrain) {
+  if (hero == null) return false
+
+  dialog.pushDialog('hint_jieji_fringe')
+  dialog.pushSelection('jiejiFringe', _jiejiFringeChoices())
+  await dialog.execute()
+  final picked = dialog.checkSelected('jiejiFringe')
+  var selected = _jiejiFringeNormalizeKind(picked)
+  if (selected == null) {
+    selected = 'tiefringe'
+  }
+
+  final seasonId = _jiejiFringeSeasonId()
+  if (selected == 'tiefringe') {
+    final herbNeed = _jiejiFringeTiefringeHerbCost(seasonId)
+    final herbHave = hero.materials['herb'] ?? 0
+    if (herbNeed > 0 && herbHave < herbNeed) {
+      dialog.pushDialog('hint_jieji_fringe_tiefringe_broke', interpolations: [herbNeed])
+      await dialog.execute()
+    } else {
+      if (herbNeed > 0) {
+        Player.exhaust('herb', herbNeed)
+      }
+      final healed = Player.restoreLife(kJiejiFringeTiefringeLife)
+      dialog.pushDialog('hint_jieji_fringe_tiefringe_ok', interpolations: [healed])
+      await dialog.execute()
+      await tryDropGongfaShard(rate: kJiejiFringeTiefringeGongfaRate)
+    }
+  } else if (selected == 'loosefringe') {
+    final moneyNeed = _jiejiFringeLoosefringeMoneyCost(seasonId)
+    final moneyHave = hero.materials['money'] ?? 0
+    if (moneyHave < moneyNeed) {
+      dialog.pushDialog('hint_jieji_fringe_loosefringe_broke', interpolations: [moneyNeed])
+      await dialog.execute()
+    } else {
+      Player.exhaust('money', moneyNeed)
+      await Player.collect('herb', kJiejiFringeLoosefringeHerb, incurIncident: false)
+      final healed = Player.restoreLife(kJiejiFringeLoosefringeLife)
+      dialog.pushDialog('hint_jieji_fringe_loosefringe_ok', interpolations: [kJiejiFringeLoosefringeHerb, healed])
+      await dialog.execute()
+    }
+  } else {
+    final lost = _jiejiFringeCostLife(_jiejiFringeBloodLifeCost(seasonId))
+    dialog.pushDialog('hint_jieji_fringe_bloodfringe_ok', interpolations: [lost])
+    await dialog.execute()
+    final dropped = await tryDropGongfaShard(rate: kJiejiFringeBloodGongfaRate)
+    if (dropped != true) {
+      await Player.collect('money', kJiejiFringeBloodMoney, incurIncident: false)
+      dialog.pushDialog('hint_jieji_fringe_bloodfringe_none', interpolations: [kJiejiFringeBloodMoney])
+      await dialog.execute()
+    }
+  }
+
+  Game.updateUI()
+  return true
+}
+
+/// 赶路触发：教程锁与路遇相同；冷却 24 步；约 0.08%。出过则返回 true。
+async function tryJiejiFringeOnMove(terrain) {
+  if (hero == null) return false
+  if (_jiejiFringeTutorialLocked()) return false
+
+  final jieji = ensureJiejiFlags()
+  final moves = jieji.worldMoves ?? 0
+  final last = jieji.lastFringeMove ?? -999
+  if (moves - last < kJiejiFringeMoveCooldown) return false
+
+  var rate = kJiejiFringeBaseRate
+  if (rate < 0) rate = 0
+  if (random.nextDouble() > rate) return false
+
+  jieji.lastFringeMove = moves
+  await playJiejiFringeEvent(terrain)
+  return true
+}

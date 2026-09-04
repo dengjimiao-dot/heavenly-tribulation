@@ -4178,6 +4178,20 @@
   "hint_jieji_ribbon_bloodribbon_ok": "你割了 {0} 点生机去染劫缎。",
   "hint_jieji_ribbon_bloodribbon_none": "血缎下去，缎影却散了。袋里多了 {0} 铜钱。",
 
+  "hint_jieji_fringe": "路遇一缕劫缨。你可以系缨、解缨，或以血染缨。",
+  "jieji_fringe_tiefringe": "系缨",
+  "jieji_fringe_loosefringe": "解缨",
+  "jieji_fringe_bloodfringe": "血缨",
+  "hint_jieji_fringe_tiefringe": "系缨：耗 1 药材（雾月不耗）。回 3 命，四厘摸残页。药材不够则空手。",
+  "hint_jieji_fringe_loosefringe": "解缨：花 4 铜钱（雷月 2）。得 1 药材，并回 2 命。袋里不够则空手。",
+  "hint_jieji_fringe_bloodfringe": "血缨：扣 2 点生机（至少留 1，血月 3）。一成八摸残页，不成则得 8 铜钱。",
+  "hint_jieji_fringe_tiefringe_ok": "你系上劫缨。生机回了 {0} 点。",
+  "hint_jieji_fringe_tiefringe_broke": "系缨要 {0} 药材。你拿不出来。",
+  "hint_jieji_fringe_loosefringe_ok": "你解开劫缨。得了 {0} 药材，生机回了 {1} 点。",
+  "hint_jieji_fringe_loosefringe_broke": "解缨要 {0} 铜钱。袋里不够。",
+  "hint_jieji_fringe_bloodfringe_ok": "你割了 {0} 点生机去染劫缨。",
+  "hint_jieji_fringe_bloodfringe_none": "血缨下去，缨影却散了。袋里多了 {0} 铜钱。",
+
 
   "jiejiMenpaiDemo": "劫季门派 · Demo",
   "jiejiMenpaiPitch": "带着业力赶天劫的门派肉鸽",
