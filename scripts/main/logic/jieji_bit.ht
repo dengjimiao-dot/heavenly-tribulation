@@ -1,0 +1,152 @@
+/// 赶路「劫衔」三选：衔辔 / 收衔 / 血衔。隐藏、劫兆、野遇、赶路、行商、拾荒、扎营、残锋、残卷、雾灯、残鼓、汲泉、劫幡、劫铃、劫符、劫旌、劫烛、劫角、劫笛、劫笠、劫带、劫履、劫氅、劫扇、劫杖、劫伞、劫面、劫帔、劫手套、劫戒、劫镜、劫鼓、劫炬、劫梳、劫勺、劫碗、劫杯、劫罐、劫瓶、劫墨、劫袍、劫带、劫簪、劫笔、劫针、劫扣、劫绳、劫珠、劫钗、劫绦、劫穗、劫缎、劫缨、劫袖、劫领、劫缘、劫辫、劫翎、劫裹、劫轭、劫辔、劫缰、劫镫、劫鞦、劫勒都没中时才滚。
+const kJiejiBitBaseRate = 0.00004
+const kJiejiBitMoveCooldown = 24
+const kJiejiBitHoldbitHerb = 1
+const kJiejiBitHoldbitLife = 1
+const kJiejiBitHoldbitGongfaRate = 0.006
+const kJiejiBitStowbitMoney = 1
+const kJiejiBitStowbitMoneyThunder = 1
+const kJiejiBitStowbitHerb = 1
+const kJiejiBitStowbitLife = 1
+const kJiejiBitBloodLife = 1
+const kJiejiBitBloodLifeBlood = 2
+const kJiejiBitBloodGongfaRate = 0.04
+const kJiejiBitBloodMoney = 2
+
+function _jiejiBitSeasonId() {
+  if (game.jieji != null && game.jieji.seasonId != null) {
+    return game.jieji.seasonId
+  }
+  return null
+}
+
+function _jiejiBitTutorialLocked() {
+  return game.enableTutorial && game.flags.tutorial.bountyQuest != true
+}
+
+function _jiejiBitHoldbitHerbCost(seasonId) {
+  if (seasonId == 'mist') return 0
+  return kJiejiBitHoldbitHerb
+}
+
+function _jiejiBitStowbitMoneyCost(seasonId) {
+  if (seasonId == 'thunder') return kJiejiBitStowbitMoneyThunder
+  return kJiejiBitStowbitMoney
+}
+
+function _jiejiBitBloodLifeCost(seasonId) {
+  if (seasonId == 'blood') return kJiejiBitBloodLifeBlood
+  return kJiejiBitBloodLife
+}
+
+function _jiejiBitCostLife(want) {
+  var lost = want
+  final life = hero.life ?? 1
+  if (life - lost < 1) lost = life - 1
+  if (lost < 0) lost = 0
+  if (lost > 0) {
+    Player.setLife(hero.life - lost)
+  }
+  return lost
+}
+
+function _jiejiBitNormalizeKind(kind) {
+  if (kind == 'holdbit' || kind == 'jieji_bit_holdbit') return 'holdbit'
+  if (kind == 'stowbit' || kind == 'jieji_bit_stowbit') return 'stowbit'
+  if (kind == 'bloodbit' || kind == 'jieji_bit_bloodbit') return 'bloodbit'
+  return null
+}
+
+function _jiejiBitChoices() {
+  return [
+    {
+      text: 'jieji_bit_holdbit',
+      description: 'hint_jieji_bit_holdbit',
+    },
+    {
+      text: 'jieji_bit_stowbit',
+      description: 'hint_jieji_bit_stowbit',
+    },
+    {
+      text: 'jieji_bit_bloodbit',
+      description: 'hint_jieji_bit_bloodbit',
+    },
+  ]
+}
+
+/// 赶路劫衔三选。debug.forceJiejiEvent('bit') / forceBit 直接走这里，仍弹出三选。
+async function playJiejiBitEvent(terrain) {
+  if (hero == null) return false
+
+  dialog.pushDialog('hint_jieji_bit')
+  dialog.pushSelection('jiejiBit', _jiejiBitChoices())
+  await dialog.execute()
+  final picked = dialog.checkSelected('jiejiBit')
+  var selected = _jiejiBitNormalizeKind(picked)
+  if (selected == null) {
+    selected = 'holdbit'
+  }
+
+  final seasonId = _jiejiBitSeasonId()
+  if (selected == 'holdbit') {
+    final herbNeed = _jiejiBitHoldbitHerbCost(seasonId)
+    final herbHave = hero.materials['herb'] ?? 0
+    if (herbNeed > 0 && herbHave < herbNeed) {
+      dialog.pushDialog('hint_jieji_bit_holdbit_broke', interpolations: [herbNeed])
+      await dialog.execute()
+    } else {
+      if (herbNeed > 0) {
+        Player.exhaust('herb', herbNeed)
+      }
+      final healed = Player.restoreLife(kJiejiBitHoldbitLife)
+      dialog.pushDialog('hint_jieji_bit_holdbit_ok', interpolations: [healed])
+      await dialog.execute()
+      await tryDropGongfaShard(rate: kJiejiBitHoldbitGongfaRate)
+    }
+  } else if (selected == 'stowbit') {
+    final moneyNeed = _jiejiBitStowbitMoneyCost(seasonId)
+    final moneyHave = hero.materials['money'] ?? 0
+    if (moneyHave < moneyNeed) {
+      dialog.pushDialog('hint_jieji_bit_stowbit_broke', interpolations: [moneyNeed])
+      await dialog.execute()
+    } else {
+      Player.exhaust('money', moneyNeed)
+      await Player.collect('herb', kJiejiBitStowbitHerb, incurIncident: false)
+      final healed = Player.restoreLife(kJiejiBitStowbitLife)
+      dialog.pushDialog('hint_jieji_bit_stowbit_ok', interpolations: [kJiejiBitStowbitHerb, healed])
+      await dialog.execute()
+    }
+  } else {
+    final lost = _jiejiBitCostLife(_jiejiBitBloodLifeCost(seasonId))
+    dialog.pushDialog('hint_jieji_bit_bloodbit_ok', interpolations: [lost])
+    await dialog.execute()
+    final dropped = await tryDropGongfaShard(rate: kJiejiBitBloodGongfaRate)
+    if (dropped != true) {
+      await Player.collect('money', kJiejiBitBloodMoney, incurIncident: false)
+      dialog.pushDialog('hint_jieji_bit_bloodbit_none', interpolations: [kJiejiBitBloodMoney])
+      await dialog.execute()
+    }
+  }
+
+  Game.updateUI()
+  return true
+}
+
+/// 赶路触发：教程锁与路遇相同；冷却 24 步；约 0.004%。出过则返回 true。
+async function tryJiejiBitOnMove(terrain) {
+  if (hero == null) return false
+  if (_jiejiBitTutorialLocked()) return false
+
+  final jieji = ensureJiejiFlags()
+  final moves = jieji.worldMoves ?? 0
+  final last = jieji.lastBitMove ?? -999
+  if (moves - last < kJiejiBitMoveCooldown) return false
+
+  var rate = kJiejiBitBaseRate
+  if (rate < 0) rate = 0
+  if (random.nextDouble() > rate) return false
+
+  jieji.lastBitMove = moves
+  await playJiejiBitEvent(terrain)
+  return true
+}
