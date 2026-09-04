@@ -345,6 +345,9 @@ namespace debug {
     } else if (kind == 'censer') {
       game.flags.dungeon.pendingEncounter = 'jiejiCenser'
       await playJiejiDungeonEncounter()
+    } else if (kind == 'desk') {
+      game.flags.dungeon.pendingEncounter = 'jiejiDesk'
+      await playJiejiDungeonEncounter()
     } else if (kind == 'exit') {
       await playJiejiDungeonExitGift()
     } else {
