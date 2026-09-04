@@ -421,6 +421,11 @@ namespace debug {
     return await visitJiejiTomb(free: true)
   }
 
+  /// 忽略冷却与花费，仍弹出秘境入口探穴三选。
+  async function forceDelve() {
+    return await delveJiejiTomb(free: true)
+  }
+
   async function forceBlackLot() {
     return await bidJiejiBlackLot(free: true)
   }

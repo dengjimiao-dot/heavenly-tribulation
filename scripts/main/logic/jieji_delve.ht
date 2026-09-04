@@ -1,0 +1,194 @@
+/// 秘境入口「探穴」三选：摸穴 / 掘骨 / 血穴。不替换剑冢与进秘境。
+const kJiejiDelveCooldownDays = 1
+const kJiejiDelveScoutMoney = 25
+const kJiejiDelveScoutMoneyThunder = 12
+const kJiejiDelveScoutLife = 4
+const kJiejiDelveScoutMistHerb = 1
+const kJiejiDelveDigHerb = 1
+const kJiejiDelveDigMistMoney = 20
+const kJiejiDelveDigGongfaRate = 0.20
+const kJiejiDelveBloodLife = 2
+const kJiejiDelveBloodLifeBlood = 3
+const kJiejiDelveBloodGongfaRate = 0.30
+const kJiejiDelveBloodMoney = 45
+
+function _jiejiDelveSeasonId() {
+  if (game.jieji != null && game.jieji.seasonId != null) {
+    return game.jieji.seasonId
+  }
+  return null
+}
+
+function _jiejiDelveCurrentDay() {
+  if (game.timestamp == null) return null
+  if (Constants.ticksPerDay == null) return null
+  if (Constants.ticksPerDay <= 0) return null
+  return game.timestamp ~/ Constants.ticksPerDay
+}
+
+function _jiejiDelveOnCooldown() {
+  final jieji = ensureJiejiFlags()
+  final day = _jiejiDelveCurrentDay()
+  if (day == null) return false
+  if (jieji.lastDelveDay == null) return false
+  if (day - jieji.lastDelveDay < kJiejiDelveCooldownDays) return true
+  return false
+}
+
+function _jiejiDelveMark() {
+  final jieji = ensureJiejiFlags()
+  jieji.lastDelveDay = _jiejiDelveCurrentDay()
+}
+
+function _jiejiDelveCostLife(want) {
+  var lost = want
+  final life = hero.life ?? 1
+  if (life - lost < 1) lost = life - 1
+  if (lost < 0) lost = 0
+  if (lost > 0) {
+    Player.setLife(hero.life - lost)
+  }
+  return lost
+}
+
+/// 与剑冢拔剑同法：发一枚牌胚。路遇 _jiejiRoadGrantBlank 不可见时仍本地发胚。
+function _jiejiDelveGrantBlank() {
+  final card = BattleCard(rank: 0)
+  card.isCardBlank = true
+  Player.acquireCard(card)
+  return card
+}
+
+function _jiejiDelveScoutMoneyCost(seasonId) {
+  if (seasonId == 'thunder') return kJiejiDelveScoutMoneyThunder
+  return kJiejiDelveScoutMoney
+}
+
+function _jiejiDelveBloodLifeCost(seasonId) {
+  if (seasonId == 'blood') return kJiejiDelveBloodLifeBlood
+  return kJiejiDelveBloodLife
+}
+
+function _jiejiDelveNormalizeKind(kind) {
+  if (kind == 'scout' || kind == 'jieji_delve_scout') return 'scout'
+  if (kind == 'dig' || kind == 'jieji_delve_dig') return 'dig'
+  if (kind == 'blood' || kind == 'jieji_delve_blood') return 'blood'
+  return null
+}
+
+function _jiejiDelveChoices() {
+  return [
+    {
+      text: 'jieji_delve_scout',
+      description: 'hint_jieji_delve_scout',
+    },
+    {
+      text: 'jieji_delve_dig',
+      description: 'hint_jieji_delve_dig',
+    },
+    {
+      text: 'jieji_delve_blood',
+      description: 'hint_jieji_delve_blood',
+    },
+    'cancel',
+  ]
+}
+
+function _jiejiDelveHerbNeed(selected) {
+  if (selected == 'dig') return kJiejiDelveDigHerb
+  return 0
+}
+
+function _jiejiDelveMoneyNeed(selected, seasonId) {
+  if (selected == 'scout') return _jiejiDelveScoutMoneyCost(seasonId)
+  return 0
+}
+
+async function _jiejiDelveApply(selected, seasonId) {
+  if (selected == 'scout') {
+    Player.restoreLife(kJiejiDelveScoutLife)
+    if (seasonId == 'mist') {
+      await Player.collect('herb', kJiejiDelveScoutMistHerb, incurIncident: false)
+      dialog.pushDialog('hint_delveJiejiTomb_scout_mist')
+    } else {
+      dialog.pushDialog('hint_delveJiejiTomb_scout')
+    }
+    await dialog.execute()
+    return
+  }
+  if (selected == 'dig') {
+    _jiejiDelveGrantBlank()
+    if (seasonId == 'mist') {
+      await Player.collect('money', kJiejiDelveDigMistMoney, incurIncident: false)
+      dialog.pushDialog('hint_delveJiejiTomb_dig_mist')
+    } else {
+      dialog.pushDialog('hint_delveJiejiTomb_dig')
+    }
+    await dialog.execute()
+    await tryDropGongfaShard(rate: kJiejiDelveDigGongfaRate)
+    return
+  }
+  if (selected == 'blood') {
+    final ok = await tryDropGongfaShard(rate: kJiejiDelveBloodGongfaRate)
+    if (ok == true) {
+      dialog.pushDialog('hint_delveJiejiTomb_blood')
+      await dialog.execute()
+    } else {
+      await Player.collect('money', kJiejiDelveBloodMoney, incurIncident: false)
+      dialog.pushDialog('hint_delveJiejiTomb_blood_money')
+      await dialog.execute()
+    }
+  }
+}
+
+/// 秘境入口探穴三选。free 为 true 时不扣费、不检查冷却（debug）；kind 为空仍弹出三选。
+/// 返回 'cooldown' | 'notEnough' | 'scout' | 'dig' | 'blood'；取消为 null。
+async function delveJiejiTomb({ free = false, kind = null }) {
+  if (hero == null) return null
+  if (free != true && _jiejiDelveOnCooldown()) {
+    return 'cooldown'
+  }
+
+  var selected = _jiejiDelveNormalizeKind(kind)
+  if (selected == null) {
+    dialog.pushDialog('hint_delveJiejiTomb')
+    dialog.pushSelection('jiejiDelve', _jiejiDelveChoices())
+    await dialog.execute()
+    final picked = dialog.checkSelected('jiejiDelve')
+    if (picked == null || picked == 'cancel') {
+      return null
+    }
+    selected = _jiejiDelveNormalizeKind(picked)
+  }
+  if (selected == null) return null
+
+  final seasonId = _jiejiDelveSeasonId()
+  if (free != true) {
+    final herbNeed = _jiejiDelveHerbNeed(selected)
+    final moneyNeed = _jiejiDelveMoneyNeed(selected, seasonId)
+    final herbHave = hero.materials['herb'] ?? 0
+    final moneyHave = hero.materials['money'] ?? 0
+    if (herbHave < herbNeed || moneyHave < moneyNeed) {
+      return 'notEnough'
+    }
+  }
+
+  if (free != true) {
+    final herbNeed = _jiejiDelveHerbNeed(selected)
+    final moneyNeed = _jiejiDelveMoneyNeed(selected, seasonId)
+    if (herbNeed > 0) {
+      Player.exhaust('herb', herbNeed)
+    }
+    if (moneyNeed > 0) {
+      Player.exhaust('money', moneyNeed)
+    }
+    if (selected == 'blood') {
+      _jiejiDelveCostLife(_jiejiDelveBloodLifeCost(seasonId))
+    }
+    _jiejiDelveMark()
+  }
+
+  await _jiejiDelveApply(selected, seasonId)
+  Game.updateUI()
+  return selected
+}

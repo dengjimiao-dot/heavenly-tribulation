@@ -1815,6 +1815,27 @@
   "hint_visitJiejiTomb_cooldown": "刚抚过冢。过一日再来。",
   "hint_visitJiejiTomb_notEnough": "抚碑要 30 铜钱（雷月 15），拔剑要 1 药材。",
 
+
+  "delveJiejiTomb": "探穴",
+  "jiejiDelve": "探穴",
+  "hint_delveJiejiTomb_description": "冢旁另有浅穴可探。一日一次，与剑冢分开计。摸穴耗 25 铜钱（雷月 12）回 4 命（雾月另得 1 药材）；掘骨耗 1 药材得牌胚，两成残页（雾月另得 20 铜钱）；血穴扣 2 命（血月 3），三成残页，否则 45 铜钱。",
+  "hint_delveJiejiTomb": "穴口阴风。摸穴、掘骨、血穴，择一。一日一次。",
+  "jieji_delve_scout": "摸穴",
+  "jieji_delve_dig": "掘骨",
+  "jieji_delve_blood": "血穴",
+  "hint_jieji_delve_scout": "摸穴：耗 25 铜钱（雷月 12）。回复 4 点生机。雾月另得 1 药材。",
+  "hint_jieji_delve_dig": "掘骨：耗 1 药材。得一枚牌胚，两成残页。雾月另得 20 铜钱。",
+  "hint_jieji_delve_blood": "血穴：扣 2 点生机（至少留 1；血月 3）。三成残页，否则 45 铜钱。",
+  "hint_delveJiejiTomb_scout": "你摸过穴。生机回了 4 点。",
+  "hint_delveJiejiTomb_scout_mist": "你摸过穴。生机回了 4 点，另得 1 药材。",
+  "hint_delveJiejiTomb_dig": "你掘出残骨。得了一枚牌胚。",
+  "hint_delveJiejiTomb_dig_mist": "你掘出残骨。得了一枚牌胚，袋里另多了 20 铜钱。",
+  "hint_delveJiejiTomb_blood": "血穴落成。残页入手。",
+  "hint_delveJiejiTomb_blood_money": "血穴未成残页。袋里落下 45 铜钱。",
+  "hint_delveJiejiTomb_cooldown": "刚探过穴。过一日再来。",
+  "hint_delveJiejiTomb_notEnough": "摸穴要 25 铜钱（雷月 12），掘骨要 1 药材。",
+
+
   "bidJiejiBlackLot": "黑拍",
   "jiejiBlackLot": "黑拍",
   "hint_bidJiejiBlackLot_description": "柜台下另开一场黑拍。看三件货，拍一件。一日或走八程才能再来。雾月多雾货，雷月多雷晶，血月多血契。与路边黑市匣不同，这里是出价拍货。",

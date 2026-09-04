@@ -2374,6 +2374,27 @@ Future<void> _heroVisitJiejiTomb(dynamic location) async {
 }
 
 
+
+Future<void> _heroDelveJiejiTomb(dynamic location) async {
+  final result = await engine.hetu.invoke('delveJiejiTomb');
+  if (result == 'cooldown') {
+    dialog.pushDialog(
+      'hint_delveJiejiTomb_cooldown',
+      npcId: location['npcId'],
+    );
+    await dialog.execute();
+    return;
+  }
+  if (result == 'notEnough') {
+    dialog.pushDialog(
+      'hint_delveJiejiTomb_notEnough',
+      npcId: location['npcId'],
+    );
+    await dialog.execute();
+    return;
+  }
+}
+
 Future<void> _heroIssueJiejiEdict(dynamic location) async {
   final result = await engine.hetu.invoke('issueJiejiEdict');
   if (result == 'claimed') {
@@ -3271,6 +3292,10 @@ Future<void> _onInteractSite(
       'text': 'visitJiejiTomb',
       'description': 'hint_visitJiejiTomb_description',
     });
+    siteOptions.add({
+      'text': 'delveJiejiTomb',
+      'description': 'hint_delveJiejiTomb_description',
+    });
   }
   siteOptions.add('cancel');
 
@@ -3401,6 +3426,8 @@ Future<void> _onInteractSite(
       await dialog.execute();
     case 'visitJiejiTomb':
       await _heroVisitJiejiTomb(location);
+    case 'delveJiejiTomb':
+      await _heroDelveJiejiTomb(location);
     case 'about_arena':
       dialog.pushDialog(
         'hint_arenaEntrance',
