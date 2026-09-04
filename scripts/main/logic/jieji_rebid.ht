@@ -1,0 +1,181 @@
+/// 拍卖行「再拍」：再观 / 再加 / 血再。不替换黑拍与加拍。
+const kJiejiRebidCooldownDays = 1
+const kJiejiRebidWatchMoney = 20
+const kJiejiRebidWatchMoneyThunder = 10
+const kJiejiRebidWatchHerb = 1
+const kJiejiRebidWatchHerbMistExtra = 1
+const kJiejiRebidTipMoney = 40
+const kJiejiRebidTipMoneyThunder = 20
+const kJiejiRebidTipGongfaRate = 0.20
+const kJiejiRebidTipHerb = 2
+const kJiejiRebidBloodLife = 2
+const kJiejiRebidBloodLifeBlood = 3
+const kJiejiRebidBloodGongfaRate = 0.35
+const kJiejiRebidBloodMoney = 50
+
+function _jiejiRebidSeasonId() {
+  if (game.jieji != null && game.jieji.seasonId != null) {
+    return game.jieji.seasonId
+  }
+  return null
+}
+
+function _jiejiRebidCurrentDay() {
+  if (game.timestamp == null) return null
+  if (Constants.ticksPerDay == null) return null
+  if (Constants.ticksPerDay <= 0) return null
+  return game.timestamp ~/ Constants.ticksPerDay
+}
+
+function _jiejiRebidOnCooldown() {
+  final jieji = ensureJiejiFlags()
+  final day = _jiejiRebidCurrentDay()
+  if (day == null) return false
+  if (jieji.lastRebidDay == null) return false
+  if (day - jieji.lastRebidDay < kJiejiRebidCooldownDays) return true
+  return false
+}
+
+function _jiejiRebidMark() {
+  final jieji = ensureJiejiFlags()
+  jieji.lastRebidDay = _jiejiRebidCurrentDay()
+}
+
+function _jiejiRebidCostLife(want) {
+  var lost = want
+  final life = hero.life ?? 1
+  if (life - lost < 1) lost = life - 1
+  if (lost < 0) lost = 0
+  if (lost > 0) {
+    Player.setLife(hero.life - lost)
+  }
+  return lost
+}
+
+function _jiejiRebidWatchMoneyCost(seasonId) {
+  if (seasonId == 'thunder') return kJiejiRebidWatchMoneyThunder
+  return kJiejiRebidWatchMoney
+}
+
+function _jiejiRebidTipMoneyCost(seasonId) {
+  if (seasonId == 'thunder') return kJiejiRebidTipMoneyThunder
+  return kJiejiRebidTipMoney
+}
+
+function _jiejiRebidBloodLifeCost(seasonId) {
+  if (seasonId == 'blood') return kJiejiRebidBloodLifeBlood
+  return kJiejiRebidBloodLife
+}
+
+function _jiejiRebidNormalizeKind(kind) {
+  if (kind == 'watch' || kind == 'jieji_rebid_watch') return 'watch'
+  if (kind == 'tip' || kind == 'jieji_rebid_tip') return 'tip'
+  if (kind == 'blood' || kind == 'jieji_rebid_blood') return 'blood'
+  return null
+}
+
+function _jiejiRebidChoices() {
+  return [
+    {
+      text: 'jieji_rebid_watch',
+      description: 'hint_jieji_rebid_watch',
+    },
+    {
+      text: 'jieji_rebid_tip',
+      description: 'hint_jieji_rebid_tip',
+    },
+    {
+      text: 'jieji_rebid_blood',
+      description: 'hint_jieji_rebid_blood',
+    },
+    'cancel',
+  ]
+}
+
+function _jiejiRebidMoneyNeed(selected, seasonId) {
+  if (selected == 'watch') return _jiejiRebidWatchMoneyCost(seasonId)
+  if (selected == 'tip') return _jiejiRebidTipMoneyCost(seasonId)
+  return 0
+}
+
+/// 拍卖行再拍三选。free 为 true 时不扣费、不检查冷却（debug），仍弹出三选。
+/// null 选择在 free 时默认再观。
+/// 返回 'ok' | 'cooldown' | 'poor' | 'cancel'。
+async function rebidJiejiBlackLot({ free = false }) {
+  if (hero == null) return 'cancel'
+  if (free != true && _jiejiRebidOnCooldown()) {
+    return 'cooldown'
+  }
+
+  dialog.pushDialog('hint_rebidJiejiBlackLot')
+  dialog.pushSelection('jiejiRebid', _jiejiRebidChoices())
+  await dialog.execute()
+  final picked = dialog.checkSelected('jiejiRebid')
+  var selected = null
+  if (picked == null || picked == 'cancel') {
+    if (free == true && picked == null) {
+      selected = 'watch'
+    } else {
+      return 'cancel'
+    }
+  } else {
+    selected = _jiejiRebidNormalizeKind(picked)
+  }
+  if (selected == null) return 'cancel'
+
+  final seasonId = _jiejiRebidSeasonId()
+  if (free != true) {
+    final moneyNeed = _jiejiRebidMoneyNeed(selected, seasonId)
+    final moneyHave = hero.materials['money'] ?? 0
+    if (moneyHave < moneyNeed) {
+      return 'poor'
+    }
+  }
+
+  if (free != true) {
+    final moneyNeed = _jiejiRebidMoneyNeed(selected, seasonId)
+    if (moneyNeed > 0) {
+      Player.exhaust('money', moneyNeed)
+    }
+    if (selected == 'blood') {
+      _jiejiRebidCostLife(_jiejiRebidBloodLifeCost(seasonId))
+    }
+    _jiejiRebidMark()
+  }
+
+  if (selected == 'watch') {
+    var gain = kJiejiRebidWatchHerb
+    if (seasonId == 'mist') {
+      gain = gain + kJiejiRebidWatchHerbMistExtra
+      await Player.collect('herb', gain, incurIncident: false)
+      dialog.pushDialog('hint_rebidJiejiBlackLot_watch_mist', interpolations: [gain])
+    } else {
+      await Player.collect('herb', gain, incurIncident: false)
+      dialog.pushDialog('hint_rebidJiejiBlackLot_watch', interpolations: [gain])
+    }
+    await dialog.execute()
+  } else if (selected == 'tip') {
+    final dropped = await tryDropGongfaShard(rate: kJiejiRebidTipGongfaRate)
+    if (dropped == true) {
+      dialog.pushDialog('hint_rebidJiejiBlackLot_tip')
+      await dialog.execute()
+    } else {
+      await Player.collect('herb', kJiejiRebidTipHerb, incurIncident: false)
+      dialog.pushDialog('hint_rebidJiejiBlackLot_tip_herb', interpolations: [kJiejiRebidTipHerb])
+      await dialog.execute()
+    }
+  } else if (selected == 'blood') {
+    final ok = await tryDropGongfaShard(rate: kJiejiRebidBloodGongfaRate)
+    if (ok == true) {
+      dialog.pushDialog('hint_rebidJiejiBlackLot_blood')
+      await dialog.execute()
+    } else {
+      await Player.collect('money', kJiejiRebidBloodMoney, incurIncident: false)
+      dialog.pushDialog('hint_rebidJiejiBlackLot_blood_money', interpolations: [kJiejiRebidBloodMoney])
+      await dialog.execute()
+    }
+  }
+
+  Game.updateUI()
+  return 'ok'
+}

@@ -2657,6 +2657,27 @@ Future<void> _heroRaiseJiejiBlackLot(dynamic location) async {
   }
 }
 
+
+Future<void> _heroRebidJiejiBlackLot(dynamic location) async {
+  final result = await engine.hetu.invoke('rebidJiejiBlackLot');
+  if (result == 'cooldown') {
+    dialog.pushDialog(
+      'hint_rebidJiejiBlackLot_cooldown',
+      npcId: location['npcId'],
+    );
+    await dialog.execute();
+    return;
+  }
+  if (result == 'poor') {
+    dialog.pushDialog(
+      'hint_rebidJiejiBlackLot_notEnough',
+      npcId: location['npcId'],
+    );
+    await dialog.execute();
+    return;
+  }
+}
+
 Future<void> _heroSwapJiejiGoods(dynamic location) async {
   final result = await engine.hetu.invoke('swapJiejiGoods');
   if (result == 'cooldown') {
@@ -3509,6 +3530,10 @@ Future<void> _onInteractSite(
       'text': 'raiseJiejiBlackLot',
       'description': 'hint_raiseJiejiBlackLot_description',
     });
+    siteOptions.add({
+      'text': 'rebidJiejiBlackLot',
+      'description': 'hint_rebidJiejiBlackLot_description',
+    });
   }
   if (siteKind == 'tradinghouse') {
     siteOptions.add({
@@ -3963,6 +3988,8 @@ Future<void> _onInteractSite(
       await _heroBidJiejiBlackLot(location);
     case 'raiseJiejiBlackLot':
       await _heroRaiseJiejiBlackLot(location);
+    case 'rebidJiejiBlackLot':
+      await _heroRebidJiejiBlackLot(location);
     case 'swapJiejiGoods':
       await _heroSwapJiejiGoods(location);
     case 'haggleJiejiGoods':
