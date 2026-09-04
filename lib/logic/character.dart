@@ -954,6 +954,10 @@ Future<void> _onInteractHeadquarters(
     'text': 'issueJiejiEdict',
     'description': 'hint_issueJiejiEdict_description',
   });
+  siteOptions.add({
+    'text': 'reissueJiejiEdict',
+    'description': 'hint_reissueJiejiEdict_description',
+  });
   final heroSectId = GameData.hero['sectId'];
   if (heroSectId == null) {
     siteOptions.add('enroll');
@@ -1030,6 +1034,8 @@ Future<void> _onInteractHeadquarters(
       );
     case 'issueJiejiEdict':
       await _heroIssueJiejiEdict(location);
+    case 'reissueJiejiEdict':
+      await _heroReissueJiejiEdict(location);
     case 'enroll':
       await _heroEnrollSect(sect, npc);
     case 'resign':
@@ -2659,6 +2665,26 @@ Future<void> _heroIssueJiejiEdict(dynamic location) async {
   if (result == 'poor') {
     dialog.pushDialog(
       'hint_issueJiejiEdict_notEnough',
+      npcId: location['npcId'],
+    );
+    await dialog.execute();
+    return;
+  }
+}
+
+Future<void> _heroReissueJiejiEdict(dynamic location) async {
+  final result = await engine.hetu.invoke('reissueJiejiEdict');
+  if (result == 'cooldown') {
+    dialog.pushDialog(
+      'hint_reissueJiejiEdict_cooldown',
+      npcId: location['npcId'],
+    );
+    await dialog.execute();
+    return;
+  }
+  if (result == 'poor') {
+    dialog.pushDialog(
+      'hint_reissueJiejiEdict_notEnough',
       npcId: location['npcId'],
     );
     await dialog.execute();

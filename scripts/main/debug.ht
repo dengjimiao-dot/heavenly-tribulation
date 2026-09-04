@@ -710,6 +710,11 @@ namespace debug {
     return await issueJiejiEdict(free: true)
   }
 
+  /// 忽略冷却与花费，仍弹出山门再令三选。不与 forceEdict 撞名。
+  async function forceReissue() {
+    return await reissueJiejiEdict(free: true)
+  }
+
   /// 忽略一城一季一次，仍弹出进城劫谣三选。无参则用主角故乡。
   async function forceCityRumor(location) {
     var loc = location

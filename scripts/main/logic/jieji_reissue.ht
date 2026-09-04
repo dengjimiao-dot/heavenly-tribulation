@@ -1,0 +1,199 @@
+/// 山门「再令」：再饷 / 再徵 / 血令。不替换劫令、入门、请辞、外交、捐献。
+/// 与劫令（jieji_edict.ht / lastEdictSeasonId）分开；本文件用 lastReissueDay（一日冷却）。
+const kJiejiReissueCooldownDays = 1
+const kJiejiReissuePayrollMoney = 40
+const kJiejiReissuePayrollMoneyThunder = 20
+const kJiejiReissuePayrollHerb = 2
+const kJiejiReissuePayrollHerbMist = 1
+const kJiejiReissueLevyHerb = 1
+const kJiejiReissueLevyHerbMist = 0
+const kJiejiReissueLevyTimber = 1
+const kJiejiReissueLevyStone = 1
+const kJiejiReissueLevyMoney = 50
+const kJiejiReissueOathLife = 2
+const kJiejiReissueOathLifeBlood = 3
+const kJiejiReissueOathGongfaRate = 0.25
+const kJiejiReissueOathMoney = 100
+
+function _jiejiReissueSeasonId() {
+  if (game.jieji != null && game.jieji.seasonId != null) {
+    return game.jieji.seasonId
+  }
+  return null
+}
+
+function _jiejiReissueCurrentDay() {
+  if (game.timestamp == null) return null
+  if (Constants.ticksPerDay == null) return null
+  if (Constants.ticksPerDay <= 0) return null
+  return game.timestamp ~/ Constants.ticksPerDay
+}
+
+function _jiejiReissueOnCooldown() {
+  final jieji = ensureJiejiFlags()
+  final day = _jiejiReissueCurrentDay()
+  if (day == null) return false
+  if (jieji.lastReissueDay == null) return false
+  if (day - jieji.lastReissueDay < kJiejiReissueCooldownDays) return true
+  return false
+}
+
+function _jiejiReissueMark() {
+  final jieji = ensureJiejiFlags()
+  jieji.lastReissueDay = _jiejiReissueCurrentDay()
+}
+
+function _jiejiReissueHasMaterial(id) {
+  if (Constants.materialKinds == null) return false
+  return Constants.materialKinds.contains(id)
+}
+
+function _jiejiReissueCostLife(want) {
+  var lost = want
+  final life = hero.life ?? 1
+  if (life - lost < 1) lost = life - 1
+  if (lost < 0) lost = 0
+  if (lost > 0) {
+    Player.setLife(hero.life - lost)
+  }
+  return lost
+}
+
+function _jiejiReissuePayrollMoneyCost(seasonId) {
+  if (seasonId == 'thunder') return kJiejiReissuePayrollMoneyThunder
+  return kJiejiReissuePayrollMoney
+}
+
+function _jiejiReissuePayrollHerbGain(seasonId) {
+  if (seasonId == 'mist') return kJiejiReissuePayrollHerbMist
+  return kJiejiReissuePayrollHerb
+}
+
+function _jiejiReissueLevyHerbCost(seasonId) {
+  if (seasonId == 'mist') return kJiejiReissueLevyHerbMist
+  return kJiejiReissueLevyHerb
+}
+
+function _jiejiReissueOathLifeCost(seasonId) {
+  if (seasonId == 'blood') return kJiejiReissueOathLifeBlood
+  return kJiejiReissueOathLife
+}
+
+function _jiejiReissueNormalizeKind(kind) {
+  if (kind == 'payroll' || kind == 'jieji_reissue_payroll') return 'payroll'
+  if (kind == 'levy' || kind == 'jieji_reissue_levy') return 'levy'
+  if (kind == 'oath' || kind == 'jieji_reissue_oath') return 'oath'
+  return null
+}
+
+function _jiejiReissueChoices() {
+  return [
+    {
+      text: 'jieji_reissue_payroll',
+      description: 'hint_jieji_reissue_payroll',
+    },
+    {
+      text: 'jieji_reissue_levy',
+      description: 'hint_jieji_reissue_levy',
+    },
+    {
+      text: 'jieji_reissue_oath',
+      description: 'hint_jieji_reissue_oath',
+    },
+    'cancel',
+  ]
+}
+
+function _jiejiReissueHerbNeed(selected, seasonId) {
+  if (selected == 'levy') return _jiejiReissueLevyHerbCost(seasonId)
+  return 0
+}
+
+function _jiejiReissueMoneyNeed(selected, seasonId) {
+  if (selected == 'payroll') return _jiejiReissuePayrollMoneyCost(seasonId)
+  return 0
+}
+
+/// 山门再令三选。free 为 true 时不扣费、不检查冷却（debug），仍弹出三选。
+/// null 选择在 free 时默认再饷。
+/// 返回 'ok' | 'cooldown' | 'poor' | 'cancel'。
+async function reissueJiejiEdict({ free = false }) {
+  if (hero == null) return 'cancel'
+  if (free != true && _jiejiReissueOnCooldown()) {
+    return 'cooldown'
+  }
+
+  dialog.pushDialog('hint_reissueJiejiEdict')
+  dialog.pushSelection('jiejiReissue', _jiejiReissueChoices())
+  await dialog.execute()
+  final picked = dialog.checkSelected('jiejiReissue')
+  var selected = null
+  if (picked == null || picked == 'cancel') {
+    if (free == true && picked == null) {
+      selected = 'payroll'
+    } else {
+      return 'cancel'
+    }
+  } else {
+    selected = _jiejiReissueNormalizeKind(picked)
+  }
+  if (selected == null) return 'cancel'
+
+  final seasonId = _jiejiReissueSeasonId()
+  if (free != true) {
+    final herbNeed = _jiejiReissueHerbNeed(selected, seasonId)
+    final moneyNeed = _jiejiReissueMoneyNeed(selected, seasonId)
+    final herbHave = hero.materials['herb'] ?? 0
+    final moneyHave = hero.materials['money'] ?? 0
+    if (herbHave < herbNeed || moneyHave < moneyNeed) {
+      return 'poor'
+    }
+  }
+
+  if (free != true) {
+    final herbNeed = _jiejiReissueHerbNeed(selected, seasonId)
+    final moneyNeed = _jiejiReissueMoneyNeed(selected, seasonId)
+    if (herbNeed > 0) {
+      Player.exhaust('herb', herbNeed)
+    }
+    if (moneyNeed > 0) {
+      Player.exhaust('money', moneyNeed)
+    }
+    if (selected == 'oath') {
+      _jiejiReissueCostLife(_jiejiReissueOathLifeCost(seasonId))
+    }
+    _jiejiReissueMark()
+  }
+
+  if (selected == 'levy') {
+    if (_jiejiReissueHasMaterial('timber')) {
+      await Player.collect('timber', kJiejiReissueLevyTimber, incurIncident: false)
+      dialog.pushDialog('hint_reissueJiejiEdict_levy_timber', interpolations: [kJiejiReissueLevyTimber])
+    } else if (_jiejiReissueHasMaterial('stone')) {
+      await Player.collect('stone', kJiejiReissueLevyStone, incurIncident: false)
+      dialog.pushDialog('hint_reissueJiejiEdict_levy_stone', interpolations: [kJiejiReissueLevyStone])
+    } else {
+      await Player.collect('money', kJiejiReissueLevyMoney, incurIncident: false)
+      dialog.pushDialog('hint_reissueJiejiEdict_levy_money', interpolations: [kJiejiReissueLevyMoney])
+    }
+    await dialog.execute()
+  } else if (selected == 'oath') {
+    final dropped = await tryDropGongfaShard(rate: kJiejiReissueOathGongfaRate)
+    if (dropped == true) {
+      dialog.pushDialog('hint_reissueJiejiEdict_oath')
+      await dialog.execute()
+    } else {
+      await Player.collect('money', kJiejiReissueOathMoney, incurIncident: false)
+      dialog.pushDialog('hint_reissueJiejiEdict_oath_money', interpolations: [kJiejiReissueOathMoney])
+      await dialog.execute()
+    }
+  } else {
+    final herb = _jiejiReissuePayrollHerbGain(seasonId)
+    await Player.collect('herb', herb, incurIncident: false)
+    dialog.pushDialog('hint_reissueJiejiEdict_payroll', interpolations: [herb])
+    await dialog.execute()
+  }
+
+  Game.updateUI()
+  return 'ok'
+}
