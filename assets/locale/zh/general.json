@@ -3112,6 +3112,22 @@
   "hint_jieji_streamer_blood_ok": "你割了 {0} 点生机去染劫旌。",
   "hint_jieji_streamer_blood_none": "血旌下去，旌影却散了。袋里多了 {0} 铜钱。",
 
+
+  "jiejiCandle": "劫烛",
+  "hint_jieji_candle": "路边残着半截劫烛。你可以燃烛、收烛，或以血烛。",
+  "jieji_candle_light": "燃烛",
+  "jieji_candle_snuff": "收烛",
+  "jieji_candle_bloodcandle": "血烛",
+  "hint_jieji_candle_light": "燃烛：耗 1 药材（雾月不耗）。回 5 命，一成四摸残页。药材不够则空手。",
+  "hint_jieji_candle_snuff": "收烛：花 18 铜钱（雷月 9）。得 2 药材，并回 3 命。袋里不够则空手。",
+  "hint_jieji_candle_bloodcandle": "血烛：扣 2 点生机（至少留 1，血月 3）。三成八摸残页，不成则得 28 铜钱。",
+  "hint_jieji_candle_light_ok": "你燃起劫烛。生机回了 {0} 点。",
+  "hint_jieji_candle_light_broke": "燃烛要 {0} 药材。你拿不出来。",
+  "hint_jieji_candle_snuff_ok": "你收起劫烛。得了 {0} 药材，生机回了 {1} 点。",
+  "hint_jieji_candle_snuff_broke": "收烛要 {0} 铜钱。袋里不够。",
+  "hint_jieji_candle_bloodcandle_ok": "你割了 {0} 点生机去染劫烛。",
+  "hint_jieji_candle_bloodcandle_none": "血烛下去，烛影却散了。袋里多了 {0} 铜钱。",
+
   "jiejiMenpaiDemo": "劫季门派 · Demo",
   "jiejiMenpaiPitch": "带着业力赶天劫的门派肉鸽",
   "knownIssues": "已知问题",

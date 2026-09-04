@@ -1,0 +1,152 @@
+/// 赶路「劫烛」三选：燃烛 / 收烛 / 血烛。隐藏、劫兆、野遇、赶路、行商、拾荒、扎营、残锋、残卷、雾灯、残鼓、汲泉、劫幡、劫铃、劫符、劫旌都没中时才滚。
+const kJiejiCandleBaseRate = 0.038
+const kJiejiCandleMoveCooldown = 18
+const kJiejiCandleLightHerb = 1
+const kJiejiCandleLightLife = 5
+const kJiejiCandleLightGongfaRate = 0.14
+const kJiejiCandleSnuffMoney = 18
+const kJiejiCandleSnuffMoneyThunder = 9
+const kJiejiCandleSnuffHerb = 2
+const kJiejiCandleSnuffLife = 3
+const kJiejiCandleBloodLife = 2
+const kJiejiCandleBloodLifeBlood = 3
+const kJiejiCandleBloodGongfaRate = 0.38
+const kJiejiCandleBloodMoney = 28
+
+function _jiejiCandleSeasonId() {
+  if (game.jieji != null && game.jieji.seasonId != null) {
+    return game.jieji.seasonId
+  }
+  return null
+}
+
+function _jiejiCandleTutorialLocked() {
+  return game.enableTutorial && game.flags.tutorial.bountyQuest != true
+}
+
+function _jiejiCandleLightHerbCost(seasonId) {
+  if (seasonId == 'mist') return 0
+  return kJiejiCandleLightHerb
+}
+
+function _jiejiCandleSnuffMoneyCost(seasonId) {
+  if (seasonId == 'thunder') return kJiejiCandleSnuffMoneyThunder
+  return kJiejiCandleSnuffMoney
+}
+
+function _jiejiCandleBloodLifeCost(seasonId) {
+  if (seasonId == 'blood') return kJiejiCandleBloodLifeBlood
+  return kJiejiCandleBloodLife
+}
+
+function _jiejiCandleCostLife(want) {
+  var lost = want
+  final life = hero.life ?? 1
+  if (life - lost < 1) lost = life - 1
+  if (lost < 0) lost = 0
+  if (lost > 0) {
+    Player.setLife(hero.life - lost)
+  }
+  return lost
+}
+
+function _jiejiCandleNormalizeKind(kind) {
+  if (kind == 'light' || kind == 'jieji_candle_light') return 'light'
+  if (kind == 'snuff' || kind == 'jieji_candle_snuff') return 'snuff'
+  if (kind == 'bloodcandle' || kind == 'jieji_candle_bloodcandle') return 'bloodcandle'
+  return null
+}
+
+function _jiejiCandleChoices() {
+  return [
+    {
+      text: 'jieji_candle_light',
+      description: 'hint_jieji_candle_light',
+    },
+    {
+      text: 'jieji_candle_snuff',
+      description: 'hint_jieji_candle_snuff',
+    },
+    {
+      text: 'jieji_candle_bloodcandle',
+      description: 'hint_jieji_candle_bloodcandle',
+    },
+  ]
+}
+
+/// 赶路劫烛三选。debug.forceJiejiEvent('candle') / forceCandle 直接走这里，仍弹出三选。
+async function playJiejiCandleEvent(terrain) {
+  if (hero == null) return false
+
+  dialog.pushDialog('hint_jieji_candle')
+  dialog.pushSelection('jiejiCandle', _jiejiCandleChoices())
+  await dialog.execute()
+  final picked = dialog.checkSelected('jiejiCandle')
+  var selected = _jiejiCandleNormalizeKind(picked)
+  if (selected == null) {
+    selected = 'light'
+  }
+
+  final seasonId = _jiejiCandleSeasonId()
+  if (selected == 'light') {
+    final herbNeed = _jiejiCandleLightHerbCost(seasonId)
+    final herbHave = hero.materials['herb'] ?? 0
+    if (herbNeed > 0 && herbHave < herbNeed) {
+      dialog.pushDialog('hint_jieji_candle_light_broke', interpolations: [herbNeed])
+      await dialog.execute()
+    } else {
+      if (herbNeed > 0) {
+        Player.exhaust('herb', herbNeed)
+      }
+      final healed = Player.restoreLife(kJiejiCandleLightLife)
+      dialog.pushDialog('hint_jieji_candle_light_ok', interpolations: [healed])
+      await dialog.execute()
+      await tryDropGongfaShard(rate: kJiejiCandleLightGongfaRate)
+    }
+  } else if (selected == 'snuff') {
+    final moneyNeed = _jiejiCandleSnuffMoneyCost(seasonId)
+    final moneyHave = hero.materials['money'] ?? 0
+    if (moneyHave < moneyNeed) {
+      dialog.pushDialog('hint_jieji_candle_snuff_broke', interpolations: [moneyNeed])
+      await dialog.execute()
+    } else {
+      Player.exhaust('money', moneyNeed)
+      await Player.collect('herb', kJiejiCandleSnuffHerb, incurIncident: false)
+      final healed = Player.restoreLife(kJiejiCandleSnuffLife)
+      dialog.pushDialog('hint_jieji_candle_snuff_ok', interpolations: [kJiejiCandleSnuffHerb, healed])
+      await dialog.execute()
+    }
+  } else {
+    final lost = _jiejiCandleCostLife(_jiejiCandleBloodLifeCost(seasonId))
+    dialog.pushDialog('hint_jieji_candle_bloodcandle_ok', interpolations: [lost])
+    await dialog.execute()
+    final dropped = await tryDropGongfaShard(rate: kJiejiCandleBloodGongfaRate)
+    if (dropped != true) {
+      await Player.collect('money', kJiejiCandleBloodMoney, incurIncident: false)
+      dialog.pushDialog('hint_jieji_candle_bloodcandle_none', interpolations: [kJiejiCandleBloodMoney])
+      await dialog.execute()
+    }
+  }
+
+  Game.updateUI()
+  return true
+}
+
+/// 赶路触发：教程锁与路遇相同；冷却 18 步；约 3.8%。出过则返回 true。
+async function tryJiejiCandleOnMove(terrain) {
+  if (hero == null) return false
+  if (_jiejiCandleTutorialLocked()) return false
+
+  final jieji = ensureJiejiFlags()
+  final moves = jieji.worldMoves ?? 0
+  final last = jieji.lastCandleMove ?? -999
+  if (moves - last < kJiejiCandleMoveCooldown) return false
+
+  var rate = kJiejiCandleBaseRate
+  if (rate < 0) rate = 0
+  if (random.nextDouble() > rate) return false
+
+  jieji.lastCandleMove = moves
+  await playJiejiCandleEvent(terrain)
+  return true
+}
