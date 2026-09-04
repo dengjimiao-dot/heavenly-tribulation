@@ -288,6 +288,8 @@ namespace debug {
       await playJiejiStreamerEvent(terrain)
     } else if (kind == 'candle') {
       await playJiejiCandleEvent(terrain)
+    } else if (kind == 'horn') {
+      await playJiejiHornEvent(terrain)
     } else {
       await playJiejiThunderRoadEvent(terrain)
     }
@@ -827,6 +829,11 @@ namespace debug {
   /// 忽略几率与冷却，仍弹出赶路劫烛三选。
   async function forceCandle() {
     return await playJiejiCandleEvent({ kind: 'plain' })
+  }
+
+  /// 忽略几率与冷却，仍弹出赶路劫角三选。
+  async function forceHorn() {
+    return await playJiejiHornEvent({ kind: 'plain' })
   }
 
   /// 忽略冷却与花费，仍弹出幻术祭坛入幻三选。

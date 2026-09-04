@@ -1,0 +1,152 @@
+/// 赶路「劫角」三选：吹角 / 收角 / 血角。隐藏、劫兆、野遇、赶路、行商、拾荒、扎营、残锋、残卷、雾灯、残鼓、汲泉、劫幡、劫铃、劫符、劫旌、劫烛都没中时才滚。
+const kJiejiHornBaseRate = 0.036
+const kJiejiHornMoveCooldown = 19
+const kJiejiHornBlowHerb = 1
+const kJiejiHornBlowLife = 6
+const kJiejiHornBlowGongfaRate = 0.13
+const kJiejiHornPackMoney = 16
+const kJiejiHornPackMoneyThunder = 8
+const kJiejiHornPackHerb = 2
+const kJiejiHornPackLife = 3
+const kJiejiHornBloodLife = 2
+const kJiejiHornBloodLifeBlood = 3
+const kJiejiHornBloodGongfaRate = 0.36
+const kJiejiHornBloodMoney = 26
+
+function _jiejiHornSeasonId() {
+  if (game.jieji != null && game.jieji.seasonId != null) {
+    return game.jieji.seasonId
+  }
+  return null
+}
+
+function _jiejiHornTutorialLocked() {
+  return game.enableTutorial && game.flags.tutorial.bountyQuest != true
+}
+
+function _jiejiHornBlowHerbCost(seasonId) {
+  if (seasonId == 'mist') return 0
+  return kJiejiHornBlowHerb
+}
+
+function _jiejiHornPackMoneyCost(seasonId) {
+  if (seasonId == 'thunder') return kJiejiHornPackMoneyThunder
+  return kJiejiHornPackMoney
+}
+
+function _jiejiHornBloodLifeCost(seasonId) {
+  if (seasonId == 'blood') return kJiejiHornBloodLifeBlood
+  return kJiejiHornBloodLife
+}
+
+function _jiejiHornCostLife(want) {
+  var lost = want
+  final life = hero.life ?? 1
+  if (life - lost < 1) lost = life - 1
+  if (lost < 0) lost = 0
+  if (lost > 0) {
+    Player.setLife(hero.life - lost)
+  }
+  return lost
+}
+
+function _jiejiHornNormalizeKind(kind) {
+  if (kind == 'blow' || kind == 'jieji_horn_blow') return 'blow'
+  if (kind == 'pack' || kind == 'jieji_horn_pack') return 'pack'
+  if (kind == 'bloodhorn' || kind == 'jieji_horn_bloodhorn') return 'bloodhorn'
+  return null
+}
+
+function _jiejiHornChoices() {
+  return [
+    {
+      text: 'jieji_horn_blow',
+      description: 'hint_jieji_horn_blow',
+    },
+    {
+      text: 'jieji_horn_pack',
+      description: 'hint_jieji_horn_pack',
+    },
+    {
+      text: 'jieji_horn_bloodhorn',
+      description: 'hint_jieji_horn_bloodhorn',
+    },
+  ]
+}
+
+/// 赶路劫角三选。debug.forceJiejiEvent('horn') / forceHorn 直接走这里，仍弹出三选。
+async function playJiejiHornEvent(terrain) {
+  if (hero == null) return false
+
+  dialog.pushDialog('hint_jieji_horn')
+  dialog.pushSelection('jiejiHorn', _jiejiHornChoices())
+  await dialog.execute()
+  final picked = dialog.checkSelected('jiejiHorn')
+  var selected = _jiejiHornNormalizeKind(picked)
+  if (selected == null) {
+    selected = 'blow'
+  }
+
+  final seasonId = _jiejiHornSeasonId()
+  if (selected == 'blow') {
+    final herbNeed = _jiejiHornBlowHerbCost(seasonId)
+    final herbHave = hero.materials['herb'] ?? 0
+    if (herbNeed > 0 && herbHave < herbNeed) {
+      dialog.pushDialog('hint_jieji_horn_blow_broke', interpolations: [herbNeed])
+      await dialog.execute()
+    } else {
+      if (herbNeed > 0) {
+        Player.exhaust('herb', herbNeed)
+      }
+      final healed = Player.restoreLife(kJiejiHornBlowLife)
+      dialog.pushDialog('hint_jieji_horn_blow_ok', interpolations: [healed])
+      await dialog.execute()
+      await tryDropGongfaShard(rate: kJiejiHornBlowGongfaRate)
+    }
+  } else if (selected == 'pack') {
+    final moneyNeed = _jiejiHornPackMoneyCost(seasonId)
+    final moneyHave = hero.materials['money'] ?? 0
+    if (moneyHave < moneyNeed) {
+      dialog.pushDialog('hint_jieji_horn_pack_broke', interpolations: [moneyNeed])
+      await dialog.execute()
+    } else {
+      Player.exhaust('money', moneyNeed)
+      await Player.collect('herb', kJiejiHornPackHerb, incurIncident: false)
+      final healed = Player.restoreLife(kJiejiHornPackLife)
+      dialog.pushDialog('hint_jieji_horn_pack_ok', interpolations: [kJiejiHornPackHerb, healed])
+      await dialog.execute()
+    }
+  } else {
+    final lost = _jiejiHornCostLife(_jiejiHornBloodLifeCost(seasonId))
+    dialog.pushDialog('hint_jieji_horn_bloodhorn_ok', interpolations: [lost])
+    await dialog.execute()
+    final dropped = await tryDropGongfaShard(rate: kJiejiHornBloodGongfaRate)
+    if (dropped != true) {
+      await Player.collect('money', kJiejiHornBloodMoney, incurIncident: false)
+      dialog.pushDialog('hint_jieji_horn_bloodhorn_none', interpolations: [kJiejiHornBloodMoney])
+      await dialog.execute()
+    }
+  }
+
+  Game.updateUI()
+  return true
+}
+
+/// 赶路触发：教程锁与路遇相同；冷却 19 步；约 3.6%。出过则返回 true。
+async function tryJiejiHornOnMove(terrain) {
+  if (hero == null) return false
+  if (_jiejiHornTutorialLocked()) return false
+
+  final jieji = ensureJiejiFlags()
+  final moves = jieji.worldMoves ?? 0
+  final last = jieji.lastHornMove ?? -999
+  if (moves - last < kJiejiHornMoveCooldown) return false
+
+  var rate = kJiejiHornBaseRate
+  if (rate < 0) rate = 0
+  if (random.nextDouble() > rate) return false
+
+  jieji.lastHornMove = moves
+  await playJiejiHornEvent(terrain)
+  return true
+}
