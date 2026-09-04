@@ -3580,6 +3580,22 @@
   "hint_jieji_drum_blooddrum_none": "血鼓下去，鼓影却散了。袋里多了 {0} 铜钱。",
 
 
+  "jiejiTorch": "劫炬",
+  "hint_jieji_torch": "路边搁着一支劫炬。你可以燃炬、收炬，或以血炬。",
+  "jieji_torch_lighttorch": "燃炬",
+  "jieji_torch_stowtorch": "收炬",
+  "jieji_torch_bloodtorch": "血炬",
+  "hint_jieji_torch_lighttorch": "燃炬：耗 1 药材（雾月不耗）。回 5 命，八厘摸残页。药材不够则空手。",
+  "hint_jieji_torch_stowtorch": "收炬：花 8 铜钱（雷月 4）。得 2 药材，并回 3 命。袋里不够则空手。",
+  "hint_jieji_torch_bloodtorch": "血炬：扣 2 点生机（至少留 1，血月 3）。二成六摸残页，不成则得 16 铜钱。",
+  "hint_jieji_torch_lighttorch_ok": "你燃起劫炬。生机回了 {0} 点。",
+  "hint_jieji_torch_lighttorch_broke": "燃炬要 {0} 药材。你拿不出来。",
+  "hint_jieji_torch_stowtorch_ok": "你收起劫炬。得了 {0} 药材，生机回了 {1} 点。",
+  "hint_jieji_torch_stowtorch_broke": "收炬要 {0} 铜钱。袋里不够。",
+  "hint_jieji_torch_bloodtorch_ok": "你割了 {0} 点生机去染劫炬。",
+  "hint_jieji_torch_bloodtorch_none": "血炬下去，炬影却散了。袋里多了 {0} 铜钱。",
+
+
   "jiejiMenpaiDemo": "劫季门派 · Demo",
   "jiejiMenpaiPitch": "带着业力赶天劫的门派肉鸽",
   "knownIssues": "已知问题",

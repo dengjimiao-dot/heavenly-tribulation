@@ -1,0 +1,152 @@
+/// 赶路「劫炬」三选：燃炬 / 收炬 / 血炬。隐藏、劫兆、野遇、赶路、行商、拾荒、扎营、残锋、残卷、雾灯、残鼓、汲泉、劫幡、劫铃、劫符、劫旌、劫烛、劫角、劫笛、劫笠、劫带、劫履、劫氅、劫扇、劫杖、劫伞、劫面、劫帔、劫手套、劫戒、劫镜、劫鼓都没中时才滚。
+const kJiejiTorchBaseRate = 0.016
+const kJiejiTorchMoveCooldown = 24
+const kJiejiTorchLighttorchHerb = 1
+const kJiejiTorchLighttorchLife = 5
+const kJiejiTorchLighttorchGongfaRate = 0.08
+const kJiejiTorchStowtorchMoney = 8
+const kJiejiTorchStowtorchMoneyThunder = 4
+const kJiejiTorchStowtorchHerb = 2
+const kJiejiTorchStowtorchLife = 3
+const kJiejiTorchBloodLife = 2
+const kJiejiTorchBloodLifeBlood = 3
+const kJiejiTorchBloodGongfaRate = 0.26
+const kJiejiTorchBloodMoney = 16
+
+function _jiejiTorchSeasonId() {
+  if (game.jieji != null && game.jieji.seasonId != null) {
+    return game.jieji.seasonId
+  }
+  return null
+}
+
+function _jiejiTorchTutorialLocked() {
+  return game.enableTutorial && game.flags.tutorial.bountyQuest != true
+}
+
+function _jiejiTorchLighttorchHerbCost(seasonId) {
+  if (seasonId == 'mist') return 0
+  return kJiejiTorchLighttorchHerb
+}
+
+function _jiejiTorchStowtorchMoneyCost(seasonId) {
+  if (seasonId == 'thunder') return kJiejiTorchStowtorchMoneyThunder
+  return kJiejiTorchStowtorchMoney
+}
+
+function _jiejiTorchBloodLifeCost(seasonId) {
+  if (seasonId == 'blood') return kJiejiTorchBloodLifeBlood
+  return kJiejiTorchBloodLife
+}
+
+function _jiejiTorchCostLife(want) {
+  var lost = want
+  final life = hero.life ?? 1
+  if (life - lost < 1) lost = life - 1
+  if (lost < 0) lost = 0
+  if (lost > 0) {
+    Player.setLife(hero.life - lost)
+  }
+  return lost
+}
+
+function _jiejiTorchNormalizeKind(kind) {
+  if (kind == 'lighttorch' || kind == 'jieji_torch_lighttorch') return 'lighttorch'
+  if (kind == 'stowtorch' || kind == 'jieji_torch_stowtorch') return 'stowtorch'
+  if (kind == 'bloodtorch' || kind == 'jieji_torch_bloodtorch') return 'bloodtorch'
+  return null
+}
+
+function _jiejiTorchChoices() {
+  return [
+    {
+      text: 'jieji_torch_lighttorch',
+      description: 'hint_jieji_torch_lighttorch',
+    },
+    {
+      text: 'jieji_torch_stowtorch',
+      description: 'hint_jieji_torch_stowtorch',
+    },
+    {
+      text: 'jieji_torch_bloodtorch',
+      description: 'hint_jieji_torch_bloodtorch',
+    },
+  ]
+}
+
+/// 赶路劫炬三选。debug.forceJiejiEvent('torch') / forceTorch 直接走这里，仍弹出三选。
+async function playJiejiTorchEvent(terrain) {
+  if (hero == null) return false
+
+  dialog.pushDialog('hint_jieji_torch')
+  dialog.pushSelection('jiejiTorch', _jiejiTorchChoices())
+  await dialog.execute()
+  final picked = dialog.checkSelected('jiejiTorch')
+  var selected = _jiejiTorchNormalizeKind(picked)
+  if (selected == null) {
+    selected = 'lighttorch'
+  }
+
+  final seasonId = _jiejiTorchSeasonId()
+  if (selected == 'lighttorch') {
+    final herbNeed = _jiejiTorchLighttorchHerbCost(seasonId)
+    final herbHave = hero.materials['herb'] ?? 0
+    if (herbNeed > 0 && herbHave < herbNeed) {
+      dialog.pushDialog('hint_jieji_torch_lighttorch_broke', interpolations: [herbNeed])
+      await dialog.execute()
+    } else {
+      if (herbNeed > 0) {
+        Player.exhaust('herb', herbNeed)
+      }
+      final healed = Player.restoreLife(kJiejiTorchLighttorchLife)
+      dialog.pushDialog('hint_jieji_torch_lighttorch_ok', interpolations: [healed])
+      await dialog.execute()
+      await tryDropGongfaShard(rate: kJiejiTorchLighttorchGongfaRate)
+    }
+  } else if (selected == 'stowtorch') {
+    final moneyNeed = _jiejiTorchStowtorchMoneyCost(seasonId)
+    final moneyHave = hero.materials['money'] ?? 0
+    if (moneyHave < moneyNeed) {
+      dialog.pushDialog('hint_jieji_torch_stowtorch_broke', interpolations: [moneyNeed])
+      await dialog.execute()
+    } else {
+      Player.exhaust('money', moneyNeed)
+      await Player.collect('herb', kJiejiTorchStowtorchHerb, incurIncident: false)
+      final healed = Player.restoreLife(kJiejiTorchStowtorchLife)
+      dialog.pushDialog('hint_jieji_torch_stowtorch_ok', interpolations: [kJiejiTorchStowtorchHerb, healed])
+      await dialog.execute()
+    }
+  } else {
+    final lost = _jiejiTorchCostLife(_jiejiTorchBloodLifeCost(seasonId))
+    dialog.pushDialog('hint_jieji_torch_bloodtorch_ok', interpolations: [lost])
+    await dialog.execute()
+    final dropped = await tryDropGongfaShard(rate: kJiejiTorchBloodGongfaRate)
+    if (dropped != true) {
+      await Player.collect('money', kJiejiTorchBloodMoney, incurIncident: false)
+      dialog.pushDialog('hint_jieji_torch_bloodtorch_none', interpolations: [kJiejiTorchBloodMoney])
+      await dialog.execute()
+    }
+  }
+
+  Game.updateUI()
+  return true
+}
+
+/// 赶路触发：教程锁与路遇相同；冷却 24 步；约 1.6%。出过则返回 true。
+async function tryJiejiTorchOnMove(terrain) {
+  if (hero == null) return false
+  if (_jiejiTorchTutorialLocked()) return false
+
+  final jieji = ensureJiejiFlags()
+  final moves = jieji.worldMoves ?? 0
+  final last = jieji.lastTorchMove ?? -999
+  if (moves - last < kJiejiTorchMoveCooldown) return false
+
+  var rate = kJiejiTorchBaseRate
+  if (rate < 0) rate = 0
+  if (random.nextDouble() > rate) return false
+
+  jieji.lastTorchMove = moves
+  await playJiejiTorchEvent(terrain)
+  return true
+}
