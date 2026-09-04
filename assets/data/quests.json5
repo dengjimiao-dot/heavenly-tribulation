@@ -211,5 +211,13 @@
     contribution: 11,
     rank: 0,
   },
+  hidden_tide_pool: {
+    id: "hidden_tide_pool",
+    policy: null,
+    isBounty: false,
+    isHidden: true,
+    contribution: 11,
+    rank: 0,
+  },
 
 }

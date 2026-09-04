@@ -185,6 +185,8 @@ namespace debug {
       questKind = 'hidden_blank_cache'
     } else if (kind == 'field') {
       questKind = 'hidden_night_field'
+    } else if (kind == 'tide') {
+      questKind = 'hidden_tide_pool'
     }
     final ctor = Quests[questKind]
     if (ctor == null) return false
