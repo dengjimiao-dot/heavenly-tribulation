@@ -1730,6 +1730,27 @@
   "hint_consultJiejiStars_cooldown": "本季已经问过一次劫。待下一季再来。",
   "hint_consultJiejiStars_notEnough": "问劫需要 {0} 药材和 {1} 铜钱。",
 
+
+  "againJiejiStars": "再星",
+  "jiejiStars": "再星",
+  "hint_againJiejiStars_description": "卜算台可再星。一日一次。温星耗 1 药材（雾月免）回 6 命；借杀耗 40 铜钱（雷月 20）挂破军或拼酒劲；血星扣 2 命（血月 3）三成五残页，没掉则得 40 铜钱。",
+  "hint_againJiejiStars": "台上余星可再观。温星、借杀、血星，择一。一日一次。问劫与再星各不挡。",
+  "jieji_stars_warm": "温星",
+  "jieji_stars_borrow": "借杀",
+  "jieji_stars_blood": "血星",
+  "hint_jieji_stars_warm": "温星：耗 1 药材（雾月免）。回复 6 点生机。",
+  "hint_jieji_stars_borrow": "借杀：耗 40 铜钱（雷月 20）。未挂破军则挂破军（下场出手 +8%）；已有则挂劫宴拼酒（下场出手 +8%）。两者都有则只回 4 命。不退护身阵。",
+  "hint_jieji_stars_blood": "血星：扣 2 点生机（至少留 1；血月 3）。三成五得残页；没残页则得 40 铜钱。",
+  "hint_againJiejiStars_warm": "温星已了。星光还暖，生机回了 6 点。",
+  "hint_againJiejiStars_borrow_array": "借杀成了。破军挂上，下一场你出手更狠。",
+  "hint_againJiejiStars_borrow_feast": "借杀成了。酒劲挂上，下一场你出手更狠。",
+  "hint_againJiejiStars_borrow_life": "借杀成了。破军与酒劲都在，星息回流，生机回了 4 点。",
+  "hint_againJiejiStars_blood": "血星落成。残页已入袖。",
+  "hint_againJiejiStars_blood_money": "血星落成。残页未现，袖里多了 40 铜钱。",
+  "hint_againJiejiStars_cooldown": "星象余辉未散。过一日再来再星。",
+  "hint_againJiejiStars_notEnough": "温星要 1 药材（雾月免），借杀要 40 铜钱（雷月 20）。",
+
+
   "duelJiejiArena": "劫季切磋",
   "hint_duelJiejiArena_description": "花铜钱上台，与当季具名对手切磋。四程或一日才能再打。雷月入场 20，平常 40，血月 60。胜了拿彩头，败了只伤生机，不会丧命。",
   "hint_duelJiejiArena": "台下有人应了你的名帖。点到为止，败了也不过伤些筋骨。",

@@ -395,6 +395,11 @@ namespace debug {
     return await consultJiejiStars(free: true)
   }
 
+  /// 忽略冷却与花费，仍弹出卜算台再星三选。
+  async function forceAgainStars() {
+    return await againJiejiStars(free: true)
+  }
+
   async function forceArenaDuel() {
     return await duelJiejiArena(free: true)
   }
