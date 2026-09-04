@@ -653,6 +653,9 @@ namespace debug {
     } else if (kind == 'cornice') {
       game.flags.dungeon.pendingEncounter = 'jiejiCornice'
       await playJiejiDungeonEncounter()
+    } else if (kind == 'plinth') {
+      game.flags.dungeon.pendingEncounter = 'jiejiPlinth'
+      await playJiejiDungeonEncounter()
     } else if (kind == 'exit') {
       await playJiejiDungeonExitGift()
     } else {
