@@ -4238,6 +4238,21 @@
   "hint_jieji_cuff_bloodcuff_none": "血袖下去，袖影却散了。袋里多了 {0} 铜钱。",
 
 
+  "hint_jieji_collar": "路遇一只劫领。你可以系领、解领，或以血染领。",
+  "jieji_collar_tiecollar": "系领",
+  "jieji_collar_loosecollar": "解领",
+  "jieji_collar_bloodcollar": "血领",
+  "hint_jieji_collar_tiecollar": "系领：耗 1 药材（雾月不耗）。回 2 命，三厘摸残页。药材不够则空手。",
+  "hint_jieji_collar_loosecollar": "解领：花 3 铜钱（雷月 1）。得 1 药材，并回 1 命。袋里不够则空手。",
+  "hint_jieji_collar_bloodcollar": "血领：扣 1 点生机（至少留 1，血月 2）。一成四摸残页，不成则得 5 铜钱。",
+  "hint_jieji_collar_tiecollar_ok": "你系上劫领。生机回了 {0} 点。",
+  "hint_jieji_collar_tiecollar_broke": "系领要 {0} 药材。你拿不出来。",
+  "hint_jieji_collar_loosecollar_ok": "你解开劫领。得了 {0} 药材，生机回了 {1} 点。",
+  "hint_jieji_collar_loosecollar_broke": "解领要 {0} 铜钱。袋里不够。",
+  "hint_jieji_collar_bloodcollar_ok": "你割了 {0} 点生机去染劫领。",
+  "hint_jieji_collar_bloodcollar_none": "血领下去，领影却散了。袋里多了 {0} 铜钱。",
+
+
   "jiejiMenpaiDemo": "劫季门派 · Demo",
   "jiejiMenpaiPitch": "带着业力赶天劫的门派肉鸽",
   "knownIssues": "已知问题",

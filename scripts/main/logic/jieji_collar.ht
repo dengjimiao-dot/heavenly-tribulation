@@ -1,0 +1,152 @@
+/// 赶路「劫领」三选：系领 / 解领 / 血领。隐藏、劫兆、野遇、赶路、行商、拾荒、扎营、残锋、残卷、雾灯、残鼓、汲泉、劫幡、劫铃、劫符、劫旌、劫烛、劫角、劫笛、劫笠、劫带、劫履、劫氅、劫扇、劫杖、劫伞、劫面、劫帔、劫手套、劫戒、劫镜、劫鼓、劫炬、劫梳、劫勺、劫碗、劫杯、劫罐、劫瓶、劫墨、劫袍、劫带、劫簪、劫笔、劫针、劫扣、劫绳、劫珠、劫钗、劫绦、劫穗、劫缎、劫缨、劫袖都没中时才滚。
+const kJiejiCollarBaseRate = 0.0005
+const kJiejiCollarMoveCooldown = 24
+const kJiejiCollarTiecollarHerb = 1
+const kJiejiCollarTiecollarLife = 2
+const kJiejiCollarTiecollarGongfaRate = 0.03
+const kJiejiCollarLoosecollarMoney = 3
+const kJiejiCollarLoosecollarMoneyThunder = 1
+const kJiejiCollarLoosecollarHerb = 1
+const kJiejiCollarLoosecollarLife = 1
+const kJiejiCollarBloodLife = 1
+const kJiejiCollarBloodLifeBlood = 2
+const kJiejiCollarBloodGongfaRate = 0.14
+const kJiejiCollarBloodMoney = 5
+
+function _jiejiCollarSeasonId() {
+  if (game.jieji != null && game.jieji.seasonId != null) {
+    return game.jieji.seasonId
+  }
+  return null
+}
+
+function _jiejiCollarTutorialLocked() {
+  return game.enableTutorial && game.flags.tutorial.bountyQuest != true
+}
+
+function _jiejiCollarTiecollarHerbCost(seasonId) {
+  if (seasonId == 'mist') return 0
+  return kJiejiCollarTiecollarHerb
+}
+
+function _jiejiCollarLoosecollarMoneyCost(seasonId) {
+  if (seasonId == 'thunder') return kJiejiCollarLoosecollarMoneyThunder
+  return kJiejiCollarLoosecollarMoney
+}
+
+function _jiejiCollarBloodLifeCost(seasonId) {
+  if (seasonId == 'blood') return kJiejiCollarBloodLifeBlood
+  return kJiejiCollarBloodLife
+}
+
+function _jiejiCollarCostLife(want) {
+  var lost = want
+  final life = hero.life ?? 1
+  if (life - lost < 1) lost = life - 1
+  if (lost < 0) lost = 0
+  if (lost > 0) {
+    Player.setLife(hero.life - lost)
+  }
+  return lost
+}
+
+function _jiejiCollarNormalizeKind(kind) {
+  if (kind == 'tiecollar' || kind == 'jieji_collar_tiecollar') return 'tiecollar'
+  if (kind == 'loosecollar' || kind == 'jieji_collar_loosecollar') return 'loosecollar'
+  if (kind == 'bloodcollar' || kind == 'jieji_collar_bloodcollar') return 'bloodcollar'
+  return null
+}
+
+function _jiejiCollarChoices() {
+  return [
+    {
+      text: 'jieji_collar_tiecollar',
+      description: 'hint_jieji_collar_tiecollar',
+    },
+    {
+      text: 'jieji_collar_loosecollar',
+      description: 'hint_jieji_collar_loosecollar',
+    },
+    {
+      text: 'jieji_collar_bloodcollar',
+      description: 'hint_jieji_collar_bloodcollar',
+    },
+  ]
+}
+
+/// 赶路劫领三选。debug.forceJiejiEvent('collar') / forceCollar 直接走这里，仍弹出三选。
+async function playJiejiCollarEvent(terrain) {
+  if (hero == null) return false
+
+  dialog.pushDialog('hint_jieji_collar')
+  dialog.pushSelection('jiejiCollar', _jiejiCollarChoices())
+  await dialog.execute()
+  final picked = dialog.checkSelected('jiejiCollar')
+  var selected = _jiejiCollarNormalizeKind(picked)
+  if (selected == null) {
+    selected = 'tiecollar'
+  }
+
+  final seasonId = _jiejiCollarSeasonId()
+  if (selected == 'tiecollar') {
+    final herbNeed = _jiejiCollarTiecollarHerbCost(seasonId)
+    final herbHave = hero.materials['herb'] ?? 0
+    if (herbNeed > 0 && herbHave < herbNeed) {
+      dialog.pushDialog('hint_jieji_collar_tiecollar_broke', interpolations: [herbNeed])
+      await dialog.execute()
+    } else {
+      if (herbNeed > 0) {
+        Player.exhaust('herb', herbNeed)
+      }
+      final healed = Player.restoreLife(kJiejiCollarTiecollarLife)
+      dialog.pushDialog('hint_jieji_collar_tiecollar_ok', interpolations: [healed])
+      await dialog.execute()
+      await tryDropGongfaShard(rate: kJiejiCollarTiecollarGongfaRate)
+    }
+  } else if (selected == 'loosecollar') {
+    final moneyNeed = _jiejiCollarLoosecollarMoneyCost(seasonId)
+    final moneyHave = hero.materials['money'] ?? 0
+    if (moneyHave < moneyNeed) {
+      dialog.pushDialog('hint_jieji_collar_loosecollar_broke', interpolations: [moneyNeed])
+      await dialog.execute()
+    } else {
+      Player.exhaust('money', moneyNeed)
+      await Player.collect('herb', kJiejiCollarLoosecollarHerb, incurIncident: false)
+      final healed = Player.restoreLife(kJiejiCollarLoosecollarLife)
+      dialog.pushDialog('hint_jieji_collar_loosecollar_ok', interpolations: [kJiejiCollarLoosecollarHerb, healed])
+      await dialog.execute()
+    }
+  } else {
+    final lost = _jiejiCollarCostLife(_jiejiCollarBloodLifeCost(seasonId))
+    dialog.pushDialog('hint_jieji_collar_bloodcollar_ok', interpolations: [lost])
+    await dialog.execute()
+    final dropped = await tryDropGongfaShard(rate: kJiejiCollarBloodGongfaRate)
+    if (dropped != true) {
+      await Player.collect('money', kJiejiCollarBloodMoney, incurIncident: false)
+      dialog.pushDialog('hint_jieji_collar_bloodcollar_none', interpolations: [kJiejiCollarBloodMoney])
+      await dialog.execute()
+    }
+  }
+
+  Game.updateUI()
+  return true
+}
+
+/// 赶路触发：教程锁与路遇相同；冷却 24 步；约 0.05%。出过则返回 true。
+async function tryJiejiCollarOnMove(terrain) {
+  if (hero == null) return false
+  if (_jiejiCollarTutorialLocked()) return false
+
+  final jieji = ensureJiejiFlags()
+  final moves = jieji.worldMoves ?? 0
+  final last = jieji.lastCollarMove ?? -999
+  if (moves - last < kJiejiCollarMoveCooldown) return false
+
+  var rate = kJiejiCollarBaseRate
+  if (rate < 0) rate = 0
+  if (random.nextDouble() > rate) return false
+
+  jieji.lastCollarMove = moves
+  await playJiejiCollarEvent(terrain)
+  return true
+}
