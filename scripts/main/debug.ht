@@ -423,6 +423,11 @@ namespace debug {
     return await bidJiejiBlackLot(free: true)
   }
 
+  /// 忽略冷却与花费，仍弹出拍卖行加拍三选。
+  async function forceRaise() {
+    return await raiseJiejiBlackLot(free: true)
+  }
+
   async function forceEnchantSpark() {
     final result = await sparkJiejiEnchant(free: true)
     if (result == 'empty') {
