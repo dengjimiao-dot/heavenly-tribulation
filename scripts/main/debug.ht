@@ -440,6 +440,8 @@ namespace debug {
       await playJiejiCuffEvent(terrain)
     } else if (kind == 'collar') {
       await playJiejiCollarEvent(terrain)
+    } else if (kind == 'hem') {
+      await playJiejiHemEvent(terrain)
     } else {
       await playJiejiThunderRoadEvent(terrain)
     }
@@ -1283,6 +1285,11 @@ namespace debug {
   /// 忽略几率与冷却，仍弹出赶路劫领三选。
   async function forceCollar() {
     return await playJiejiCollarEvent({ kind: 'plain' })
+  }
+
+  /// 忽略几率与冷却，仍弹出赶路劫缘三选。
+  async function forceHem() {
+    return await playJiejiHemEvent({ kind: 'plain' })
   }
 
   /// 忽略冷却与花费，仍弹出幻术祭坛入幻三选。

@@ -1,0 +1,152 @@
+/// 赶路「劫缘」三选：系缘 / 解缘 / 血缘。隐藏、劫兆、野遇、赶路、行商、拾荒、扎营、残锋、残卷、雾灯、残鼓、汲泉、劫幡、劫铃、劫符、劫旌、劫烛、劫角、劫笛、劫笠、劫带、劫履、劫氅、劫扇、劫杖、劫伞、劫面、劫帔、劫手套、劫戒、劫镜、劫鼓、劫炬、劫梳、劫勺、劫碗、劫杯、劫罐、劫瓶、劫墨、劫袍、劫带、劫簪、劫笔、劫针、劫扣、劫绳、劫珠、劫钗、劫绦、劫穗、劫缎、劫缨、劫袖、劫领都没中时才滚。
+const kJiejiHemBaseRate = 0.0004
+const kJiejiHemMoveCooldown = 24
+const kJiejiHemTiehemHerb = 1
+const kJiejiHemTiehemLife = 2
+const kJiejiHemTiehemGongfaRate = 0.02
+const kJiejiHemLoosehemMoney = 2
+const kJiejiHemLoosehemMoneyThunder = 1
+const kJiejiHemLoosehemHerb = 1
+const kJiejiHemLoosehemLife = 1
+const kJiejiHemBloodLife = 1
+const kJiejiHemBloodLifeBlood = 2
+const kJiejiHemBloodGongfaRate = 0.12
+const kJiejiHemBloodMoney = 4
+
+function _jiejiHemSeasonId() {
+  if (game.jieji != null && game.jieji.seasonId != null) {
+    return game.jieji.seasonId
+  }
+  return null
+}
+
+function _jiejiHemTutorialLocked() {
+  return game.enableTutorial && game.flags.tutorial.bountyQuest != true
+}
+
+function _jiejiHemTiehemHerbCost(seasonId) {
+  if (seasonId == 'mist') return 0
+  return kJiejiHemTiehemHerb
+}
+
+function _jiejiHemLoosehemMoneyCost(seasonId) {
+  if (seasonId == 'thunder') return kJiejiHemLoosehemMoneyThunder
+  return kJiejiHemLoosehemMoney
+}
+
+function _jiejiHemBloodLifeCost(seasonId) {
+  if (seasonId == 'blood') return kJiejiHemBloodLifeBlood
+  return kJiejiHemBloodLife
+}
+
+function _jiejiHemCostLife(want) {
+  var lost = want
+  final life = hero.life ?? 1
+  if (life - lost < 1) lost = life - 1
+  if (lost < 0) lost = 0
+  if (lost > 0) {
+    Player.setLife(hero.life - lost)
+  }
+  return lost
+}
+
+function _jiejiHemNormalizeKind(kind) {
+  if (kind == 'tiehem' || kind == 'jieji_hem_tiehem') return 'tiehem'
+  if (kind == 'loosehem' || kind == 'jieji_hem_loosehem') return 'loosehem'
+  if (kind == 'bloodhem' || kind == 'jieji_hem_bloodhem') return 'bloodhem'
+  return null
+}
+
+function _jiejiHemChoices() {
+  return [
+    {
+      text: 'jieji_hem_tiehem',
+      description: 'hint_jieji_hem_tiehem',
+    },
+    {
+      text: 'jieji_hem_loosehem',
+      description: 'hint_jieji_hem_loosehem',
+    },
+    {
+      text: 'jieji_hem_bloodhem',
+      description: 'hint_jieji_hem_bloodhem',
+    },
+  ]
+}
+
+/// 赶路劫缘三选。debug.forceJiejiEvent('hem') / forceHem 直接走这里，仍弹出三选。
+async function playJiejiHemEvent(terrain) {
+  if (hero == null) return false
+
+  dialog.pushDialog('hint_jieji_hem')
+  dialog.pushSelection('jiejiHem', _jiejiHemChoices())
+  await dialog.execute()
+  final picked = dialog.checkSelected('jiejiHem')
+  var selected = _jiejiHemNormalizeKind(picked)
+  if (selected == null) {
+    selected = 'tiehem'
+  }
+
+  final seasonId = _jiejiHemSeasonId()
+  if (selected == 'tiehem') {
+    final herbNeed = _jiejiHemTiehemHerbCost(seasonId)
+    final herbHave = hero.materials['herb'] ?? 0
+    if (herbNeed > 0 && herbHave < herbNeed) {
+      dialog.pushDialog('hint_jieji_hem_tiehem_broke', interpolations: [herbNeed])
+      await dialog.execute()
+    } else {
+      if (herbNeed > 0) {
+        Player.exhaust('herb', herbNeed)
+      }
+      final healed = Player.restoreLife(kJiejiHemTiehemLife)
+      dialog.pushDialog('hint_jieji_hem_tiehem_ok', interpolations: [healed])
+      await dialog.execute()
+      await tryDropGongfaShard(rate: kJiejiHemTiehemGongfaRate)
+    }
+  } else if (selected == 'loosehem') {
+    final moneyNeed = _jiejiHemLoosehemMoneyCost(seasonId)
+    final moneyHave = hero.materials['money'] ?? 0
+    if (moneyHave < moneyNeed) {
+      dialog.pushDialog('hint_jieji_hem_loosehem_broke', interpolations: [moneyNeed])
+      await dialog.execute()
+    } else {
+      Player.exhaust('money', moneyNeed)
+      await Player.collect('herb', kJiejiHemLoosehemHerb, incurIncident: false)
+      final healed = Player.restoreLife(kJiejiHemLoosehemLife)
+      dialog.pushDialog('hint_jieji_hem_loosehem_ok', interpolations: [kJiejiHemLoosehemHerb, healed])
+      await dialog.execute()
+    }
+  } else {
+    final lost = _jiejiHemCostLife(_jiejiHemBloodLifeCost(seasonId))
+    dialog.pushDialog('hint_jieji_hem_bloodhem_ok', interpolations: [lost])
+    await dialog.execute()
+    final dropped = await tryDropGongfaShard(rate: kJiejiHemBloodGongfaRate)
+    if (dropped != true) {
+      await Player.collect('money', kJiejiHemBloodMoney, incurIncident: false)
+      dialog.pushDialog('hint_jieji_hem_bloodhem_none', interpolations: [kJiejiHemBloodMoney])
+      await dialog.execute()
+    }
+  }
+
+  Game.updateUI()
+  return true
+}
+
+/// 赶路触发：教程锁与路遇相同；冷却 24 步；约 0.04%。出过则返回 true。
+async function tryJiejiHemOnMove(terrain) {
+  if (hero == null) return false
+  if (_jiejiHemTutorialLocked()) return false
+
+  final jieji = ensureJiejiFlags()
+  final moves = jieji.worldMoves ?? 0
+  final last = jieji.lastHemMove ?? -999
+  if (moves - last < kJiejiHemMoveCooldown) return false
+
+  var rate = kJiejiHemBaseRate
+  if (rate < 0) rate = 0
+  if (random.nextDouble() > rate) return false
+
+  jieji.lastHemMove = moves
+  await playJiejiHemEvent(terrain)
+  return true
+}
