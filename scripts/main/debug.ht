@@ -667,6 +667,9 @@ namespace debug {
     } else if (kind == 'capital') {
       game.flags.dungeon.pendingEncounter = 'jiejiCapital'
       await playJiejiDungeonEncounter()
+    } else if (kind == 'socle') {
+      game.flags.dungeon.pendingEncounter = 'jiejiSocle'
+      await playJiejiDungeonEncounter()
     } else if (kind == 'exit') {
       await playJiejiDungeonExitGift()
     } else {
