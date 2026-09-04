@@ -3120,6 +3120,29 @@ Future<void> _heroEdgeJiejiWeapon(dynamic location) async {
   }
 }
 
+Future<void> _heroOilJiejiWeapon(dynamic location) async {
+  final isRented = await GameLogic.checkRented(location);
+  if (!isRented) return;
+
+  final result = await engine.hetu.invoke('oilJiejiWeapon');
+  if (result == 'cooldown') {
+    dialog.pushDialog(
+      'hint_oilJiejiWeapon_cooldown',
+      npcId: location['npcId'],
+    );
+    await dialog.execute();
+    return;
+  }
+  if (result == 'poor') {
+    dialog.pushDialog(
+      'hint_oilJiejiWeapon_notEnough',
+      npcId: location['npcId'],
+    );
+    await dialog.execute();
+    return;
+  }
+}
+
 Future<void> _heroShowKarmaCodex(dynamic location) async {
   final text = engine.hetu.invoke('formatKarmaCodex');
   dialog.pushDialog(
@@ -3231,6 +3254,10 @@ Future<void> _onInteractSite(
     siteOptions.add({
       'text': 'edgeJiejiWeapon',
       'description': 'hint_edgeJiejiWeapon_description',
+    });
+    siteOptions.add({
+      'text': 'oilJiejiWeapon',
+      'description': 'hint_oilJiejiWeapon_description',
     });
   } else if (siteKind == 'cardforge') {
     siteOptions.add({
@@ -3483,6 +3510,8 @@ Future<void> _onInteractSite(
       await _heroCraftJiejiWeapon(location);
     case 'edgeJiejiWeapon':
       await _heroEdgeJiejiWeapon(location);
+    case 'oilJiejiWeapon':
+      await _heroOilJiejiWeapon(location);
     case 'forgeCardBlank':
       await _heroForgeCardBlank(location);
     case 'forgeCardBlankAdvanced':

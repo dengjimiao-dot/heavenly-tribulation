@@ -1,0 +1,213 @@
+/// 工坊「养刃」：拭刃 / 养刃 / 血养。不替换淬器、试锋。
+const kJiejiOilCooldownDays = 1
+const kJiejiOilWipeMoney = 20
+const kJiejiOilWipeMoneyThunder = 10
+const kJiejiOilWipeLife = 5
+const kJiejiOilWipeHerbMist = 1
+const kJiejiOilOilHerb = 1
+const kJiejiOilOilGongfaRate = 0.15
+const kJiejiOilOilLife = 4
+const kJiejiOilBloodLife = 2
+const kJiejiOilBloodLifeBlood = 3
+const kJiejiOilBloodGongfaRate = 0.30
+const kJiejiOilBloodMoney = 40
+
+function _jiejiOilSeasonId() {
+  if (game.jieji != null && game.jieji.seasonId != null) {
+    return game.jieji.seasonId
+  }
+  return null
+}
+
+function _jiejiOilCurrentDay() {
+  if (game.timestamp == null) return null
+  if (Constants.ticksPerDay == null) return null
+  if (Constants.ticksPerDay <= 0) return null
+  return game.timestamp ~/ Constants.ticksPerDay
+}
+
+function _jiejiOilOnCooldown() {
+  final jieji = ensureJiejiFlags()
+  final day = _jiejiOilCurrentDay()
+  if (day == null) return false
+  if (jieji.lastOilDay == null) return false
+  if (day - jieji.lastOilDay < kJiejiOilCooldownDays) return true
+  return false
+}
+
+function _jiejiOilMark() {
+  final jieji = ensureJiejiFlags()
+  jieji.lastOilDay = _jiejiOilCurrentDay()
+}
+
+function _jiejiOilCostLife(want) {
+  var lost = want
+  final life = hero.life ?? 1
+  if (life - lost < 1) lost = life - 1
+  if (lost < 0) lost = 0
+  if (lost > 0) {
+    Player.setLife(hero.life - lost)
+  }
+  return lost
+}
+
+function _jiejiOilWipeMoneyCost(seasonId) {
+  if (seasonId == 'thunder') return kJiejiOilWipeMoneyThunder
+  return kJiejiOilWipeMoney
+}
+
+function _jiejiOilBloodLifeCost(seasonId) {
+  if (seasonId == 'blood') return kJiejiOilBloodLifeBlood
+  return kJiejiOilBloodLife
+}
+
+function _jiejiOilNormalizeKind(kind) {
+  if (kind == 'wipe' || kind == 'jieji_oil_wipe') return 'wipe'
+  if (kind == 'oil' || kind == 'jieji_oil_oil') return 'oil'
+  if (kind == 'blood' || kind == 'jieji_oil_blood') return 'blood'
+  return null
+}
+
+function _jiejiOilChoices() {
+  return [
+    {
+      text: 'jieji_oil_wipe',
+      description: 'hint_jieji_oil_wipe',
+    },
+    {
+      text: 'jieji_oil_oil',
+      description: 'hint_jieji_oil_oil',
+    },
+    {
+      text: 'jieji_oil_blood',
+      description: 'hint_jieji_oil_blood',
+    },
+    'cancel',
+  ]
+}
+
+function _jiejiOilMoneyNeed(selected, seasonId) {
+  if (selected == 'wipe') return _jiejiOilWipeMoneyCost(seasonId)
+  return 0
+}
+
+function _jiejiOilHerbNeed(selected, seasonId) {
+  if (selected == 'oil') return kJiejiOilOilHerb
+  return 0
+}
+
+/// 破军未挂则挂 arrayFury；已挂则挂 feastFury。两者都有则只回血。不退护身阵。
+function _jiejiOilApplyFury() {
+  final jieji = ensureJiejiFlags()
+  if (jieji.arrayFury != true) {
+    jieji.arrayFury = true
+    return 'array'
+  }
+  if (jieji.feastFury != true) {
+    jieji.feastFury = true
+    return 'feast'
+  }
+  return null
+}
+
+/// 工坊养刃三选。free 为 true 时不扣费、不检查冷却（debug），仍弹出三选。
+/// kind 为空则弹窗；null 选择在 free 时默认拭刃。
+/// 返回 'cooldown' | 'poor' | 'cancel' | 'wipe' | 'oil' | 'blood'。
+async function oilJiejiWeapon({ free = false, kind = null }) {
+  if (hero == null) return 'cancel'
+  if (free != true && _jiejiOilOnCooldown()) {
+    return 'cooldown'
+  }
+
+  var selected = _jiejiOilNormalizeKind(kind)
+  if (selected == null) {
+    dialog.pushDialog('hint_oilJiejiWeapon')
+    dialog.pushSelection('jiejiOil', _jiejiOilChoices())
+    await dialog.execute()
+    final picked = dialog.checkSelected('jiejiOil')
+    if (picked == null || picked == 'cancel') {
+      if (free == true && picked == null) {
+        selected = 'wipe'
+      } else {
+        return 'cancel'
+      }
+    } else {
+      selected = _jiejiOilNormalizeKind(picked)
+    }
+  }
+  if (selected == null) return 'cancel'
+
+  final seasonId = _jiejiOilSeasonId()
+  if (free != true) {
+    final moneyNeed = _jiejiOilMoneyNeed(selected, seasonId)
+    final herbNeed = _jiejiOilHerbNeed(selected, seasonId)
+    final moneyHave = hero.materials['money'] ?? 0
+    final herbHave = hero.materials['herb'] ?? 0
+    if (moneyHave < moneyNeed || herbHave < herbNeed) {
+      return 'poor'
+    }
+  }
+
+  if (free != true) {
+    final moneyNeed = _jiejiOilMoneyNeed(selected, seasonId)
+    final herbNeed = _jiejiOilHerbNeed(selected, seasonId)
+    if (moneyNeed > 0) {
+      Player.exhaust('money', moneyNeed)
+    }
+    if (herbNeed > 0) {
+      Player.exhaust('herb', herbNeed)
+    }
+    if (selected == 'blood') {
+      _jiejiOilCostLife(_jiejiOilBloodLifeCost(seasonId))
+    }
+    _jiejiOilMark()
+  }
+
+  if (selected == 'wipe') {
+    final healed = Player.restoreLife(kJiejiOilWipeLife)
+    if (seasonId == 'mist') {
+      await Player.collect('herb', kJiejiOilWipeHerbMist, incurIncident: false)
+    }
+    dialog.pushDialog('hint_oilJiejiWeapon_wipe', interpolations: [healed])
+    await dialog.execute()
+  } else if (selected == 'oil') {
+    final fury = _jiejiOilApplyFury()
+    final ok = await tryDropGongfaShard(rate: kJiejiOilOilGongfaRate)
+    if (fury == 'array') {
+      if (ok == true) {
+        dialog.pushDialog('hint_oilJiejiWeapon_oil_array')
+      } else {
+        dialog.pushDialog('hint_oilJiejiWeapon_oil_array_plain')
+      }
+      await dialog.execute()
+    } else if (fury == 'feast') {
+      if (ok == true) {
+        dialog.pushDialog('hint_oilJiejiWeapon_oil_feast')
+      } else {
+        dialog.pushDialog('hint_oilJiejiWeapon_oil_feast_plain')
+      }
+      await dialog.execute()
+    } else {
+      Player.restoreLife(kJiejiOilOilLife)
+      if (ok == true) {
+        dialog.pushDialog('hint_oilJiejiWeapon_oil_life')
+      } else {
+        dialog.pushDialog('hint_oilJiejiWeapon_oil_life_plain')
+      }
+      await dialog.execute()
+    }
+  } else if (selected == 'blood') {
+    final ok = await tryDropGongfaShard(rate: kJiejiOilBloodGongfaRate)
+    if (ok == true) {
+      dialog.pushDialog('hint_oilJiejiWeapon_blood')
+      await dialog.execute()
+    } else {
+      await Player.collect('money', kJiejiOilBloodMoney, incurIncident: false)
+      dialog.pushDialog('hint_oilJiejiWeapon_blood_money')
+      await dialog.execute()
+    }
+  }
+
+  Game.updateUI()
+  return selected
+}

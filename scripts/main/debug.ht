@@ -597,6 +597,11 @@ namespace debug {
     return await edgeJiejiWeapon(free: true)
   }
 
+  /// 忽略冷却与花费，仍弹出工坊养刃三选。
+  async function forceOil() {
+    return await oilJiejiWeapon(free: true)
+  }
+
   async function forceBounty(kind) {
     var k = kind
     if (k != 'hunt' && k != 'search' && k != 'blood') {
