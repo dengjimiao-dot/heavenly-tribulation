@@ -1,0 +1,152 @@
+/// 赶路「劫袍」三选：披袍 / 折袍 / 血染。隐藏、劫兆、野遇、赶路、行商、拾荒、扎营、残锋、残卷、雾灯、残鼓、汲泉、劫幡、劫铃、劫符、劫旌、劫烛、劫角、劫笛、劫笠、劫带、劫履、劫氅、劫扇、劫杖、劫伞、劫面、劫帔、劫手套、劫戒、劫镜、劫鼓、劫炬、劫梳、劫勺、劫碗、劫杯、劫罐、劫瓶、劫墨都没中时才滚。
+const kJiejiRobeBaseRate = 0.008
+const kJiejiRobeMoveCooldown = 24
+const kJiejiRobeDonrobeHerb = 1
+const kJiejiRobeDonrobeLife = 5
+const kJiejiRobeDonrobeGongfaRate = 0.08
+const kJiejiRobeFoldrobeMoney = 8
+const kJiejiRobeFoldrobeMoneyThunder = 4
+const kJiejiRobeFoldrobeHerb = 2
+const kJiejiRobeFoldrobeLife = 3
+const kJiejiRobeBloodLife = 2
+const kJiejiRobeBloodLifeBlood = 3
+const kJiejiRobeBloodGongfaRate = 0.26
+const kJiejiRobeBloodMoney = 16
+
+function _jiejiRobeSeasonId() {
+  if (game.jieji != null && game.jieji.seasonId != null) {
+    return game.jieji.seasonId
+  }
+  return null
+}
+
+function _jiejiRobeTutorialLocked() {
+  return game.enableTutorial && game.flags.tutorial.bountyQuest != true
+}
+
+function _jiejiRobeDonrobeHerbCost(seasonId) {
+  if (seasonId == 'mist') return 0
+  return kJiejiRobeDonrobeHerb
+}
+
+function _jiejiRobeFoldrobeMoneyCost(seasonId) {
+  if (seasonId == 'thunder') return kJiejiRobeFoldrobeMoneyThunder
+  return kJiejiRobeFoldrobeMoney
+}
+
+function _jiejiRobeBloodLifeCost(seasonId) {
+  if (seasonId == 'blood') return kJiejiRobeBloodLifeBlood
+  return kJiejiRobeBloodLife
+}
+
+function _jiejiRobeCostLife(want) {
+  var lost = want
+  final life = hero.life ?? 1
+  if (life - lost < 1) lost = life - 1
+  if (lost < 0) lost = 0
+  if (lost > 0) {
+    Player.setLife(hero.life - lost)
+  }
+  return lost
+}
+
+function _jiejiRobeNormalizeKind(kind) {
+  if (kind == 'donrobe' || kind == 'jieji_robe_donrobe') return 'donrobe'
+  if (kind == 'foldrobe' || kind == 'jieji_robe_foldrobe') return 'foldrobe'
+  if (kind == 'bloodrobe' || kind == 'jieji_robe_bloodrobe') return 'bloodrobe'
+  return null
+}
+
+function _jiejiRobeChoices() {
+  return [
+    {
+      text: 'jieji_robe_donrobe',
+      description: 'hint_jieji_robe_donrobe',
+    },
+    {
+      text: 'jieji_robe_foldrobe',
+      description: 'hint_jieji_robe_foldrobe',
+    },
+    {
+      text: 'jieji_robe_bloodrobe',
+      description: 'hint_jieji_robe_bloodrobe',
+    },
+  ]
+}
+
+/// 赶路劫袍三选。debug.forceJiejiEvent('robe') / forceRobe 直接走这里，仍弹出三选。
+async function playJiejiRobeEvent(terrain) {
+  if (hero == null) return false
+
+  dialog.pushDialog('hint_jieji_robe')
+  dialog.pushSelection('jiejiRobe', _jiejiRobeChoices())
+  await dialog.execute()
+  final picked = dialog.checkSelected('jiejiRobe')
+  var selected = _jiejiRobeNormalizeKind(picked)
+  if (selected == null) {
+    selected = 'donrobe'
+  }
+
+  final seasonId = _jiejiRobeSeasonId()
+  if (selected == 'donrobe') {
+    final herbNeed = _jiejiRobeDonrobeHerbCost(seasonId)
+    final herbHave = hero.materials['herb'] ?? 0
+    if (herbNeed > 0 && herbHave < herbNeed) {
+      dialog.pushDialog('hint_jieji_robe_donrobe_broke', interpolations: [herbNeed])
+      await dialog.execute()
+    } else {
+      if (herbNeed > 0) {
+        Player.exhaust('herb', herbNeed)
+      }
+      final healed = Player.restoreLife(kJiejiRobeDonrobeLife)
+      dialog.pushDialog('hint_jieji_robe_donrobe_ok', interpolations: [healed])
+      await dialog.execute()
+      await tryDropGongfaShard(rate: kJiejiRobeDonrobeGongfaRate)
+    }
+  } else if (selected == 'foldrobe') {
+    final moneyNeed = _jiejiRobeFoldrobeMoneyCost(seasonId)
+    final moneyHave = hero.materials['money'] ?? 0
+    if (moneyHave < moneyNeed) {
+      dialog.pushDialog('hint_jieji_robe_foldrobe_broke', interpolations: [moneyNeed])
+      await dialog.execute()
+    } else {
+      Player.exhaust('money', moneyNeed)
+      await Player.collect('herb', kJiejiRobeFoldrobeHerb, incurIncident: false)
+      final healed = Player.restoreLife(kJiejiRobeFoldrobeLife)
+      dialog.pushDialog('hint_jieji_robe_foldrobe_ok', interpolations: [kJiejiRobeFoldrobeHerb, healed])
+      await dialog.execute()
+    }
+  } else {
+    final lost = _jiejiRobeCostLife(_jiejiRobeBloodLifeCost(seasonId))
+    dialog.pushDialog('hint_jieji_robe_bloodrobe_ok', interpolations: [lost])
+    await dialog.execute()
+    final dropped = await tryDropGongfaShard(rate: kJiejiRobeBloodGongfaRate)
+    if (dropped != true) {
+      await Player.collect('money', kJiejiRobeBloodMoney, incurIncident: false)
+      dialog.pushDialog('hint_jieji_robe_bloodrobe_none', interpolations: [kJiejiRobeBloodMoney])
+      await dialog.execute()
+    }
+  }
+
+  Game.updateUI()
+  return true
+}
+
+/// 赶路触发：教程锁与路遇相同；冷却 24 步；约 0.8%。出过则返回 true。
+async function tryJiejiRobeOnMove(terrain) {
+  if (hero == null) return false
+  if (_jiejiRobeTutorialLocked()) return false
+
+  final jieji = ensureJiejiFlags()
+  final moves = jieji.worldMoves ?? 0
+  final last = jieji.lastRobeMove ?? -999
+  if (moves - last < kJiejiRobeMoveCooldown) return false
+
+  var rate = kJiejiRobeBaseRate
+  if (rate < 0) rate = 0
+  if (random.nextDouble() > rate) return false
+
+  jieji.lastRobeMove = moves
+  await playJiejiRobeEvent(terrain)
+  return true
+}

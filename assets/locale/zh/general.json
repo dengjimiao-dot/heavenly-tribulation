@@ -3820,6 +3820,22 @@
   "hint_jieji_ink_bloodink_none": "血墨下去，墨影却散了。袋里多了 {0} 铜钱。",
 
 
+  "jiejiRobe": "劫袍",
+  "hint_jieji_robe": "路遇一袭劫袍。你可以披袍、折袍，或以血染袍。",
+  "jieji_robe_donrobe": "披袍",
+  "jieji_robe_foldrobe": "折袍",
+  "jieji_robe_bloodrobe": "血染袍",
+  "hint_jieji_robe_donrobe": "披袍：耗 1 药材（雾月不耗）。回 5 命，八厘摸残页。药材不够则空手。",
+  "hint_jieji_robe_foldrobe": "折袍：花 8 铜钱（雷月 4）。得 2 药材，并回 3 命。袋里不够则空手。",
+  "hint_jieji_robe_bloodrobe": "血染：扣 2 点生机（至少留 1，血月 3）。二成六摸残页，不成则得 16 铜钱。",
+  "hint_jieji_robe_donrobe_ok": "你披上劫袍。生机回了 {0} 点。",
+  "hint_jieji_robe_donrobe_broke": "披袍要 {0} 药材。你拿不出来。",
+  "hint_jieji_robe_foldrobe_ok": "你折起劫袍。得了 {0} 药材，生机回了 {1} 点。",
+  "hint_jieji_robe_foldrobe_broke": "折袍要 {0} 铜钱。袋里不够。",
+  "hint_jieji_robe_bloodrobe_ok": "你割了 {0} 点生机去染劫袍。",
+  "hint_jieji_robe_bloodrobe_none": "血袍下去，袍影却散了。袋里多了 {0} 铜钱。",
+
+
   "jiejiMenpaiDemo": "劫季门派 · Demo",
   "jiejiMenpaiPitch": "带着业力赶天劫的门派肉鸽",
   "knownIssues": "已知问题",
