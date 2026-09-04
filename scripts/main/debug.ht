@@ -316,6 +316,8 @@ namespace debug {
       await playJiejiCapeEvent(terrain)
     } else if (kind == 'fan') {
       await playJiejiFanEvent(terrain)
+    } else if (kind == 'staff') {
+      await playJiejiStaffEvent(terrain)
     } else {
       await playJiejiThunderRoadEvent(terrain)
     }
@@ -911,6 +913,11 @@ namespace debug {
   /// 忽略几率与冷却，仍弹出赶路劫扇三选。
   async function forceFan() {
     return await playJiejiFanEvent({ kind: 'plain' })
+  }
+
+  /// 忽略几率与冷却，仍弹出赶路劫杖三选。
+  async function forceStaff() {
+    return await playJiejiStaffEvent({ kind: 'plain' })
   }
 
   /// 忽略冷却与花费，仍弹出幻术祭坛入幻三选。
