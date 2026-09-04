@@ -1,0 +1,185 @@
+/// 藏经阁「再读」：再温 / 再抄 / 血阅。不替换夜读、问道。
+const kJiejiRereadCooldownDays = 1
+const kJiejiRereadSkimMoney = 20
+const kJiejiRereadSkimMoneyThunder = 10
+const kJiejiRereadSkimLife = 4
+const kJiejiRereadSkimHerbMist = 1
+const kJiejiRereadCopyHerb = 1
+const kJiejiRereadCopyGongfaRate = 0.20
+const kJiejiRereadCopyMoneyMist = 20
+const kJiejiRereadBloodLife = 2
+const kJiejiRereadBloodLifeBlood = 3
+const kJiejiRereadBloodGongfaRate = 0.35
+const kJiejiRereadBloodMoney = 50
+
+function _jiejiRereadSeasonId() {
+  if (game.jieji != null && game.jieji.seasonId != null) {
+    return game.jieji.seasonId
+  }
+  return null
+}
+
+function _jiejiRereadCurrentDay() {
+  if (game.timestamp == null) return null
+  if (Constants.ticksPerDay == null) return null
+  if (Constants.ticksPerDay <= 0) return null
+  return game.timestamp ~/ Constants.ticksPerDay
+}
+
+function _jiejiRereadOnCooldown() {
+  final jieji = ensureJiejiFlags()
+  final day = _jiejiRereadCurrentDay()
+  if (day == null) return false
+  if (jieji.lastRereadDay == null) return false
+  if (day - jieji.lastRereadDay < kJiejiRereadCooldownDays) return true
+  return false
+}
+
+function _jiejiRereadMark() {
+  final jieji = ensureJiejiFlags()
+  jieji.lastRereadDay = _jiejiRereadCurrentDay()
+}
+
+function _jiejiRereadCostLife(want) {
+  var lost = want
+  final life = hero.life ?? 1
+  if (life - lost < 1) lost = life - 1
+  if (lost < 0) lost = 0
+  if (lost > 0) {
+    Player.setLife(hero.life - lost)
+  }
+  return lost
+}
+
+function _jiejiRereadSkimMoneyCost(seasonId) {
+  if (seasonId == 'thunder') return kJiejiRereadSkimMoneyThunder
+  return kJiejiRereadSkimMoney
+}
+
+function _jiejiRereadBloodLifeCost(seasonId) {
+  if (seasonId == 'blood') return kJiejiRereadBloodLifeBlood
+  return kJiejiRereadBloodLife
+}
+
+function _jiejiRereadNormalizeKind(kind) {
+  if (kind == 'skim' || kind == 'jieji_reread_skim') return 'skim'
+  if (kind == 'copy' || kind == 'jieji_reread_copy') return 'copy'
+  if (kind == 'blood' || kind == 'jieji_reread_blood') return 'blood'
+  return null
+}
+
+function _jiejiRereadChoices() {
+  return [
+    {
+      text: 'jieji_reread_skim',
+      description: 'hint_jieji_reread_skim',
+    },
+    {
+      text: 'jieji_reread_copy',
+      description: 'hint_jieji_reread_copy',
+    },
+    {
+      text: 'jieji_reread_blood',
+      description: 'hint_jieji_reread_blood',
+    },
+    'cancel',
+  ]
+}
+
+function _jiejiRereadMoneyNeed(selected, seasonId) {
+  if (selected == 'skim') return _jiejiRereadSkimMoneyCost(seasonId)
+  return 0
+}
+
+function _jiejiRereadHerbNeed(selected) {
+  if (selected == 'copy') return kJiejiRereadCopyHerb
+  return 0
+}
+
+/// 藏经阁再读三选。free 为 true 时不扣费、不检查冷却（debug），仍弹出三选。
+/// kind 为空则弹窗；null 选择在 free 时默认再温。
+/// 返回 'cooldown' | 'poor' | 'cancel' | 'skim' | 'copy' | 'blood'。
+async function rereadJiejiNight({ free = false, kind = null }) {
+  if (hero == null) return 'cancel'
+  if (free != true && _jiejiRereadOnCooldown()) {
+    return 'cooldown'
+  }
+
+  var selected = _jiejiRereadNormalizeKind(kind)
+  if (selected == null) {
+    dialog.pushDialog('hint_rereadJiejiNight')
+    dialog.pushSelection('jiejiReread', _jiejiRereadChoices())
+    await dialog.execute()
+    final picked = dialog.checkSelected('jiejiReread')
+    if (picked == null || picked == 'cancel') {
+      if (free == true && picked == null) {
+        selected = 'skim'
+      } else {
+        return 'cancel'
+      }
+    } else {
+      selected = _jiejiRereadNormalizeKind(picked)
+    }
+  }
+  if (selected == null) return 'cancel'
+
+  final seasonId = _jiejiRereadSeasonId()
+  if (free != true) {
+    final moneyNeed = _jiejiRereadMoneyNeed(selected, seasonId)
+    final herbNeed = _jiejiRereadHerbNeed(selected)
+    final moneyHave = hero.materials['money'] ?? 0
+    final herbHave = hero.materials['herb'] ?? 0
+    if (moneyHave < moneyNeed || herbHave < herbNeed) {
+      return 'poor'
+    }
+  }
+
+  if (free != true) {
+    final moneyNeed = _jiejiRereadMoneyNeed(selected, seasonId)
+    final herbNeed = _jiejiRereadHerbNeed(selected)
+    if (moneyNeed > 0) {
+      Player.exhaust('money', moneyNeed)
+    }
+    if (herbNeed > 0) {
+      Player.exhaust('herb', herbNeed)
+    }
+    if (selected == 'blood') {
+      _jiejiRereadCostLife(_jiejiRereadBloodLifeCost(seasonId))
+    }
+    _jiejiRereadMark()
+  }
+
+  if (selected == 'skim') {
+    final healed = Player.restoreLife(kJiejiRereadSkimLife)
+    if (seasonId == 'mist') {
+      await Player.collect('herb', kJiejiRereadSkimHerbMist, incurIncident: false)
+    }
+    dialog.pushDialog('hint_rereadJiejiNight_skim', interpolations: [healed])
+    await dialog.execute()
+  } else if (selected == 'copy') {
+    jiejiDungeonGrantBlank()
+    if (seasonId == 'mist') {
+      await Player.collect('money', kJiejiRereadCopyMoneyMist, incurIncident: false)
+    }
+    final ok = await tryDropGongfaShard(rate: kJiejiRereadCopyGongfaRate)
+    if (ok == true) {
+      dialog.pushDialog('hint_rereadJiejiNight_copy')
+    } else {
+      dialog.pushDialog('hint_rereadJiejiNight_copy_plain')
+    }
+    await dialog.execute()
+  } else if (selected == 'blood') {
+    final ok = await tryDropGongfaShard(rate: kJiejiRereadBloodGongfaRate)
+    if (ok == true) {
+      dialog.pushDialog('hint_rereadJiejiNight_blood')
+      await dialog.execute()
+    } else {
+      await Player.collect('money', kJiejiRereadBloodMoney, incurIncident: false)
+      dialog.pushDialog('hint_rereadJiejiNight_blood_money')
+      await dialog.execute()
+    }
+  }
+
+  Game.updateUI()
+  return selected
+}

@@ -388,6 +388,11 @@ namespace debug {
     return await readJiejiNight(free: true)
   }
 
+  /// 忽略冷却与花费，仍弹出藏经阁再读三选。
+  async function forceReread() {
+    return await rereadJiejiNight(free: true)
+  }
+
   async function forceHarvestRite() {
     return await riteJiejiHarvest(free: true)
   }
