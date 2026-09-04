@@ -1,0 +1,152 @@
+/// 赶路「劫铃」三选：听铃 / 摘铃 / 血铃。隐藏、劫兆、野遇、赶路、行商、拾荒、扎营、残锋、残卷、雾灯、残鼓、汲泉、劫幡都没中时才滚。
+const kJiejiChimeBaseRate = 0.045
+const kJiejiChimeMoveCooldown = 15
+const kJiejiChimeListenHerb = 1
+const kJiejiChimeListenLife = 5
+const kJiejiChimeListenGongfaRate = 0.15
+const kJiejiChimePickMoney = 20
+const kJiejiChimePickMoneyThunder = 10
+const kJiejiChimePickHerb = 2
+const kJiejiChimePickLife = 3
+const kJiejiChimeBloodLife = 2
+const kJiejiChimeBloodLifeBlood = 3
+const kJiejiChimeBloodGongfaRate = 0.40
+const kJiejiChimeBloodMoney = 40
+
+function _jiejiChimeSeasonId() {
+  if (game.jieji != null && game.jieji.seasonId != null) {
+    return game.jieji.seasonId
+  }
+  return null
+}
+
+function _jiejiChimeTutorialLocked() {
+  return game.enableTutorial && game.flags.tutorial.bountyQuest != true
+}
+
+function _jiejiChimeListenHerbCost(seasonId) {
+  if (seasonId == 'mist') return 0
+  return kJiejiChimeListenHerb
+}
+
+function _jiejiChimePickMoneyCost(seasonId) {
+  if (seasonId == 'thunder') return kJiejiChimePickMoneyThunder
+  return kJiejiChimePickMoney
+}
+
+function _jiejiChimeBloodLifeCost(seasonId) {
+  if (seasonId == 'blood') return kJiejiChimeBloodLifeBlood
+  return kJiejiChimeBloodLife
+}
+
+function _jiejiChimeCostLife(want) {
+  var lost = want
+  final life = hero.life ?? 1
+  if (life - lost < 1) lost = life - 1
+  if (lost < 0) lost = 0
+  if (lost > 0) {
+    Player.setLife(hero.life - lost)
+  }
+  return lost
+}
+
+function _jiejiChimeNormalizeKind(kind) {
+  if (kind == 'listen' || kind == 'jieji_chime_listen') return 'listen'
+  if (kind == 'pick' || kind == 'jieji_chime_pick') return 'pick'
+  if (kind == 'blood' || kind == 'jieji_chime_blood') return 'blood'
+  return null
+}
+
+function _jiejiChimeChoices() {
+  return [
+    {
+      text: 'jieji_chime_listen',
+      description: 'hint_jieji_chime_listen',
+    },
+    {
+      text: 'jieji_chime_pick',
+      description: 'hint_jieji_chime_pick',
+    },
+    {
+      text: 'jieji_chime_blood',
+      description: 'hint_jieji_chime_blood',
+    },
+  ]
+}
+
+/// 赶路劫铃三选。debug.forceJiejiEvent('chime') / forceChime 直接走这里，仍弹出三选。
+async function playJiejiChimeEvent(terrain) {
+  if (hero == null) return false
+
+  dialog.pushDialog('hint_jieji_chime')
+  dialog.pushSelection('jiejiChime', _jiejiChimeChoices())
+  await dialog.execute()
+  final picked = dialog.checkSelected('jiejiChime')
+  var selected = _jiejiChimeNormalizeKind(picked)
+  if (selected == null) {
+    selected = 'listen'
+  }
+
+  final seasonId = _jiejiChimeSeasonId()
+  if (selected == 'listen') {
+    final herbNeed = _jiejiChimeListenHerbCost(seasonId)
+    final herbHave = hero.materials['herb'] ?? 0
+    if (herbNeed > 0 && herbHave < herbNeed) {
+      dialog.pushDialog('hint_jieji_chime_listen_broke', interpolations: [herbNeed])
+      await dialog.execute()
+    } else {
+      if (herbNeed > 0) {
+        Player.exhaust('herb', herbNeed)
+      }
+      final healed = Player.restoreLife(kJiejiChimeListenLife)
+      dialog.pushDialog('hint_jieji_chime_listen_ok', interpolations: [healed])
+      await dialog.execute()
+      await tryDropGongfaShard(rate: kJiejiChimeListenGongfaRate)
+    }
+  } else if (selected == 'pick') {
+    final moneyNeed = _jiejiChimePickMoneyCost(seasonId)
+    final moneyHave = hero.materials['money'] ?? 0
+    if (moneyHave < moneyNeed) {
+      dialog.pushDialog('hint_jieji_chime_pick_broke', interpolations: [moneyNeed])
+      await dialog.execute()
+    } else {
+      Player.exhaust('money', moneyNeed)
+      await Player.collect('herb', kJiejiChimePickHerb, incurIncident: false)
+      final healed = Player.restoreLife(kJiejiChimePickLife)
+      dialog.pushDialog('hint_jieji_chime_pick_ok', interpolations: [kJiejiChimePickHerb, healed])
+      await dialog.execute()
+    }
+  } else {
+    final lost = _jiejiChimeCostLife(_jiejiChimeBloodLifeCost(seasonId))
+    dialog.pushDialog('hint_jieji_chime_blood_ok', interpolations: [lost])
+    await dialog.execute()
+    final dropped = await tryDropGongfaShard(rate: kJiejiChimeBloodGongfaRate)
+    if (dropped != true) {
+      await Player.collect('money', kJiejiChimeBloodMoney, incurIncident: false)
+      dialog.pushDialog('hint_jieji_chime_blood_none', interpolations: [kJiejiChimeBloodMoney])
+      await dialog.execute()
+    }
+  }
+
+  Game.updateUI()
+  return true
+}
+
+/// 赶路触发：教程锁与路遇相同；冷却 15 步；约 4.5%。出过则返回 true。
+async function tryJiejiChimeOnMove(terrain) {
+  if (hero == null) return false
+  if (_jiejiChimeTutorialLocked()) return false
+
+  final jieji = ensureJiejiFlags()
+  final moves = jieji.worldMoves ?? 0
+  final last = jieji.lastChimeMove ?? -999
+  if (moves - last < kJiejiChimeMoveCooldown) return false
+
+  var rate = kJiejiChimeBaseRate
+  if (rate < 0) rate = 0
+  if (random.nextDouble() > rate) return false
+
+  jieji.lastChimeMove = moves
+  await playJiejiChimeEvent(terrain)
+  return true
+}

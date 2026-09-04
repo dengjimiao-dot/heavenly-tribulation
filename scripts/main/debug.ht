@@ -272,6 +272,8 @@ namespace debug {
       await playJiejiDrawEvent(terrain)
     } else if (kind == 'pennant') {
       await playJiejiPennantEvent(terrain)
+    } else if (kind == 'chime') {
+      await playJiejiChimeEvent(terrain)
     } else {
       await playJiejiThunderRoadEvent(terrain)
     }
@@ -779,6 +781,11 @@ namespace debug {
   /// 忽略几率与冷却，仍弹出赶路劫幡三选。
   async function forcePennant() {
     return await playJiejiPennantEvent({ kind: 'plain' })
+  }
+
+  /// 忽略几率与冷却，仍弹出赶路劫铃三选。
+  async function forceChime() {
+    return await playJiejiChimeEvent({ kind: 'plain' })
   }
 
   /// 忽略冷却与花费，仍弹出幻术祭坛入幻三选。
