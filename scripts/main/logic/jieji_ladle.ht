@@ -1,0 +1,152 @@
+/// 赶路「劫勺」三选：舀勺 / 收勺 / 血勺。隐藏、劫兆、野遇、赶路、行商、拾荒、扎营、残锋、残卷、雾灯、残鼓、汲泉、劫幡、劫铃、劫符、劫旌、劫烛、劫角、劫笛、劫笠、劫带、劫履、劫氅、劫扇、劫杖、劫伞、劫面、劫帔、劫手套、劫戒、劫镜、劫鼓、劫炬、劫梳都没中时才滚。
+const kJiejiLadleBaseRate = 0.014
+const kJiejiLadleMoveCooldown = 24
+const kJiejiLadleScoopladleHerb = 1
+const kJiejiLadleScoopladleLife = 5
+const kJiejiLadleScoopladleGongfaRate = 0.08
+const kJiejiLadleStowladleMoney = 8
+const kJiejiLadleStowladleMoneyThunder = 4
+const kJiejiLadleStowladleHerb = 2
+const kJiejiLadleStowladleLife = 3
+const kJiejiLadleBloodLife = 2
+const kJiejiLadleBloodLifeBlood = 3
+const kJiejiLadleBloodGongfaRate = 0.26
+const kJiejiLadleBloodMoney = 16
+
+function _jiejiLadleSeasonId() {
+  if (game.jieji != null && game.jieji.seasonId != null) {
+    return game.jieji.seasonId
+  }
+  return null
+}
+
+function _jiejiLadleTutorialLocked() {
+  return game.enableTutorial && game.flags.tutorial.bountyQuest != true
+}
+
+function _jiejiLadleScoopladleHerbCost(seasonId) {
+  if (seasonId == 'mist') return 0
+  return kJiejiLadleScoopladleHerb
+}
+
+function _jiejiLadleStowladleMoneyCost(seasonId) {
+  if (seasonId == 'thunder') return kJiejiLadleStowladleMoneyThunder
+  return kJiejiLadleStowladleMoney
+}
+
+function _jiejiLadleBloodLifeCost(seasonId) {
+  if (seasonId == 'blood') return kJiejiLadleBloodLifeBlood
+  return kJiejiLadleBloodLife
+}
+
+function _jiejiLadleCostLife(want) {
+  var lost = want
+  final life = hero.life ?? 1
+  if (life - lost < 1) lost = life - 1
+  if (lost < 0) lost = 0
+  if (lost > 0) {
+    Player.setLife(hero.life - lost)
+  }
+  return lost
+}
+
+function _jiejiLadleNormalizeKind(kind) {
+  if (kind == 'scoopladle' || kind == 'jieji_ladle_scoopladle') return 'scoopladle'
+  if (kind == 'stowladle' || kind == 'jieji_ladle_stowladle') return 'stowladle'
+  if (kind == 'bloodladle' || kind == 'jieji_ladle_bloodladle') return 'bloodladle'
+  return null
+}
+
+function _jiejiLadleChoices() {
+  return [
+    {
+      text: 'jieji_ladle_scoopladle',
+      description: 'hint_jieji_ladle_scoopladle',
+    },
+    {
+      text: 'jieji_ladle_stowladle',
+      description: 'hint_jieji_ladle_stowladle',
+    },
+    {
+      text: 'jieji_ladle_bloodladle',
+      description: 'hint_jieji_ladle_bloodladle',
+    },
+  ]
+}
+
+/// 赶路劫勺三选。debug.forceJiejiEvent('ladle') / forceLadle 直接走这里，仍弹出三选。
+async function playJiejiLadleEvent(terrain) {
+  if (hero == null) return false
+
+  dialog.pushDialog('hint_jieji_ladle')
+  dialog.pushSelection('jiejiLadle', _jiejiLadleChoices())
+  await dialog.execute()
+  final picked = dialog.checkSelected('jiejiLadle')
+  var selected = _jiejiLadleNormalizeKind(picked)
+  if (selected == null) {
+    selected = 'scoopladle'
+  }
+
+  final seasonId = _jiejiLadleSeasonId()
+  if (selected == 'scoopladle') {
+    final herbNeed = _jiejiLadleScoopladleHerbCost(seasonId)
+    final herbHave = hero.materials['herb'] ?? 0
+    if (herbNeed > 0 && herbHave < herbNeed) {
+      dialog.pushDialog('hint_jieji_ladle_scoopladle_broke', interpolations: [herbNeed])
+      await dialog.execute()
+    } else {
+      if (herbNeed > 0) {
+        Player.exhaust('herb', herbNeed)
+      }
+      final healed = Player.restoreLife(kJiejiLadleScoopladleLife)
+      dialog.pushDialog('hint_jieji_ladle_scoopladle_ok', interpolations: [healed])
+      await dialog.execute()
+      await tryDropGongfaShard(rate: kJiejiLadleScoopladleGongfaRate)
+    }
+  } else if (selected == 'stowladle') {
+    final moneyNeed = _jiejiLadleStowladleMoneyCost(seasonId)
+    final moneyHave = hero.materials['money'] ?? 0
+    if (moneyHave < moneyNeed) {
+      dialog.pushDialog('hint_jieji_ladle_stowladle_broke', interpolations: [moneyNeed])
+      await dialog.execute()
+    } else {
+      Player.exhaust('money', moneyNeed)
+      await Player.collect('herb', kJiejiLadleStowladleHerb, incurIncident: false)
+      final healed = Player.restoreLife(kJiejiLadleStowladleLife)
+      dialog.pushDialog('hint_jieji_ladle_stowladle_ok', interpolations: [kJiejiLadleStowladleHerb, healed])
+      await dialog.execute()
+    }
+  } else {
+    final lost = _jiejiLadleCostLife(_jiejiLadleBloodLifeCost(seasonId))
+    dialog.pushDialog('hint_jieji_ladle_bloodladle_ok', interpolations: [lost])
+    await dialog.execute()
+    final dropped = await tryDropGongfaShard(rate: kJiejiLadleBloodGongfaRate)
+    if (dropped != true) {
+      await Player.collect('money', kJiejiLadleBloodMoney, incurIncident: false)
+      dialog.pushDialog('hint_jieji_ladle_bloodladle_none', interpolations: [kJiejiLadleBloodMoney])
+      await dialog.execute()
+    }
+  }
+
+  Game.updateUI()
+  return true
+}
+
+/// 赶路触发：教程锁与路遇相同；冷却 24 步；约 1.4%。出过则返回 true。
+async function tryJiejiLadleOnMove(terrain) {
+  if (hero == null) return false
+  if (_jiejiLadleTutorialLocked()) return false
+
+  final jieji = ensureJiejiFlags()
+  final moves = jieji.worldMoves ?? 0
+  final last = jieji.lastLadleMove ?? -999
+  if (moves - last < kJiejiLadleMoveCooldown) return false
+
+  var rate = kJiejiLadleBaseRate
+  if (rate < 0) rate = 0
+  if (random.nextDouble() > rate) return false
+
+  jieji.lastLadleMove = moves
+  await playJiejiLadleEvent(terrain)
+  return true
+}

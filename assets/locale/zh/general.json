@@ -3640,6 +3640,22 @@
   "hint_jieji_comb_bloodcomb_none": "血梳下去，梳影却散了。袋里多了 {0} 铜钱。",
 
 
+  "jiejiLadle": "劫勺",
+  "hint_jieji_ladle": "路边搁着一把劫勺。你可以舀勺、收勺，或以血勺。",
+  "jieji_ladle_scoopladle": "舀勺",
+  "jieji_ladle_stowladle": "收勺",
+  "jieji_ladle_bloodladle": "血勺",
+  "hint_jieji_ladle_scoopladle": "舀勺：耗 1 药材（雾月不耗）。回 5 命，八厘摸残页。药材不够则空手。",
+  "hint_jieji_ladle_stowladle": "收勺：花 8 铜钱（雷月 4）。得 2 药材，并回 3 命。袋里不够则空手。",
+  "hint_jieji_ladle_bloodladle": "血勺：扣 2 点生机（至少留 1，血月 3）。二成六摸残页，不成则得 16 铜钱。",
+  "hint_jieji_ladle_scoopladle_ok": "你用劫勺舀了一勺。生机回了 {0} 点。",
+  "hint_jieji_ladle_scoopladle_broke": "舀勺要 {0} 药材。你拿不出来。",
+  "hint_jieji_ladle_stowladle_ok": "你收起劫勺。得了 {0} 药材，生机回了 {1} 点。",
+  "hint_jieji_ladle_stowladle_broke": "收勺要 {0} 铜钱。袋里不够。",
+  "hint_jieji_ladle_bloodladle_ok": "你割了 {0} 点生机去染劫勺。",
+  "hint_jieji_ladle_bloodladle_none": "血勺下去，勺影却散了。袋里多了 {0} 铜钱。",
+
+
   "jiejiMenpaiDemo": "劫季门派 · Demo",
   "jiejiMenpaiPitch": "带着业力赶天劫的门派肉鸽",
   "knownIssues": "已知问题",
