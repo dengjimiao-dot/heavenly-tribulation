@@ -576,6 +576,9 @@ namespace debug {
     } else if (kind == 'tapestry') {
       game.flags.dungeon.pendingEncounter = 'jiejiTapestry'
       await playJiejiDungeonEncounter()
+    } else if (kind == 'plaque') {
+      game.flags.dungeon.pendingEncounter = 'jiejiPlaque'
+      await playJiejiDungeonEncounter()
     } else if (kind == 'exit') {
       await playJiejiDungeonExitGift()
     } else {
