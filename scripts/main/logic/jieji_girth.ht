@@ -1,0 +1,152 @@
+/// 赶路「劫鞦」三选：系鞦 / 解鞦 / 血鞦。隐藏、劫兆、野遇、赶路、行商、拾荒、扎营、残锋、残卷、雾灯、残鼓、汲泉、劫幡、劫铃、劫符、劫旌、劫烛、劫角、劫笛、劫笠、劫带、劫履、劫氅、劫扇、劫杖、劫伞、劫面、劫帔、劫手套、劫戒、劫镜、劫鼓、劫炬、劫梳、劫勺、劫碗、劫杯、劫罐、劫瓶、劫墨、劫袍、劫带、劫簪、劫笔、劫针、劫扣、劫绳、劫珠、劫钗、劫绦、劫穗、劫缎、劫缨、劫袖、劫领、劫缘、劫辫、劫翎、劫裹、劫轭、劫辔、劫缰、劫镫都没中时才滚。
+const kJiejiGirthBaseRate = 0.00006
+const kJiejiGirthMoveCooldown = 24
+const kJiejiGirthTiegirthHerb = 1
+const kJiejiGirthTiegirthLife = 1
+const kJiejiGirthTiegirthGongfaRate = 0.006
+const kJiejiGirthLoosegirthMoney = 1
+const kJiejiGirthLoosegirthMoneyThunder = 1
+const kJiejiGirthLoosegirthHerb = 1
+const kJiejiGirthLoosegirthLife = 1
+const kJiejiGirthBloodLife = 1
+const kJiejiGirthBloodLifeBlood = 2
+const kJiejiGirthBloodGongfaRate = 0.04
+const kJiejiGirthBloodMoney = 2
+
+function _jiejiGirthSeasonId() {
+  if (game.jieji != null && game.jieji.seasonId != null) {
+    return game.jieji.seasonId
+  }
+  return null
+}
+
+function _jiejiGirthTutorialLocked() {
+  return game.enableTutorial && game.flags.tutorial.bountyQuest != true
+}
+
+function _jiejiGirthTiegirthHerbCost(seasonId) {
+  if (seasonId == 'mist') return 0
+  return kJiejiGirthTiegirthHerb
+}
+
+function _jiejiGirthLoosegirthMoneyCost(seasonId) {
+  if (seasonId == 'thunder') return kJiejiGirthLoosegirthMoneyThunder
+  return kJiejiGirthLoosegirthMoney
+}
+
+function _jiejiGirthBloodLifeCost(seasonId) {
+  if (seasonId == 'blood') return kJiejiGirthBloodLifeBlood
+  return kJiejiGirthBloodLife
+}
+
+function _jiejiGirthCostLife(want) {
+  var lost = want
+  final life = hero.life ?? 1
+  if (life - lost < 1) lost = life - 1
+  if (lost < 0) lost = 0
+  if (lost > 0) {
+    Player.setLife(hero.life - lost)
+  }
+  return lost
+}
+
+function _jiejiGirthNormalizeKind(kind) {
+  if (kind == 'tiegirth' || kind == 'jieji_girth_tiegirth') return 'tiegirth'
+  if (kind == 'loosegirth' || kind == 'jieji_girth_loosegirth') return 'loosegirth'
+  if (kind == 'bloodgirth' || kind == 'jieji_girth_bloodgirth') return 'bloodgirth'
+  return null
+}
+
+function _jiejiGirthChoices() {
+  return [
+    {
+      text: 'jieji_girth_tiegirth',
+      description: 'hint_jieji_girth_tiegirth',
+    },
+    {
+      text: 'jieji_girth_loosegirth',
+      description: 'hint_jieji_girth_loosegirth',
+    },
+    {
+      text: 'jieji_girth_bloodgirth',
+      description: 'hint_jieji_girth_bloodgirth',
+    },
+  ]
+}
+
+/// 赶路劫鞦三选。debug.forceJiejiEvent('girth') / forceGirth 直接走这里，仍弹出三选。
+async function playJiejiGirthEvent(terrain) {
+  if (hero == null) return false
+
+  dialog.pushDialog('hint_jieji_girth')
+  dialog.pushSelection('jiejiGirth', _jiejiGirthChoices())
+  await dialog.execute()
+  final picked = dialog.checkSelected('jiejiGirth')
+  var selected = _jiejiGirthNormalizeKind(picked)
+  if (selected == null) {
+    selected = 'tiegirth'
+  }
+
+  final seasonId = _jiejiGirthSeasonId()
+  if (selected == 'tiegirth') {
+    final herbNeed = _jiejiGirthTiegirthHerbCost(seasonId)
+    final herbHave = hero.materials['herb'] ?? 0
+    if (herbNeed > 0 && herbHave < herbNeed) {
+      dialog.pushDialog('hint_jieji_girth_tiegirth_broke', interpolations: [herbNeed])
+      await dialog.execute()
+    } else {
+      if (herbNeed > 0) {
+        Player.exhaust('herb', herbNeed)
+      }
+      final healed = Player.restoreLife(kJiejiGirthTiegirthLife)
+      dialog.pushDialog('hint_jieji_girth_tiegirth_ok', interpolations: [healed])
+      await dialog.execute()
+      await tryDropGongfaShard(rate: kJiejiGirthTiegirthGongfaRate)
+    }
+  } else if (selected == 'loosegirth') {
+    final moneyNeed = _jiejiGirthLoosegirthMoneyCost(seasonId)
+    final moneyHave = hero.materials['money'] ?? 0
+    if (moneyHave < moneyNeed) {
+      dialog.pushDialog('hint_jieji_girth_loosegirth_broke', interpolations: [moneyNeed])
+      await dialog.execute()
+    } else {
+      Player.exhaust('money', moneyNeed)
+      await Player.collect('herb', kJiejiGirthLoosegirthHerb, incurIncident: false)
+      final healed = Player.restoreLife(kJiejiGirthLoosegirthLife)
+      dialog.pushDialog('hint_jieji_girth_loosegirth_ok', interpolations: [kJiejiGirthLoosegirthHerb, healed])
+      await dialog.execute()
+    }
+  } else {
+    final lost = _jiejiGirthCostLife(_jiejiGirthBloodLifeCost(seasonId))
+    dialog.pushDialog('hint_jieji_girth_bloodgirth_ok', interpolations: [lost])
+    await dialog.execute()
+    final dropped = await tryDropGongfaShard(rate: kJiejiGirthBloodGongfaRate)
+    if (dropped != true) {
+      await Player.collect('money', kJiejiGirthBloodMoney, incurIncident: false)
+      dialog.pushDialog('hint_jieji_girth_bloodgirth_none', interpolations: [kJiejiGirthBloodMoney])
+      await dialog.execute()
+    }
+  }
+
+  Game.updateUI()
+  return true
+}
+
+/// 赶路触发：教程锁与路遇相同；冷却 24 步；约 0.006%。出过则返回 true。
+async function tryJiejiGirthOnMove(terrain) {
+  if (hero == null) return false
+  if (_jiejiGirthTutorialLocked()) return false
+
+  final jieji = ensureJiejiFlags()
+  final moves = jieji.worldMoves ?? 0
+  final last = jieji.lastGirthMove ?? -999
+  if (moves - last < kJiejiGirthMoveCooldown) return false
+
+  var rate = kJiejiGirthBaseRate
+  if (rate < 0) rate = 0
+  if (random.nextDouble() > rate) return false
+
+  jieji.lastGirthMove = moves
+  await playJiejiGirthEvent(terrain)
+  return true
+}
