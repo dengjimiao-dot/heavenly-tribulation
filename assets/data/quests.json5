@@ -555,5 +555,13 @@
     contribution: 11,
     rank: 0,
   },
+  hidden_mist_inlet: {
+    id: "hidden_mist_inlet",
+    policy: null,
+    isBounty: false,
+    isHidden: true,
+    contribution: 11,
+    rank: 0,
+  },
 
 }
