@@ -483,5 +483,13 @@
     contribution: 11,
     rank: 0,
   },
+  hidden_mist_reef: {
+    id: "hidden_mist_reef",
+    policy: null,
+    isBounty: false,
+    isHidden: true,
+    contribution: 11,
+    rank: 0,
+  },
 
 }

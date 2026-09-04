@@ -253,6 +253,8 @@ namespace debug {
       questKind = 'hidden_blood_sluice'
     } else if (kind == 'stair') {
       questKind = 'hidden_thunder_stair'
+    } else if (kind == 'reef') {
+      questKind = 'hidden_mist_reef'
     }
     final ctor = Quests[questKind]
     if (ctor == null) return false
