@@ -2727,6 +2727,40 @@ async function onAfterEnterLocation(location) -> bool {
         }
 
 
+        case 'hidden_mist_mere': {
+          if (isLate) {
+            Player.progressJournalById(journal.id, stage: 2)
+            dialog.pushDialog('quest_hidden_late_failed', interpolations: [journal.title])
+            await dialog.execute()
+          } else {
+            Player.progressJournalById(journal.id)
+            var locName = ''
+            final loc = game.locations[journal.quest.targetLocationId]
+            if (loc != null) {
+              locName = loc.name
+            }
+            dialog.pushDialog('quest_hidden_mist_mere_complete', interpolations: [
+              journal.title,
+              locName,
+            ])
+            await dialog.execute()
+            final items = await Player.loot(journal.quest.reward)
+            Game.promptItems(items)
+            if (random.nextDouble() < 0.5) {
+              await Player.collect('herb', 2, incurIncident: false)
+            } else {
+              await Player.collect('money', 40, incurIncident: false)
+            }
+            Player.restoreLife(4)
+            dialog.pushDialog('hint_jieji_mist_mere_extra')
+            await dialog.execute()
+            await tryDropGongfaShard(rate: 0.25)
+            await grantJiejiHiddenQuestExtra('mere')
+          }
+          return true
+        }
+
+
 
 
 
@@ -3672,6 +3706,24 @@ async function grantJiejiHiddenQuestExtra(kind) {
         await Player.collect('money', 20, incurIncident: false)
       }
       dialog.pushDialog('hint_jieji_thunder_spark_extra_thunder')
+      await dialog.execute()
+    }
+  }
+
+
+  if (kind == 'mere') {
+    if (seasonId == 'mist') {
+      final r = random.nextDouble()
+      if (r < 0.34) {
+        await Player.collect('herb', 2, incurIncident: false)
+      } else if (r < 0.67) {
+        final card = BattleCard(rank: 0)
+        card.isCardBlank = true
+        Player.acquireCard(card)
+      } else {
+        await Player.collect('money', 15, incurIncident: false)
+      }
+      dialog.pushDialog('hint_jieji_mist_mere_extra_mist')
       await dialog.execute()
     }
   }
