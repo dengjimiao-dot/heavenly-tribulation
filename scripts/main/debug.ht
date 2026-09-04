@@ -352,6 +352,11 @@ namespace debug {
     return await pasteJiejiTalisman(free: true)
   }
 
+  /// 忽略冷却与花费，仍弹出符法所描符三选。
+  async function forceTrace() {
+    return await traceJiejiTalisman(free: true)
+  }
+
   async function forceRecruitAid(genre) {
     final result = recruitJiejiAid(genre, free: true)
     if (result == null || result == 'cooldown') {

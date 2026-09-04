@@ -1,0 +1,183 @@
+/// 符法所「描符」三选：描墨 / 描护 / 血描。不替换抄符成牌、贴符。
+const kJiejiTraceCooldownDays = 1
+const kJiejiTraceInkMoney = 20
+const kJiejiTraceInkMoneyThunder = 10
+const kJiejiTraceInkLife = 4
+const kJiejiTraceInkHerbMist = 1
+const kJiejiTraceWardHerb = 1
+const kJiejiTraceWardGongfaRate = 0.15
+const kJiejiTraceBloodLife = 2
+const kJiejiTraceBloodLifeBlood = 3
+const kJiejiTraceBloodGongfaRate = 0.30
+const kJiejiTraceBloodMoney = 45
+
+function _jiejiTraceSeasonId() {
+  if (game.jieji != null && game.jieji.seasonId != null) {
+    return game.jieji.seasonId
+  }
+  return null
+}
+
+function _jiejiTraceCurrentDay() {
+  if (game.timestamp == null) return null
+  if (Constants.ticksPerDay == null) return null
+  if (Constants.ticksPerDay <= 0) return null
+  return game.timestamp ~/ Constants.ticksPerDay
+}
+
+function _jiejiTraceOnCooldown() {
+  final jieji = ensureJiejiFlags()
+  final day = _jiejiTraceCurrentDay()
+  if (day == null) return false
+  if (jieji.lastTraceDay == null) return false
+  if (day - jieji.lastTraceDay < kJiejiTraceCooldownDays) return true
+  return false
+}
+
+function _jiejiTraceMark() {
+  final jieji = ensureJiejiFlags()
+  jieji.lastTraceDay = _jiejiTraceCurrentDay()
+}
+
+function _jiejiTraceCostLife(want) {
+  var lost = want
+  final life = hero.life ?? 1
+  if (life - lost < 1) lost = life - 1
+  if (lost < 0) lost = 0
+  if (lost > 0) {
+    Player.setLife(hero.life - lost)
+  }
+  return lost
+}
+
+function _jiejiTraceInkMoneyCost(seasonId) {
+  if (seasonId == 'thunder') return kJiejiTraceInkMoneyThunder
+  return kJiejiTraceInkMoney
+}
+
+function _jiejiTraceBloodLifeCost(seasonId) {
+  if (seasonId == 'blood') return kJiejiTraceBloodLifeBlood
+  return kJiejiTraceBloodLife
+}
+
+function _jiejiTraceNormalizeKind(kind) {
+  if (kind == 'ink' || kind == 'jieji_trace_ink') return 'ink'
+  if (kind == 'ward' || kind == 'jieji_trace_ward') return 'ward'
+  if (kind == 'blood' || kind == 'jieji_trace_blood') return 'blood'
+  return null
+}
+
+function _jiejiTraceChoices() {
+  return [
+    {
+      text: 'jieji_trace_ink',
+      description: 'hint_jieji_trace_ink',
+    },
+    {
+      text: 'jieji_trace_ward',
+      description: 'hint_jieji_trace_ward',
+    },
+    {
+      text: 'jieji_trace_blood',
+      description: 'hint_jieji_trace_blood',
+    },
+    'cancel',
+  ]
+}
+
+function _jiejiTraceMoneyNeed(selected, seasonId) {
+  if (selected == 'ink') return _jiejiTraceInkMoneyCost(seasonId)
+  return 0
+}
+
+function _jiejiTraceHerbNeed(selected, seasonId) {
+  if (selected == 'ward') return kJiejiTraceWardHerb
+  return 0
+}
+
+/// 符法所描符三选。free 为 true 时不扣费、不检查冷却（debug），仍弹出三选。
+/// kind 为空则弹窗；null 选择在 free 时默认描墨。
+/// 返回 'cooldown' | 'poor' | 'cancel' | 'ink' | 'ward' | 'blood'。
+async function traceJiejiTalisman({ free = false, kind = null }) {
+  if (hero == null) return 'cancel'
+  if (free != true && _jiejiTraceOnCooldown()) {
+    return 'cooldown'
+  }
+
+  var selected = _jiejiTraceNormalizeKind(kind)
+  if (selected == null) {
+    dialog.pushDialog('hint_traceJiejiTalisman')
+    dialog.pushSelection('jiejiTrace', _jiejiTraceChoices())
+    await dialog.execute()
+    final picked = dialog.checkSelected('jiejiTrace')
+    if (picked == null || picked == 'cancel') {
+      if (free == true && picked == null) {
+        selected = 'ink'
+      } else {
+        return 'cancel'
+      }
+    } else {
+      selected = _jiejiTraceNormalizeKind(picked)
+    }
+  }
+  if (selected == null) return 'cancel'
+
+  final seasonId = _jiejiTraceSeasonId()
+  if (free != true) {
+    final moneyNeed = _jiejiTraceMoneyNeed(selected, seasonId)
+    final herbNeed = _jiejiTraceHerbNeed(selected, seasonId)
+    final moneyHave = hero.materials['money'] ?? 0
+    final herbHave = hero.materials['herb'] ?? 0
+    if (moneyHave < moneyNeed || herbHave < herbNeed) {
+      return 'poor'
+    }
+  }
+
+  if (free != true) {
+    final moneyNeed = _jiejiTraceMoneyNeed(selected, seasonId)
+    final herbNeed = _jiejiTraceHerbNeed(selected, seasonId)
+    if (moneyNeed > 0) {
+      Player.exhaust('money', moneyNeed)
+    }
+    if (herbNeed > 0) {
+      Player.exhaust('herb', herbNeed)
+    }
+    if (selected == 'blood') {
+      _jiejiTraceCostLife(_jiejiTraceBloodLifeCost(seasonId))
+    }
+    _jiejiTraceMark()
+  }
+
+  if (selected == 'ink') {
+    final healed = Player.restoreLife(kJiejiTraceInkLife)
+    if (seasonId == 'mist') {
+      await Player.collect('herb', kJiejiTraceInkHerbMist, incurIncident: false)
+    }
+    dialog.pushDialog('hint_traceJiejiTalisman_ink', interpolations: [healed])
+    await dialog.execute()
+  } else if (selected == 'ward') {
+    final jieji = ensureJiejiFlags()
+    jieji.illusionVeil = true
+    final ok = await tryDropGongfaShard(rate: kJiejiTraceWardGongfaRate)
+    if (ok == true) {
+      dialog.pushDialog('hint_traceJiejiTalisman_ward')
+      await dialog.execute()
+    } else {
+      dialog.pushDialog('hint_traceJiejiTalisman_ward_plain')
+      await dialog.execute()
+    }
+  } else if (selected == 'blood') {
+    final ok = await tryDropGongfaShard(rate: kJiejiTraceBloodGongfaRate)
+    if (ok == true) {
+      dialog.pushDialog('hint_traceJiejiTalisman_blood')
+      await dialog.execute()
+    } else {
+      await Player.collect('money', kJiejiTraceBloodMoney, incurIncident: false)
+      dialog.pushDialog('hint_traceJiejiTalisman_blood_money')
+      await dialog.execute()
+    }
+  }
+
+  Game.updateUI()
+  return selected
+}
