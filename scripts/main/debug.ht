@@ -519,6 +519,10 @@ namespace debug {
     return await blessJiejiArray(free: true)
   }
 
+  async function forceCharge() {
+    return await chargeJiejiArray(free: true)
+  }
+
   async function forceInsight() {
     return await insightJiejiStele(free: true)
   }

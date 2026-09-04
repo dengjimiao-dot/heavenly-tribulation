@@ -1,0 +1,206 @@
+/// 聚灵阵「蓄阵」：蓄灵 / 蓄锋 / 血蓄。不替换吐纳与加持。
+const kJiejiChargeCooldownDays = 1
+const kJiejiChargePoolMoney = 25
+const kJiejiChargePoolMoneyThunder = 12
+const kJiejiChargePoolLife = 5
+const kJiejiChargePoolHerbMist = 1
+const kJiejiChargeSurgeHerb = 1
+const kJiejiChargeSurgeGongfaRate = 0.15
+const kJiejiChargeSurgeLife = 4
+const kJiejiChargeBloodLife = 2
+const kJiejiChargeBloodLifeBlood = 3
+const kJiejiChargeBloodGongfaRate = 0.30
+const kJiejiChargeBloodMoney = 40
+
+function _jiejiChargeSeasonId() {
+  if (game.jieji != null && game.jieji.seasonId != null) {
+    return game.jieji.seasonId
+  }
+  return null
+}
+
+function _jiejiChargeCurrentDay() {
+  if (game.timestamp == null) return null
+  if (Constants.ticksPerDay == null) return null
+  if (Constants.ticksPerDay <= 0) return null
+  return game.timestamp ~/ Constants.ticksPerDay
+}
+
+function _jiejiChargeOnCooldown() {
+  final jieji = ensureJiejiFlags()
+  final day = _jiejiChargeCurrentDay()
+  if (day == null) return false
+  if (jieji.lastChargeDay == null) return false
+  if (day - jieji.lastChargeDay < kJiejiChargeCooldownDays) return true
+  return false
+}
+
+function _jiejiChargeMark() {
+  final jieji = ensureJiejiFlags()
+  jieji.lastChargeDay = _jiejiChargeCurrentDay()
+}
+
+function _jiejiChargeCostLife(want) {
+  var lost = want
+  final life = hero.life ?? 1
+  if (life - lost < 1) lost = life - 1
+  if (lost < 0) lost = 0
+  if (lost > 0) {
+    Player.setLife(hero.life - lost)
+  }
+  return lost
+}
+
+function _jiejiChargePoolMoneyCost(seasonId) {
+  if (seasonId == 'thunder') return kJiejiChargePoolMoneyThunder
+  return kJiejiChargePoolMoney
+}
+
+function _jiejiChargeBloodLifeCost(seasonId) {
+  if (seasonId == 'blood') return kJiejiChargeBloodLifeBlood
+  return kJiejiChargeBloodLife
+}
+
+function _jiejiChargeNormalizeKind(kind) {
+  if (kind == 'pool' || kind == 'jieji_charge_pool') return 'pool'
+  if (kind == 'surge' || kind == 'jieji_charge_surge') return 'surge'
+  if (kind == 'blood' || kind == 'jieji_charge_blood') return 'blood'
+  return null
+}
+
+function _jiejiChargeChoices() {
+  return [
+    {
+      text: 'jieji_charge_pool',
+      description: 'hint_jieji_charge_pool',
+    },
+    {
+      text: 'jieji_charge_surge',
+      description: 'hint_jieji_charge_surge',
+    },
+    {
+      text: 'jieji_charge_blood',
+      description: 'hint_jieji_charge_blood',
+    },
+    'cancel',
+  ]
+}
+
+function _jiejiChargeMoneyNeed(selected, seasonId) {
+  if (selected == 'pool') return _jiejiChargePoolMoneyCost(seasonId)
+  return 0
+}
+
+function _jiejiChargeHerbNeed(selected) {
+  if (selected == 'surge') return kJiejiChargeSurgeHerb
+  return 0
+}
+
+/// 破军未挂则挂 arrayFury；已挂则挂 feastFury。两者都有则只回血。
+function _jiejiChargeApplyFury() {
+  final jieji = ensureJiejiFlags()
+  if (jieji.arrayFury != true) {
+    jieji.arrayFury = true
+    return 'array'
+  }
+  if (jieji.feastFury != true) {
+    jieji.feastFury = true
+    return 'feast'
+  }
+  return null
+}
+
+/// 聚灵阵蓄阵三选。free 为 true 时不扣费、不检查冷却（debug），仍弹出三选。
+/// kind 为空则弹窗；null 选择在 free 时默认蓄灵。
+/// 返回 'cooldown' | 'poor' | 'cancel' | 'pool' | 'surge' | 'blood'。
+async function chargeJiejiArray({ free = false, kind = null }) {
+  if (hero == null) return 'cancel'
+  if (free != true && _jiejiChargeOnCooldown()) {
+    return 'cooldown'
+  }
+
+  var selected = _jiejiChargeNormalizeKind(kind)
+  if (selected == null) {
+    dialog.pushDialog('hint_chargeJiejiArray')
+    dialog.pushSelection('jiejiCharge', _jiejiChargeChoices())
+    await dialog.execute()
+    final picked = dialog.checkSelected('jiejiCharge')
+    if (picked == null || picked == 'cancel') {
+      if (free == true && picked == null) {
+        selected = 'pool'
+      } else {
+        return 'cancel'
+      }
+    } else {
+      selected = _jiejiChargeNormalizeKind(picked)
+    }
+  }
+  if (selected == null) return 'cancel'
+
+  final seasonId = _jiejiChargeSeasonId()
+  if (free != true) {
+    final moneyNeed = _jiejiChargeMoneyNeed(selected, seasonId)
+    final herbNeed = _jiejiChargeHerbNeed(selected)
+    final moneyHave = hero.materials['money'] ?? 0
+    final herbHave = hero.materials['herb'] ?? 0
+    if (moneyHave < moneyNeed || herbHave < herbNeed) {
+      return 'poor'
+    }
+  }
+
+  if (free != true) {
+    final moneyNeed = _jiejiChargeMoneyNeed(selected, seasonId)
+    final herbNeed = _jiejiChargeHerbNeed(selected)
+    if (moneyNeed > 0) {
+      Player.exhaust('money', moneyNeed)
+    }
+    if (herbNeed > 0) {
+      Player.exhaust('herb', herbNeed)
+    }
+    if (selected == 'blood') {
+      _jiejiChargeCostLife(_jiejiChargeBloodLifeCost(seasonId))
+    }
+    _jiejiChargeMark()
+  }
+
+  if (selected == 'pool') {
+    final healed = Player.restoreLife(kJiejiChargePoolLife)
+    if (seasonId == 'mist') {
+      await Player.collect('herb', kJiejiChargePoolHerbMist, incurIncident: false)
+    }
+    dialog.pushDialog('hint_chargeJiejiArray_pool', interpolations: [healed])
+    await dialog.execute()
+  } else if (selected == 'surge') {
+    final fury = _jiejiChargeApplyFury()
+    if (fury == 'array') {
+      dialog.pushDialog('hint_chargeJiejiArray_surge_array')
+      await dialog.execute()
+      await tryDropGongfaShard(rate: kJiejiChargeSurgeGongfaRate)
+    } else if (fury == 'feast') {
+      dialog.pushDialog('hint_chargeJiejiArray_surge_feast')
+      await dialog.execute()
+      await tryDropGongfaShard(rate: kJiejiChargeSurgeGongfaRate)
+    } else {
+      Player.restoreLife(kJiejiChargeSurgeLife)
+      dialog.pushDialog('hint_chargeJiejiArray_surge')
+      await dialog.execute()
+    }
+  } else if (selected == 'blood') {
+    final jieji = ensureJiejiFlags()
+    if (jieji.arrayWard != true) {
+      jieji.arrayWard = true
+      dialog.pushDialog('hint_chargeJiejiArray_blood')
+      await dialog.execute()
+    } else {
+      final dropped = await tryDropGongfaShard(rate: kJiejiChargeBloodGongfaRate)
+      if (dropped != true) {
+        await Player.collect('money', kJiejiChargeBloodMoney, incurIncident: false)
+        dialog.pushDialog('hint_chargeJiejiArray_blood_money')
+        await dialog.execute()
+      }
+    }
+  }
+
+  Game.updateUI()
+  return selected
+}
