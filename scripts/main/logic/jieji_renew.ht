@@ -1,0 +1,212 @@
+/// 显圣殿「再愿」：再清 / 再求 / 血再。不替换请神与还愿。
+const kJiejiRenewCooldownDays = 1
+const kJiejiRenewClearHerb = 1
+const kJiejiRenewClearHerbMist = 0
+const kJiejiRenewClearLife = 6
+const kJiejiRenewSparkMoney = 40
+const kJiejiRenewSparkMoneyThunder = 20
+const kJiejiRenewSparkLife = 4
+const kJiejiRenewSparkGongfaRate = 0.15
+const kJiejiRenewBloodLife = 2
+const kJiejiRenewBloodLifeBlood = 3
+const kJiejiRenewBloodGongfaRate = 0.35
+const kJiejiRenewBloodMoney = 40
+
+function _jiejiRenewSeasonId() {
+  if (game.jieji != null && game.jieji.seasonId != null) {
+    return game.jieji.seasonId
+  }
+  return null
+}
+
+function _jiejiRenewCurrentDay() {
+  if (game.timestamp == null) return null
+  if (Constants.ticksPerDay == null) return null
+  if (Constants.ticksPerDay <= 0) return null
+  return game.timestamp ~/ Constants.ticksPerDay
+}
+
+function _jiejiRenewOnCooldown() {
+  final jieji = ensureJiejiFlags()
+  final day = _jiejiRenewCurrentDay()
+  if (day == null) return false
+  if (jieji.lastRenewDay == null) return false
+  if (day - jieji.lastRenewDay < kJiejiRenewCooldownDays) return true
+  return false
+}
+
+function _jiejiRenewMark() {
+  final jieji = ensureJiejiFlags()
+  jieji.lastRenewDay = _jiejiRenewCurrentDay()
+}
+
+function _jiejiRenewCostLife(want) {
+  var lost = want
+  final life = hero.life ?? 1
+  if (life - lost < 1) lost = life - 1
+  if (lost < 0) lost = 0
+  if (lost > 0) {
+    Player.setLife(hero.life - lost)
+  }
+  return lost
+}
+
+function _jiejiRenewClearHerbCost(seasonId) {
+  if (seasonId == 'mist') return kJiejiRenewClearHerbMist
+  return kJiejiRenewClearHerb
+}
+
+function _jiejiRenewSparkMoneyCost(seasonId) {
+  if (seasonId == 'thunder') return kJiejiRenewSparkMoneyThunder
+  return kJiejiRenewSparkMoney
+}
+
+function _jiejiRenewBloodLifeCost(seasonId) {
+  if (seasonId == 'blood') return kJiejiRenewBloodLifeBlood
+  return kJiejiRenewBloodLife
+}
+
+function _jiejiRenewNormalizeKind(kind) {
+  if (kind == 'clear' || kind == 'jieji_renew_clear') return 'clear'
+  if (kind == 'spark' || kind == 'jieji_renew_spark') return 'spark'
+  if (kind == 'blood' || kind == 'jieji_renew_blood') return 'blood'
+  return null
+}
+
+function _jiejiRenewChoices() {
+  return [
+    {
+      text: 'jieji_renew_clear',
+      description: 'hint_jieji_renew_clear',
+    },
+    {
+      text: 'jieji_renew_spark',
+      description: 'hint_jieji_renew_spark',
+    },
+    {
+      text: 'jieji_renew_blood',
+      description: 'hint_jieji_renew_blood',
+    },
+    'cancel',
+  ]
+}
+
+function _jiejiRenewHerbNeed(selected, seasonId) {
+  if (selected == 'clear') return _jiejiRenewClearHerbCost(seasonId)
+  return 0
+}
+
+function _jiejiRenewMoneyNeed(selected, seasonId) {
+  if (selected == 'spark') return _jiejiRenewSparkMoneyCost(seasonId)
+  return 0
+}
+
+/// 未挂雷火神则挂 theurgyFury；已挂则挂 feastFury。两者都有则只回血。
+function _jiejiRenewApplySpark() {
+  final jieji = ensureJiejiFlags()
+  if (jieji.theurgyFury != true) {
+    jieji.theurgyFury = true
+    return 'theurgy'
+  }
+  if (jieji.feastFury != true) {
+    jieji.feastFury = true
+    return 'feast'
+  }
+  return null
+}
+
+/// 显圣殿再愿三选。free 为 true 时不扣费、不检查冷却（debug），仍弹出三选。
+/// kind 为空则弹窗；null 选择在 free 时默认再清。
+/// 返回 'ok' | 'cooldown' | 'poor' | 'cancel'。
+async function renewJiejiTheurgy({ free = false, kind = null }) {
+  if (hero == null) return 'cancel'
+  if (free != true && _jiejiRenewOnCooldown()) {
+    return 'cooldown'
+  }
+
+  var selected = _jiejiRenewNormalizeKind(kind)
+  if (selected == null) {
+    dialog.pushDialog('hint_renewJiejiTheurgy')
+    dialog.pushSelection('jiejiRenew', _jiejiRenewChoices())
+    await dialog.execute()
+    final picked = dialog.checkSelected('jiejiRenew')
+    if (picked == null || picked == 'cancel') {
+      if (free == true && picked == null) {
+        selected = 'clear'
+      } else {
+        return 'cancel'
+      }
+    } else {
+      selected = _jiejiRenewNormalizeKind(picked)
+    }
+  }
+  if (selected == null) return 'cancel'
+
+  final seasonId = _jiejiRenewSeasonId()
+  if (free != true) {
+    final herbNeed = _jiejiRenewHerbNeed(selected, seasonId)
+    final moneyNeed = _jiejiRenewMoneyNeed(selected, seasonId)
+    final herbHave = hero.materials['herb'] ?? 0
+    final moneyHave = hero.materials['money'] ?? 0
+    if (herbHave < herbNeed || moneyHave < moneyNeed) {
+      return 'poor'
+    }
+  }
+
+  if (free != true) {
+    final herbNeed = _jiejiRenewHerbNeed(selected, seasonId)
+    final moneyNeed = _jiejiRenewMoneyNeed(selected, seasonId)
+    if (herbNeed > 0) {
+      Player.exhaust('herb', herbNeed)
+    }
+    if (moneyNeed > 0) {
+      Player.exhaust('money', moneyNeed)
+    }
+    if (selected == 'blood') {
+      _jiejiRenewCostLife(_jiejiRenewBloodLifeCost(seasonId))
+    }
+    _jiejiRenewMark()
+  }
+
+  if (selected == 'spark') {
+    final spark = _jiejiRenewApplySpark()
+    if (spark == 'theurgy') {
+      dialog.pushDialog('hint_renewJiejiTheurgy_spark')
+      await dialog.execute()
+      await tryDropGongfaShard(rate: kJiejiRenewSparkGongfaRate)
+    } else if (spark == 'feast') {
+      dialog.pushDialog('hint_renewJiejiTheurgy_spark_feast')
+      await dialog.execute()
+      await tryDropGongfaShard(rate: kJiejiRenewSparkGongfaRate)
+    } else {
+      Player.restoreLife(kJiejiRenewSparkLife)
+      dialog.pushDialog('hint_renewJiejiTheurgy_spark_life')
+      await dialog.execute()
+    }
+  } else if (selected == 'blood') {
+    final dropped = await tryDropGongfaShard(rate: kJiejiRenewBloodGongfaRate)
+    if (dropped != true) {
+      await Player.collect('money', kJiejiRenewBloodMoney, incurIncident: false)
+      dialog.pushDialog('hint_renewJiejiTheurgy_blood_money')
+      await dialog.execute()
+    } else {
+      dialog.pushDialog('hint_renewJiejiTheurgy_blood')
+      await dialog.execute()
+    }
+  } else {
+    Player.restoreLife(kJiejiRenewClearLife)
+    final jieji = ensureJiejiFlags()
+    final hadGod = jieji.theurgyWard == true || jieji.theurgyFury == true
+    if (hadGod) {
+      jieji.theurgyWard = false
+      jieji.theurgyFury = false
+      dialog.pushDialog('hint_renewJiejiTheurgy_clear_god')
+    } else {
+      dialog.pushDialog('hint_renewJiejiTheurgy_clear')
+    }
+    await dialog.execute()
+  }
+
+  Game.updateUI()
+  return 'ok'
+}

@@ -1657,6 +1657,28 @@
   "hint_vowJiejiTheurgy_cooldown": "殿中愿香未散。过一日再来还愿。",
   "hint_vowJiejiTheurgy_notEnough": "清愿要 1 药材（雾月免），求雷要 40 铜钱（雷月 20）。",
 
+
+  "renewJiejiTheurgy": "再愿",
+  "jiejiRenew": "再愿",
+  "hint_renewJiejiTheurgy_description": "显圣殿另可再愿。一日一次，与还愿分开计。再清耗 1 药材（雾月免）回 6 命，若身上有请神则神退；再求耗 40 铜钱（雷月 20）挂雷火神或拼酒劲，约一成半残页；血再扣 2 命（血月 3）三成五残页，没掉则得 40 铜钱。",
+  "hint_renewJiejiTheurgy": "殿里另可再愿。再清、再求、血再，择一。一日一次。与还愿各不挡。",
+  "jieji_renew_clear": "再清",
+  "jieji_renew_spark": "再求",
+  "jieji_renew_blood": "血再",
+  "hint_jieji_renew_clear": "再清：耗 1 药材（雾月免）。回复 6 点生机。若身上有护身神或雷火神，神退。不碰护身阵、破军、酒劲。",
+  "hint_jieji_renew_spark": "再求：耗 40 铜钱（雷月 20）。未挂雷火神则挂雷火神（下场出手 +10%）；已有则挂劫宴拼酒（下场出手 +8%）。约一成半残页。两者都有则只回 4 命。不退护身神。",
+  "hint_jieji_renew_blood": "血再：扣 2 点生机（至少留 1；血月 3）。三成五得残页；没残页则得 40 铜钱。",
+  "hint_renewJiejiTheurgy_clear": "再清已了。生机回了 6 点。殿中无神可退。",
+  "hint_renewJiejiTheurgy_clear_god": "再清已了。生机回了 6 点。请神退了。",
+  "hint_renewJiejiTheurgy_spark": "再求应了。雷火神挂上，下一场你出手更狠。",
+  "hint_renewJiejiTheurgy_spark_feast": "再求应了。酒劲挂上，下一场你出手更狠。",
+  "hint_renewJiejiTheurgy_spark_life": "再求应了。雷火神与酒劲都在，灵息回流，生机回了 4 点。",
+  "hint_renewJiejiTheurgy_blood": "血再落成。残页已入袖。",
+  "hint_renewJiejiTheurgy_blood_money": "血再落成。残页未现，袖里多了 40 铜钱。",
+  "hint_renewJiejiTheurgy_cooldown": "殿中再愿余香未散。过一日再来再愿。",
+  "hint_renewJiejiTheurgy_notEnough": "再清要 1 药材（雾月免），再求要 40 铜钱（雷月 20）。",
+
+
   "inkJiejiTattoo": "季纹",
   "jiejiTattoo": "季纹",
   "hint_inkJiejiTattoo_description": "耗 4 药材、100 铜钱与 1 点生机（至少留 1）刺当季纹身。雷月 80 铜钱。雾月 3 药材。血月 2 点生机。三种纹随时可选。当季一直生效，再刺会盖掉旧纹、再付一次。季末消散。雷纹出手 +4%。雾纹野遇更少。血纹吸血 +3%。",

@@ -3185,6 +3185,30 @@ Future<void> _heroVowJiejiTheurgy(dynamic location) async {
   }
 }
 
+
+Future<void> _heroRenewJiejiTheurgy(dynamic location) async {
+  final isRented = await GameLogic.checkRented(location);
+  if (!isRented) return;
+
+  final result = await engine.hetu.invoke('renewJiejiTheurgy');
+  if (result == 'cooldown') {
+    dialog.pushDialog(
+      'hint_renewJiejiTheurgy_cooldown',
+      npcId: location['npcId'],
+    );
+    await dialog.execute();
+    return;
+  }
+  if (result == 'poor') {
+    dialog.pushDialog(
+      'hint_renewJiejiTheurgy_notEnough',
+      npcId: location['npcId'],
+    );
+    await dialog.execute();
+    return;
+  }
+}
+
 Future<void> _heroInkJiejiTattoo(dynamic location) async {
   final isRented = await GameLogic.checkRented(location);
   if (!isRented) return;
@@ -3655,6 +3679,10 @@ Future<void> _onInteractSite(
       'text': 'vowJiejiTheurgy',
       'description': 'hint_vowJiejiTheurgy_description',
     });
+    siteOptions.add({
+      'text': 'renewJiejiTheurgy',
+      'description': 'hint_renewJiejiTheurgy_description',
+    });
   } else if (siteKind == 'tattooshop') {
     siteOptions.add({
       'text': 'inkJiejiTattoo',
@@ -3780,6 +3808,8 @@ Future<void> _onInteractSite(
       await _heroInvokeJiejiTheurgy(location);
     case 'vowJiejiTheurgy':
       await _heroVowJiejiTheurgy(location);
+    case 'renewJiejiTheurgy':
+      await _heroRenewJiejiTheurgy(location);
     case 'inkJiejiTattoo':
       await _heroInkJiejiTattoo(location);
     case 'mendJiejiTattoo':
