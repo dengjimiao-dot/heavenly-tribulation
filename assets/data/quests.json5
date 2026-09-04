@@ -427,5 +427,13 @@
     contribution: 11,
     rank: 0,
   },
+  hidden_thunder_riser: {
+    id: "hidden_thunder_riser",
+    policy: null,
+    isBounty: false,
+    isHidden: true,
+    contribution: 11,
+    rank: 0,
+  },
 
 }

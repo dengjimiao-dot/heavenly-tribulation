@@ -239,6 +239,8 @@ namespace debug {
       questKind = 'hidden_mist_pier'
     } else if (kind == 'ditch') {
       questKind = 'hidden_blood_ditch'
+    } else if (kind == 'riser') {
+      questKind = 'hidden_thunder_riser'
     }
     final ctor = Quests[questKind]
     if (ctor == null) return false
