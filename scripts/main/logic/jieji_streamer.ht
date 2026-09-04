@@ -1,0 +1,152 @@
+/// 赶路「劫旌」三选：扶旌 / 收旌 / 血旌。隐藏、劫兆、野遇、赶路、行商、拾荒、扎营、残锋、残卷、雾灯、残鼓、汲泉、劫幡、劫铃、劫符都没中时才滚。
+const kJiejiStreamerBaseRate = 0.04
+const kJiejiStreamerMoveCooldown = 17
+const kJiejiStreamerRaiseHerb = 1
+const kJiejiStreamerRaiseLife = 6
+const kJiejiStreamerRaiseGongfaRate = 0.15
+const kJiejiStreamerTakeMoney = 20
+const kJiejiStreamerTakeMoneyThunder = 10
+const kJiejiStreamerTakeHerb = 2
+const kJiejiStreamerTakeLife = 3
+const kJiejiStreamerBloodLife = 2
+const kJiejiStreamerBloodLifeBlood = 3
+const kJiejiStreamerBloodGongfaRate = 0.4
+const kJiejiStreamerBloodMoney = 30
+
+function _jiejiStreamerSeasonId() {
+  if (game.jieji != null && game.jieji.seasonId != null) {
+    return game.jieji.seasonId
+  }
+  return null
+}
+
+function _jiejiStreamerTutorialLocked() {
+  return game.enableTutorial && game.flags.tutorial.bountyQuest != true
+}
+
+function _jiejiStreamerRaiseHerbCost(seasonId) {
+  if (seasonId == 'mist') return 0
+  return kJiejiStreamerRaiseHerb
+}
+
+function _jiejiStreamerTakeMoneyCost(seasonId) {
+  if (seasonId == 'thunder') return kJiejiStreamerTakeMoneyThunder
+  return kJiejiStreamerTakeMoney
+}
+
+function _jiejiStreamerBloodLifeCost(seasonId) {
+  if (seasonId == 'blood') return kJiejiStreamerBloodLifeBlood
+  return kJiejiStreamerBloodLife
+}
+
+function _jiejiStreamerCostLife(want) {
+  var lost = want
+  final life = hero.life ?? 1
+  if (life - lost < 1) lost = life - 1
+  if (lost < 0) lost = 0
+  if (lost > 0) {
+    Player.setLife(hero.life - lost)
+  }
+  return lost
+}
+
+function _jiejiStreamerNormalizeKind(kind) {
+  if (kind == 'raise' || kind == 'jieji_streamer_raise') return 'raise'
+  if (kind == 'take' || kind == 'jieji_streamer_take') return 'take'
+  if (kind == 'blood' || kind == 'jieji_streamer_blood') return 'blood'
+  return null
+}
+
+function _jiejiStreamerChoices() {
+  return [
+    {
+      text: 'jieji_streamer_raise',
+      description: 'hint_jieji_streamer_raise',
+    },
+    {
+      text: 'jieji_streamer_take',
+      description: 'hint_jieji_streamer_take',
+    },
+    {
+      text: 'jieji_streamer_blood',
+      description: 'hint_jieji_streamer_blood',
+    },
+  ]
+}
+
+/// 赶路劫旌三选。debug.forceJiejiEvent('streamer') / forceStreamer 直接走这里，仍弹出三选。
+async function playJiejiStreamerEvent(terrain) {
+  if (hero == null) return false
+
+  dialog.pushDialog('hint_jieji_streamer')
+  dialog.pushSelection('jiejiStreamer', _jiejiStreamerChoices())
+  await dialog.execute()
+  final picked = dialog.checkSelected('jiejiStreamer')
+  var selected = _jiejiStreamerNormalizeKind(picked)
+  if (selected == null) {
+    selected = 'raise'
+  }
+
+  final seasonId = _jiejiStreamerSeasonId()
+  if (selected == 'raise') {
+    final herbNeed = _jiejiStreamerRaiseHerbCost(seasonId)
+    final herbHave = hero.materials['herb'] ?? 0
+    if (herbNeed > 0 && herbHave < herbNeed) {
+      dialog.pushDialog('hint_jieji_streamer_raise_broke', interpolations: [herbNeed])
+      await dialog.execute()
+    } else {
+      if (herbNeed > 0) {
+        Player.exhaust('herb', herbNeed)
+      }
+      final healed = Player.restoreLife(kJiejiStreamerRaiseLife)
+      dialog.pushDialog('hint_jieji_streamer_raise_ok', interpolations: [healed])
+      await dialog.execute()
+      await tryDropGongfaShard(rate: kJiejiStreamerRaiseGongfaRate)
+    }
+  } else if (selected == 'take') {
+    final moneyNeed = _jiejiStreamerTakeMoneyCost(seasonId)
+    final moneyHave = hero.materials['money'] ?? 0
+    if (moneyHave < moneyNeed) {
+      dialog.pushDialog('hint_jieji_streamer_take_broke', interpolations: [moneyNeed])
+      await dialog.execute()
+    } else {
+      Player.exhaust('money', moneyNeed)
+      await Player.collect('herb', kJiejiStreamerTakeHerb, incurIncident: false)
+      final healed = Player.restoreLife(kJiejiStreamerTakeLife)
+      dialog.pushDialog('hint_jieji_streamer_take_ok', interpolations: [kJiejiStreamerTakeHerb, healed])
+      await dialog.execute()
+    }
+  } else {
+    final lost = _jiejiStreamerCostLife(_jiejiStreamerBloodLifeCost(seasonId))
+    dialog.pushDialog('hint_jieji_streamer_blood_ok', interpolations: [lost])
+    await dialog.execute()
+    final dropped = await tryDropGongfaShard(rate: kJiejiStreamerBloodGongfaRate)
+    if (dropped != true) {
+      await Player.collect('money', kJiejiStreamerBloodMoney, incurIncident: false)
+      dialog.pushDialog('hint_jieji_streamer_blood_none', interpolations: [kJiejiStreamerBloodMoney])
+      await dialog.execute()
+    }
+  }
+
+  Game.updateUI()
+  return true
+}
+
+/// 赶路触发：教程锁与路遇相同；冷却 17 步；约 4%。出过则返回 true。
+async function tryJiejiStreamerOnMove(terrain) {
+  if (hero == null) return false
+  if (_jiejiStreamerTutorialLocked()) return false
+
+  final jieji = ensureJiejiFlags()
+  final moves = jieji.worldMoves ?? 0
+  final last = jieji.lastStreamerMove ?? -999
+  if (moves - last < kJiejiStreamerMoveCooldown) return false
+
+  var rate = kJiejiStreamerBaseRate
+  if (rate < 0) rate = 0
+  if (random.nextDouble() > rate) return false
+
+  jieji.lastStreamerMove = moves
+  await playJiejiStreamerEvent(terrain)
+  return true
+}

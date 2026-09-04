@@ -280,6 +280,8 @@ namespace debug {
       await playJiejiChimeEvent(terrain)
     } else if (kind == 'talisman') {
       await playJiejiTalismanEvent(terrain)
+    } else if (kind == 'streamer') {
+      await playJiejiStreamerEvent(terrain)
     } else {
       await playJiejiThunderRoadEvent(terrain)
     }
@@ -803,6 +805,11 @@ namespace debug {
   /// 忽略几率与冷却，仍弹出赶路劫符三选。
   async function forceTalisman() {
     return await playJiejiTalismanEvent({ kind: 'plain' })
+  }
+
+  /// 忽略几率与冷却，仍弹出赶路劫旌三选。
+  async function forceStreamer() {
+    return await playJiejiStreamerEvent({ kind: 'plain' })
   }
 
   /// 忽略冷却与花费，仍弹出幻术祭坛入幻三选。
