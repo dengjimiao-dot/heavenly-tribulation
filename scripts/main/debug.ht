@@ -562,6 +562,9 @@ namespace debug {
     } else if (kind == 'canopy') {
       game.flags.dungeon.pendingEncounter = 'jiejiCanopy'
       await playJiejiDungeonEncounter()
+    } else if (kind == 'gong') {
+      game.flags.dungeon.pendingEncounter = 'jiejiGong'
+      await playJiejiDungeonEncounter()
     } else if (kind == 'exit') {
       await playJiejiDungeonExitGift()
     } else {
