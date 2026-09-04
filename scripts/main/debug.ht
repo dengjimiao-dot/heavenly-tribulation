@@ -478,6 +478,9 @@ namespace debug {
     } else if (kind == 'relic') {
       game.flags.dungeon.pendingEncounter = 'jiejiRelic'
       await playJiejiDungeonEncounter()
+    } else if (kind == 'tablet') {
+      game.flags.dungeon.pendingEncounter = 'jiejiTablet'
+      await playJiejiDungeonEncounter()
     } else if (kind == 'exit') {
       await playJiejiDungeonExitGift()
     } else {
