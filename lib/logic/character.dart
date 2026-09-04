@@ -3225,6 +3225,29 @@ Future<void> _heroAgainJiejiPsychic(dynamic location) async {
   }
 }
 
+Future<void> _heroDeepJiejiPsychic(dynamic location) async {
+  final isRented = await GameLogic.checkRented(location);
+  if (!isRented) return;
+
+  final result = await engine.hetu.invoke('deepJiejiPsychic');
+  if (result == 'cooldown') {
+    dialog.pushDialog(
+      'hint_deepJiejiPsychic_cooldown',
+      npcId: location['npcId'],
+    );
+    await dialog.execute();
+    return;
+  }
+  if (result == 'poor') {
+    dialog.pushDialog(
+      'hint_deepJiejiPsychic_notEnough',
+      npcId: location['npcId'],
+    );
+    await dialog.execute();
+    return;
+  }
+}
+
 Future<void> _heroInvokeJiejiTheurgy(dynamic location) async {
   final isRented = await GameLogic.checkRented(location);
   if (!isRented) return;
@@ -3768,6 +3791,10 @@ Future<void> _onInteractSite(
       'text': 'againJiejiPsychic',
       'description': 'hint_againJiejiPsychic_description',
     });
+    siteOptions.add({
+      'text': 'deepJiejiPsychic',
+      'description': 'hint_deepJiejiPsychic_description',
+    });
   } else if (siteKind == 'theurgytemple') {
     siteOptions.add({
       'text': 'invokeJiejiTheurgy',
@@ -3906,6 +3933,8 @@ Future<void> _onInteractSite(
       await _heroConsultJiejiPsychic(location);
     case 'againJiejiPsychic':
       await _heroAgainJiejiPsychic(location);
+    case 'deepJiejiPsychic':
+      await _heroDeepJiejiPsychic(location);
     case 'invokeJiejiTheurgy':
       await _heroInvokeJiejiTheurgy(location);
     case 'vowJiejiTheurgy':

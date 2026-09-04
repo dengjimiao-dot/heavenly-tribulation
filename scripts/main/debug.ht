@@ -612,6 +612,11 @@ namespace debug {
     return await againJiejiPsychic(free: true)
   }
 
+  /// 忽略冷却与花费，仍弹出通灵殿深通三选。不与 forceAgain / forceAgainStars 撞名。
+  async function forceDeep() {
+    return await deepJiejiPsychic(free: true)
+  }
+
   async function forceTheurgy(kind) {
     var k = kind
     if (k != 'ward' && k != 'fury' && k != 'heal') {

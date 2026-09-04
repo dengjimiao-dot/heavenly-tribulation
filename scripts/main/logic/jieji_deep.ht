@@ -1,0 +1,183 @@
+/// 通灵殿「深通」三选：深温 / 深听 / 血深。不替换通灵与再卜。
+const kJiejiDeepCooldownDays = 1
+const kJiejiDeepWarmHerb = 1
+const kJiejiDeepWarmHerbMist = 0
+const kJiejiDeepWarmLife = 6
+const kJiejiDeepListenMoney = 40
+const kJiejiDeepListenMoneyThunder = 20
+const kJiejiDeepListenGongfaRate = 0.20
+const kJiejiDeepListenLife = 4
+const kJiejiDeepBloodLife = 2
+const kJiejiDeepBloodLifeBlood = 3
+const kJiejiDeepBloodGongfaRate = 0.35
+const kJiejiDeepBloodMoney = 40
+
+function _jiejiDeepSeasonId() {
+  if (game.jieji != null && game.jieji.seasonId != null) {
+    return game.jieji.seasonId
+  }
+  return null
+}
+
+function _jiejiDeepCurrentDay() {
+  if (game.timestamp == null) return null
+  if (Constants.ticksPerDay == null) return null
+  if (Constants.ticksPerDay <= 0) return null
+  return game.timestamp ~/ Constants.ticksPerDay
+}
+
+function _jiejiDeepOnCooldown() {
+  final jieji = ensureJiejiFlags()
+  final day = _jiejiDeepCurrentDay()
+  if (day == null) return false
+  if (jieji.lastDeepDay == null) return false
+  if (day - jieji.lastDeepDay < kJiejiDeepCooldownDays) return true
+  return false
+}
+
+function _jiejiDeepMark() {
+  final jieji = ensureJiejiFlags()
+  jieji.lastDeepDay = _jiejiDeepCurrentDay()
+}
+
+function _jiejiDeepCostLife(want) {
+  var lost = want
+  final life = hero.life ?? 1
+  if (life - lost < 1) lost = life - 1
+  if (lost < 0) lost = 0
+  if (lost > 0) {
+    Player.setLife(hero.life - lost)
+  }
+  return lost
+}
+
+function _jiejiDeepWarmHerbCost(seasonId) {
+  if (seasonId == 'mist') return kJiejiDeepWarmHerbMist
+  return kJiejiDeepWarmHerb
+}
+
+function _jiejiDeepListenMoneyCost(seasonId) {
+  if (seasonId == 'thunder') return kJiejiDeepListenMoneyThunder
+  return kJiejiDeepListenMoney
+}
+
+function _jiejiDeepBloodLifeCost(seasonId) {
+  if (seasonId == 'blood') return kJiejiDeepBloodLifeBlood
+  return kJiejiDeepBloodLife
+}
+
+function _jiejiDeepNormalizeKind(kind) {
+  if (kind == 'warm' || kind == 'jieji_deep_warm') return 'warm'
+  if (kind == 'listen' || kind == 'jieji_deep_listen') return 'listen'
+  if (kind == 'blood' || kind == 'jieji_deep_blood') return 'blood'
+  return null
+}
+
+function _jiejiDeepChoices() {
+  return [
+    {
+      text: 'jieji_deep_warm',
+      description: 'hint_jieji_deep_warm',
+    },
+    {
+      text: 'jieji_deep_listen',
+      description: 'hint_jieji_deep_listen',
+    },
+    {
+      text: 'jieji_deep_blood',
+      description: 'hint_jieji_deep_blood',
+    },
+    'cancel',
+  ]
+}
+
+function _jiejiDeepHerbNeed(selected, seasonId) {
+  if (selected == 'warm') return _jiejiDeepWarmHerbCost(seasonId)
+  return 0
+}
+
+function _jiejiDeepMoneyNeed(selected, seasonId) {
+  if (selected == 'listen') return _jiejiDeepListenMoneyCost(seasonId)
+  return 0
+}
+
+/// 通灵殿深通三选。free 为 true 时不扣费、不检查冷却（debug），仍弹出三选。
+/// null 选择在 free 时默认深温。
+/// 返回 'ok' | 'cooldown' | 'poor' | 'cancel'。
+async function deepJiejiPsychic({ free = false }) {
+  if (hero == null) return 'cancel'
+  if (free != true && _jiejiDeepOnCooldown()) {
+    return 'cooldown'
+  }
+
+  dialog.pushDialog('hint_deepJiejiPsychic')
+  dialog.pushSelection('jiejiDeep', _jiejiDeepChoices())
+  await dialog.execute()
+  final picked = dialog.checkSelected('jiejiDeep')
+  var selected = null
+  if (picked == null || picked == 'cancel') {
+    if (free == true && picked == null) {
+      selected = 'warm'
+    } else {
+      return 'cancel'
+    }
+  } else {
+    selected = _jiejiDeepNormalizeKind(picked)
+  }
+  if (selected == null) return 'cancel'
+
+  final seasonId = _jiejiDeepSeasonId()
+  if (free != true) {
+    final herbNeed = _jiejiDeepHerbNeed(selected, seasonId)
+    final moneyNeed = _jiejiDeepMoneyNeed(selected, seasonId)
+    final herbHave = hero.materials['herb'] ?? 0
+    final moneyHave = hero.materials['money'] ?? 0
+    if (herbHave < herbNeed || moneyHave < moneyNeed) {
+      return 'poor'
+    }
+  }
+
+  if (free != true) {
+    final herbNeed = _jiejiDeepHerbNeed(selected, seasonId)
+    final moneyNeed = _jiejiDeepMoneyNeed(selected, seasonId)
+    if (herbNeed > 0) {
+      Player.exhaust('herb', herbNeed)
+    }
+    if (moneyNeed > 0) {
+      Player.exhaust('money', moneyNeed)
+    }
+    if (selected == 'blood') {
+      _jiejiDeepCostLife(_jiejiDeepBloodLifeCost(seasonId))
+    }
+    _jiejiDeepMark()
+  }
+
+  if (selected == 'listen') {
+    final dropped = await tryDropGongfaShard(rate: kJiejiDeepListenGongfaRate)
+    if (dropped == true) {
+      dialog.pushDialog('hint_deepJiejiPsychic_listen')
+      await dialog.execute()
+    } else {
+      Player.restoreLife(kJiejiDeepListenLife)
+      dialog.pushDialog('hint_deepJiejiPsychic_listen_life')
+      await dialog.execute()
+    }
+  } else if (selected == 'blood') {
+    final dropped = await tryDropGongfaShard(rate: kJiejiDeepBloodGongfaRate)
+    if (dropped != true) {
+      await Player.collect('money', kJiejiDeepBloodMoney, incurIncident: false)
+      dialog.pushDialog('hint_deepJiejiPsychic_blood_money')
+      await dialog.execute()
+    } else {
+      dialog.pushDialog('hint_deepJiejiPsychic_blood')
+      await dialog.execute()
+    }
+  } else {
+    Player.restoreLife(kJiejiDeepWarmLife)
+    dialog.pushDialog('hint_deepJiejiPsychic_warm')
+    await dialog.execute()
+  }
+
+  Game.updateUI()
+  return 'ok'
+}
