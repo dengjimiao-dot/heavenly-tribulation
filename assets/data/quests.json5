@@ -670,4 +670,13 @@
     rank: 0,
   },
 
+  hidden_blood_stain: {
+    id: "hidden_blood_stain",
+    policy: null,
+    isBounty: false,
+    isHidden: true,
+    contribution: 11,
+    rank: 0,
+  },
+
 }
