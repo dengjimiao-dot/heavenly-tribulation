@@ -464,6 +464,8 @@ namespace debug {
       await playJiejiYokeEvent(terrain)
     } else if (kind == 'rein') {
       await playJiejiReinEvent(terrain)
+    } else if (kind == 'bridle') {
+      await playJiejiBridleEvent(terrain)
     } else {
       await playJiejiThunderRoadEvent(terrain)
     }
@@ -1355,6 +1357,11 @@ namespace debug {
   /// 忽略几率与冷却，仍弹出赶路劫辔三选。
   async function forceRein() {
     return await playJiejiReinEvent({ kind: 'plain' })
+  }
+
+  /// 忽略几率与冷却，仍弹出赶路劫缰三选。
+  async function forceBridle() {
+    return await playJiejiBridleEvent({ kind: 'plain' })
   }
 
   /// 忽略冷却与花费，仍弹出幻术祭坛入幻三选。

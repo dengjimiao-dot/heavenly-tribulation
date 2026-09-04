@@ -4436,6 +4436,20 @@
   "hint_jieji_rein_bloodrein_ok": "你割了 {0} 点生机去染劫辔。",
   "hint_jieji_rein_bloodrein_none": "血辔下去，辔影却散了。袋里多了 {0} 铜钱。",
 
+  "hint_jieji_bridle": "路遇一副劫缰。你可以勒缰、收缰，或以血染缰。",
+  "jieji_bridle_lebridle": "勒缰",
+  "jieji_bridle_stowbridle": "收缰",
+  "jieji_bridle_bloodbridle": "血缰",
+  "hint_jieji_bridle_lebridle": "勒缰：耗 1 药材（雾月不耗）。回 1 命，七毫摸残页。药材不够则空手。",
+  "hint_jieji_bridle_stowbridle": "收缰：花 1 铜钱（雷月 1）。得 1 药材，并回 1 命。袋里不够则空手。",
+  "hint_jieji_bridle_bloodbridle": "血缰：扣 1 点生机（至少留 1，血月 2）。五厘摸残页，不成则得 2 铜钱。",
+  "hint_jieji_bridle_lebridle_ok": "你勒紧劫缰。生机回了 {0} 点。",
+  "hint_jieji_bridle_lebridle_broke": "勒缰要 {0} 药材。你拿不出来。",
+  "hint_jieji_bridle_stowbridle_ok": "你收起劫缰。得了 {0} 药材，生机回了 {1} 点。",
+  "hint_jieji_bridle_stowbridle_broke": "收缰要 {0} 铜钱。袋里不够。",
+  "hint_jieji_bridle_bloodbridle_ok": "你割了 {0} 点生机去染劫缰。",
+  "hint_jieji_bridle_bloodbridle_none": "血缰下去，缰影却散了。袋里多了 {0} 铜钱。",
+
 
   "jiejiMenpaiDemo": "劫季门派 · Demo",
   "jiejiMenpaiPitch": "带着业力赶天劫的门派肉鸽",

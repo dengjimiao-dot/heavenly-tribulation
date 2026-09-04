@@ -1,0 +1,152 @@
+/// 赶路「劫缰」三选：勒缰 / 收缰 / 血缰。隐藏、劫兆、野遇、赶路、行商、拾荒、扎营、残锋、残卷、雾灯、残鼓、汲泉、劫幡、劫铃、劫符、劫旌、劫烛、劫角、劫笛、劫笠、劫带、劫履、劫氅、劫扇、劫杖、劫伞、劫面、劫帔、劫手套、劫戒、劫镜、劫鼓、劫炬、劫梳、劫勺、劫碗、劫杯、劫罐、劫瓶、劫墨、劫袍、劫带、劫簪、劫笔、劫针、劫扣、劫绳、劫珠、劫钗、劫绦、劫穗、劫缎、劫缨、劫袖、劫领、劫缘、劫辫、劫翎、劫裹、劫轭、劫辔都没中时才滚。
+const kJiejiBridleBaseRate = 0.0001
+const kJiejiBridleMoveCooldown = 24
+const kJiejiBridleLebridleHerb = 1
+const kJiejiBridleLebridleLife = 1
+const kJiejiBridleLebridleGongfaRate = 0.007
+const kJiejiBridleStowbridleMoney = 1
+const kJiejiBridleStowbridleMoneyThunder = 1
+const kJiejiBridleStowbridleHerb = 1
+const kJiejiBridleStowbridleLife = 1
+const kJiejiBridleBloodLife = 1
+const kJiejiBridleBloodLifeBlood = 2
+const kJiejiBridleBloodGongfaRate = 0.05
+const kJiejiBridleBloodMoney = 2
+
+function _jiejiBridleSeasonId() {
+  if (game.jieji != null && game.jieji.seasonId != null) {
+    return game.jieji.seasonId
+  }
+  return null
+}
+
+function _jiejiBridleTutorialLocked() {
+  return game.enableTutorial && game.flags.tutorial.bountyQuest != true
+}
+
+function _jiejiBridleLebridleHerbCost(seasonId) {
+  if (seasonId == 'mist') return 0
+  return kJiejiBridleLebridleHerb
+}
+
+function _jiejiBridleStowbridleMoneyCost(seasonId) {
+  if (seasonId == 'thunder') return kJiejiBridleStowbridleMoneyThunder
+  return kJiejiBridleStowbridleMoney
+}
+
+function _jiejiBridleBloodLifeCost(seasonId) {
+  if (seasonId == 'blood') return kJiejiBridleBloodLifeBlood
+  return kJiejiBridleBloodLife
+}
+
+function _jiejiBridleCostLife(want) {
+  var lost = want
+  final life = hero.life ?? 1
+  if (life - lost < 1) lost = life - 1
+  if (lost < 0) lost = 0
+  if (lost > 0) {
+    Player.setLife(hero.life - lost)
+  }
+  return lost
+}
+
+function _jiejiBridleNormalizeKind(kind) {
+  if (kind == 'lebridle' || kind == 'jieji_bridle_lebridle') return 'lebridle'
+  if (kind == 'stowbridle' || kind == 'jieji_bridle_stowbridle') return 'stowbridle'
+  if (kind == 'bloodbridle' || kind == 'jieji_bridle_bloodbridle') return 'bloodbridle'
+  return null
+}
+
+function _jiejiBridleChoices() {
+  return [
+    {
+      text: 'jieji_bridle_lebridle',
+      description: 'hint_jieji_bridle_lebridle',
+    },
+    {
+      text: 'jieji_bridle_stowbridle',
+      description: 'hint_jieji_bridle_stowbridle',
+    },
+    {
+      text: 'jieji_bridle_bloodbridle',
+      description: 'hint_jieji_bridle_bloodbridle',
+    },
+  ]
+}
+
+/// 赶路劫缰三选。debug.forceJiejiEvent('bridle') / forceBridle 直接走这里，仍弹出三选。
+async function playJiejiBridleEvent(terrain) {
+  if (hero == null) return false
+
+  dialog.pushDialog('hint_jieji_bridle')
+  dialog.pushSelection('jiejiBridle', _jiejiBridleChoices())
+  await dialog.execute()
+  final picked = dialog.checkSelected('jiejiBridle')
+  var selected = _jiejiBridleNormalizeKind(picked)
+  if (selected == null) {
+    selected = 'lebridle'
+  }
+
+  final seasonId = _jiejiBridleSeasonId()
+  if (selected == 'lebridle') {
+    final herbNeed = _jiejiBridleLebridleHerbCost(seasonId)
+    final herbHave = hero.materials['herb'] ?? 0
+    if (herbNeed > 0 && herbHave < herbNeed) {
+      dialog.pushDialog('hint_jieji_bridle_lebridle_broke', interpolations: [herbNeed])
+      await dialog.execute()
+    } else {
+      if (herbNeed > 0) {
+        Player.exhaust('herb', herbNeed)
+      }
+      final healed = Player.restoreLife(kJiejiBridleLebridleLife)
+      dialog.pushDialog('hint_jieji_bridle_lebridle_ok', interpolations: [healed])
+      await dialog.execute()
+      await tryDropGongfaShard(rate: kJiejiBridleLebridleGongfaRate)
+    }
+  } else if (selected == 'stowbridle') {
+    final moneyNeed = _jiejiBridleStowbridleMoneyCost(seasonId)
+    final moneyHave = hero.materials['money'] ?? 0
+    if (moneyHave < moneyNeed) {
+      dialog.pushDialog('hint_jieji_bridle_stowbridle_broke', interpolations: [moneyNeed])
+      await dialog.execute()
+    } else {
+      Player.exhaust('money', moneyNeed)
+      await Player.collect('herb', kJiejiBridleStowbridleHerb, incurIncident: false)
+      final healed = Player.restoreLife(kJiejiBridleStowbridleLife)
+      dialog.pushDialog('hint_jieji_bridle_stowbridle_ok', interpolations: [kJiejiBridleStowbridleHerb, healed])
+      await dialog.execute()
+    }
+  } else {
+    final lost = _jiejiBridleCostLife(_jiejiBridleBloodLifeCost(seasonId))
+    dialog.pushDialog('hint_jieji_bridle_bloodbridle_ok', interpolations: [lost])
+    await dialog.execute()
+    final dropped = await tryDropGongfaShard(rate: kJiejiBridleBloodGongfaRate)
+    if (dropped != true) {
+      await Player.collect('money', kJiejiBridleBloodMoney, incurIncident: false)
+      dialog.pushDialog('hint_jieji_bridle_bloodbridle_none', interpolations: [kJiejiBridleBloodMoney])
+      await dialog.execute()
+    }
+  }
+
+  Game.updateUI()
+  return true
+}
+
+/// 赶路触发：教程锁与路遇相同；冷却 24 步；约 0.01%。出过则返回 true。
+async function tryJiejiBridleOnMove(terrain) {
+  if (hero == null) return false
+  if (_jiejiBridleTutorialLocked()) return false
+
+  final jieji = ensureJiejiFlags()
+  final moves = jieji.worldMoves ?? 0
+  final last = jieji.lastBridleMove ?? -999
+  if (moves - last < kJiejiBridleMoveCooldown) return false
+
+  var rate = kJiejiBridleBaseRate
+  if (rate < 0) rate = 0
+  if (random.nextDouble() > rate) return false
+
+  jieji.lastBridleMove = moves
+  await playJiejiBridleEvent(terrain)
+  return true
+}
