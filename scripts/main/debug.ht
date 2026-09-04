@@ -369,6 +369,11 @@ namespace debug {
     return await riteJiejiHarvest(free: true)
   }
 
+  /// 忽略冷却与花费，仍弹出农田夜耕三选。
+  async function forceTill() {
+    return await tillJiejiFarm(free: true)
+  }
+
   async function forceGather(kind) {
     var k = kind
     if (k != 'mine' && k != 'fishery' && k != 'timberland' && k != 'huntingground') {

@@ -2117,6 +2117,30 @@ Future<void> _heroRiteJiejiHarvest(dynamic location) async {
 }
 
 
+
+Future<void> _heroTillJiejiFarm(dynamic location) async {
+  final isRented = await GameLogic.checkRented(location);
+  if (!isRented) return;
+
+  final result = await engine.hetu.invoke('tillJiejiFarm');
+  if (result == 'cooldown') {
+    dialog.pushDialog(
+      'hint_tillJiejiFarm_cooldown',
+      npcId: location['npcId'],
+    );
+    await dialog.execute();
+    return;
+  }
+  if (result == 'poor') {
+    dialog.pushDialog(
+      'hint_tillJiejiFarm_notEnough',
+      npcId: location['npcId'],
+    );
+    await dialog.execute();
+    return;
+  }
+}
+
 Future<void> _heroGatherJiejiSite(dynamic location) async {
   final kind = location['kind'];
   final result = await engine.hetu.invoke(
@@ -2995,6 +3019,10 @@ Future<void> _onInteractSite(
       'text': 'riteJiejiHarvest',
       'description': 'hint_riteJiejiHarvest_description',
     });
+    siteOptions.add({
+      'text': 'tillJiejiFarm',
+      'description': 'hint_tillJiejiFarm_description',
+    });
   }
   if (siteKind == 'mine' ||
       siteKind == 'fishery' ||
@@ -3329,6 +3357,8 @@ Future<void> _onInteractSite(
       await _heroReadJiejiNight(location);
     case 'riteJiejiHarvest':
       await _heroRiteJiejiHarvest(location);
+    case 'tillJiejiFarm':
+      await _heroTillJiejiFarm(location);
     case 'gatherJiejiSite':
       await _heroGatherJiejiSite(location);
     case 'restJiejiSite':
