@@ -570,6 +570,11 @@ namespace debug {
     return await breakJiejiArray(free: true)
   }
 
+  /// 忽略冷却与花费，仍弹出阵法所再破三选。
+  async function forceCleave() {
+    return await cleaveJiejiArray(free: true)
+  }
+
   async function forcePsychic(kind) {
     var k = kind
     if (k != 'scry' && k != 'summon' && k != 'draw') {

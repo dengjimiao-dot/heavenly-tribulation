@@ -1,0 +1,202 @@
+/// 阵法所「再破」：再拆 / 再借 / 血再。不替换布阵与破阵。
+const kJiejiCleaveCooldownDays = 1
+const kJiejiCleaveTearMoney = 20
+const kJiejiCleaveTearMoneyThunder = 10
+const kJiejiCleaveTearLife = 5
+const kJiejiCleaveTearHerbMist = 1
+const kJiejiCleaveBorrowHerb = 1
+const kJiejiCleaveBorrowGongfaRate = 0.15
+const kJiejiCleaveBorrowLife = 4
+const kJiejiCleaveBloodLife = 2
+const kJiejiCleaveBloodLifeBlood = 3
+const kJiejiCleaveBloodGongfaRate = 0.30
+const kJiejiCleaveBloodMoney = 45
+
+function _jiejiCleaveSeasonId() {
+  if (game.jieji != null && game.jieji.seasonId != null) {
+    return game.jieji.seasonId
+  }
+  return null
+}
+
+function _jiejiCleaveCurrentDay() {
+  if (game.timestamp == null) return null
+  if (Constants.ticksPerDay == null) return null
+  if (Constants.ticksPerDay <= 0) return null
+  return game.timestamp ~/ Constants.ticksPerDay
+}
+
+function _jiejiCleaveOnCooldown() {
+  final jieji = ensureJiejiFlags()
+  final day = _jiejiCleaveCurrentDay()
+  if (day == null) return false
+  if (jieji.lastCleaveDay == null) return false
+  if (day - jieji.lastCleaveDay < kJiejiCleaveCooldownDays) return true
+  return false
+}
+
+function _jiejiCleaveMark() {
+  final jieji = ensureJiejiFlags()
+  jieji.lastCleaveDay = _jiejiCleaveCurrentDay()
+}
+
+function _jiejiCleaveCostLife(want) {
+  var lost = want
+  final life = hero.life ?? 1
+  if (life - lost < 1) lost = life - 1
+  if (lost < 0) lost = 0
+  if (lost > 0) {
+    Player.setLife(hero.life - lost)
+  }
+  return lost
+}
+
+function _jiejiCleaveTearMoneyCost(seasonId) {
+  if (seasonId == 'thunder') return kJiejiCleaveTearMoneyThunder
+  return kJiejiCleaveTearMoney
+}
+
+function _jiejiCleaveBloodLifeCost(seasonId) {
+  if (seasonId == 'blood') return kJiejiCleaveBloodLifeBlood
+  return kJiejiCleaveBloodLife
+}
+
+function _jiejiCleaveNormalizeKind(kind) {
+  if (kind == 'tear' || kind == 'jieji_cleave_tear') return 'tear'
+  if (kind == 'borrow' || kind == 'jieji_cleave_borrow') return 'borrow'
+  if (kind == 'blood' || kind == 'jieji_cleave_blood') return 'blood'
+  return null
+}
+
+function _jiejiCleaveChoices() {
+  return [
+    {
+      text: 'jieji_cleave_tear',
+      description: 'hint_jieji_cleave_tear',
+    },
+    {
+      text: 'jieji_cleave_borrow',
+      description: 'hint_jieji_cleave_borrow',
+    },
+    {
+      text: 'jieji_cleave_blood',
+      description: 'hint_jieji_cleave_blood',
+    },
+    'cancel',
+  ]
+}
+
+function _jiejiCleaveMoneyNeed(selected, seasonId) {
+  if (selected == 'tear') return _jiejiCleaveTearMoneyCost(seasonId)
+  return 0
+}
+
+function _jiejiCleaveHerbNeed(selected) {
+  if (selected == 'borrow') return kJiejiCleaveBorrowHerb
+  return 0
+}
+
+/// 破军未挂则挂 arrayFury；已挂则挂 feastFury。两者都有则只回血。
+function _jiejiCleaveApplyFury() {
+  final jieji = ensureJiejiFlags()
+  if (jieji.arrayFury != true) {
+    jieji.arrayFury = true
+    return 'array'
+  }
+  if (jieji.feastFury != true) {
+    jieji.feastFury = true
+    return 'feast'
+  }
+  return null
+}
+
+/// 阵法所再破三选。free 为 true 时不扣费、不检查冷却（debug），仍弹出三选。
+/// kind 为空则弹窗；null 选择在 free 时默认再拆。
+/// 返回 'cooldown' | 'poor' | 'cancel' | 'tear' | 'borrow' | 'blood'。
+async function cleaveJiejiArray({ free = false, kind = null }) {
+  if (hero == null) return 'cancel'
+  if (free != true && _jiejiCleaveOnCooldown()) {
+    return 'cooldown'
+  }
+
+  var selected = _jiejiCleaveNormalizeKind(kind)
+  if (selected == null) {
+    dialog.pushDialog('hint_cleaveJiejiArray')
+    dialog.pushSelection('jiejiCleave', _jiejiCleaveChoices())
+    await dialog.execute()
+    final picked = dialog.checkSelected('jiejiCleave')
+    if (picked == null || picked == 'cancel') {
+      if (free == true && picked == null) {
+        selected = 'tear'
+      } else {
+        return 'cancel'
+      }
+    } else {
+      selected = _jiejiCleaveNormalizeKind(picked)
+    }
+  }
+  if (selected == null) return 'cancel'
+
+  final seasonId = _jiejiCleaveSeasonId()
+  if (free != true) {
+    final moneyNeed = _jiejiCleaveMoneyNeed(selected, seasonId)
+    final herbNeed = _jiejiCleaveHerbNeed(selected)
+    final moneyHave = hero.materials['money'] ?? 0
+    final herbHave = hero.materials['herb'] ?? 0
+    if (moneyHave < moneyNeed || herbHave < herbNeed) {
+      return 'poor'
+    }
+  }
+
+  if (free != true) {
+    final moneyNeed = _jiejiCleaveMoneyNeed(selected, seasonId)
+    final herbNeed = _jiejiCleaveHerbNeed(selected)
+    if (moneyNeed > 0) {
+      Player.exhaust('money', moneyNeed)
+    }
+    if (herbNeed > 0) {
+      Player.exhaust('herb', herbNeed)
+    }
+    if (selected == 'blood') {
+      _jiejiCleaveCostLife(_jiejiCleaveBloodLifeCost(seasonId))
+    }
+    _jiejiCleaveMark()
+  }
+
+  if (selected == 'tear') {
+    final healed = Player.restoreLife(kJiejiCleaveTearLife)
+    if (seasonId == 'mist') {
+      await Player.collect('herb', kJiejiCleaveTearHerbMist, incurIncident: false)
+    }
+    dialog.pushDialog('hint_cleaveJiejiArray_tear', interpolations: [healed])
+    await dialog.execute()
+  } else if (selected == 'borrow') {
+    final fury = _jiejiCleaveApplyFury()
+    if (fury == 'array') {
+      dialog.pushDialog('hint_cleaveJiejiArray_borrow_array')
+      await dialog.execute()
+      await tryDropGongfaShard(rate: kJiejiCleaveBorrowGongfaRate)
+    } else if (fury == 'feast') {
+      dialog.pushDialog('hint_cleaveJiejiArray_borrow_feast')
+      await dialog.execute()
+      await tryDropGongfaShard(rate: kJiejiCleaveBorrowGongfaRate)
+    } else {
+      Player.restoreLife(kJiejiCleaveBorrowLife)
+      dialog.pushDialog('hint_cleaveJiejiArray_borrow')
+      await dialog.execute()
+    }
+  } else if (selected == 'blood') {
+    final dropped = await tryDropGongfaShard(rate: kJiejiCleaveBloodGongfaRate)
+    if (dropped != true) {
+      await Player.collect('money', kJiejiCleaveBloodMoney, incurIncident: false)
+      dialog.pushDialog('hint_cleaveJiejiArray_blood_money')
+      await dialog.execute()
+    } else {
+      dialog.pushDialog('hint_cleaveJiejiArray_blood')
+      await dialog.execute()
+    }
+  }
+
+  Game.updateUI()
+  return selected
+}

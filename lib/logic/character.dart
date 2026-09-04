@@ -3000,6 +3000,29 @@ Future<void> _heroBreakJiejiArray(dynamic location) async {
   }
 }
 
+Future<void> _heroCleaveJiejiArray(dynamic location) async {
+  final isRented = await GameLogic.checkRented(location);
+  if (!isRented) return;
+
+  final result = await engine.hetu.invoke('cleaveJiejiArray');
+  if (result == 'cooldown') {
+    dialog.pushDialog(
+      'hint_cleaveJiejiArray_cooldown',
+      npcId: location['npcId'],
+    );
+    await dialog.execute();
+    return;
+  }
+  if (result == 'poor') {
+    dialog.pushDialog(
+      'hint_cleaveJiejiArray_notEnough',
+      npcId: location['npcId'],
+    );
+    await dialog.execute();
+    return;
+  }
+}
+
 Future<void> _heroCastJiejiVeil(dynamic location) async {
   final isRented = await GameLogic.checkRented(location);
   if (!isRented) return;
@@ -3574,6 +3597,10 @@ Future<void> _onInteractSite(
       'text': 'breakJiejiArray',
       'description': 'hint_breakJiejiArray_description',
     });
+    siteOptions.add({
+      'text': 'cleaveJiejiArray',
+      'description': 'hint_cleaveJiejiArray_description',
+    });
   } else if (siteKind == 'illusionaltar') {
     siteOptions.add({
       'text': 'castJiejiVeil',
@@ -3710,6 +3737,8 @@ Future<void> _onInteractSite(
       await _heroLayJiejiArray(location);
     case 'breakJiejiArray':
       await _heroBreakJiejiArray(location);
+    case 'cleaveJiejiArray':
+      await _heroCleaveJiejiArray(location);
     case 'castJiejiVeil':
       await _heroCastJiejiVeil(location);
     case 'enterJiejiIllusion':
