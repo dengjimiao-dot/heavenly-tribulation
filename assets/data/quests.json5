@@ -323,5 +323,13 @@
     contribution: 11,
     rank: 0,
   },
+  hidden_blood_brand: {
+    id: "hidden_blood_brand",
+    policy: null,
+    isBounty: false,
+    isHidden: true,
+    contribution: 11,
+    rank: 0,
+  },
 
 }
