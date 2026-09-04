@@ -2306,6 +2306,31 @@ Future<void> _heroScourJiejiSite(dynamic location) async {
   }
 }
 
+
+Future<void> _heroSkimJiejiSite(dynamic location) async {
+  final kind = location['kind'];
+  final result = await engine.hetu.invoke(
+    'skimJiejiSite',
+    positionalArgs: [kind],
+  );
+  if (result == 'cooldown') {
+    dialog.pushDialog(
+      'hint_skimJiejiSite_cooldown',
+      npcId: location['npcId'],
+    );
+    await dialog.execute();
+    return;
+  }
+  if (result == 'poor') {
+    dialog.pushDialog(
+      'hint_skimJiejiSite_notEnough',
+      npcId: location['npcId'],
+    );
+    await dialog.execute();
+    return;
+  }
+}
+
 Future<void> _heroConsultJiejiStars(dynamic location) async {
   final isRented = await GameLogic.checkRented(location);
   if (!isRented) return;
@@ -3563,6 +3588,10 @@ Future<void> _onInteractSite(
       'text': 'scourJiejiSite',
       'description': 'hint_scourJiejiSite_description',
     });
+    siteOptions.add({
+      'text': 'skimJiejiSite',
+      'description': 'hint_skimJiejiSite_description',
+    });
   }
   if (kSiteKindsTradable.contains(siteKind)) {
     siteOptions.add('trade');
@@ -4008,6 +4037,8 @@ Future<void> _onInteractSite(
       await _heroGatherJiejiSite(location);
     case 'scourJiejiSite':
       await _heroScourJiejiSite(location);
+    case 'skimJiejiSite':
+      await _heroSkimJiejiSite(location);
     case 'restJiejiSite':
       await _heroRestJiejiSite(location);
     case 'studyJiejiHome':

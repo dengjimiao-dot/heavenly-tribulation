@@ -427,6 +427,13 @@ namespace debug {
     return await scourJiejiSite(k, free: true)
   }
 
+  /// 忽略冷却与花费，仍弹出四野再捞三选。不与 forceScour / forceGather 撞名。
+  async function forceSkim(kind) {
+    var k = kind
+    if (k == null) k = 'mine'
+    return await skimJiejiSite(k, free: true)
+  }
+
   async function forceRest(kind) {
     return await restJiejiSite(kind, free: true)
   }
