@@ -1,0 +1,152 @@
+/// 赶路「劫幡」三选：扶幡 / 收幡 / 血幡。隐藏、劫兆、野遇、赶路、行商、拾荒、扎营、残锋、残卷、雾灯、残鼓、汲泉都没中时才滚。
+const kJiejiPennantBaseRate = 0.05
+const kJiejiPennantMoveCooldown = 14
+const kJiejiPennantRaiseHerb = 1
+const kJiejiPennantRaiseLife = 6
+const kJiejiPennantRaiseGongfaRate = 0.15
+const kJiejiPennantTakeMoney = 20
+const kJiejiPennantTakeMoneyThunder = 10
+const kJiejiPennantTakeHerb = 2
+const kJiejiPennantTakeLife = 3
+const kJiejiPennantBloodLife = 2
+const kJiejiPennantBloodLifeBlood = 3
+const kJiejiPennantBloodGongfaRate = 0.45
+const kJiejiPennantBloodMoney = 40
+
+function _jiejiPennantSeasonId() {
+  if (game.jieji != null && game.jieji.seasonId != null) {
+    return game.jieji.seasonId
+  }
+  return null
+}
+
+function _jiejiPennantTutorialLocked() {
+  return game.enableTutorial && game.flags.tutorial.bountyQuest != true
+}
+
+function _jiejiPennantRaiseHerbCost(seasonId) {
+  if (seasonId == 'mist') return 0
+  return kJiejiPennantRaiseHerb
+}
+
+function _jiejiPennantTakeMoneyCost(seasonId) {
+  if (seasonId == 'thunder') return kJiejiPennantTakeMoneyThunder
+  return kJiejiPennantTakeMoney
+}
+
+function _jiejiPennantBloodLifeCost(seasonId) {
+  if (seasonId == 'blood') return kJiejiPennantBloodLifeBlood
+  return kJiejiPennantBloodLife
+}
+
+function _jiejiPennantCostLife(want) {
+  var lost = want
+  final life = hero.life ?? 1
+  if (life - lost < 1) lost = life - 1
+  if (lost < 0) lost = 0
+  if (lost > 0) {
+    Player.setLife(hero.life - lost)
+  }
+  return lost
+}
+
+function _jiejiPennantNormalizeKind(kind) {
+  if (kind == 'raise' || kind == 'jieji_pennant_raise') return 'raise'
+  if (kind == 'take' || kind == 'jieji_pennant_take') return 'take'
+  if (kind == 'blood' || kind == 'jieji_pennant_blood') return 'blood'
+  return null
+}
+
+function _jiejiPennantChoices() {
+  return [
+    {
+      text: 'jieji_pennant_raise',
+      description: 'hint_jieji_pennant_raise',
+    },
+    {
+      text: 'jieji_pennant_take',
+      description: 'hint_jieji_pennant_take',
+    },
+    {
+      text: 'jieji_pennant_blood',
+      description: 'hint_jieji_pennant_blood',
+    },
+  ]
+}
+
+/// 赶路劫幡三选。debug.forceJiejiEvent('pennant') / forcePennant 直接走这里，仍弹出三选。
+async function playJiejiPennantEvent(terrain) {
+  if (hero == null) return false
+
+  dialog.pushDialog('hint_jieji_pennant')
+  dialog.pushSelection('jiejiPennant', _jiejiPennantChoices())
+  await dialog.execute()
+  final picked = dialog.checkSelected('jiejiPennant')
+  var selected = _jiejiPennantNormalizeKind(picked)
+  if (selected == null) {
+    selected = 'raise'
+  }
+
+  final seasonId = _jiejiPennantSeasonId()
+  if (selected == 'raise') {
+    final herbNeed = _jiejiPennantRaiseHerbCost(seasonId)
+    final herbHave = hero.materials['herb'] ?? 0
+    if (herbNeed > 0 && herbHave < herbNeed) {
+      dialog.pushDialog('hint_jieji_pennant_raise_broke', interpolations: [herbNeed])
+      await dialog.execute()
+    } else {
+      if (herbNeed > 0) {
+        Player.exhaust('herb', herbNeed)
+      }
+      final healed = Player.restoreLife(kJiejiPennantRaiseLife)
+      dialog.pushDialog('hint_jieji_pennant_raise_ok', interpolations: [healed])
+      await dialog.execute()
+      await tryDropGongfaShard(rate: kJiejiPennantRaiseGongfaRate)
+    }
+  } else if (selected == 'take') {
+    final moneyNeed = _jiejiPennantTakeMoneyCost(seasonId)
+    final moneyHave = hero.materials['money'] ?? 0
+    if (moneyHave < moneyNeed) {
+      dialog.pushDialog('hint_jieji_pennant_take_broke', interpolations: [moneyNeed])
+      await dialog.execute()
+    } else {
+      Player.exhaust('money', moneyNeed)
+      await Player.collect('herb', kJiejiPennantTakeHerb, incurIncident: false)
+      final healed = Player.restoreLife(kJiejiPennantTakeLife)
+      dialog.pushDialog('hint_jieji_pennant_take_ok', interpolations: [kJiejiPennantTakeHerb, healed])
+      await dialog.execute()
+    }
+  } else {
+    final lost = _jiejiPennantCostLife(_jiejiPennantBloodLifeCost(seasonId))
+    dialog.pushDialog('hint_jieji_pennant_blood_ok', interpolations: [lost])
+    await dialog.execute()
+    final dropped = await tryDropGongfaShard(rate: kJiejiPennantBloodGongfaRate)
+    if (dropped != true) {
+      await Player.collect('money', kJiejiPennantBloodMoney, incurIncident: false)
+      dialog.pushDialog('hint_jieji_pennant_blood_none', interpolations: [kJiejiPennantBloodMoney])
+      await dialog.execute()
+    }
+  }
+
+  Game.updateUI()
+  return true
+}
+
+/// 赶路触发：教程锁与路遇相同；冷却 14 步；约 5%。出过则返回 true。
+async function tryJiejiPennantOnMove(terrain) {
+  if (hero == null) return false
+  if (_jiejiPennantTutorialLocked()) return false
+
+  final jieji = ensureJiejiFlags()
+  final moves = jieji.worldMoves ?? 0
+  final last = jieji.lastPennantMove ?? -999
+  if (moves - last < kJiejiPennantMoveCooldown) return false
+
+  var rate = kJiejiPennantBaseRate
+  if (rate < 0) rate = 0
+  if (random.nextDouble() > rate) return false
+
+  jieji.lastPennantMove = moves
+  await playJiejiPennantEvent(terrain)
+  return true
+}
