@@ -1,0 +1,152 @@
+/// 赶路「劫戒」三选：戴戒 / 收戒 / 血戒。隐藏、劫兆、野遇、赶路、行商、拾荒、扎营、残锋、残卷、雾灯、残鼓、汲泉、劫幡、劫铃、劫符、劫旌、劫烛、劫角、劫笛、劫笠、劫带、劫履、劫氅、劫扇、劫杖、劫伞、劫面、劫帔、劫手套都没中时才滚。
+const kJiejiRingBaseRate = 0.019
+const kJiejiRingMoveCooldown = 24
+const kJiejiRingDonringHerb = 1
+const kJiejiRingDonringLife = 5
+const kJiejiRingDonringGongfaRate = 0.08
+const kJiejiRingStowringMoney = 8
+const kJiejiRingStowringMoneyThunder = 4
+const kJiejiRingStowringHerb = 2
+const kJiejiRingStowringLife = 3
+const kJiejiRingBloodLife = 2
+const kJiejiRingBloodLifeBlood = 3
+const kJiejiRingBloodGongfaRate = 0.26
+const kJiejiRingBloodMoney = 16
+
+function _jiejiRingSeasonId() {
+  if (game.jieji != null && game.jieji.seasonId != null) {
+    return game.jieji.seasonId
+  }
+  return null
+}
+
+function _jiejiRingTutorialLocked() {
+  return game.enableTutorial && game.flags.tutorial.bountyQuest != true
+}
+
+function _jiejiRingDonringHerbCost(seasonId) {
+  if (seasonId == 'mist') return 0
+  return kJiejiRingDonringHerb
+}
+
+function _jiejiRingStowringMoneyCost(seasonId) {
+  if (seasonId == 'thunder') return kJiejiRingStowringMoneyThunder
+  return kJiejiRingStowringMoney
+}
+
+function _jiejiRingBloodLifeCost(seasonId) {
+  if (seasonId == 'blood') return kJiejiRingBloodLifeBlood
+  return kJiejiRingBloodLife
+}
+
+function _jiejiRingCostLife(want) {
+  var lost = want
+  final life = hero.life ?? 1
+  if (life - lost < 1) lost = life - 1
+  if (lost < 0) lost = 0
+  if (lost > 0) {
+    Player.setLife(hero.life - lost)
+  }
+  return lost
+}
+
+function _jiejiRingNormalizeKind(kind) {
+  if (kind == 'donring' || kind == 'jieji_ring_donring') return 'donring'
+  if (kind == 'stowring' || kind == 'jieji_ring_stowring') return 'stowring'
+  if (kind == 'bloodring' || kind == 'jieji_ring_bloodring') return 'bloodring'
+  return null
+}
+
+function _jiejiRingChoices() {
+  return [
+    {
+      text: 'jieji_ring_donring',
+      description: 'hint_jieji_ring_donring',
+    },
+    {
+      text: 'jieji_ring_stowring',
+      description: 'hint_jieji_ring_stowring',
+    },
+    {
+      text: 'jieji_ring_bloodring',
+      description: 'hint_jieji_ring_bloodring',
+    },
+  ]
+}
+
+/// 赶路劫戒三选。debug.forceJiejiEvent('ring') / forceRing 直接走这里，仍弹出三选。
+async function playJiejiRingEvent(terrain) {
+  if (hero == null) return false
+
+  dialog.pushDialog('hint_jieji_ring')
+  dialog.pushSelection('jiejiRing', _jiejiRingChoices())
+  await dialog.execute()
+  final picked = dialog.checkSelected('jiejiRing')
+  var selected = _jiejiRingNormalizeKind(picked)
+  if (selected == null) {
+    selected = 'donring'
+  }
+
+  final seasonId = _jiejiRingSeasonId()
+  if (selected == 'donring') {
+    final herbNeed = _jiejiRingDonringHerbCost(seasonId)
+    final herbHave = hero.materials['herb'] ?? 0
+    if (herbNeed > 0 && herbHave < herbNeed) {
+      dialog.pushDialog('hint_jieji_ring_donring_broke', interpolations: [herbNeed])
+      await dialog.execute()
+    } else {
+      if (herbNeed > 0) {
+        Player.exhaust('herb', herbNeed)
+      }
+      final healed = Player.restoreLife(kJiejiRingDonringLife)
+      dialog.pushDialog('hint_jieji_ring_donring_ok', interpolations: [healed])
+      await dialog.execute()
+      await tryDropGongfaShard(rate: kJiejiRingDonringGongfaRate)
+    }
+  } else if (selected == 'stowring') {
+    final moneyNeed = _jiejiRingStowringMoneyCost(seasonId)
+    final moneyHave = hero.materials['money'] ?? 0
+    if (moneyHave < moneyNeed) {
+      dialog.pushDialog('hint_jieji_ring_stowring_broke', interpolations: [moneyNeed])
+      await dialog.execute()
+    } else {
+      Player.exhaust('money', moneyNeed)
+      await Player.collect('herb', kJiejiRingStowringHerb, incurIncident: false)
+      final healed = Player.restoreLife(kJiejiRingStowringLife)
+      dialog.pushDialog('hint_jieji_ring_stowring_ok', interpolations: [kJiejiRingStowringHerb, healed])
+      await dialog.execute()
+    }
+  } else {
+    final lost = _jiejiRingCostLife(_jiejiRingBloodLifeCost(seasonId))
+    dialog.pushDialog('hint_jieji_ring_bloodring_ok', interpolations: [lost])
+    await dialog.execute()
+    final dropped = await tryDropGongfaShard(rate: kJiejiRingBloodGongfaRate)
+    if (dropped != true) {
+      await Player.collect('money', kJiejiRingBloodMoney, incurIncident: false)
+      dialog.pushDialog('hint_jieji_ring_bloodring_none', interpolations: [kJiejiRingBloodMoney])
+      await dialog.execute()
+    }
+  }
+
+  Game.updateUI()
+  return true
+}
+
+/// 赶路触发：教程锁与路遇相同；冷却 24 步；约 1.9%。出过则返回 true。
+async function tryJiejiRingOnMove(terrain) {
+  if (hero == null) return false
+  if (_jiejiRingTutorialLocked()) return false
+
+  final jieji = ensureJiejiFlags()
+  final moves = jieji.worldMoves ?? 0
+  final last = jieji.lastRingMove ?? -999
+  if (moves - last < kJiejiRingMoveCooldown) return false
+
+  var rate = kJiejiRingBaseRate
+  if (rate < 0) rate = 0
+  if (random.nextDouble() > rate) return false
+
+  jieji.lastRingMove = moves
+  await playJiejiRingEvent(terrain)
+  return true
+}
