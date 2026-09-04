@@ -476,6 +476,8 @@ namespace debug {
       await playJiejiStirrupEvent(terrain)
     } else if (kind == 'girth') {
       await playJiejiGirthEvent(terrain)
+    } else if (kind == 'lash') {
+      await playJiejiLashEvent(terrain)
     } else {
       await playJiejiThunderRoadEvent(terrain)
     }
@@ -1391,6 +1393,11 @@ namespace debug {
   /// 忽略几率与冷却，仍弹出赶路劫鞦三选。
   async function forceGirth() {
     return await playJiejiGirthEvent({ kind: 'plain' })
+  }
+
+  /// 忽略几率与冷却，仍弹出赶路劫勒三选。
+  async function forceLash() {
+    return await playJiejiLashEvent({ kind: 'plain' })
   }
 
   /// 忽略冷却与花费，仍弹出幻术祭坛入幻三选。
