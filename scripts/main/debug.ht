@@ -201,6 +201,8 @@ namespace debug {
       questKind = 'hidden_thunder_ridge'
     } else if (kind == 'pavilion') {
       questKind = 'hidden_mist_pavilion'
+    } else if (kind == 'cairn') {
+      questKind = 'hidden_mist_cairn'
     } else if (kind == 'banner') {
       questKind = 'hidden_blood_banner'
     } else if (kind == 'kiosk') {

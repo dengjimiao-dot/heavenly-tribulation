@@ -84,6 +84,7 @@
   "quest_hidden_blood_bog": "劫纹血沼",
   "quest_hidden_thunder_ridge": "劫纹雷岗",
   "quest_hidden_mist_pavilion": "劫纹雾亭",
+  "quest_hidden_mist_cairn": "劫纹雾冢",
   "quest_hidden_blood_banner": "劫纹血幡",
   "quest_hidden_thunder_kiosk": "劫纹雷亭",
 
@@ -114,6 +115,7 @@
   "quest_hidden_blood_bog_description": "行路听闻{0}城外有劫纹血沼。去走一遭，或可采得药材、拾得铜钱并回些生机。",
   "quest_hidden_thunder_ridge_description": "行路听闻{0}城外有劫纹雷岗。去走一遭，或可拣得矿石、拾得铜钱并回些生机。",
   "quest_hidden_mist_pavilion_description": "行路听闻{0}城外有劫纹雾亭。去走一遭，或可采得药材并回些生机。",
+  "quest_hidden_mist_cairn_description": "行路听闻{0}城外有劫纹雾冢。去走一遭，或可采得药材并回些生机。",
   "quest_hidden_blood_banner_description": "行路听闻{0}城外有劫纹血幡。去走一遭，或可采得药材、拾得铜钱并回些生机。",
   "quest_hidden_thunder_kiosk_description": "行路听闻{0}城外有劫纹雷亭。去走一遭，或可拣得矿石、拾得铜钱并回些生机。",
 
@@ -147,6 +149,7 @@
   "quest_hidden_blood_bog_complete": "「{0}」有了着落。你在{1}的血沼边走了一遭。",
   "quest_hidden_thunder_ridge_complete": "「{0}」有了着落。你在{1}的雷岗上走了一遭。",
   "quest_hidden_mist_pavilion_complete": "「{0}」有了着落。你在{1}的雾亭里走了一遭。",
+  "quest_hidden_mist_cairn_complete": "「{0}」有了着落。你在{1}的雾冢里走了一遭。",
   "quest_hidden_blood_banner_complete": "「{0}」有了着落。你在{1}的血幡下走了一遭。",
   "quest_hidden_thunder_kiosk_complete": "「{0}」有了着落。你在{1}的雷亭里走了一遭。"
 }
