@@ -422,6 +422,9 @@ namespace debug {
     } else if (kind == 'bench') {
       game.flags.dungeon.pendingEncounter = 'jiejiBench'
       await playJiejiDungeonEncounter()
+    } else if (kind == 'mat') {
+      game.flags.dungeon.pendingEncounter = 'jiejiMat'
+      await playJiejiDungeonEncounter()
     } else if (kind == 'exit') {
       await playJiejiDungeonExitGift()
     } else {
