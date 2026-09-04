@@ -1,0 +1,152 @@
+/// 赶路「劫笛」三选：吹笛 / 收笛 / 血笛。隐藏、劫兆、野遇、赶路、行商、拾荒、扎营、残锋、残卷、雾灯、残鼓、汲泉、劫幡、劫铃、劫符、劫旌、劫烛、劫角都没中时才滚。
+const kJiejiFluteBaseRate = 0.034
+const kJiejiFluteMoveCooldown = 20
+const kJiejiFlutePlayHerb = 1
+const kJiejiFlutePlayLife = 5
+const kJiejiFlutePlayGongfaRate = 0.12
+const kJiejiFlutePocketMoney = 14
+const kJiejiFlutePocketMoneyThunder = 7
+const kJiejiFlutePocketHerb = 2
+const kJiejiFlutePocketLife = 3
+const kJiejiFluteBloodLife = 2
+const kJiejiFluteBloodLifeBlood = 3
+const kJiejiFluteBloodGongfaRate = 0.34
+const kJiejiFluteBloodMoney = 24
+
+function _jiejiFluteSeasonId() {
+  if (game.jieji != null && game.jieji.seasonId != null) {
+    return game.jieji.seasonId
+  }
+  return null
+}
+
+function _jiejiFluteTutorialLocked() {
+  return game.enableTutorial && game.flags.tutorial.bountyQuest != true
+}
+
+function _jiejiFlutePlayHerbCost(seasonId) {
+  if (seasonId == 'mist') return 0
+  return kJiejiFlutePlayHerb
+}
+
+function _jiejiFlutePocketMoneyCost(seasonId) {
+  if (seasonId == 'thunder') return kJiejiFlutePocketMoneyThunder
+  return kJiejiFlutePocketMoney
+}
+
+function _jiejiFluteBloodLifeCost(seasonId) {
+  if (seasonId == 'blood') return kJiejiFluteBloodLifeBlood
+  return kJiejiFluteBloodLife
+}
+
+function _jiejiFluteCostLife(want) {
+  var lost = want
+  final life = hero.life ?? 1
+  if (life - lost < 1) lost = life - 1
+  if (lost < 0) lost = 0
+  if (lost > 0) {
+    Player.setLife(hero.life - lost)
+  }
+  return lost
+}
+
+function _jiejiFluteNormalizeKind(kind) {
+  if (kind == 'play' || kind == 'jieji_flute_play') return 'play'
+  if (kind == 'pocket' || kind == 'jieji_flute_pocket') return 'pocket'
+  if (kind == 'bloodflute' || kind == 'jieji_flute_bloodflute') return 'bloodflute'
+  return null
+}
+
+function _jiejiFluteChoices() {
+  return [
+    {
+      text: 'jieji_flute_play',
+      description: 'hint_jieji_flute_play',
+    },
+    {
+      text: 'jieji_flute_pocket',
+      description: 'hint_jieji_flute_pocket',
+    },
+    {
+      text: 'jieji_flute_bloodflute',
+      description: 'hint_jieji_flute_bloodflute',
+    },
+  ]
+}
+
+/// 赶路劫笛三选。debug.forceJiejiEvent('flute') / forceFlute 直接走这里，仍弹出三选。
+async function playJiejiFluteEvent(terrain) {
+  if (hero == null) return false
+
+  dialog.pushDialog('hint_jieji_flute')
+  dialog.pushSelection('jiejiFlute', _jiejiFluteChoices())
+  await dialog.execute()
+  final picked = dialog.checkSelected('jiejiFlute')
+  var selected = _jiejiFluteNormalizeKind(picked)
+  if (selected == null) {
+    selected = 'play'
+  }
+
+  final seasonId = _jiejiFluteSeasonId()
+  if (selected == 'play') {
+    final herbNeed = _jiejiFlutePlayHerbCost(seasonId)
+    final herbHave = hero.materials['herb'] ?? 0
+    if (herbNeed > 0 && herbHave < herbNeed) {
+      dialog.pushDialog('hint_jieji_flute_play_broke', interpolations: [herbNeed])
+      await dialog.execute()
+    } else {
+      if (herbNeed > 0) {
+        Player.exhaust('herb', herbNeed)
+      }
+      final healed = Player.restoreLife(kJiejiFlutePlayLife)
+      dialog.pushDialog('hint_jieji_flute_play_ok', interpolations: [healed])
+      await dialog.execute()
+      await tryDropGongfaShard(rate: kJiejiFlutePlayGongfaRate)
+    }
+  } else if (selected == 'pocket') {
+    final moneyNeed = _jiejiFlutePocketMoneyCost(seasonId)
+    final moneyHave = hero.materials['money'] ?? 0
+    if (moneyHave < moneyNeed) {
+      dialog.pushDialog('hint_jieji_flute_pocket_broke', interpolations: [moneyNeed])
+      await dialog.execute()
+    } else {
+      Player.exhaust('money', moneyNeed)
+      await Player.collect('herb', kJiejiFlutePocketHerb, incurIncident: false)
+      final healed = Player.restoreLife(kJiejiFlutePocketLife)
+      dialog.pushDialog('hint_jieji_flute_pocket_ok', interpolations: [kJiejiFlutePocketHerb, healed])
+      await dialog.execute()
+    }
+  } else {
+    final lost = _jiejiFluteCostLife(_jiejiFluteBloodLifeCost(seasonId))
+    dialog.pushDialog('hint_jieji_flute_bloodflute_ok', interpolations: [lost])
+    await dialog.execute()
+    final dropped = await tryDropGongfaShard(rate: kJiejiFluteBloodGongfaRate)
+    if (dropped != true) {
+      await Player.collect('money', kJiejiFluteBloodMoney, incurIncident: false)
+      dialog.pushDialog('hint_jieji_flute_bloodflute_none', interpolations: [kJiejiFluteBloodMoney])
+      await dialog.execute()
+    }
+  }
+
+  Game.updateUI()
+  return true
+}
+
+/// 赶路触发：教程锁与路遇相同；冷却 20 步；约 3.4%。出过则返回 true。
+async function tryJiejiFluteOnMove(terrain) {
+  if (hero == null) return false
+  if (_jiejiFluteTutorialLocked()) return false
+
+  final jieji = ensureJiejiFlags()
+  final moves = jieji.worldMoves ?? 0
+  final last = jieji.lastFluteMove ?? -999
+  if (moves - last < kJiejiFluteMoveCooldown) return false
+
+  var rate = kJiejiFluteBaseRate
+  if (rate < 0) rate = 0
+  if (random.nextDouble() > rate) return false
+
+  jieji.lastFluteMove = moves
+  await playJiejiFluteEvent(terrain)
+  return true
+}

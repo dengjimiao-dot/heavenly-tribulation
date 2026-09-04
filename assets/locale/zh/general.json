@@ -3171,6 +3171,22 @@
   "hint_jieji_horn_bloodhorn_ok": "你割了 {0} 点生机去染劫角。",
   "hint_jieji_horn_bloodhorn_none": "血角下去，角声却散了。袋里多了 {0} 铜钱。",
 
+
+  "jiejiFlute": "劫笛",
+  "hint_jieji_flute": "路边落着一支劫笛。你可以吹笛、收笛，或以血笛。",
+  "jieji_flute_play": "吹笛",
+  "jieji_flute_pocket": "收笛",
+  "jieji_flute_bloodflute": "血笛",
+  "hint_jieji_flute_play": "吹笛：耗 1 药材（雾月不耗）。回 5 命，一成二摸残页。药材不够则空手。",
+  "hint_jieji_flute_pocket": "收笛：花 14 铜钱（雷月 7）。得 2 药材，并回 3 命。袋里不够则空手。",
+  "hint_jieji_flute_bloodflute": "血笛：扣 2 点生机（至少留 1，血月 3）。三成四摸残页，不成则得 24 铜钱。",
+  "hint_jieji_flute_play_ok": "你吹响劫笛。生机回了 {0} 点。",
+  "hint_jieji_flute_play_broke": "吹笛要 {0} 药材。你拿不出来。",
+  "hint_jieji_flute_pocket_ok": "你收起劫笛。得了 {0} 药材，生机回了 {1} 点。",
+  "hint_jieji_flute_pocket_broke": "收笛要 {0} 铜钱。袋里不够。",
+  "hint_jieji_flute_bloodflute_ok": "你割了 {0} 点生机去染劫笛。",
+  "hint_jieji_flute_bloodflute_none": "血笛下去，笛声却散了。袋里多了 {0} 铜钱。",
+
   "jiejiMenpaiDemo": "劫季门派 · Demo",
   "jiejiMenpaiPitch": "带着业力赶天劫的门派肉鸽",
   "knownIssues": "已知问题",
