@@ -1,0 +1,152 @@
+/// 赶路「劫绳」三选：结绳 / 折绳 / 血染。隐藏、劫兆、野遇、赶路、行商、拾荒、扎营、残锋、残卷、雾灯、残鼓、汲泉、劫幡、劫铃、劫符、劫旌、劫烛、劫角、劫笛、劫笠、劫带、劫履、劫氅、劫扇、劫杖、劫伞、劫面、劫帔、劫手套、劫戒、劫镜、劫鼓、劫炬、劫梳、劫勺、劫碗、劫杯、劫罐、劫瓶、劫墨、劫袍、劫带、劫簪、劫笔、劫针、劫扣都没中时才滚。
+const kJiejiCordBaseRate = 0.003
+const kJiejiCordMoveCooldown = 24
+const kJiejiCordKnotcordHerb = 1
+const kJiejiCordKnotcordLife = 5
+const kJiejiCordKnotcordGongfaRate = 0.08
+const kJiejiCordFoldcordMoney = 8
+const kJiejiCordFoldcordMoneyThunder = 4
+const kJiejiCordFoldcordHerb = 2
+const kJiejiCordFoldcordLife = 3
+const kJiejiCordBloodLife = 2
+const kJiejiCordBloodLifeBlood = 3
+const kJiejiCordBloodGongfaRate = 0.26
+const kJiejiCordBloodMoney = 16
+
+function _jiejiCordSeasonId() {
+  if (game.jieji != null && game.jieji.seasonId != null) {
+    return game.jieji.seasonId
+  }
+  return null
+}
+
+function _jiejiCordTutorialLocked() {
+  return game.enableTutorial && game.flags.tutorial.bountyQuest != true
+}
+
+function _jiejiCordKnotcordHerbCost(seasonId) {
+  if (seasonId == 'mist') return 0
+  return kJiejiCordKnotcordHerb
+}
+
+function _jiejiCordFoldcordMoneyCost(seasonId) {
+  if (seasonId == 'thunder') return kJiejiCordFoldcordMoneyThunder
+  return kJiejiCordFoldcordMoney
+}
+
+function _jiejiCordBloodLifeCost(seasonId) {
+  if (seasonId == 'blood') return kJiejiCordBloodLifeBlood
+  return kJiejiCordBloodLife
+}
+
+function _jiejiCordCostLife(want) {
+  var lost = want
+  final life = hero.life ?? 1
+  if (life - lost < 1) lost = life - 1
+  if (lost < 0) lost = 0
+  if (lost > 0) {
+    Player.setLife(hero.life - lost)
+  }
+  return lost
+}
+
+function _jiejiCordNormalizeKind(kind) {
+  if (kind == 'knotcord' || kind == 'jieji_cord_knotcord') return 'knotcord'
+  if (kind == 'foldcord' || kind == 'jieji_cord_foldcord') return 'foldcord'
+  if (kind == 'bloodcord' || kind == 'jieji_cord_bloodcord') return 'bloodcord'
+  return null
+}
+
+function _jiejiCordChoices() {
+  return [
+    {
+      text: 'jieji_cord_knotcord',
+      description: 'hint_jieji_cord_knotcord',
+    },
+    {
+      text: 'jieji_cord_foldcord',
+      description: 'hint_jieji_cord_foldcord',
+    },
+    {
+      text: 'jieji_cord_bloodcord',
+      description: 'hint_jieji_cord_bloodcord',
+    },
+  ]
+}
+
+/// 赶路劫绳三选。debug.forceJiejiEvent('cord') / forceCord 直接走这里，仍弹出三选。
+async function playJiejiCordEvent(terrain) {
+  if (hero == null) return false
+
+  dialog.pushDialog('hint_jieji_cord')
+  dialog.pushSelection('jiejiCord', _jiejiCordChoices())
+  await dialog.execute()
+  final picked = dialog.checkSelected('jiejiCord')
+  var selected = _jiejiCordNormalizeKind(picked)
+  if (selected == null) {
+    selected = 'knotcord'
+  }
+
+  final seasonId = _jiejiCordSeasonId()
+  if (selected == 'knotcord') {
+    final herbNeed = _jiejiCordKnotcordHerbCost(seasonId)
+    final herbHave = hero.materials['herb'] ?? 0
+    if (herbNeed > 0 && herbHave < herbNeed) {
+      dialog.pushDialog('hint_jieji_cord_knotcord_broke', interpolations: [herbNeed])
+      await dialog.execute()
+    } else {
+      if (herbNeed > 0) {
+        Player.exhaust('herb', herbNeed)
+      }
+      final healed = Player.restoreLife(kJiejiCordKnotcordLife)
+      dialog.pushDialog('hint_jieji_cord_knotcord_ok', interpolations: [healed])
+      await dialog.execute()
+      await tryDropGongfaShard(rate: kJiejiCordKnotcordGongfaRate)
+    }
+  } else if (selected == 'foldcord') {
+    final moneyNeed = _jiejiCordFoldcordMoneyCost(seasonId)
+    final moneyHave = hero.materials['money'] ?? 0
+    if (moneyHave < moneyNeed) {
+      dialog.pushDialog('hint_jieji_cord_foldcord_broke', interpolations: [moneyNeed])
+      await dialog.execute()
+    } else {
+      Player.exhaust('money', moneyNeed)
+      await Player.collect('herb', kJiejiCordFoldcordHerb, incurIncident: false)
+      final healed = Player.restoreLife(kJiejiCordFoldcordLife)
+      dialog.pushDialog('hint_jieji_cord_foldcord_ok', interpolations: [kJiejiCordFoldcordHerb, healed])
+      await dialog.execute()
+    }
+  } else {
+    final lost = _jiejiCordCostLife(_jiejiCordBloodLifeCost(seasonId))
+    dialog.pushDialog('hint_jieji_cord_bloodcord_ok', interpolations: [lost])
+    await dialog.execute()
+    final dropped = await tryDropGongfaShard(rate: kJiejiCordBloodGongfaRate)
+    if (dropped != true) {
+      await Player.collect('money', kJiejiCordBloodMoney, incurIncident: false)
+      dialog.pushDialog('hint_jieji_cord_bloodcord_none', interpolations: [kJiejiCordBloodMoney])
+      await dialog.execute()
+    }
+  }
+
+  Game.updateUI()
+  return true
+}
+
+/// 赶路触发：教程锁与路遇相同；冷却 24 步；约 0.3%。出过则返回 true。
+async function tryJiejiCordOnMove(terrain) {
+  if (hero == null) return false
+  if (_jiejiCordTutorialLocked()) return false
+
+  final jieji = ensureJiejiFlags()
+  final moves = jieji.worldMoves ?? 0
+  final last = jieji.lastCordMove ?? -999
+  if (moves - last < kJiejiCordMoveCooldown) return false
+
+  var rate = kJiejiCordBaseRate
+  if (rate < 0) rate = 0
+  if (random.nextDouble() > rate) return false
+
+  jieji.lastCordMove = moves
+  await playJiejiCordEvent(terrain)
+  return true
+}

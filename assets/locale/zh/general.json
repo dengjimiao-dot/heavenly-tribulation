@@ -4000,6 +4000,22 @@
   "hint_jieji_clasp_bloodclasp_none": "血扣下去，扣影却散了。袋里多了 {0} 铜钱。",
 
 
+  "jiejiCord": "劫绳",
+  "hint_jieji_cord": "路遇一根劫绳。你可以结绳、折绳，或以血染绳。",
+  "jieji_cord_knotcord": "结绳",
+  "jieji_cord_foldcord": "折绳",
+  "jieji_cord_bloodcord": "血染绳",
+  "hint_jieji_cord_knotcord": "结绳：耗 1 药材（雾月不耗）。回 5 命，八厘摸残页。药材不够则空手。",
+  "hint_jieji_cord_foldcord": "折绳：花 8 铜钱（雷月 4）。得 2 药材，并回 3 命。袋里不够则空手。",
+  "hint_jieji_cord_bloodcord": "血染：扣 2 点生机（至少留 1，血月 3）。二成六摸残页，不成则得 16 铜钱。",
+  "hint_jieji_cord_knotcord_ok": "你结起劫绳。生机回了 {0} 点。",
+  "hint_jieji_cord_knotcord_broke": "结绳要 {0} 药材。你拿不出来。",
+  "hint_jieji_cord_foldcord_ok": "你折起劫绳。得了 {0} 药材，生机回了 {1} 点。",
+  "hint_jieji_cord_foldcord_broke": "折绳要 {0} 铜钱。袋里不够。",
+  "hint_jieji_cord_bloodcord_ok": "你割了 {0} 点生机去染劫绳。",
+  "hint_jieji_cord_bloodcord_none": "血绳下去，绳影却散了。袋里多了 {0} 铜钱。",
+
+
   "jiejiMenpaiDemo": "劫季门派 · Demo",
   "jiejiMenpaiPitch": "带着业力赶天劫的门派肉鸽",
   "knownIssues": "已知问题",

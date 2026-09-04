@@ -404,6 +404,8 @@ namespace debug {
       await playJiejiNeedleEvent(terrain)
     } else if (kind == 'clasp') {
       await playJiejiClaspEvent(terrain)
+    } else if (kind == 'cord') {
+      await playJiejiCordEvent(terrain)
     } else {
       await playJiejiThunderRoadEvent(terrain)
     }
@@ -1175,6 +1177,11 @@ namespace debug {
   /// 忽略几率与冷却，仍弹出赶路劫扣三选。
   async function forceClasp() {
     return await playJiejiClaspEvent({ kind: 'plain' })
+  }
+
+  /// 忽略几率与冷却，仍弹出赶路劫绳三选。
+  async function forceCord() {
+    return await playJiejiCordEvent({ kind: 'plain' })
   }
 
   /// 忽略冷却与花费，仍弹出幻术祭坛入幻三选。
