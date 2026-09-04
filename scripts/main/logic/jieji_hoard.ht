@@ -1,0 +1,194 @@
+/// 交易所「囤货」：囤药 / 囤粮 / 血囤。不替换换货与议价。
+const kJiejiHoardCooldownDays = 1
+const kJiejiHoardHerbMoney = 30
+const kJiejiHoardHerbMoneyThunder = 15
+const kJiejiHoardHerbGain = 2
+const kJiejiHoardHerbMistExtra = 1
+const kJiejiHoardGrainHerb = 1
+const kJiejiHoardGrainHerbMist = 0
+const kJiejiHoardGrainGain = 3
+const kJiejiHoardGrainMoneyFallback = 40
+const kJiejiHoardBloodLife = 2
+const kJiejiHoardBloodLifeBlood = 3
+const kJiejiHoardBloodGongfaRate = 0.25
+const kJiejiHoardBloodMoney = 50
+
+function _jiejiHoardSeasonId() {
+  if (game.jieji != null && game.jieji.seasonId != null) {
+    return game.jieji.seasonId
+  }
+  return null
+}
+
+function _jiejiHoardCurrentDay() {
+  if (game.timestamp == null) return null
+  if (Constants.ticksPerDay == null) return null
+  if (Constants.ticksPerDay <= 0) return null
+  return game.timestamp ~/ Constants.ticksPerDay
+}
+
+function _jiejiHoardOnCooldown() {
+  final jieji = ensureJiejiFlags()
+  final day = _jiejiHoardCurrentDay()
+  if (day == null) return false
+  if (jieji.lastHoardDay == null) return false
+  if (day - jieji.lastHoardDay < kJiejiHoardCooldownDays) return true
+  return false
+}
+
+function _jiejiHoardMark() {
+  final jieji = ensureJiejiFlags()
+  jieji.lastHoardDay = _jiejiHoardCurrentDay()
+}
+
+function _jiejiHoardCostLife(want) {
+  var lost = want
+  final life = hero.life ?? 1
+  if (life - lost < 1) lost = life - 1
+  if (lost < 0) lost = 0
+  if (lost > 0) {
+    Player.setLife(hero.life - lost)
+  }
+  return lost
+}
+
+function _jiejiHoardHerbMoneyCost(seasonId) {
+  if (seasonId == 'thunder') return kJiejiHoardHerbMoneyThunder
+  return kJiejiHoardHerbMoney
+}
+
+function _jiejiHoardGrainHerbCost(seasonId) {
+  if (seasonId == 'mist') return kJiejiHoardGrainHerbMist
+  return kJiejiHoardGrainHerb
+}
+
+function _jiejiHoardBloodLifeCost(seasonId) {
+  if (seasonId == 'blood') return kJiejiHoardBloodLifeBlood
+  return kJiejiHoardBloodLife
+}
+
+function _jiejiHoardNormalizeKind(kind) {
+  if (kind == 'herb' || kind == 'jieji_hoard_herb') return 'herb'
+  if (kind == 'grain' || kind == 'jieji_hoard_grain') return 'grain'
+  if (kind == 'blood' || kind == 'jieji_hoard_blood') return 'blood'
+  return null
+}
+
+function _jiejiHoardChoices() {
+  return [
+    {
+      text: 'jieji_hoard_herb',
+      description: 'hint_jieji_hoard_herb',
+    },
+    {
+      text: 'jieji_hoard_grain',
+      description: 'hint_jieji_hoard_grain',
+    },
+    {
+      text: 'jieji_hoard_blood',
+      description: 'hint_jieji_hoard_blood',
+    },
+    'cancel',
+  ]
+}
+
+function _jiejiHoardHerbNeed(selected, seasonId) {
+  if (selected == 'grain') return _jiejiHoardGrainHerbCost(seasonId)
+  return 0
+}
+
+function _jiejiHoardMoneyNeed(selected, seasonId) {
+  if (selected == 'herb') return _jiejiHoardHerbMoneyCost(seasonId)
+  return 0
+}
+
+function _jiejiHoardCanCollectGrain() {
+  return kMaterialGrain != null
+}
+
+/// 交易所囤货三选。free 为 true 时不扣费、不检查冷却（debug），仍弹出三选。
+/// null 选择在 free 时默认囤药。
+/// 返回 'ok' | 'cooldown' | 'poor' | 'cancel'。
+async function hoardJiejiGoods({ free = false }) {
+  if (hero == null) return 'cancel'
+  if (free != true && _jiejiHoardOnCooldown()) {
+    return 'cooldown'
+  }
+
+  dialog.pushDialog('hint_hoardJiejiGoods')
+  dialog.pushSelection('jiejiHoard', _jiejiHoardChoices())
+  await dialog.execute()
+  final picked = dialog.checkSelected('jiejiHoard')
+  var selected = null
+  if (picked == null || picked == 'cancel') {
+    if (free == true && picked == null) {
+      selected = 'herb'
+    } else {
+      return 'cancel'
+    }
+  } else {
+    selected = _jiejiHoardNormalizeKind(picked)
+  }
+  if (selected == null) return 'cancel'
+
+  final seasonId = _jiejiHoardSeasonId()
+  if (free != true) {
+    final herbNeed = _jiejiHoardHerbNeed(selected, seasonId)
+    final moneyNeed = _jiejiHoardMoneyNeed(selected, seasonId)
+    final herbHave = hero.materials['herb'] ?? 0
+    final moneyHave = hero.materials['money'] ?? 0
+    if (herbHave < herbNeed || moneyHave < moneyNeed) {
+      return 'poor'
+    }
+  }
+
+  if (free != true) {
+    final herbNeed = _jiejiHoardHerbNeed(selected, seasonId)
+    final moneyNeed = _jiejiHoardMoneyNeed(selected, seasonId)
+    if (herbNeed > 0) {
+      Player.exhaust('herb', herbNeed)
+    }
+    if (moneyNeed > 0) {
+      Player.exhaust('money', moneyNeed)
+    }
+    if (selected == 'blood') {
+      _jiejiHoardCostLife(_jiejiHoardBloodLifeCost(seasonId))
+    }
+    _jiejiHoardMark()
+  }
+
+  if (selected == 'herb') {
+    var gain = kJiejiHoardHerbGain
+    if (seasonId == 'mist') {
+      gain = gain + kJiejiHoardHerbMistExtra
+      await Player.collect('herb', gain, incurIncident: false)
+      dialog.pushDialog('hint_hoardJiejiGoods_herb_mist', interpolations: [gain])
+    } else {
+      await Player.collect('herb', gain, incurIncident: false)
+      dialog.pushDialog('hint_hoardJiejiGoods_herb', interpolations: [gain])
+    }
+    await dialog.execute()
+  } else if (selected == 'grain') {
+    if (_jiejiHoardCanCollectGrain()) {
+      await Player.collect('grain', kJiejiHoardGrainGain, incurIncident: false)
+      dialog.pushDialog('hint_hoardJiejiGoods_grain', interpolations: [kJiejiHoardGrainGain])
+    } else {
+      await Player.collect('money', kJiejiHoardGrainMoneyFallback, incurIncident: false)
+      dialog.pushDialog('hint_hoardJiejiGoods_grain_money', interpolations: [kJiejiHoardGrainMoneyFallback])
+    }
+    await dialog.execute()
+  } else {
+    final dropped = await tryDropGongfaShard(rate: kJiejiHoardBloodGongfaRate)
+    if (dropped == true) {
+      dialog.pushDialog('hint_hoardJiejiGoods_blood')
+      await dialog.execute()
+    } else {
+      await Player.collect('money', kJiejiHoardBloodMoney, incurIncident: false)
+      dialog.pushDialog('hint_hoardJiejiGoods_blood_money', interpolations: [kJiejiHoardBloodMoney])
+      await dialog.execute()
+    }
+  }
+
+  Game.updateUI()
+  return 'ok'
+}

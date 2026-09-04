@@ -554,6 +554,11 @@ namespace debug {
     return await haggleJiejiGoods(free: true)
   }
 
+  /// 忽略冷却与花费，仍弹出交易所囤货三选。
+  async function forceHoard() {
+    return await hoardJiejiGoods(free: true)
+  }
+
   /// 忽略冷却与花费，仍弹出铸牌斋检胚三选。
   async function forceAssay() {
     return await assayJiejiBlank(free: true)
