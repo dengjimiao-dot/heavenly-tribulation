@@ -3700,6 +3700,22 @@
   "hint_jieji_bowl_bloodbowl_none": "血碗下去，碗影却散了。袋里多了 {0} 铜钱。",
 
 
+  "jiejiCup": "劫杯",
+  "hint_jieji_cup": "路边搁着一只劫杯。你可以举杯、收杯，或以血杯。",
+  "jieji_cup_raisecup": "举杯",
+  "jieji_cup_stowcup": "收杯",
+  "jieji_cup_bloodcup": "血杯",
+  "hint_jieji_cup_raisecup": "举杯：耗 1 药材（雾月不耗）。回 5 命，八厘摸残页。药材不够则空手。",
+  "hint_jieji_cup_stowcup": "收杯：花 8 铜钱（雷月 4）。得 2 药材，并回 3 命。袋里不够则空手。",
+  "hint_jieji_cup_bloodcup": "血杯：扣 2 点生机（至少留 1，血月 3）。二成六摸残页，不成则得 16 铜钱。",
+  "hint_jieji_cup_raisecup_ok": "你举起劫杯。生机回了 {0} 点。",
+  "hint_jieji_cup_raisecup_broke": "举杯要 {0} 药材。你拿不出来。",
+  "hint_jieji_cup_stowcup_ok": "你收起劫杯。得了 {0} 药材，生机回了 {1} 点。",
+  "hint_jieji_cup_stowcup_broke": "收杯要 {0} 铜钱。袋里不够。",
+  "hint_jieji_cup_bloodcup_ok": "你割了 {0} 点生机去染劫杯。",
+  "hint_jieji_cup_bloodcup_none": "血杯下去，杯影却散了。袋里多了 {0} 铜钱。",
+
+
   "jiejiMenpaiDemo": "劫季门派 · Demo",
   "jiejiMenpaiPitch": "带着业力赶天劫的门派肉鸽",
   "knownIssues": "已知问题",
