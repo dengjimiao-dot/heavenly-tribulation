@@ -1,0 +1,152 @@
+/// 赶路「劫鼓」三选：击鼓 / 收鼓 / 血鼓。隐藏、劫兆、野遇、赶路、行商、拾荒、扎营、残锋、残卷、雾灯、残鼓、汲泉、劫幡、劫铃、劫符、劫旌、劫烛、劫角、劫笛、劫笠、劫带、劫履、劫氅、劫扇、劫杖、劫伞、劫面、劫帔、劫手套、劫戒、劫镜都没中时才滚。
+const kJiejiDrumBaseRate = 0.017
+const kJiejiDrumMoveCooldown = 24
+const kJiejiDrumBeatdrumHerb = 1
+const kJiejiDrumBeatdrumLife = 5
+const kJiejiDrumBeatdrumGongfaRate = 0.08
+const kJiejiDrumStowdrumMoney = 8
+const kJiejiDrumStowdrumMoneyThunder = 4
+const kJiejiDrumStowdrumHerb = 2
+const kJiejiDrumStowdrumLife = 3
+const kJiejiDrumBloodLife = 2
+const kJiejiDrumBloodLifeBlood = 3
+const kJiejiDrumBloodGongfaRate = 0.26
+const kJiejiDrumBloodMoney = 16
+
+function _jiejiDrumSeasonId() {
+  if (game.jieji != null && game.jieji.seasonId != null) {
+    return game.jieji.seasonId
+  }
+  return null
+}
+
+function _jiejiDrumTutorialLocked() {
+  return game.enableTutorial && game.flags.tutorial.bountyQuest != true
+}
+
+function _jiejiDrumBeatdrumHerbCost(seasonId) {
+  if (seasonId == 'mist') return 0
+  return kJiejiDrumBeatdrumHerb
+}
+
+function _jiejiDrumStowdrumMoneyCost(seasonId) {
+  if (seasonId == 'thunder') return kJiejiDrumStowdrumMoneyThunder
+  return kJiejiDrumStowdrumMoney
+}
+
+function _jiejiDrumBloodLifeCost(seasonId) {
+  if (seasonId == 'blood') return kJiejiDrumBloodLifeBlood
+  return kJiejiDrumBloodLife
+}
+
+function _jiejiDrumCostLife(want) {
+  var lost = want
+  final life = hero.life ?? 1
+  if (life - lost < 1) lost = life - 1
+  if (lost < 0) lost = 0
+  if (lost > 0) {
+    Player.setLife(hero.life - lost)
+  }
+  return lost
+}
+
+function _jiejiDrumNormalizeKind(kind) {
+  if (kind == 'beatdrum' || kind == 'jieji_drum_beatdrum') return 'beatdrum'
+  if (kind == 'stowdrum' || kind == 'jieji_drum_stowdrum') return 'stowdrum'
+  if (kind == 'blooddrum' || kind == 'jieji_drum_blooddrum') return 'blooddrum'
+  return null
+}
+
+function _jiejiDrumChoices() {
+  return [
+    {
+      text: 'jieji_drum_beatdrum',
+      description: 'hint_jieji_drum_beatdrum',
+    },
+    {
+      text: 'jieji_drum_stowdrum',
+      description: 'hint_jieji_drum_stowdrum',
+    },
+    {
+      text: 'jieji_drum_blooddrum',
+      description: 'hint_jieji_drum_blooddrum',
+    },
+  ]
+}
+
+/// 赶路劫鼓三选。debug.forceJiejiEvent('drum') / forceDrum 直接走这里，仍弹出三选。
+async function playJiejiDrumEvent(terrain) {
+  if (hero == null) return false
+
+  dialog.pushDialog('hint_jieji_drum')
+  dialog.pushSelection('jiejiDrum', _jiejiDrumChoices())
+  await dialog.execute()
+  final picked = dialog.checkSelected('jiejiDrum')
+  var selected = _jiejiDrumNormalizeKind(picked)
+  if (selected == null) {
+    selected = 'beatdrum'
+  }
+
+  final seasonId = _jiejiDrumSeasonId()
+  if (selected == 'beatdrum') {
+    final herbNeed = _jiejiDrumBeatdrumHerbCost(seasonId)
+    final herbHave = hero.materials['herb'] ?? 0
+    if (herbNeed > 0 && herbHave < herbNeed) {
+      dialog.pushDialog('hint_jieji_drum_beatdrum_broke', interpolations: [herbNeed])
+      await dialog.execute()
+    } else {
+      if (herbNeed > 0) {
+        Player.exhaust('herb', herbNeed)
+      }
+      final healed = Player.restoreLife(kJiejiDrumBeatdrumLife)
+      dialog.pushDialog('hint_jieji_drum_beatdrum_ok', interpolations: [healed])
+      await dialog.execute()
+      await tryDropGongfaShard(rate: kJiejiDrumBeatdrumGongfaRate)
+    }
+  } else if (selected == 'stowdrum') {
+    final moneyNeed = _jiejiDrumStowdrumMoneyCost(seasonId)
+    final moneyHave = hero.materials['money'] ?? 0
+    if (moneyHave < moneyNeed) {
+      dialog.pushDialog('hint_jieji_drum_stowdrum_broke', interpolations: [moneyNeed])
+      await dialog.execute()
+    } else {
+      Player.exhaust('money', moneyNeed)
+      await Player.collect('herb', kJiejiDrumStowdrumHerb, incurIncident: false)
+      final healed = Player.restoreLife(kJiejiDrumStowdrumLife)
+      dialog.pushDialog('hint_jieji_drum_stowdrum_ok', interpolations: [kJiejiDrumStowdrumHerb, healed])
+      await dialog.execute()
+    }
+  } else {
+    final lost = _jiejiDrumCostLife(_jiejiDrumBloodLifeCost(seasonId))
+    dialog.pushDialog('hint_jieji_drum_blooddrum_ok', interpolations: [lost])
+    await dialog.execute()
+    final dropped = await tryDropGongfaShard(rate: kJiejiDrumBloodGongfaRate)
+    if (dropped != true) {
+      await Player.collect('money', kJiejiDrumBloodMoney, incurIncident: false)
+      dialog.pushDialog('hint_jieji_drum_blooddrum_none', interpolations: [kJiejiDrumBloodMoney])
+      await dialog.execute()
+    }
+  }
+
+  Game.updateUI()
+  return true
+}
+
+/// 赶路触发：教程锁与路遇相同；冷却 24 步；约 1.7%。出过则返回 true。
+async function tryJiejiDrumOnMove(terrain) {
+  if (hero == null) return false
+  if (_jiejiDrumTutorialLocked()) return false
+
+  final jieji = ensureJiejiFlags()
+  final moves = jieji.worldMoves ?? 0
+  final last = jieji.lastDrumMove ?? -999
+  if (moves - last < kJiejiDrumMoveCooldown) return false
+
+  var rate = kJiejiDrumBaseRate
+  if (rate < 0) rate = 0
+  if (random.nextDouble() > rate) return false
+
+  jieji.lastDrumMove = moves
+  await playJiejiDrumEvent(terrain)
+  return true
+}

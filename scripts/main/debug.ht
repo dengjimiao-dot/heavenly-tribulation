@@ -344,6 +344,8 @@ namespace debug {
       await playJiejiRingEvent(terrain)
     } else if (kind == 'mirror') {
       await playJiejiMirrorEvent(terrain)
+    } else if (kind == 'drum') {
+      await playJiejiDrumEvent(terrain)
     } else {
       await playJiejiThunderRoadEvent(terrain)
     }
@@ -995,6 +997,11 @@ namespace debug {
   /// 忽略几率与冷却，仍弹出赶路劫镜三选。
   async function forceMirror() {
     return await playJiejiMirrorEvent({ kind: 'plain' })
+  }
+
+  /// 忽略几率与冷却，仍弹出赶路劫鼓三选。
+  async function forceDrum() {
+    return await playJiejiDrumEvent({ kind: 'plain' })
   }
 
   /// 忽略冷却与花费，仍弹出幻术祭坛入幻三选。

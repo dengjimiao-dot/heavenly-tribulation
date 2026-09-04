@@ -3550,6 +3550,22 @@
   "hint_jieji_mirror_bloodmirror_none": "血镜下去，镜影却散了。袋里多了 {0} 铜钱。",
 
 
+  "jiejiDrum": "劫鼓",
+  "hint_jieji_drum": "路边搁着一面劫鼓。你可以击鼓、收鼓，或以血鼓。",
+  "jieji_drum_beatdrum": "击鼓",
+  "jieji_drum_stowdrum": "收鼓",
+  "jieji_drum_blooddrum": "血鼓",
+  "hint_jieji_drum_beatdrum": "击鼓：耗 1 药材（雾月不耗）。回 5 命，八厘摸残页。药材不够则空手。",
+  "hint_jieji_drum_stowdrum": "收鼓：花 8 铜钱（雷月 4）。得 2 药材，并回 3 命。袋里不够则空手。",
+  "hint_jieji_drum_blooddrum": "血鼓：扣 2 点生机（至少留 1，血月 3）。二成六摸残页，不成则得 16 铜钱。",
+  "hint_jieji_drum_beatdrum_ok": "你击了劫鼓。生机回了 {0} 点。",
+  "hint_jieji_drum_beatdrum_broke": "击鼓要 {0} 药材。你拿不出来。",
+  "hint_jieji_drum_stowdrum_ok": "你收起劫鼓。得了 {0} 药材，生机回了 {1} 点。",
+  "hint_jieji_drum_stowdrum_broke": "收鼓要 {0} 铜钱。袋里不够。",
+  "hint_jieji_drum_blooddrum_ok": "你割了 {0} 点生机去染劫鼓。",
+  "hint_jieji_drum_blooddrum_none": "血鼓下去，鼓影却散了。袋里多了 {0} 铜钱。",
+
+
   "jiejiMenpaiDemo": "劫季门派 · Demo",
   "jiejiMenpaiPitch": "带着业力赶天劫的门派肉鸽",
   "knownIssues": "已知问题",
