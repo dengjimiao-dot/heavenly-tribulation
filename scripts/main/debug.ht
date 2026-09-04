@@ -436,6 +436,9 @@ namespace debug {
     } else if (kind == 'stool') {
       game.flags.dungeon.pendingEncounter = 'jiejiStool'
       await playJiejiDungeonEncounter()
+    } else if (kind == 'lectern') {
+      game.flags.dungeon.pendingEncounter = 'jiejiLectern'
+      await playJiejiDungeonEncounter()
     } else if (kind == 'exit') {
       await playJiejiDungeonExitGift()
     } else {

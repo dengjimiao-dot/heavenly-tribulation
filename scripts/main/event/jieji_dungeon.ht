@@ -1,4 +1,4 @@
-/// 秘境劫季切片：营地天象、精英/Boss 染色、祭坛/匣/劫泉/伏击/试剑/古钟/残页/功法冢/剑炉/镜池/灯龛/劫鼓/残井/印室/劫门/劫匣/劫炉奇遇、出口劫礼。
+/// 秘境劫季切片：营地天象、精英/Boss 染色、祭坛/匣/劫泉/伏击/试剑/古钟/残页/功法冢/剑炉/镜池/灯龛/劫鼓/残井/印室/劫门/劫匣/劫炉奇遇、劫经奇遇、出口劫礼。
 /// 由 dungeon.ht 的 _prepareMap / onEnterMap / promptExit 小钩子调用。不改教程房布局。
 
 const kJiejiDungeonGuideCost = 80
@@ -289,6 +289,16 @@ const kJiejiDungeonStoolBloodLife = 2
 const kJiejiDungeonStoolBloodLifeBlood = 3
 const kJiejiDungeonStoolBloodGongfaRate = 0.35
 const kJiejiDungeonStoolBloodMoney = 55
+const kJiejiDungeonLecternOpenbookHerb = 1
+const kJiejiDungeonLecternOpenbookMistMoney = 20
+const kJiejiDungeonLecternSealMoney = 30
+const kJiejiDungeonLecternSealMoneyThunder = 15
+const kJiejiDungeonLecternSealLife = 4
+const kJiejiDungeonLecternSealGongfaRate = 0.25
+const kJiejiDungeonLecternBloodLife = 2
+const kJiejiDungeonLecternBloodLifeBlood = 3
+const kJiejiDungeonLecternBloodGongfaRate = 0.35
+const kJiejiDungeonLecternBloodMoney = 55
 const kJiejiDungeonExitPackMoney = 80
 const kJiejiDungeonExitPackMoneyThunder = 120
 const kJiejiDungeonExitPackMoneyBlood = 100
@@ -500,6 +510,8 @@ async function playJiejiDungeonEncounter() {
     await playJiejiDungeonMat()
   } else if (kind == 'jiejiStool') {
     await playJiejiDungeonStool()
+  } else if (kind == 'jiejiLectern') {
+    await playJiejiDungeonLectern()
   }
   Game.updateUI()
 }
@@ -2899,6 +2911,86 @@ async function playJiejiDungeonStool() {
       }
     } else {
       dialog.pushDialog('hint_jieji_dungeon_liftseat_broke', interpolations: ['${herbCost}'])
+      await dialog.execute()
+    }
+  }
+}
+
+function jiejiDungeonLecternSealMoney() {
+  if (jiejiDungeonSeasonId() == 'thunder') return kJiejiDungeonLecternSealMoneyThunder
+  return kJiejiDungeonLecternSealMoney
+}
+
+function jiejiDungeonLecternBloodLifeLoss() {
+  if (jiejiDungeonSeasonId() == 'blood') return kJiejiDungeonLecternBloodLifeBlood
+  return kJiejiDungeonLecternBloodLife
+}
+
+function jiejiDungeonLecternApplyWard() {
+  game.flags.jieji ??= {}
+  if (game.flags.jieji.arrayWard != true) {
+    game.flags.jieji.arrayWard = true
+  } else {
+    game.flags.jieji.feastFury = true
+  }
+}
+
+async function playJiejiDungeonLectern() {
+  dialog.pushDialog('hint_jieji_dungeon_lectern_room')
+  dialog.pushSelection('jiejiDungeonLectern', [
+    'jieji_dungeon_openbook',
+    'jieji_dungeon_seallect',
+    'jieji_dungeon_bloodlect',
+  ])
+  await dialog.execute()
+  final selected = dialog.checkSelected('jiejiDungeonLectern')
+
+  if (selected == 'jieji_dungeon_seallect') {
+    final cost = jiejiDungeonLecternSealMoney()
+    final moneyHave = hero.materials['money'] ?? 0
+    if (moneyHave >= cost) {
+      Player.exhaust('money', cost)
+      final healed = Player.restoreLife(kJiejiDungeonLecternSealLife)
+      jiejiDungeonLecternApplyWard()
+      dialog.pushDialog('hint_jieji_dungeon_seallect', interpolations: ['${cost}', '${healed}'])
+      await dialog.execute()
+      await tryDropGongfaShard(rate: kJiejiDungeonLecternSealGongfaRate)
+    } else {
+      dialog.pushDialog('hint_jieji_dungeon_seallect_broke', interpolations: ['${cost}'])
+      await dialog.execute()
+    }
+  } else if (selected == 'jieji_dungeon_bloodlect') {
+    final lost = jiejiDungeonClampLifeLoss(jiejiDungeonLecternBloodLifeLoss())
+    if (lost > 0) {
+      Player.setLife(hero.life - lost)
+    }
+    dialog.pushDialog('hint_jieji_dungeon_bloodlect', interpolations: ['${lost}'])
+    await dialog.execute()
+    await grantKarmaCard(jiejiDungeonKarmaSource())
+    var ok = await tryDropGongfaShard(rate: kJiejiDungeonLecternBloodGongfaRate)
+    if (ok != true) {
+      final money = kJiejiDungeonLecternBloodMoney
+      await Player.collect('money', money, incurIncident: false)
+      dialog.pushDialog('hint_jieji_dungeon_bloodlect_none', interpolations: ['${money}'])
+      await dialog.execute()
+    }
+  } else {
+    final herbCost = kJiejiDungeonLecternOpenbookHerb
+    final herbHave = hero.materials['herb'] ?? 0
+    if (herbHave >= herbCost) {
+      Player.exhaust('herb', herbCost)
+      jiejiDungeonGrantBlank()
+      if (jiejiDungeonSeasonId() == 'mist') {
+        final money = kJiejiDungeonLecternOpenbookMistMoney
+        await Player.collect('money', money, incurIncident: false)
+        dialog.pushDialog('hint_jieji_dungeon_openbook_mist', interpolations: ['${herbCost}', '${money}'])
+        await dialog.execute()
+      } else {
+        dialog.pushDialog('hint_jieji_dungeon_openbook', interpolations: ['${herbCost}'])
+        await dialog.execute()
+      }
+    } else {
+      dialog.pushDialog('hint_jieji_dungeon_openbook_broke', interpolations: ['${herbCost}'])
       await dialog.execute()
     }
   }
