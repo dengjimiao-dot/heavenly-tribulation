@@ -3730,6 +3730,22 @@
   "hint_jieji_cup_bloodcup_none": "血杯下去，杯影却散了。袋里多了 {0} 铜钱。",
 
 
+  "jiejiJar": "劫罐",
+  "hint_jieji_jar": "路边搁着一只劫罐。你可以启罐、收罐，或以血罐。",
+  "jieji_jar_openjar": "启罐",
+  "jieji_jar_stowjar": "收罐",
+  "jieji_jar_bloodjar": "血罐",
+  "hint_jieji_jar_openjar": "启罐：耗 1 药材（雾月不耗）。回 5 命，八厘摸残页。药材不够则空手。",
+  "hint_jieji_jar_stowjar": "收罐：花 8 铜钱（雷月 4）。得 2 药材，并回 3 命。袋里不够则空手。",
+  "hint_jieji_jar_bloodjar": "血罐：扣 2 点生机（至少留 1，血月 3）。二成六摸残页，不成则得 16 铜钱。",
+  "hint_jieji_jar_openjar_ok": "你启开劫罐。生机回了 {0} 点。",
+  "hint_jieji_jar_openjar_broke": "启罐要 {0} 药材。你拿不出来。",
+  "hint_jieji_jar_stowjar_ok": "你收起劫罐。得了 {0} 药材，生机回了 {1} 点。",
+  "hint_jieji_jar_stowjar_broke": "收罐要 {0} 铜钱。袋里不够。",
+  "hint_jieji_jar_bloodjar_ok": "你割了 {0} 点生机去染劫罐。",
+  "hint_jieji_jar_bloodjar_none": "血罐下去，罐影却散了。袋里多了 {0} 铜钱。",
+
+
   "jiejiMenpaiDemo": "劫季门派 · Demo",
   "jiejiMenpaiPitch": "带着业力赶天劫的门派肉鸽",
   "knownIssues": "已知问题",

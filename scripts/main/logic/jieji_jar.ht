@@ -1,0 +1,152 @@
+/// 赶路「劫罐」三选：启罐 / 收罐 / 血罐。隐藏、劫兆、野遇、赶路、行商、拾荒、扎营、残锋、残卷、雾灯、残鼓、汲泉、劫幡、劫铃、劫符、劫旌、劫烛、劫角、劫笛、劫笠、劫带、劫履、劫氅、劫扇、劫杖、劫伞、劫面、劫帔、劫手套、劫戒、劫镜、劫鼓、劫炬、劫梳、劫勺、劫碗、劫杯都没中时才滚。
+const kJiejiJarBaseRate = 0.011
+const kJiejiJarMoveCooldown = 24
+const kJiejiJarOpenjarHerb = 1
+const kJiejiJarOpenjarLife = 5
+const kJiejiJarOpenjarGongfaRate = 0.08
+const kJiejiJarStowjarMoney = 8
+const kJiejiJarStowjarMoneyThunder = 4
+const kJiejiJarStowjarHerb = 2
+const kJiejiJarStowjarLife = 3
+const kJiejiJarBloodLife = 2
+const kJiejiJarBloodLifeBlood = 3
+const kJiejiJarBloodGongfaRate = 0.26
+const kJiejiJarBloodMoney = 16
+
+function _jiejiJarSeasonId() {
+  if (game.jieji != null && game.jieji.seasonId != null) {
+    return game.jieji.seasonId
+  }
+  return null
+}
+
+function _jiejiJarTutorialLocked() {
+  return game.enableTutorial && game.flags.tutorial.bountyQuest != true
+}
+
+function _jiejiJarOpenjarHerbCost(seasonId) {
+  if (seasonId == 'mist') return 0
+  return kJiejiJarOpenjarHerb
+}
+
+function _jiejiJarStowjarMoneyCost(seasonId) {
+  if (seasonId == 'thunder') return kJiejiJarStowjarMoneyThunder
+  return kJiejiJarStowjarMoney
+}
+
+function _jiejiJarBloodLifeCost(seasonId) {
+  if (seasonId == 'blood') return kJiejiJarBloodLifeBlood
+  return kJiejiJarBloodLife
+}
+
+function _jiejiJarCostLife(want) {
+  var lost = want
+  final life = hero.life ?? 1
+  if (life - lost < 1) lost = life - 1
+  if (lost < 0) lost = 0
+  if (lost > 0) {
+    Player.setLife(hero.life - lost)
+  }
+  return lost
+}
+
+function _jiejiJarNormalizeKind(kind) {
+  if (kind == 'openjar' || kind == 'jieji_jar_openjar') return 'openjar'
+  if (kind == 'stowjar' || kind == 'jieji_jar_stowjar') return 'stowjar'
+  if (kind == 'bloodjar' || kind == 'jieji_jar_bloodjar') return 'bloodjar'
+  return null
+}
+
+function _jiejiJarChoices() {
+  return [
+    {
+      text: 'jieji_jar_openjar',
+      description: 'hint_jieji_jar_openjar',
+    },
+    {
+      text: 'jieji_jar_stowjar',
+      description: 'hint_jieji_jar_stowjar',
+    },
+    {
+      text: 'jieji_jar_bloodjar',
+      description: 'hint_jieji_jar_bloodjar',
+    },
+  ]
+}
+
+/// 赶路劫罐三选。debug.forceJiejiEvent('jar') / forceJar 直接走这里，仍弹出三选。
+async function playJiejiJarEvent(terrain) {
+  if (hero == null) return false
+
+  dialog.pushDialog('hint_jieji_jar')
+  dialog.pushSelection('jiejiJar', _jiejiJarChoices())
+  await dialog.execute()
+  final picked = dialog.checkSelected('jiejiJar')
+  var selected = _jiejiJarNormalizeKind(picked)
+  if (selected == null) {
+    selected = 'openjar'
+  }
+
+  final seasonId = _jiejiJarSeasonId()
+  if (selected == 'openjar') {
+    final herbNeed = _jiejiJarOpenjarHerbCost(seasonId)
+    final herbHave = hero.materials['herb'] ?? 0
+    if (herbNeed > 0 && herbHave < herbNeed) {
+      dialog.pushDialog('hint_jieji_jar_openjar_broke', interpolations: [herbNeed])
+      await dialog.execute()
+    } else {
+      if (herbNeed > 0) {
+        Player.exhaust('herb', herbNeed)
+      }
+      final healed = Player.restoreLife(kJiejiJarOpenjarLife)
+      dialog.pushDialog('hint_jieji_jar_openjar_ok', interpolations: [healed])
+      await dialog.execute()
+      await tryDropGongfaShard(rate: kJiejiJarOpenjarGongfaRate)
+    }
+  } else if (selected == 'stowjar') {
+    final moneyNeed = _jiejiJarStowjarMoneyCost(seasonId)
+    final moneyHave = hero.materials['money'] ?? 0
+    if (moneyHave < moneyNeed) {
+      dialog.pushDialog('hint_jieji_jar_stowjar_broke', interpolations: [moneyNeed])
+      await dialog.execute()
+    } else {
+      Player.exhaust('money', moneyNeed)
+      await Player.collect('herb', kJiejiJarStowjarHerb, incurIncident: false)
+      final healed = Player.restoreLife(kJiejiJarStowjarLife)
+      dialog.pushDialog('hint_jieji_jar_stowjar_ok', interpolations: [kJiejiJarStowjarHerb, healed])
+      await dialog.execute()
+    }
+  } else {
+    final lost = _jiejiJarCostLife(_jiejiJarBloodLifeCost(seasonId))
+    dialog.pushDialog('hint_jieji_jar_bloodjar_ok', interpolations: [lost])
+    await dialog.execute()
+    final dropped = await tryDropGongfaShard(rate: kJiejiJarBloodGongfaRate)
+    if (dropped != true) {
+      await Player.collect('money', kJiejiJarBloodMoney, incurIncident: false)
+      dialog.pushDialog('hint_jieji_jar_bloodjar_none', interpolations: [kJiejiJarBloodMoney])
+      await dialog.execute()
+    }
+  }
+
+  Game.updateUI()
+  return true
+}
+
+/// 赶路触发：教程锁与路遇相同；冷却 24 步；约 1.1%。出过则返回 true。
+async function tryJiejiJarOnMove(terrain) {
+  if (hero == null) return false
+  if (_jiejiJarTutorialLocked()) return false
+
+  final jieji = ensureJiejiFlags()
+  final moves = jieji.worldMoves ?? 0
+  final last = jieji.lastJarMove ?? -999
+  if (moves - last < kJiejiJarMoveCooldown) return false
+
+  var rate = kJiejiJarBaseRate
+  if (rate < 0) rate = 0
+  if (random.nextDouble() > rate) return false
+
+  jieji.lastJarMove = moves
+  await playJiejiJarEvent(terrain)
+  return true
+}
