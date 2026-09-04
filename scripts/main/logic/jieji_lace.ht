@@ -1,0 +1,152 @@
+/// 赶路「劫绦」三选：系绦 / 解绦 / 血绦。隐藏、劫兆、野遇、赶路、行商、拾荒、扎营、残锋、残卷、雾灯、残鼓、汲泉、劫幡、劫铃、劫符、劫旌、劫烛、劫角、劫笛、劫笠、劫带、劫履、劫氅、劫扇、劫杖、劫伞、劫面、劫帔、劫手套、劫戒、劫镜、劫鼓、劫炬、劫梳、劫勺、劫碗、劫杯、劫罐、劫瓶、劫墨、劫袍、劫带、劫簪、劫笔、劫针、劫扣、劫绳、劫珠、劫钗都没中时才滚。
+const kJiejiLaceBaseRate = 0.0015
+const kJiejiLaceMoveCooldown = 24
+const kJiejiLaceTiklaceHerb = 1
+const kJiejiLaceTiklaceLife = 4
+const kJiejiLaceTiklaceGongfaRate = 0.07
+const kJiejiLaceUntielaceMoney = 7
+const kJiejiLaceUntielaceMoneyThunder = 3
+const kJiejiLaceUntielaceHerb = 2
+const kJiejiLaceUntielaceLife = 3
+const kJiejiLaceBloodLife = 2
+const kJiejiLaceBloodLifeBlood = 3
+const kJiejiLaceBloodGongfaRate = 0.24
+const kJiejiLaceBloodMoney = 14
+
+function _jiejiLaceSeasonId() {
+  if (game.jieji != null && game.jieji.seasonId != null) {
+    return game.jieji.seasonId
+  }
+  return null
+}
+
+function _jiejiLaceTutorialLocked() {
+  return game.enableTutorial && game.flags.tutorial.bountyQuest != true
+}
+
+function _jiejiLaceTiklaceHerbCost(seasonId) {
+  if (seasonId == 'mist') return 0
+  return kJiejiLaceTiklaceHerb
+}
+
+function _jiejiLaceUntielaceMoneyCost(seasonId) {
+  if (seasonId == 'thunder') return kJiejiLaceUntielaceMoneyThunder
+  return kJiejiLaceUntielaceMoney
+}
+
+function _jiejiLaceBloodLifeCost(seasonId) {
+  if (seasonId == 'blood') return kJiejiLaceBloodLifeBlood
+  return kJiejiLaceBloodLife
+}
+
+function _jiejiLaceCostLife(want) {
+  var lost = want
+  final life = hero.life ?? 1
+  if (life - lost < 1) lost = life - 1
+  if (lost < 0) lost = 0
+  if (lost > 0) {
+    Player.setLife(hero.life - lost)
+  }
+  return lost
+}
+
+function _jiejiLaceNormalizeKind(kind) {
+  if (kind == 'tiklace' || kind == 'jieji_lace_tiklace') return 'tiklace'
+  if (kind == 'untielace' || kind == 'jieji_lace_untielace') return 'untielace'
+  if (kind == 'bloodlace' || kind == 'jieji_lace_bloodlace') return 'bloodlace'
+  return null
+}
+
+function _jiejiLaceChoices() {
+  return [
+    {
+      text: 'jieji_lace_tiklace',
+      description: 'hint_jieji_lace_tiklace',
+    },
+    {
+      text: 'jieji_lace_untielace',
+      description: 'hint_jieji_lace_untielace',
+    },
+    {
+      text: 'jieji_lace_bloodlace',
+      description: 'hint_jieji_lace_bloodlace',
+    },
+  ]
+}
+
+/// 赶路劫绦三选。debug.forceJiejiEvent('lace') / forceLace 直接走这里，仍弹出三选。
+async function playJiejiLaceEvent(terrain) {
+  if (hero == null) return false
+
+  dialog.pushDialog('hint_jieji_lace')
+  dialog.pushSelection('jiejiLace', _jiejiLaceChoices())
+  await dialog.execute()
+  final picked = dialog.checkSelected('jiejiLace')
+  var selected = _jiejiLaceNormalizeKind(picked)
+  if (selected == null) {
+    selected = 'tiklace'
+  }
+
+  final seasonId = _jiejiLaceSeasonId()
+  if (selected == 'tiklace') {
+    final herbNeed = _jiejiLaceTiklaceHerbCost(seasonId)
+    final herbHave = hero.materials['herb'] ?? 0
+    if (herbNeed > 0 && herbHave < herbNeed) {
+      dialog.pushDialog('hint_jieji_lace_tiklace_broke', interpolations: [herbNeed])
+      await dialog.execute()
+    } else {
+      if (herbNeed > 0) {
+        Player.exhaust('herb', herbNeed)
+      }
+      final healed = Player.restoreLife(kJiejiLaceTiklaceLife)
+      dialog.pushDialog('hint_jieji_lace_tiklace_ok', interpolations: [healed])
+      await dialog.execute()
+      await tryDropGongfaShard(rate: kJiejiLaceTiklaceGongfaRate)
+    }
+  } else if (selected == 'untielace') {
+    final moneyNeed = _jiejiLaceUntielaceMoneyCost(seasonId)
+    final moneyHave = hero.materials['money'] ?? 0
+    if (moneyHave < moneyNeed) {
+      dialog.pushDialog('hint_jieji_lace_untielace_broke', interpolations: [moneyNeed])
+      await dialog.execute()
+    } else {
+      Player.exhaust('money', moneyNeed)
+      await Player.collect('herb', kJiejiLaceUntielaceHerb, incurIncident: false)
+      final healed = Player.restoreLife(kJiejiLaceUntielaceLife)
+      dialog.pushDialog('hint_jieji_lace_untielace_ok', interpolations: [kJiejiLaceUntielaceHerb, healed])
+      await dialog.execute()
+    }
+  } else {
+    final lost = _jiejiLaceCostLife(_jiejiLaceBloodLifeCost(seasonId))
+    dialog.pushDialog('hint_jieji_lace_bloodlace_ok', interpolations: [lost])
+    await dialog.execute()
+    final dropped = await tryDropGongfaShard(rate: kJiejiLaceBloodGongfaRate)
+    if (dropped != true) {
+      await Player.collect('money', kJiejiLaceBloodMoney, incurIncident: false)
+      dialog.pushDialog('hint_jieji_lace_bloodlace_none', interpolations: [kJiejiLaceBloodMoney])
+      await dialog.execute()
+    }
+  }
+
+  Game.updateUI()
+  return true
+}
+
+/// 赶路触发：教程锁与路遇相同；冷却 24 步；约 0.15%。出过则返回 true。
+async function tryJiejiLaceOnMove(terrain) {
+  if (hero == null) return false
+  if (_jiejiLaceTutorialLocked()) return false
+
+  final jieji = ensureJiejiFlags()
+  final moves = jieji.worldMoves ?? 0
+  final last = jieji.lastLaceMove ?? -999
+  if (moves - last < kJiejiLaceMoveCooldown) return false
+
+  var rate = kJiejiLaceBaseRate
+  if (rate < 0) rate = 0
+  if (random.nextDouble() > rate) return false
+
+  jieji.lastLaceMove = moves
+  await playJiejiLaceEvent(terrain)
+  return true
+}
