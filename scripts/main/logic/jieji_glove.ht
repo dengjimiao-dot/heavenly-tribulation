@@ -1,0 +1,152 @@
+/// 赶路「劫手套」三选：戴套 / 收套 / 血套。隐藏、劫兆、野遇、赶路、行商、拾荒、扎营、残锋、残卷、雾灯、残鼓、汲泉、劫幡、劫铃、劫符、劫旌、劫烛、劫角、劫笛、劫笠、劫带、劫履、劫氅、劫扇、劫杖、劫伞、劫面、劫帔都没中时才滚。
+const kJiejiGloveBaseRate = 0.020
+const kJiejiGloveMoveCooldown = 24
+const kJiejiGloveDongloveHerb = 1
+const kJiejiGloveDongloveLife = 5
+const kJiejiGloveDongloveGongfaRate = 0.08
+const kJiejiGloveStowgloveMoney = 8
+const kJiejiGloveStowgloveMoneyThunder = 4
+const kJiejiGloveStowgloveHerb = 2
+const kJiejiGloveStowgloveLife = 3
+const kJiejiGloveBloodLife = 2
+const kJiejiGloveBloodLifeBlood = 3
+const kJiejiGloveBloodGongfaRate = 0.26
+const kJiejiGloveBloodMoney = 16
+
+function _jiejiGloveSeasonId() {
+  if (game.jieji != null && game.jieji.seasonId != null) {
+    return game.jieji.seasonId
+  }
+  return null
+}
+
+function _jiejiGloveTutorialLocked() {
+  return game.enableTutorial && game.flags.tutorial.bountyQuest != true
+}
+
+function _jiejiGloveDongloveHerbCost(seasonId) {
+  if (seasonId == 'mist') return 0
+  return kJiejiGloveDongloveHerb
+}
+
+function _jiejiGloveStowgloveMoneyCost(seasonId) {
+  if (seasonId == 'thunder') return kJiejiGloveStowgloveMoneyThunder
+  return kJiejiGloveStowgloveMoney
+}
+
+function _jiejiGloveBloodLifeCost(seasonId) {
+  if (seasonId == 'blood') return kJiejiGloveBloodLifeBlood
+  return kJiejiGloveBloodLife
+}
+
+function _jiejiGloveCostLife(want) {
+  var lost = want
+  final life = hero.life ?? 1
+  if (life - lost < 1) lost = life - 1
+  if (lost < 0) lost = 0
+  if (lost > 0) {
+    Player.setLife(hero.life - lost)
+  }
+  return lost
+}
+
+function _jiejiGloveNormalizeKind(kind) {
+  if (kind == 'donglove' || kind == 'jieji_glove_donglove') return 'donglove'
+  if (kind == 'stowglove' || kind == 'jieji_glove_stowglove') return 'stowglove'
+  if (kind == 'bloodglove' || kind == 'jieji_glove_bloodglove') return 'bloodglove'
+  return null
+}
+
+function _jiejiGloveChoices() {
+  return [
+    {
+      text: 'jieji_glove_donglove',
+      description: 'hint_jieji_glove_donglove',
+    },
+    {
+      text: 'jieji_glove_stowglove',
+      description: 'hint_jieji_glove_stowglove',
+    },
+    {
+      text: 'jieji_glove_bloodglove',
+      description: 'hint_jieji_glove_bloodglove',
+    },
+  ]
+}
+
+/// 赶路劫手套三选。debug.forceJiejiEvent('glove') / forceGlove 直接走这里，仍弹出三选。
+async function playJiejiGloveEvent(terrain) {
+  if (hero == null) return false
+
+  dialog.pushDialog('hint_jieji_glove')
+  dialog.pushSelection('jiejiGlove', _jiejiGloveChoices())
+  await dialog.execute()
+  final picked = dialog.checkSelected('jiejiGlove')
+  var selected = _jiejiGloveNormalizeKind(picked)
+  if (selected == null) {
+    selected = 'donglove'
+  }
+
+  final seasonId = _jiejiGloveSeasonId()
+  if (selected == 'donglove') {
+    final herbNeed = _jiejiGloveDongloveHerbCost(seasonId)
+    final herbHave = hero.materials['herb'] ?? 0
+    if (herbNeed > 0 && herbHave < herbNeed) {
+      dialog.pushDialog('hint_jieji_glove_donglove_broke', interpolations: [herbNeed])
+      await dialog.execute()
+    } else {
+      if (herbNeed > 0) {
+        Player.exhaust('herb', herbNeed)
+      }
+      final healed = Player.restoreLife(kJiejiGloveDongloveLife)
+      dialog.pushDialog('hint_jieji_glove_donglove_ok', interpolations: [healed])
+      await dialog.execute()
+      await tryDropGongfaShard(rate: kJiejiGloveDongloveGongfaRate)
+    }
+  } else if (selected == 'stowglove') {
+    final moneyNeed = _jiejiGloveStowgloveMoneyCost(seasonId)
+    final moneyHave = hero.materials['money'] ?? 0
+    if (moneyHave < moneyNeed) {
+      dialog.pushDialog('hint_jieji_glove_stowglove_broke', interpolations: [moneyNeed])
+      await dialog.execute()
+    } else {
+      Player.exhaust('money', moneyNeed)
+      await Player.collect('herb', kJiejiGloveStowgloveHerb, incurIncident: false)
+      final healed = Player.restoreLife(kJiejiGloveStowgloveLife)
+      dialog.pushDialog('hint_jieji_glove_stowglove_ok', interpolations: [kJiejiGloveStowgloveHerb, healed])
+      await dialog.execute()
+    }
+  } else {
+    final lost = _jiejiGloveCostLife(_jiejiGloveBloodLifeCost(seasonId))
+    dialog.pushDialog('hint_jieji_glove_bloodglove_ok', interpolations: [lost])
+    await dialog.execute()
+    final dropped = await tryDropGongfaShard(rate: kJiejiGloveBloodGongfaRate)
+    if (dropped != true) {
+      await Player.collect('money', kJiejiGloveBloodMoney, incurIncident: false)
+      dialog.pushDialog('hint_jieji_glove_bloodglove_none', interpolations: [kJiejiGloveBloodMoney])
+      await dialog.execute()
+    }
+  }
+
+  Game.updateUI()
+  return true
+}
+
+/// 赶路触发：教程锁与路遇相同；冷却 24 步；约 2.0%。出过则返回 true。
+async function tryJiejiGloveOnMove(terrain) {
+  if (hero == null) return false
+  if (_jiejiGloveTutorialLocked()) return false
+
+  final jieji = ensureJiejiFlags()
+  final moves = jieji.worldMoves ?? 0
+  final last = jieji.lastGloveMove ?? -999
+  if (moves - last < kJiejiGloveMoveCooldown) return false
+
+  var rate = kJiejiGloveBaseRate
+  if (rate < 0) rate = 0
+  if (random.nextDouble() > rate) return false
+
+  jieji.lastGloveMove = moves
+  await playJiejiGloveEvent(terrain)
+  return true
+}

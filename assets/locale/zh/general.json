@@ -3459,6 +3459,23 @@
   "hint_jieji_shawl_bloodshawl_ok": "你割了 {0} 点生机去染劫帔。",
   "hint_jieji_shawl_bloodshawl_none": "血帔下去，帔影却散了。袋里多了 {0} 铜钱。",
 
+
+  "jiejiGlove": "劫手套",
+  "hint_jieji_glove": "路边搁着一双劫手套。你可以戴套、收套，或以血套。",
+  "jieji_glove_donglove": "戴套",
+  "jieji_glove_stowglove": "收套",
+  "jieji_glove_bloodglove": "血套",
+  "hint_jieji_glove_donglove": "戴套：耗 1 药材（雾月不耗）。回 5 命，八厘摸残页。药材不够则空手。",
+  "hint_jieji_glove_stowglove": "收套：花 8 铜钱（雷月 4）。得 2 药材，并回 3 命。袋里不够则空手。",
+  "hint_jieji_glove_bloodglove": "血套：扣 2 点生机（至少留 1，血月 3）。二成六摸残页，不成则得 16 铜钱。",
+  "hint_jieji_glove_donglove_ok": "你戴上劫手套。生机回了 {0} 点。",
+  "hint_jieji_glove_donglove_broke": "戴套要 {0} 药材。你拿不出来。",
+  "hint_jieji_glove_stowglove_ok": "你收起劫手套。得了 {0} 药材，生机回了 {1} 点。",
+  "hint_jieji_glove_stowglove_broke": "收套要 {0} 铜钱。袋里不够。",
+  "hint_jieji_glove_bloodglove_ok": "你割了 {0} 点生机去染劫手套。",
+  "hint_jieji_glove_bloodglove_none": "血套下去，套影却散了。袋里多了 {0} 铜钱。",
+
+
   "jiejiMenpaiDemo": "劫季门派 · Demo",
   "jiejiMenpaiPitch": "带着业力赶天劫的门派肉鸽",
   "knownIssues": "已知问题",
