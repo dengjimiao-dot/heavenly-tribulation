@@ -1,0 +1,180 @@
+/// 家「再习」三选：再温 / 再抄 / 血习。仅家；不替换夜课与歇息。
+/// 与演武场加练（jieji_drill.ht / lastDrillDay）分开；本文件用 lastHomeDrillDay。
+const kJiejiHomeDrillCooldownDays = 1
+const kJiejiHomeDrillWarmHerb = 1
+const kJiejiHomeDrillWarmHerbMist = 0
+const kJiejiHomeDrillWarmLife = 6
+const kJiejiHomeDrillCopyHerb = 2
+const kJiejiHomeDrillCopyHerbMist = 1
+const kJiejiHomeDrillCopyBlankRate = 0.25
+const kJiejiHomeDrillCopyMoney = 40
+const kJiejiHomeDrillBloodLife = 2
+const kJiejiHomeDrillBloodLifeBlood = 3
+const kJiejiHomeDrillBloodGongfaRate = 0.20
+const kJiejiHomeDrillBloodMoney = 40
+
+function _jiejiHomeDrillSeasonId() {
+  if (game.jieji != null && game.jieji.seasonId != null) {
+    return game.jieji.seasonId
+  }
+  return null
+}
+
+function _jiejiHomeDrillCurrentDay() {
+  if (game.timestamp == null) return null
+  if (Constants.ticksPerDay == null) return null
+  if (Constants.ticksPerDay <= 0) return null
+  return game.timestamp ~/ Constants.ticksPerDay
+}
+
+function _jiejiHomeDrillOnCooldown() {
+  final jieji = ensureJiejiFlags()
+  final day = _jiejiHomeDrillCurrentDay()
+  if (day == null) return false
+  if (jieji.lastHomeDrillDay == null) return false
+  if (day - jieji.lastHomeDrillDay < kJiejiHomeDrillCooldownDays) return true
+  return false
+}
+
+function _jiejiHomeDrillMark() {
+  final jieji = ensureJiejiFlags()
+  jieji.lastHomeDrillDay = _jiejiHomeDrillCurrentDay()
+}
+
+function _jiejiHomeDrillCostLife(want) {
+  var lost = want
+  final life = hero.life ?? 1
+  if (life - lost < 1) lost = life - 1
+  if (lost < 0) lost = 0
+  if (lost > 0) {
+    Player.setLife(hero.life - lost)
+  }
+  return lost
+}
+
+function _jiejiHomeDrillGrantBlank() {
+  final card = BattleCard(rank: 0)
+  card.isCardBlank = true
+  Player.acquireCard(card)
+  return card
+}
+
+function _jiejiHomeDrillWarmHerbCost(seasonId) {
+  if (seasonId == 'mist') return kJiejiHomeDrillWarmHerbMist
+  return kJiejiHomeDrillWarmHerb
+}
+
+function _jiejiHomeDrillCopyHerbCost(seasonId) {
+  if (seasonId == 'mist') return kJiejiHomeDrillCopyHerbMist
+  return kJiejiHomeDrillCopyHerb
+}
+
+function _jiejiHomeDrillBloodLifeCost(seasonId) {
+  if (seasonId == 'blood') return kJiejiHomeDrillBloodLifeBlood
+  return kJiejiHomeDrillBloodLife
+}
+
+function _jiejiHomeDrillNormalizeKind(kind) {
+  if (kind == 'warm' || kind == 'jieji_home_drill_warm') return 'warm'
+  if (kind == 'copy' || kind == 'jieji_home_drill_copy') return 'copy'
+  if (kind == 'blood' || kind == 'jieji_home_drill_blood') return 'blood'
+  return null
+}
+
+function _jiejiHomeDrillChoices() {
+  return [
+    {
+      text: 'jieji_home_drill_warm',
+      description: 'hint_jieji_home_drill_warm',
+    },
+    {
+      text: 'jieji_home_drill_copy',
+      description: 'hint_jieji_home_drill_copy',
+    },
+    {
+      text: 'jieji_home_drill_blood',
+      description: 'hint_jieji_home_drill_blood',
+    },
+    'cancel',
+  ]
+}
+
+function _jiejiHomeDrillHerbNeed(selected, seasonId) {
+  if (selected == 'warm') return _jiejiHomeDrillWarmHerbCost(seasonId)
+  if (selected == 'copy') return _jiejiHomeDrillCopyHerbCost(seasonId)
+  return 0
+}
+
+/// 家再习三选。free 为 true 时不扣费、不检查冷却（debug），仍弹出三选。
+/// null 选择在 free 时默认再温。
+/// 返回 'ok' | 'cooldown' | 'poor' | 'cancel'。
+async function drillJiejiHome({ free = false }) {
+  if (hero == null) return 'cancel'
+  if (free != true && _jiejiHomeDrillOnCooldown()) {
+    return 'cooldown'
+  }
+
+  dialog.pushDialog('hint_drillJiejiHome')
+  dialog.pushSelection('jiejiHomeDrill', _jiejiHomeDrillChoices())
+  await dialog.execute()
+  final picked = dialog.checkSelected('jiejiHomeDrill')
+  var selected = null
+  if (picked == null || picked == 'cancel') {
+    if (free == true && picked == null) {
+      selected = 'warm'
+    } else {
+      return 'cancel'
+    }
+  } else {
+    selected = _jiejiHomeDrillNormalizeKind(picked)
+  }
+  if (selected == null) return 'cancel'
+
+  final seasonId = _jiejiHomeDrillSeasonId()
+  if (free != true) {
+    final herbNeed = _jiejiHomeDrillHerbNeed(selected, seasonId)
+    final herbHave = hero.materials['herb'] ?? 0
+    if (herbHave < herbNeed) {
+      return 'poor'
+    }
+  }
+
+  if (free != true) {
+    final herbNeed = _jiejiHomeDrillHerbNeed(selected, seasonId)
+    if (herbNeed > 0) {
+      Player.exhaust('herb', herbNeed)
+    }
+    if (selected == 'blood') {
+      _jiejiHomeDrillCostLife(_jiejiHomeDrillBloodLifeCost(seasonId))
+    }
+    _jiejiHomeDrillMark()
+  }
+
+  if (selected == 'copy') {
+    if (random.nextDouble() < kJiejiHomeDrillCopyBlankRate) {
+      _jiejiHomeDrillGrantBlank()
+      dialog.pushDialog('hint_drillJiejiHome_copy_blank')
+    } else {
+      await Player.collect('money', kJiejiHomeDrillCopyMoney, incurIncident: false)
+      dialog.pushDialog('hint_drillJiejiHome_copy_money')
+    }
+    await dialog.execute()
+  } else if (selected == 'blood') {
+    final dropped = await tryDropGongfaShard(rate: kJiejiHomeDrillBloodGongfaRate)
+    if (dropped == true) {
+      dialog.pushDialog('hint_drillJiejiHome_blood')
+      await dialog.execute()
+    } else {
+      await Player.collect('money', kJiejiHomeDrillBloodMoney, incurIncident: false)
+      dialog.pushDialog('hint_drillJiejiHome_blood_money')
+      await dialog.execute()
+    }
+  } else {
+    Player.restoreLife(kJiejiHomeDrillWarmLife)
+    dialog.pushDialog('hint_drillJiejiHome_warm')
+    await dialog.execute()
+  }
+
+  Game.updateUI()
+  return 'ok'
+}

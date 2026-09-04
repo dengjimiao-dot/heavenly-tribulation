@@ -445,6 +445,11 @@ namespace debug {
     return await studyJiejiHome(free: true)
   }
 
+  /// 忽略冷却与花费，仍弹出家中再习三选。不与 forceStudy / forceArenaDrill 撞名。
+  async function forceDrill() {
+    return await drillJiejiHome(free: true)
+  }
+
   /// 忽略冷却与花费，仍弹出酒楼劫宴三选。
   async function forceFeast() {
     return await feastJiejiHotel(free: true)
@@ -468,8 +473,8 @@ namespace debug {
     return await duelJiejiArena(free: true)
   }
 
-  /// 忽略冷却与花费，仍弹出演武场加练三选。
-  async function forceDrill() {
+  /// 忽略冷却与花费，仍弹出演武场加练三选。原 forceDrill 已让给家再习；此为演武加练入口。
+  async function forceArenaDrill() {
     return await drillJiejiArena(free: true)
   }
 

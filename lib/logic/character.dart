@@ -2454,6 +2454,27 @@ Future<void> _heroStudyJiejiHome(dynamic location) async {
   }
 }
 
+
+Future<void> _heroDrillJiejiHome(dynamic location) async {
+  final result = await engine.hetu.invoke('drillJiejiHome');
+  if (result == 'cooldown') {
+    dialog.pushDialog(
+      'hint_drillJiejiHome_cooldown',
+      npcId: location['npcId'],
+    );
+    await dialog.execute();
+    return;
+  }
+  if (result == 'poor') {
+    dialog.pushDialog(
+      'hint_drillJiejiHome_notEnough',
+      npcId: location['npcId'],
+    );
+    await dialog.execute();
+    return;
+  }
+}
+
 Future<void> _heroFeastJiejiHotel(dynamic location) async {
   final result = await engine.hetu.invoke('feastJiejiHotel');
   if (result == 'cooldown') {
@@ -3731,6 +3752,10 @@ Future<void> _onInteractSite(
         'text': 'studyJiejiHome',
         'description': 'hint_studyJiejiHome_description',
       });
+      siteOptions.add({
+        'text': 'drillJiejiHome',
+        'description': 'hint_drillJiejiHome_description',
+      });
     }
   } else if (siteKind == 'hotel') {
     siteOptions.add({
@@ -4043,6 +4068,8 @@ Future<void> _onInteractSite(
       await _heroRestJiejiSite(location);
     case 'studyJiejiHome':
       await _heroStudyJiejiHome(location);
+    case 'drillJiejiHome':
+      await _heroDrillJiejiHome(location);
     case 'feastJiejiHotel':
       await _heroFeastJiejiHotel(location);
     case 'nightJiejiHotel':
