@@ -1,0 +1,218 @@
+/// 四野「深采」：矿/渔/林/猎浅捞 / 深采 / 血采。不替换季采。
+const kJiejiScourCooldownDays = 1
+const kJiejiScourSkimMoney = 20
+const kJiejiScourSkimMoneyThunder = 10
+const kJiejiScourSkimPrimary = 1
+const kJiejiScourSkimMistHerb = 1
+const kJiejiScourDeepHerb = 1
+const kJiejiScourDeepPrimary = 2
+const kJiejiScourDeepSecondary = 1
+const kJiejiScourDeepGongfaRate = 0.15
+const kJiejiScourBloodLife = 2
+const kJiejiScourBloodLifeBlood = 3
+const kJiejiScourBloodGongfaRate = 0.30
+const kJiejiScourBloodMoney = 40
+
+function _jiejiScourSeasonId() {
+  if (game.jieji != null && game.jieji.seasonId != null) {
+    return game.jieji.seasonId
+  }
+  return null
+}
+
+function _jiejiScourNormalizeKind(kind) {
+  if (kind == 'mine' || kind == kLocationKindMine) return 'mine'
+  if (kind == 'fishery' || kind == kLocationKindFishery) return 'fishery'
+  if (kind == 'timberland' || kind == kLocationKindTimberland) return 'timberland'
+  if (kind == 'huntingground' || kind == kLocationKindHuntingground) return 'huntingground'
+  return null
+}
+
+function _jiejiScourMats(kind) {
+  if (kind == 'mine') {
+    return { a: 'stone', b: 'ore', primary: 'ore' }
+  }
+  if (kind == 'fishery') {
+    return { a: 'water', b: 'meat', primary: 'meat' }
+  }
+  if (kind == 'timberland') {
+    return { a: 'timber', b: 'herb', primary: 'timber' }
+  }
+  return { a: 'leather', b: 'meat', primary: 'meat' }
+}
+
+function _jiejiScourCurrentDay() {
+  if (game.timestamp == null) return null
+  if (Constants.ticksPerDay == null) return null
+  if (Constants.ticksPerDay <= 0) return null
+  return game.timestamp ~/ Constants.ticksPerDay
+}
+
+function _jiejiScourOnCooldown() {
+  final jieji = ensureJiejiFlags()
+  final day = _jiejiScourCurrentDay()
+  if (day == null) return false
+  if (jieji.lastScourDay == null) return false
+  if (day - jieji.lastScourDay < kJiejiScourCooldownDays) return true
+  return false
+}
+
+function _jiejiScourMark() {
+  final jieji = ensureJiejiFlags()
+  jieji.lastScourDay = _jiejiScourCurrentDay()
+}
+
+function _jiejiScourCostLife(want) {
+  var lost = want
+  final life = hero.life ?? 1
+  if (life - lost < 1) lost = life - 1
+  if (lost < 0) lost = 0
+  if (lost > 0) {
+    Player.setLife(hero.life - lost)
+  }
+  return lost
+}
+
+function _jiejiScourSkimMoneyCost(seasonId) {
+  if (seasonId == 'thunder') return kJiejiScourSkimMoneyThunder
+  return kJiejiScourSkimMoney
+}
+
+function _jiejiScourBloodLifeCost(seasonId) {
+  if (seasonId == 'blood') return kJiejiScourBloodLifeBlood
+  return kJiejiScourBloodLife
+}
+
+function _jiejiScourIntroKey(kind) {
+  if (kind == 'mine') return 'hint_scourJiejiSite_mine'
+  if (kind == 'fishery') return 'hint_scourJiejiSite_fishery'
+  if (kind == 'timberland') return 'hint_scourJiejiSite_timberland'
+  return 'hint_scourJiejiSite_huntingground'
+}
+
+function _jiejiScourNormalizePick(pick) {
+  if (pick == 'skim' || pick == 'jieji_scour_skim') return 'skim'
+  if (pick == 'deep' || pick == 'jieji_scour_deep') return 'deep'
+  if (pick == 'blood' || pick == 'jieji_scour_blood') return 'blood'
+  return null
+}
+
+function _jiejiScourChoices() {
+  return [
+    {
+      text: 'jieji_scour_skim',
+      description: 'hint_jieji_scour_skim',
+    },
+    {
+      text: 'jieji_scour_deep',
+      description: 'hint_jieji_scour_deep',
+    },
+    {
+      text: 'jieji_scour_blood',
+      description: 'hint_jieji_scour_blood',
+    },
+    'cancel',
+  ]
+}
+
+function _jiejiScourHerbNeed(selected) {
+  if (selected == 'deep') return kJiejiScourDeepHerb
+  return 0
+}
+
+function _jiejiScourMoneyNeed(selected, seasonId) {
+  if (selected == 'skim') return _jiejiScourSkimMoneyCost(seasonId)
+  return 0
+}
+
+function _jiejiScourSecondary(mats) {
+  if (mats.a == mats.primary) return mats.b
+  return mats.a
+}
+
+/// 四野深采三选。free 为 true 时不扣费、不检查冷却（debug）；pick 为空仍弹出三选。
+/// 返回 'cooldown' | 'poor' | 'cancel' | 'skim' | 'deep' | 'blood'。
+async function scourJiejiSite(kind, { free = false, pick = null }) {
+  if (hero == null) return 'cancel'
+  final siteKind = _jiejiScourNormalizeKind(kind)
+  if (siteKind == null) return 'cancel'
+  if (free != true && _jiejiScourOnCooldown()) {
+    return 'cooldown'
+  }
+
+  var selected = _jiejiScourNormalizePick(pick)
+  if (selected == null) {
+    dialog.pushDialog(_jiejiScourIntroKey(siteKind))
+    dialog.pushSelection('jiejiScour', _jiejiScourChoices())
+    await dialog.execute()
+    final picked = dialog.checkSelected('jiejiScour')
+    if (picked == null || picked == 'cancel') {
+      if (free == true && picked == null) {
+        selected = 'skim'
+      } else {
+        return 'cancel'
+      }
+    } else {
+      selected = _jiejiScourNormalizePick(picked)
+    }
+  }
+  if (selected == null) return 'cancel'
+
+  final seasonId = _jiejiScourSeasonId()
+  if (free != true) {
+    final herbNeed = _jiejiScourHerbNeed(selected)
+    final moneyNeed = _jiejiScourMoneyNeed(selected, seasonId)
+    final herbHave = hero.materials['herb'] ?? 0
+    final moneyHave = hero.materials['money'] ?? 0
+    if (herbHave < herbNeed || moneyHave < moneyNeed) {
+      return 'poor'
+    }
+  }
+
+  if (free != true) {
+    final herbNeed = _jiejiScourHerbNeed(selected)
+    final moneyNeed = _jiejiScourMoneyNeed(selected, seasonId)
+    if (herbNeed > 0) {
+      Player.exhaust('herb', herbNeed)
+    }
+    if (moneyNeed > 0) {
+      Player.exhaust('money', moneyNeed)
+    }
+    if (selected == 'blood') {
+      _jiejiScourCostLife(_jiejiScourBloodLifeCost(seasonId))
+    }
+    _jiejiScourMark()
+  }
+
+  final mats = _jiejiScourMats(siteKind)
+  if (selected == 'skim') {
+    await Player.collect(mats.primary, kJiejiScourSkimPrimary, incurIncident: false)
+    if (seasonId == 'mist') {
+      await Player.collect('herb', kJiejiScourSkimMistHerb, incurIncident: false)
+      dialog.pushDialog('hint_scourJiejiSite_skim_mist')
+    } else {
+      dialog.pushDialog('hint_scourJiejiSite_skim')
+    }
+    await dialog.execute()
+  } else if (selected == 'deep') {
+    final secondary = _jiejiScourSecondary(mats)
+    await Player.collect(mats.primary, kJiejiScourDeepPrimary, incurIncident: false)
+    await Player.collect(secondary, kJiejiScourDeepSecondary, incurIncident: false)
+    dialog.pushDialog('hint_scourJiejiSite_deep')
+    await dialog.execute()
+    await tryDropGongfaShard(rate: kJiejiScourDeepGongfaRate)
+  } else if (selected == 'blood') {
+    final ok = await tryDropGongfaShard(rate: kJiejiScourBloodGongfaRate)
+    if (ok == true) {
+      dialog.pushDialog('hint_scourJiejiSite_blood')
+      await dialog.execute()
+    } else {
+      await Player.collect('money', kJiejiScourBloodMoney, incurIncident: false)
+      dialog.pushDialog('hint_scourJiejiSite_blood_money')
+      await dialog.execute()
+    }
+  }
+
+  Game.updateUI()
+  return selected
+}

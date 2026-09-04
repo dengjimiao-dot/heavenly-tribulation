@@ -384,6 +384,12 @@ namespace debug {
     return await gatherJiejiSite(k, free: true)
   }
 
+  async function forceScour(kind) {
+    var k = kind
+    if (k == null) k = 'mine'
+    return await scourJiejiSite(k, free: true)
+  }
+
   async function forceRest(kind) {
     return await restJiejiSite(kind, free: true)
   }
