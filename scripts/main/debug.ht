@@ -205,6 +205,8 @@ namespace debug {
       questKind = 'hidden_mist_cairn'
     } else if (kind == 'banner') {
       questKind = 'hidden_blood_banner'
+    } else if (kind == 'pyre') {
+      questKind = 'hidden_blood_pyre'
     } else if (kind == 'kiosk') {
       questKind = 'hidden_thunder_kiosk'
     }
