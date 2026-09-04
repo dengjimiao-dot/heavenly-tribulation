@@ -309,6 +309,8 @@ namespace debug {
       questKind = 'hidden_thunder_flash'
     } else if (kind == 'dew') {
       questKind = 'hidden_mist_dew'
+    } else if (kind == 'clot') {
+      questKind = 'hidden_blood_clot'
     }
     final ctor = Quests[questKind]
     if (ctor == null) return false
