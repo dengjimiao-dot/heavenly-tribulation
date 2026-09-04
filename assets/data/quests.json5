@@ -507,5 +507,13 @@
     contribution: 11,
     rank: 0,
   },
+  hidden_mist_cove: {
+    id: "hidden_mist_cove",
+    policy: null,
+    isBounty: false,
+    isHidden: true,
+    contribution: 11,
+    rank: 0,
+  },
 
 }
