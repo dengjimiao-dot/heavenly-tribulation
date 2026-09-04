@@ -1,0 +1,152 @@
+/// 赶路「劫面」三选：戴面 / 收面 / 血面。隐藏、劫兆、野遇、赶路、行商、拾荒、扎营、残锋、残卷、雾灯、残鼓、汲泉、劫幡、劫铃、劫符、劫旌、劫烛、劫角、劫笛、劫笠、劫带、劫履、劫氅、劫扇、劫杖、劫伞都没中时才滚。
+const kJiejiMaskBaseRate = 0.022
+const kJiejiMaskMoveCooldown = 24
+const kJiejiMaskDonmaskHerb = 1
+const kJiejiMaskDonmaskLife = 5
+const kJiejiMaskDonmaskGongfaRate = 0.08
+const kJiejiMaskStowmaskMoney = 8
+const kJiejiMaskStowmaskMoneyThunder = 4
+const kJiejiMaskStowmaskHerb = 2
+const kJiejiMaskStowmaskLife = 3
+const kJiejiMaskBloodLife = 2
+const kJiejiMaskBloodLifeBlood = 3
+const kJiejiMaskBloodGongfaRate = 0.26
+const kJiejiMaskBloodMoney = 16
+
+function _jiejiMaskSeasonId() {
+  if (game.jieji != null && game.jieji.seasonId != null) {
+    return game.jieji.seasonId
+  }
+  return null
+}
+
+function _jiejiMaskTutorialLocked() {
+  return game.enableTutorial && game.flags.tutorial.bountyQuest != true
+}
+
+function _jiejiMaskDonmaskHerbCost(seasonId) {
+  if (seasonId == 'mist') return 0
+  return kJiejiMaskDonmaskHerb
+}
+
+function _jiejiMaskStowmaskMoneyCost(seasonId) {
+  if (seasonId == 'thunder') return kJiejiMaskStowmaskMoneyThunder
+  return kJiejiMaskStowmaskMoney
+}
+
+function _jiejiMaskBloodLifeCost(seasonId) {
+  if (seasonId == 'blood') return kJiejiMaskBloodLifeBlood
+  return kJiejiMaskBloodLife
+}
+
+function _jiejiMaskCostLife(want) {
+  var lost = want
+  final life = hero.life ?? 1
+  if (life - lost < 1) lost = life - 1
+  if (lost < 0) lost = 0
+  if (lost > 0) {
+    Player.setLife(hero.life - lost)
+  }
+  return lost
+}
+
+function _jiejiMaskNormalizeKind(kind) {
+  if (kind == 'donmask' || kind == 'jieji_mask_donmask') return 'donmask'
+  if (kind == 'stowmask' || kind == 'jieji_mask_stowmask') return 'stowmask'
+  if (kind == 'bloodmask' || kind == 'jieji_mask_bloodmask') return 'bloodmask'
+  return null
+}
+
+function _jiejiMaskChoices() {
+  return [
+    {
+      text: 'jieji_mask_donmask',
+      description: 'hint_jieji_mask_donmask',
+    },
+    {
+      text: 'jieji_mask_stowmask',
+      description: 'hint_jieji_mask_stowmask',
+    },
+    {
+      text: 'jieji_mask_bloodmask',
+      description: 'hint_jieji_mask_bloodmask',
+    },
+  ]
+}
+
+/// 赶路劫面三选。debug.forceJiejiEvent('mask') / forceMask 直接走这里，仍弹出三选。
+async function playJiejiMaskEvent(terrain) {
+  if (hero == null) return false
+
+  dialog.pushDialog('hint_jieji_mask')
+  dialog.pushSelection('jiejiMask', _jiejiMaskChoices())
+  await dialog.execute()
+  final picked = dialog.checkSelected('jiejiMask')
+  var selected = _jiejiMaskNormalizeKind(picked)
+  if (selected == null) {
+    selected = 'donmask'
+  }
+
+  final seasonId = _jiejiMaskSeasonId()
+  if (selected == 'donmask') {
+    final herbNeed = _jiejiMaskDonmaskHerbCost(seasonId)
+    final herbHave = hero.materials['herb'] ?? 0
+    if (herbNeed > 0 && herbHave < herbNeed) {
+      dialog.pushDialog('hint_jieji_mask_donmask_broke', interpolations: [herbNeed])
+      await dialog.execute()
+    } else {
+      if (herbNeed > 0) {
+        Player.exhaust('herb', herbNeed)
+      }
+      final healed = Player.restoreLife(kJiejiMaskDonmaskLife)
+      dialog.pushDialog('hint_jieji_mask_donmask_ok', interpolations: [healed])
+      await dialog.execute()
+      await tryDropGongfaShard(rate: kJiejiMaskDonmaskGongfaRate)
+    }
+  } else if (selected == 'stowmask') {
+    final moneyNeed = _jiejiMaskStowmaskMoneyCost(seasonId)
+    final moneyHave = hero.materials['money'] ?? 0
+    if (moneyHave < moneyNeed) {
+      dialog.pushDialog('hint_jieji_mask_stowmask_broke', interpolations: [moneyNeed])
+      await dialog.execute()
+    } else {
+      Player.exhaust('money', moneyNeed)
+      await Player.collect('herb', kJiejiMaskStowmaskHerb, incurIncident: false)
+      final healed = Player.restoreLife(kJiejiMaskStowmaskLife)
+      dialog.pushDialog('hint_jieji_mask_stowmask_ok', interpolations: [kJiejiMaskStowmaskHerb, healed])
+      await dialog.execute()
+    }
+  } else {
+    final lost = _jiejiMaskCostLife(_jiejiMaskBloodLifeCost(seasonId))
+    dialog.pushDialog('hint_jieji_mask_bloodmask_ok', interpolations: [lost])
+    await dialog.execute()
+    final dropped = await tryDropGongfaShard(rate: kJiejiMaskBloodGongfaRate)
+    if (dropped != true) {
+      await Player.collect('money', kJiejiMaskBloodMoney, incurIncident: false)
+      dialog.pushDialog('hint_jieji_mask_bloodmask_none', interpolations: [kJiejiMaskBloodMoney])
+      await dialog.execute()
+    }
+  }
+
+  Game.updateUI()
+  return true
+}
+
+/// 赶路触发：教程锁与路遇相同；冷却 24 步；约 2.2%。出过则返回 true。
+async function tryJiejiMaskOnMove(terrain) {
+  if (hero == null) return false
+  if (_jiejiMaskTutorialLocked()) return false
+
+  final jieji = ensureJiejiFlags()
+  final moves = jieji.worldMoves ?? 0
+  final last = jieji.lastMaskMove ?? -999
+  if (moves - last < kJiejiMaskMoveCooldown) return false
+
+  var rate = kJiejiMaskBaseRate
+  if (rate < 0) rate = 0
+  if (random.nextDouble() > rate) return false
+
+  jieji.lastMaskMove = moves
+  await playJiejiMaskEvent(terrain)
+  return true
+}
