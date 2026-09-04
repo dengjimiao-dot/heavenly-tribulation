@@ -1801,6 +1801,40 @@ async function onAfterEnterLocation(location) -> bool {
         }
 
 
+        case 'hidden_mist_spit': {
+          if (isLate) {
+            Player.progressJournalById(journal.id, stage: 2)
+            dialog.pushDialog('quest_hidden_late_failed', interpolations: [journal.title])
+            await dialog.execute()
+          } else {
+            Player.progressJournalById(journal.id)
+            var locName = ''
+            final loc = game.locations[journal.quest.targetLocationId]
+            if (loc != null) {
+              locName = loc.name
+            }
+            dialog.pushDialog('quest_hidden_mist_spit_complete', interpolations: [
+              journal.title,
+              locName,
+            ])
+            await dialog.execute()
+            final items = await Player.loot(journal.quest.reward)
+            Game.promptItems(items)
+            if (random.nextDouble() < 0.5) {
+              await Player.collect('herb', 2, incurIncident: false)
+            } else {
+              await Player.collect('money', 40, incurIncident: false)
+            }
+            Player.restoreLife(4)
+            dialog.pushDialog('hint_jieji_mist_spit_extra')
+            await dialog.execute()
+            await tryDropGongfaShard(rate: 0.25)
+            await grantJiejiHiddenQuestExtra('spit')
+          }
+          return true
+        }
+
+
 
 
 
@@ -2316,6 +2350,18 @@ async function grantJiejiHiddenQuestExtra(kind) {
         await Player.collect('money', 20, incurIncident: false)
       }
       dialog.pushDialog('hint_jieji_thunder_riser_extra_thunder')
+      await dialog.execute()
+    }
+  }
+
+  if (kind == 'spit') {
+    if (seasonId == 'mist') {
+      if (random.nextDouble() < 0.5) {
+        await Player.collect('herb', 1, incurIncident: false)
+      } else {
+        await Player.collect('money', 20, incurIncident: false)
+      }
+      dialog.pushDialog('hint_jieji_mist_spit_extra_mist')
       await dialog.execute()
     }
   }
