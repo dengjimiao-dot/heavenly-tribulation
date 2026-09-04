@@ -1,0 +1,152 @@
+/// 赶路「劫缎」三选：系缎 / 解缎 / 血缎。隐藏、劫兆、野遇、赶路、行商、拾荒、扎营、残锋、残卷、雾灯、残鼓、汲泉、劫幡、劫铃、劫符、劫旌、劫烛、劫角、劫笛、劫笠、劫带、劫履、劫氅、劫扇、劫杖、劫伞、劫面、劫帔、劫手套、劫戒、劫镜、劫鼓、劫炬、劫梳、劫勺、劫碗、劫杯、劫罐、劫瓶、劫墨、劫袍、劫带、劫簪、劫笔、劫针、劫扣、劫绳、劫珠、劫钗、劫绦、劫穗都没中时才滚。
+const kJiejiRibbonBaseRate = 0.001
+const kJiejiRibbonMoveCooldown = 24
+const kJiejiRibbonTieribbonHerb = 1
+const kJiejiRibbonTieribbonLife = 3
+const kJiejiRibbonTieribbonGongfaRate = 0.05
+const kJiejiRibbonLooseribbonMoney = 5
+const kJiejiRibbonLooseribbonMoneyThunder = 2
+const kJiejiRibbonLooseribbonHerb = 1
+const kJiejiRibbonLooseribbonLife = 2
+const kJiejiRibbonBloodLife = 2
+const kJiejiRibbonBloodLifeBlood = 3
+const kJiejiRibbonBloodGongfaRate = 0.20
+const kJiejiRibbonBloodMoney = 10
+
+function _jiejiRibbonSeasonId() {
+  if (game.jieji != null && game.jieji.seasonId != null) {
+    return game.jieji.seasonId
+  }
+  return null
+}
+
+function _jiejiRibbonTutorialLocked() {
+  return game.enableTutorial && game.flags.tutorial.bountyQuest != true
+}
+
+function _jiejiRibbonTieribbonHerbCost(seasonId) {
+  if (seasonId == 'mist') return 0
+  return kJiejiRibbonTieribbonHerb
+}
+
+function _jiejiRibbonLooseribbonMoneyCost(seasonId) {
+  if (seasonId == 'thunder') return kJiejiRibbonLooseribbonMoneyThunder
+  return kJiejiRibbonLooseribbonMoney
+}
+
+function _jiejiRibbonBloodLifeCost(seasonId) {
+  if (seasonId == 'blood') return kJiejiRibbonBloodLifeBlood
+  return kJiejiRibbonBloodLife
+}
+
+function _jiejiRibbonCostLife(want) {
+  var lost = want
+  final life = hero.life ?? 1
+  if (life - lost < 1) lost = life - 1
+  if (lost < 0) lost = 0
+  if (lost > 0) {
+    Player.setLife(hero.life - lost)
+  }
+  return lost
+}
+
+function _jiejiRibbonNormalizeKind(kind) {
+  if (kind == 'tieribbon' || kind == 'jieji_ribbon_tieribbon') return 'tieribbon'
+  if (kind == 'looseribbon' || kind == 'jieji_ribbon_looseribbon') return 'looseribbon'
+  if (kind == 'bloodribbon' || kind == 'jieji_ribbon_bloodribbon') return 'bloodribbon'
+  return null
+}
+
+function _jiejiRibbonChoices() {
+  return [
+    {
+      text: 'jieji_ribbon_tieribbon',
+      description: 'hint_jieji_ribbon_tieribbon',
+    },
+    {
+      text: 'jieji_ribbon_looseribbon',
+      description: 'hint_jieji_ribbon_looseribbon',
+    },
+    {
+      text: 'jieji_ribbon_bloodribbon',
+      description: 'hint_jieji_ribbon_bloodribbon',
+    },
+  ]
+}
+
+/// 赶路劫缎三选。debug.forceJiejiEvent('ribbon') / forceRibbon 直接走这里，仍弹出三选。
+async function playJiejiRibbonEvent(terrain) {
+  if (hero == null) return false
+
+  dialog.pushDialog('hint_jieji_ribbon')
+  dialog.pushSelection('jiejiRibbon', _jiejiRibbonChoices())
+  await dialog.execute()
+  final picked = dialog.checkSelected('jiejiRibbon')
+  var selected = _jiejiRibbonNormalizeKind(picked)
+  if (selected == null) {
+    selected = 'tieribbon'
+  }
+
+  final seasonId = _jiejiRibbonSeasonId()
+  if (selected == 'tieribbon') {
+    final herbNeed = _jiejiRibbonTieribbonHerbCost(seasonId)
+    final herbHave = hero.materials['herb'] ?? 0
+    if (herbNeed > 0 && herbHave < herbNeed) {
+      dialog.pushDialog('hint_jieji_ribbon_tieribbon_broke', interpolations: [herbNeed])
+      await dialog.execute()
+    } else {
+      if (herbNeed > 0) {
+        Player.exhaust('herb', herbNeed)
+      }
+      final healed = Player.restoreLife(kJiejiRibbonTieribbonLife)
+      dialog.pushDialog('hint_jieji_ribbon_tieribbon_ok', interpolations: [healed])
+      await dialog.execute()
+      await tryDropGongfaShard(rate: kJiejiRibbonTieribbonGongfaRate)
+    }
+  } else if (selected == 'looseribbon') {
+    final moneyNeed = _jiejiRibbonLooseribbonMoneyCost(seasonId)
+    final moneyHave = hero.materials['money'] ?? 0
+    if (moneyHave < moneyNeed) {
+      dialog.pushDialog('hint_jieji_ribbon_looseribbon_broke', interpolations: [moneyNeed])
+      await dialog.execute()
+    } else {
+      Player.exhaust('money', moneyNeed)
+      await Player.collect('herb', kJiejiRibbonLooseribbonHerb, incurIncident: false)
+      final healed = Player.restoreLife(kJiejiRibbonLooseribbonLife)
+      dialog.pushDialog('hint_jieji_ribbon_looseribbon_ok', interpolations: [kJiejiRibbonLooseribbonHerb, healed])
+      await dialog.execute()
+    }
+  } else {
+    final lost = _jiejiRibbonCostLife(_jiejiRibbonBloodLifeCost(seasonId))
+    dialog.pushDialog('hint_jieji_ribbon_bloodribbon_ok', interpolations: [lost])
+    await dialog.execute()
+    final dropped = await tryDropGongfaShard(rate: kJiejiRibbonBloodGongfaRate)
+    if (dropped != true) {
+      await Player.collect('money', kJiejiRibbonBloodMoney, incurIncident: false)
+      dialog.pushDialog('hint_jieji_ribbon_bloodribbon_none', interpolations: [kJiejiRibbonBloodMoney])
+      await dialog.execute()
+    }
+  }
+
+  Game.updateUI()
+  return true
+}
+
+/// 赶路触发：教程锁与路遇相同；冷却 24 步；约 0.10%。出过则返回 true。
+async function tryJiejiRibbonOnMove(terrain) {
+  if (hero == null) return false
+  if (_jiejiRibbonTutorialLocked()) return false
+
+  final jieji = ensureJiejiFlags()
+  final moves = jieji.worldMoves ?? 0
+  final last = jieji.lastRibbonMove ?? -999
+  if (moves - last < kJiejiRibbonMoveCooldown) return false
+
+  var rate = kJiejiRibbonBaseRate
+  if (rate < 0) rate = 0
+  if (random.nextDouble() > rate) return false
+
+  jieji.lastRibbonMove = moves
+  await playJiejiRibbonEvent(terrain)
+  return true
+}
