@@ -363,5 +363,13 @@
     contribution: 11,
     rank: 0,
   },
+  hidden_mist_ford: {
+    id: "hidden_mist_ford",
+    policy: null,
+    isBounty: false,
+    isHidden: true,
+    contribution: 11,
+    rank: 0,
+  },
 
 }
