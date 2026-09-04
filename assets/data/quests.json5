@@ -451,5 +451,13 @@
     contribution: 11,
     rank: 0,
   },
+  hidden_thunder_wall: {
+    id: "hidden_thunder_wall",
+    policy: null,
+    isBounty: false,
+    isHidden: true,
+    contribution: 11,
+    rank: 0,
+  },
 
 }

@@ -245,6 +245,8 @@ namespace debug {
       questKind = 'hidden_mist_spit'
     } else if (kind == 'trench') {
       questKind = 'hidden_blood_trench'
+    } else if (kind == 'wall') {
+      questKind = 'hidden_thunder_wall'
     }
     final ctor = Quests[questKind]
     if (ctor == null) return false
