@@ -1,0 +1,152 @@
+/// 赶路「劫帔」三选：披帔 / 收帔 / 血帔。隐藏、劫兆、野遇、赶路、行商、拾荒、扎营、残锋、残卷、雾灯、残鼓、汲泉、劫幡、劫铃、劫符、劫旌、劫烛、劫角、劫笛、劫笠、劫带、劫履、劫氅、劫扇、劫杖、劫伞、劫面都没中时才滚。
+const kJiejiShawlBaseRate = 0.021
+const kJiejiShawlMoveCooldown = 24
+const kJiejiShawlDonshawlHerb = 1
+const kJiejiShawlDonshawlLife = 5
+const kJiejiShawlDonshawlGongfaRate = 0.08
+const kJiejiShawlStowshawlMoney = 8
+const kJiejiShawlStowshawlMoneyThunder = 4
+const kJiejiShawlStowshawlHerb = 2
+const kJiejiShawlStowshawlLife = 3
+const kJiejiShawlBloodLife = 2
+const kJiejiShawlBloodLifeBlood = 3
+const kJiejiShawlBloodGongfaRate = 0.26
+const kJiejiShawlBloodMoney = 16
+
+function _jiejiShawlSeasonId() {
+  if (game.jieji != null && game.jieji.seasonId != null) {
+    return game.jieji.seasonId
+  }
+  return null
+}
+
+function _jiejiShawlTutorialLocked() {
+  return game.enableTutorial && game.flags.tutorial.bountyQuest != true
+}
+
+function _jiejiShawlDonshawlHerbCost(seasonId) {
+  if (seasonId == 'mist') return 0
+  return kJiejiShawlDonshawlHerb
+}
+
+function _jiejiShawlStowshawlMoneyCost(seasonId) {
+  if (seasonId == 'thunder') return kJiejiShawlStowshawlMoneyThunder
+  return kJiejiShawlStowshawlMoney
+}
+
+function _jiejiShawlBloodLifeCost(seasonId) {
+  if (seasonId == 'blood') return kJiejiShawlBloodLifeBlood
+  return kJiejiShawlBloodLife
+}
+
+function _jiejiShawlCostLife(want) {
+  var lost = want
+  final life = hero.life ?? 1
+  if (life - lost < 1) lost = life - 1
+  if (lost < 0) lost = 0
+  if (lost > 0) {
+    Player.setLife(hero.life - lost)
+  }
+  return lost
+}
+
+function _jiejiShawlNormalizeKind(kind) {
+  if (kind == 'donshawl' || kind == 'jieji_shawl_donshawl') return 'donshawl'
+  if (kind == 'stowshawl' || kind == 'jieji_shawl_stowshawl') return 'stowshawl'
+  if (kind == 'bloodshawl' || kind == 'jieji_shawl_bloodshawl') return 'bloodshawl'
+  return null
+}
+
+function _jiejiShawlChoices() {
+  return [
+    {
+      text: 'jieji_shawl_donshawl',
+      description: 'hint_jieji_shawl_donshawl',
+    },
+    {
+      text: 'jieji_shawl_stowshawl',
+      description: 'hint_jieji_shawl_stowshawl',
+    },
+    {
+      text: 'jieji_shawl_bloodshawl',
+      description: 'hint_jieji_shawl_bloodshawl',
+    },
+  ]
+}
+
+/// 赶路劫帔三选。debug.forceJiejiEvent('shawl') / forceShawl 直接走这里，仍弹出三选。
+async function playJiejiShawlEvent(terrain) {
+  if (hero == null) return false
+
+  dialog.pushDialog('hint_jieji_shawl')
+  dialog.pushSelection('jiejiShawl', _jiejiShawlChoices())
+  await dialog.execute()
+  final picked = dialog.checkSelected('jiejiShawl')
+  var selected = _jiejiShawlNormalizeKind(picked)
+  if (selected == null) {
+    selected = 'donshawl'
+  }
+
+  final seasonId = _jiejiShawlSeasonId()
+  if (selected == 'donshawl') {
+    final herbNeed = _jiejiShawlDonshawlHerbCost(seasonId)
+    final herbHave = hero.materials['herb'] ?? 0
+    if (herbNeed > 0 && herbHave < herbNeed) {
+      dialog.pushDialog('hint_jieji_shawl_donshawl_broke', interpolations: [herbNeed])
+      await dialog.execute()
+    } else {
+      if (herbNeed > 0) {
+        Player.exhaust('herb', herbNeed)
+      }
+      final healed = Player.restoreLife(kJiejiShawlDonshawlLife)
+      dialog.pushDialog('hint_jieji_shawl_donshawl_ok', interpolations: [healed])
+      await dialog.execute()
+      await tryDropGongfaShard(rate: kJiejiShawlDonshawlGongfaRate)
+    }
+  } else if (selected == 'stowshawl') {
+    final moneyNeed = _jiejiShawlStowshawlMoneyCost(seasonId)
+    final moneyHave = hero.materials['money'] ?? 0
+    if (moneyHave < moneyNeed) {
+      dialog.pushDialog('hint_jieji_shawl_stowshawl_broke', interpolations: [moneyNeed])
+      await dialog.execute()
+    } else {
+      Player.exhaust('money', moneyNeed)
+      await Player.collect('herb', kJiejiShawlStowshawlHerb, incurIncident: false)
+      final healed = Player.restoreLife(kJiejiShawlStowshawlLife)
+      dialog.pushDialog('hint_jieji_shawl_stowshawl_ok', interpolations: [kJiejiShawlStowshawlHerb, healed])
+      await dialog.execute()
+    }
+  } else {
+    final lost = _jiejiShawlCostLife(_jiejiShawlBloodLifeCost(seasonId))
+    dialog.pushDialog('hint_jieji_shawl_bloodshawl_ok', interpolations: [lost])
+    await dialog.execute()
+    final dropped = await tryDropGongfaShard(rate: kJiejiShawlBloodGongfaRate)
+    if (dropped != true) {
+      await Player.collect('money', kJiejiShawlBloodMoney, incurIncident: false)
+      dialog.pushDialog('hint_jieji_shawl_bloodshawl_none', interpolations: [kJiejiShawlBloodMoney])
+      await dialog.execute()
+    }
+  }
+
+  Game.updateUI()
+  return true
+}
+
+/// 赶路触发：教程锁与路遇相同；冷却 24 步；约 2.1%。出过则返回 true。
+async function tryJiejiShawlOnMove(terrain) {
+  if (hero == null) return false
+  if (_jiejiShawlTutorialLocked()) return false
+
+  final jieji = ensureJiejiFlags()
+  final moves = jieji.worldMoves ?? 0
+  final last = jieji.lastShawlMove ?? -999
+  if (moves - last < kJiejiShawlMoveCooldown) return false
+
+  var rate = kJiejiShawlBaseRate
+  if (rate < 0) rate = 0
+  if (random.nextDouble() > rate) return false
+
+  jieji.lastShawlMove = moves
+  await playJiejiShawlEvent(terrain)
+  return true
+}

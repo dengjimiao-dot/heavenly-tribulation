@@ -328,6 +328,8 @@ namespace debug {
       await playJiejiUmbrellaEvent(terrain)
     } else if (kind == 'mask') {
       await playJiejiMaskEvent(terrain)
+    } else if (kind == 'shawl') {
+      await playJiejiShawlEvent(terrain)
     } else {
       await playJiejiThunderRoadEvent(terrain)
     }
@@ -947,6 +949,11 @@ namespace debug {
   /// 忽略几率与冷却，仍弹出赶路劫面三选。
   async function forceMask() {
     return await playJiejiMaskEvent({ kind: 'plain' })
+  }
+
+  /// 忽略几率与冷却，仍弹出赶路劫帔三选。
+  async function forceShawl() {
+    return await playJiejiShawlEvent({ kind: 'plain' })
   }
 
   /// 忽略冷却与花费，仍弹出幻术祭坛入幻三选。
