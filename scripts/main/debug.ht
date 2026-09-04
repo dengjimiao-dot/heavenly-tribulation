@@ -195,6 +195,8 @@ namespace debug {
       questKind = 'hidden_ore_slag'
     } else if (kind == 'bridge') {
       questKind = 'hidden_mist_bridge'
+    } else if (kind == 'bog') {
+      questKind = 'hidden_blood_bog'
     }
     final ctor = Quests[questKind]
     if (ctor == null) return false
