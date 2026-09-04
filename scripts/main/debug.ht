@@ -219,6 +219,8 @@ namespace debug {
       questKind = 'hidden_thunder_anvil'
     } else if (kind == 'shed') {
       questKind = 'hidden_mist_shed'
+    } else if (kind == 'mark') {
+      questKind = 'hidden_blood_mark'
     }
     final ctor = Quests[questKind]
     if (ctor == null) return false
