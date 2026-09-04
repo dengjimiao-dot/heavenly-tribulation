@@ -1564,6 +1564,55 @@ namespace Quests {
     )
   }
 
+  function hidden_thunder_kiosk(cityhall, {
+    difficulty = 0,
+    sect,
+  }) {
+    final target = _pickVisitCity(cityhall)
+    if (target == null) return
+    final money = ((kBaseReward * (difficulty + 1) * 1.1).round() * 0.4).round()
+    var reward = [
+      {
+        type: 'material',
+        kind: 'money',
+        amount: money,
+      },
+    ]
+    if (Constants.materialKinds != null && Constants.materialKinds.contains('ore')) {
+      reward.add({
+        type: 'material',
+        kind: 'ore',
+        amount: 2,
+      })
+    } else if (Constants.materialKinds != null && Constants.materialKinds.contains('stone')) {
+      reward.add({
+        type: 'material',
+        kind: 'stone',
+        amount: 2,
+      })
+    } else {
+      reward.add({
+        type: 'material',
+        kind: 'money',
+        amount: 40,
+      })
+    }
+    return Quest(
+      kind: 'hidden_thunder_kiosk',
+      difficulty: difficulty,
+      timeLimit: _createTimeLimit(difficulty),
+      acquiredFromSiteId: cityhall.id,
+      targetLocationId: target.id,
+      reward: reward,
+      reportSiteId: target.id,
+      interpolations: [target.name],
+      sectId: sect?.id,
+      orderly: 0,
+      idealistic: 0,
+      goodwill: 0,
+    )
+  }
+
 
 }
 
@@ -1590,13 +1639,13 @@ function createHiddenQuest(fromSite) {
   if (game.jieji != null && game.jieji.seasonId != null) {
     seasonId = game.jieji.seasonId
   }
-  var kinds = ['hidden_karma_shrine', 'hidden_karma_shrine', 'hidden_gongfa_cache', 'hidden_gongfa_cave', 'hidden_ruins_explore', 'hidden_ore_vein', 'hidden_ore_vein', 'hidden_ferry_lantern', 'hidden_storm_well', 'hidden_storm_well', 'hidden_blood_feast', 'hidden_mist_market', 'hidden_mirror_ruins', 'hidden_remnant_lamp', 'hidden_drum_mound', 'hidden_remnant_spring', 'hidden_stele_shade', 'hidden_haggle_stall', 'hidden_blank_cache', 'hidden_night_field', 'hidden_tide_pool', 'hidden_timber_knot', 'hidden_hunt_trail', 'hidden_ore_slag', 'hidden_mist_bridge', 'hidden_blood_bog', 'hidden_thunder_ridge', 'hidden_mist_pavilion', 'hidden_blood_banner']
+  var kinds = ['hidden_karma_shrine', 'hidden_karma_shrine', 'hidden_gongfa_cache', 'hidden_gongfa_cave', 'hidden_ruins_explore', 'hidden_ore_vein', 'hidden_ore_vein', 'hidden_ferry_lantern', 'hidden_storm_well', 'hidden_storm_well', 'hidden_blood_feast', 'hidden_mist_market', 'hidden_mirror_ruins', 'hidden_remnant_lamp', 'hidden_drum_mound', 'hidden_remnant_spring', 'hidden_stele_shade', 'hidden_haggle_stall', 'hidden_blank_cache', 'hidden_night_field', 'hidden_tide_pool', 'hidden_timber_knot', 'hidden_hunt_trail', 'hidden_ore_slag', 'hidden_mist_bridge', 'hidden_blood_bog', 'hidden_thunder_ridge', 'hidden_mist_pavilion', 'hidden_blood_banner', 'hidden_thunder_kiosk']
   if (seasonId == 'mist') {
-    kinds = ['hidden_ruins_explore', 'hidden_herb_grove', 'hidden_herb_grove', 'hidden_karma_shrine', 'hidden_ferry_lantern', 'hidden_ferry_lantern', 'hidden_ore_vein', 'hidden_storm_well', 'hidden_blood_feast', 'hidden_mist_market', 'hidden_mist_market', 'hidden_gongfa_cave', 'hidden_mirror_ruins', 'hidden_mirror_ruins', 'hidden_remnant_lamp', 'hidden_drum_mound', 'hidden_remnant_spring', 'hidden_remnant_spring', 'hidden_stele_shade', 'hidden_stele_shade', 'hidden_haggle_stall', 'hidden_haggle_stall', 'hidden_blank_cache', 'hidden_night_field', 'hidden_night_field', 'hidden_tide_pool', 'hidden_tide_pool', 'hidden_timber_knot', 'hidden_hunt_trail', 'hidden_ore_slag', 'hidden_mist_bridge', 'hidden_mist_bridge', 'hidden_blood_bog', 'hidden_thunder_ridge', 'hidden_mist_pavilion', 'hidden_mist_pavilion', 'hidden_blood_banner']
+    kinds = ['hidden_ruins_explore', 'hidden_herb_grove', 'hidden_herb_grove', 'hidden_karma_shrine', 'hidden_ferry_lantern', 'hidden_ferry_lantern', 'hidden_ore_vein', 'hidden_storm_well', 'hidden_blood_feast', 'hidden_mist_market', 'hidden_mist_market', 'hidden_gongfa_cave', 'hidden_mirror_ruins', 'hidden_mirror_ruins', 'hidden_remnant_lamp', 'hidden_drum_mound', 'hidden_remnant_spring', 'hidden_remnant_spring', 'hidden_stele_shade', 'hidden_stele_shade', 'hidden_haggle_stall', 'hidden_haggle_stall', 'hidden_blank_cache', 'hidden_night_field', 'hidden_night_field', 'hidden_tide_pool', 'hidden_tide_pool', 'hidden_timber_knot', 'hidden_hunt_trail', 'hidden_ore_slag', 'hidden_mist_bridge', 'hidden_mist_bridge', 'hidden_blood_bog', 'hidden_thunder_ridge', 'hidden_mist_pavilion', 'hidden_mist_pavilion', 'hidden_blood_banner', 'hidden_thunder_kiosk']
   } else if (seasonId == 'thunder') {
-    kinds = ['hidden_karma_shrine', 'hidden_karma_shrine', 'hidden_gongfa_cache', 'hidden_gongfa_cave', 'hidden_gongfa_cave', 'hidden_ruins_explore', 'hidden_ore_vein', 'hidden_ore_vein', 'hidden_storm_well', 'hidden_storm_well', 'hidden_blood_feast', 'hidden_mist_market', 'hidden_mirror_ruins', 'hidden_remnant_lamp', 'hidden_remnant_lamp', 'hidden_drum_mound', 'hidden_remnant_spring', 'hidden_stele_shade', 'hidden_haggle_stall', 'hidden_blank_cache', 'hidden_blank_cache', 'hidden_night_field', 'hidden_tide_pool', 'hidden_timber_knot', 'hidden_timber_knot', 'hidden_hunt_trail', 'hidden_ore_slag', 'hidden_ore_slag', 'hidden_mist_bridge', 'hidden_blood_bog', 'hidden_thunder_ridge', 'hidden_thunder_ridge', 'hidden_mist_pavilion', 'hidden_blood_banner']
+    kinds = ['hidden_karma_shrine', 'hidden_karma_shrine', 'hidden_gongfa_cache', 'hidden_gongfa_cave', 'hidden_gongfa_cave', 'hidden_ruins_explore', 'hidden_ore_vein', 'hidden_ore_vein', 'hidden_storm_well', 'hidden_storm_well', 'hidden_blood_feast', 'hidden_mist_market', 'hidden_mirror_ruins', 'hidden_remnant_lamp', 'hidden_remnant_lamp', 'hidden_drum_mound', 'hidden_remnant_spring', 'hidden_stele_shade', 'hidden_haggle_stall', 'hidden_blank_cache', 'hidden_blank_cache', 'hidden_night_field', 'hidden_tide_pool', 'hidden_timber_knot', 'hidden_timber_knot', 'hidden_hunt_trail', 'hidden_ore_slag', 'hidden_ore_slag', 'hidden_mist_bridge', 'hidden_blood_bog', 'hidden_thunder_ridge', 'hidden_thunder_ridge', 'hidden_mist_pavilion', 'hidden_blood_banner', 'hidden_thunder_kiosk', 'hidden_thunder_kiosk']
   } else if (seasonId == 'blood') {
-    kinds = ['hidden_blood_omen', 'hidden_blood_omen', 'hidden_gongfa_cache', 'hidden_gongfa_cave', 'hidden_karma_shrine', 'hidden_ore_vein', 'hidden_ferry_lantern', 'hidden_storm_well', 'hidden_blood_feast', 'hidden_blood_feast', 'hidden_mist_market', 'hidden_mirror_ruins', 'hidden_remnant_lamp', 'hidden_drum_mound', 'hidden_drum_mound', 'hidden_remnant_spring', 'hidden_stele_shade', 'hidden_haggle_stall', 'hidden_blank_cache', 'hidden_night_field', 'hidden_tide_pool', 'hidden_timber_knot', 'hidden_hunt_trail', 'hidden_hunt_trail', 'hidden_ore_slag', 'hidden_mist_bridge', 'hidden_blood_bog', 'hidden_blood_bog', 'hidden_thunder_ridge', 'hidden_mist_pavilion', 'hidden_blood_banner', 'hidden_blood_banner']
+    kinds = ['hidden_blood_omen', 'hidden_blood_omen', 'hidden_gongfa_cache', 'hidden_gongfa_cave', 'hidden_karma_shrine', 'hidden_ore_vein', 'hidden_ferry_lantern', 'hidden_storm_well', 'hidden_blood_feast', 'hidden_blood_feast', 'hidden_mist_market', 'hidden_mirror_ruins', 'hidden_remnant_lamp', 'hidden_drum_mound', 'hidden_drum_mound', 'hidden_remnant_spring', 'hidden_stele_shade', 'hidden_haggle_stall', 'hidden_blank_cache', 'hidden_night_field', 'hidden_tide_pool', 'hidden_timber_knot', 'hidden_hunt_trail', 'hidden_hunt_trail', 'hidden_ore_slag', 'hidden_mist_bridge', 'hidden_blood_bog', 'hidden_blood_bog', 'hidden_thunder_ridge', 'hidden_mist_pavilion', 'hidden_blood_banner', 'hidden_blood_banner', 'hidden_thunder_kiosk']
   }
   final kind = random.nextIterable(kinds)
   final ctor = Quests[kind]

@@ -85,6 +85,7 @@
   "quest_hidden_thunder_ridge": "劫纹雷岗",
   "quest_hidden_mist_pavilion": "劫纹雾亭",
   "quest_hidden_blood_banner": "劫纹血幡",
+  "quest_hidden_thunder_kiosk": "劫纹雷亭",
 
   "quest_hidden_ruins_explore_description": "行路听闻{0}附近有荒墟异象。亲自走一趟探明虚实。",
   "quest_hidden_karma_shrine_description": "有人在{0}看见无名祠。据说祭过的人会沾上业力，也会得一份机缘。",
@@ -114,6 +115,7 @@
   "quest_hidden_thunder_ridge_description": "行路听闻{0}城外有劫纹雷岗。去走一遭，或可拣得矿石、拾得铜钱并回些生机。",
   "quest_hidden_mist_pavilion_description": "行路听闻{0}城外有劫纹雾亭。去走一遭，或可采得药材并回些生机。",
   "quest_hidden_blood_banner_description": "行路听闻{0}城外有劫纹血幡。去走一遭，或可采得药材、拾得铜钱并回些生机。",
+  "quest_hidden_thunder_kiosk_description": "行路听闻{0}城外有劫纹雷亭。去走一遭，或可拣得矿石、拾得铜钱并回些生机。",
 
   "quest_hidden_rumor": "路遇一位行色匆匆的修士，压低声音说：<yellow>{0}</>……去{1}看看。说完便隐入雾里。",
   "quest_hidden_spawned": "你察觉到一桩隐秘机缘：<yellow>{0}</>。去{1}探明虚实。",
@@ -145,5 +147,6 @@
   "quest_hidden_blood_bog_complete": "「{0}」有了着落。你在{1}的血沼边走了一遭。",
   "quest_hidden_thunder_ridge_complete": "「{0}」有了着落。你在{1}的雷岗上走了一遭。",
   "quest_hidden_mist_pavilion_complete": "「{0}」有了着落。你在{1}的雾亭里走了一遭。",
-  "quest_hidden_blood_banner_complete": "「{0}」有了着落。你在{1}的血幡下走了一遭。"
+  "quest_hidden_blood_banner_complete": "「{0}」有了着落。你在{1}的血幡下走了一遭。",
+  "quest_hidden_thunder_kiosk_complete": "「{0}」有了着落。你在{1}的雷亭里走了一遭。"
 }

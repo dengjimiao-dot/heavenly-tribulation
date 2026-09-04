@@ -283,5 +283,13 @@
     contribution: 11,
     rank: 0,
   },
+  hidden_thunder_kiosk: {
+    id: "hidden_thunder_kiosk",
+    policy: null,
+    isBounty: false,
+    isHidden: true,
+    contribution: 11,
+    rank: 0,
+  },
 
 }
