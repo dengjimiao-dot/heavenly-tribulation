@@ -547,5 +547,13 @@
     contribution: 11,
     rank: 0,
   },
+  hidden_thunder_rail: {
+    id: "hidden_thunder_rail",
+    policy: null,
+    isBounty: false,
+    isHidden: true,
+    contribution: 11,
+    rank: 0,
+  },
 
 }
