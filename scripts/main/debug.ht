@@ -352,6 +352,8 @@ namespace debug {
       await playJiejiDrumEvent(terrain)
     } else if (kind == 'torch') {
       await playJiejiTorchEvent(terrain)
+    } else if (kind == 'comb') {
+      await playJiejiCombEvent(terrain)
     } else {
       await playJiejiThunderRoadEvent(terrain)
     }
@@ -1019,6 +1021,11 @@ namespace debug {
   /// 忽略几率与冷却，仍弹出赶路劫炬三选。
   async function forceTorch() {
     return await playJiejiTorchEvent({ kind: 'plain' })
+  }
+
+  /// 忽略几率与冷却，仍弹出赶路劫梳三选。
+  async function forceComb() {
+    return await playJiejiCombEvent({ kind: 'plain' })
   }
 
   /// 忽略冷却与花费，仍弹出幻术祭坛入幻三选。

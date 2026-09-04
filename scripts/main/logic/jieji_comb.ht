@@ -1,0 +1,152 @@
+/// 赶路「劫梳」三选：梳头 / 收梳 / 血梳。隐藏、劫兆、野遇、赶路、行商、拾荒、扎营、残锋、残卷、雾灯、残鼓、汲泉、劫幡、劫铃、劫符、劫旌、劫烛、劫角、劫笛、劫笠、劫带、劫履、劫氅、劫扇、劫杖、劫伞、劫面、劫帔、劫手套、劫戒、劫镜、劫鼓、劫炬都没中时才滚。
+const kJiejiCombBaseRate = 0.015
+const kJiejiCombMoveCooldown = 24
+const kJiejiCombDrawcombHerb = 1
+const kJiejiCombDrawcombLife = 5
+const kJiejiCombDrawcombGongfaRate = 0.08
+const kJiejiCombStowcombMoney = 8
+const kJiejiCombStowcombMoneyThunder = 4
+const kJiejiCombStowcombHerb = 2
+const kJiejiCombStowcombLife = 3
+const kJiejiCombBloodLife = 2
+const kJiejiCombBloodLifeBlood = 3
+const kJiejiCombBloodGongfaRate = 0.26
+const kJiejiCombBloodMoney = 16
+
+function _jiejiCombSeasonId() {
+  if (game.jieji != null && game.jieji.seasonId != null) {
+    return game.jieji.seasonId
+  }
+  return null
+}
+
+function _jiejiCombTutorialLocked() {
+  return game.enableTutorial && game.flags.tutorial.bountyQuest != true
+}
+
+function _jiejiCombDrawcombHerbCost(seasonId) {
+  if (seasonId == 'mist') return 0
+  return kJiejiCombDrawcombHerb
+}
+
+function _jiejiCombStowcombMoneyCost(seasonId) {
+  if (seasonId == 'thunder') return kJiejiCombStowcombMoneyThunder
+  return kJiejiCombStowcombMoney
+}
+
+function _jiejiCombBloodLifeCost(seasonId) {
+  if (seasonId == 'blood') return kJiejiCombBloodLifeBlood
+  return kJiejiCombBloodLife
+}
+
+function _jiejiCombCostLife(want) {
+  var lost = want
+  final life = hero.life ?? 1
+  if (life - lost < 1) lost = life - 1
+  if (lost < 0) lost = 0
+  if (lost > 0) {
+    Player.setLife(hero.life - lost)
+  }
+  return lost
+}
+
+function _jiejiCombNormalizeKind(kind) {
+  if (kind == 'drawcomb' || kind == 'jieji_comb_drawcomb') return 'drawcomb'
+  if (kind == 'stowcomb' || kind == 'jieji_comb_stowcomb') return 'stowcomb'
+  if (kind == 'bloodcomb' || kind == 'jieji_comb_bloodcomb') return 'bloodcomb'
+  return null
+}
+
+function _jiejiCombChoices() {
+  return [
+    {
+      text: 'jieji_comb_drawcomb',
+      description: 'hint_jieji_comb_drawcomb',
+    },
+    {
+      text: 'jieji_comb_stowcomb',
+      description: 'hint_jieji_comb_stowcomb',
+    },
+    {
+      text: 'jieji_comb_bloodcomb',
+      description: 'hint_jieji_comb_bloodcomb',
+    },
+  ]
+}
+
+/// 赶路劫梳三选。debug.forceJiejiEvent('comb') / forceComb 直接走这里，仍弹出三选。
+async function playJiejiCombEvent(terrain) {
+  if (hero == null) return false
+
+  dialog.pushDialog('hint_jieji_comb')
+  dialog.pushSelection('jiejiComb', _jiejiCombChoices())
+  await dialog.execute()
+  final picked = dialog.checkSelected('jiejiComb')
+  var selected = _jiejiCombNormalizeKind(picked)
+  if (selected == null) {
+    selected = 'drawcomb'
+  }
+
+  final seasonId = _jiejiCombSeasonId()
+  if (selected == 'drawcomb') {
+    final herbNeed = _jiejiCombDrawcombHerbCost(seasonId)
+    final herbHave = hero.materials['herb'] ?? 0
+    if (herbNeed > 0 && herbHave < herbNeed) {
+      dialog.pushDialog('hint_jieji_comb_drawcomb_broke', interpolations: [herbNeed])
+      await dialog.execute()
+    } else {
+      if (herbNeed > 0) {
+        Player.exhaust('herb', herbNeed)
+      }
+      final healed = Player.restoreLife(kJiejiCombDrawcombLife)
+      dialog.pushDialog('hint_jieji_comb_drawcomb_ok', interpolations: [healed])
+      await dialog.execute()
+      await tryDropGongfaShard(rate: kJiejiCombDrawcombGongfaRate)
+    }
+  } else if (selected == 'stowcomb') {
+    final moneyNeed = _jiejiCombStowcombMoneyCost(seasonId)
+    final moneyHave = hero.materials['money'] ?? 0
+    if (moneyHave < moneyNeed) {
+      dialog.pushDialog('hint_jieji_comb_stowcomb_broke', interpolations: [moneyNeed])
+      await dialog.execute()
+    } else {
+      Player.exhaust('money', moneyNeed)
+      await Player.collect('herb', kJiejiCombStowcombHerb, incurIncident: false)
+      final healed = Player.restoreLife(kJiejiCombStowcombLife)
+      dialog.pushDialog('hint_jieji_comb_stowcomb_ok', interpolations: [kJiejiCombStowcombHerb, healed])
+      await dialog.execute()
+    }
+  } else {
+    final lost = _jiejiCombCostLife(_jiejiCombBloodLifeCost(seasonId))
+    dialog.pushDialog('hint_jieji_comb_bloodcomb_ok', interpolations: [lost])
+    await dialog.execute()
+    final dropped = await tryDropGongfaShard(rate: kJiejiCombBloodGongfaRate)
+    if (dropped != true) {
+      await Player.collect('money', kJiejiCombBloodMoney, incurIncident: false)
+      dialog.pushDialog('hint_jieji_comb_bloodcomb_none', interpolations: [kJiejiCombBloodMoney])
+      await dialog.execute()
+    }
+  }
+
+  Game.updateUI()
+  return true
+}
+
+/// 赶路触发：教程锁与路遇相同；冷却 24 步；约 1.5%。出过则返回 true。
+async function tryJiejiCombOnMove(terrain) {
+  if (hero == null) return false
+  if (_jiejiCombTutorialLocked()) return false
+
+  final jieji = ensureJiejiFlags()
+  final moves = jieji.worldMoves ?? 0
+  final last = jieji.lastCombMove ?? -999
+  if (moves - last < kJiejiCombMoveCooldown) return false
+
+  var rate = kJiejiCombBaseRate
+  if (rate < 0) rate = 0
+  if (random.nextDouble() > rate) return false
+
+  jieji.lastCombMove = moves
+  await playJiejiCombEvent(terrain)
+  return true
+}

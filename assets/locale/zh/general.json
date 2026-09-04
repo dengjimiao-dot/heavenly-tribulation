@@ -3610,6 +3610,22 @@
   "hint_jieji_torch_bloodtorch_none": "血炬下去，炬影却散了。袋里多了 {0} 铜钱。",
 
 
+  "jiejiComb": "劫梳",
+  "hint_jieji_comb": "路边搁着一把劫梳。你可以梳头、收梳，或以血梳。",
+  "jieji_comb_drawcomb": "梳头",
+  "jieji_comb_stowcomb": "收梳",
+  "jieji_comb_bloodcomb": "血梳",
+  "hint_jieji_comb_drawcomb": "梳头：耗 1 药材（雾月不耗）。回 5 命，八厘摸残页。药材不够则空手。",
+  "hint_jieji_comb_stowcomb": "收梳：花 8 铜钱（雷月 4）。得 2 药材，并回 3 命。袋里不够则空手。",
+  "hint_jieji_comb_bloodcomb": "血梳：扣 2 点生机（至少留 1，血月 3）。二成六摸残页，不成则得 16 铜钱。",
+  "hint_jieji_comb_drawcomb_ok": "你用劫梳梳了头。生机回了 {0} 点。",
+  "hint_jieji_comb_drawcomb_broke": "梳头要 {0} 药材。你拿不出来。",
+  "hint_jieji_comb_stowcomb_ok": "你收起劫梳。得了 {0} 药材，生机回了 {1} 点。",
+  "hint_jieji_comb_stowcomb_broke": "收梳要 {0} 铜钱。袋里不够。",
+  "hint_jieji_comb_bloodcomb_ok": "你割了 {0} 点生机去染劫梳。",
+  "hint_jieji_comb_bloodcomb_none": "血梳下去，梳影却散了。袋里多了 {0} 铜钱。",
+
+
   "jiejiMenpaiDemo": "劫季门派 · Demo",
   "jiejiMenpaiPitch": "带着业力赶天劫的门派肉鸽",
   "knownIssues": "已知问题",
