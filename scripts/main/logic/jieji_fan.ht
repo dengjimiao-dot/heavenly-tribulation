@@ -1,0 +1,152 @@
+/// 赶路「劫扇」三选：展扇 / 收扇 / 血扇。隐藏、劫兆、野遇、赶路、行商、拾荒、扎营、残锋、残卷、雾灯、残鼓、汲泉、劫幡、劫铃、劫符、劫旌、劫烛、劫角、劫笛、劫笠、劫带、劫履、劫氅都没中时才滚。
+const kJiejiFanBaseRate = 0.025
+const kJiejiFanMoveCooldown = 24
+const kJiejiFanUnfurlHerb = 1
+const kJiejiFanUnfurlLife = 5
+const kJiejiFanUnfurlGongfaRate = 0.08
+const kJiejiFanFoldMoney = 8
+const kJiejiFanFoldMoneyThunder = 4
+const kJiejiFanFoldHerb = 2
+const kJiejiFanFoldLife = 3
+const kJiejiFanBloodLife = 2
+const kJiejiFanBloodLifeBlood = 3
+const kJiejiFanBloodGongfaRate = 0.26
+const kJiejiFanBloodMoney = 16
+
+function _jiejiFanSeasonId() {
+  if (game.jieji != null && game.jieji.seasonId != null) {
+    return game.jieji.seasonId
+  }
+  return null
+}
+
+function _jiejiFanTutorialLocked() {
+  return game.enableTutorial && game.flags.tutorial.bountyQuest != true
+}
+
+function _jiejiFanUnfurlHerbCost(seasonId) {
+  if (seasonId == 'mist') return 0
+  return kJiejiFanUnfurlHerb
+}
+
+function _jiejiFanFoldMoneyCost(seasonId) {
+  if (seasonId == 'thunder') return kJiejiFanFoldMoneyThunder
+  return kJiejiFanFoldMoney
+}
+
+function _jiejiFanBloodLifeCost(seasonId) {
+  if (seasonId == 'blood') return kJiejiFanBloodLifeBlood
+  return kJiejiFanBloodLife
+}
+
+function _jiejiFanCostLife(want) {
+  var lost = want
+  final life = hero.life ?? 1
+  if (life - lost < 1) lost = life - 1
+  if (lost < 0) lost = 0
+  if (lost > 0) {
+    Player.setLife(hero.life - lost)
+  }
+  return lost
+}
+
+function _jiejiFanNormalizeKind(kind) {
+  if (kind == 'unfurl' || kind == 'jieji_fan_unfurl') return 'unfurl'
+  if (kind == 'fold' || kind == 'jieji_fan_fold') return 'fold'
+  if (kind == 'bloodfan' || kind == 'jieji_fan_bloodfan') return 'bloodfan'
+  return null
+}
+
+function _jiejiFanChoices() {
+  return [
+    {
+      text: 'jieji_fan_unfurl',
+      description: 'hint_jieji_fan_unfurl',
+    },
+    {
+      text: 'jieji_fan_fold',
+      description: 'hint_jieji_fan_fold',
+    },
+    {
+      text: 'jieji_fan_bloodfan',
+      description: 'hint_jieji_fan_bloodfan',
+    },
+  ]
+}
+
+/// 赶路劫扇三选。debug.forceJiejiEvent('fan') / forceFan 直接走这里，仍弹出三选。
+async function playJiejiFanEvent(terrain) {
+  if (hero == null) return false
+
+  dialog.pushDialog('hint_jieji_fan')
+  dialog.pushSelection('jiejiFan', _jiejiFanChoices())
+  await dialog.execute()
+  final picked = dialog.checkSelected('jiejiFan')
+  var selected = _jiejiFanNormalizeKind(picked)
+  if (selected == null) {
+    selected = 'unfurl'
+  }
+
+  final seasonId = _jiejiFanSeasonId()
+  if (selected == 'unfurl') {
+    final herbNeed = _jiejiFanUnfurlHerbCost(seasonId)
+    final herbHave = hero.materials['herb'] ?? 0
+    if (herbNeed > 0 && herbHave < herbNeed) {
+      dialog.pushDialog('hint_jieji_fan_unfurl_broke', interpolations: [herbNeed])
+      await dialog.execute()
+    } else {
+      if (herbNeed > 0) {
+        Player.exhaust('herb', herbNeed)
+      }
+      final healed = Player.restoreLife(kJiejiFanUnfurlLife)
+      dialog.pushDialog('hint_jieji_fan_unfurl_ok', interpolations: [healed])
+      await dialog.execute()
+      await tryDropGongfaShard(rate: kJiejiFanUnfurlGongfaRate)
+    }
+  } else if (selected == 'fold') {
+    final moneyNeed = _jiejiFanFoldMoneyCost(seasonId)
+    final moneyHave = hero.materials['money'] ?? 0
+    if (moneyHave < moneyNeed) {
+      dialog.pushDialog('hint_jieji_fan_fold_broke', interpolations: [moneyNeed])
+      await dialog.execute()
+    } else {
+      Player.exhaust('money', moneyNeed)
+      await Player.collect('herb', kJiejiFanFoldHerb, incurIncident: false)
+      final healed = Player.restoreLife(kJiejiFanFoldLife)
+      dialog.pushDialog('hint_jieji_fan_fold_ok', interpolations: [kJiejiFanFoldHerb, healed])
+      await dialog.execute()
+    }
+  } else {
+    final lost = _jiejiFanCostLife(_jiejiFanBloodLifeCost(seasonId))
+    dialog.pushDialog('hint_jieji_fan_bloodfan_ok', interpolations: [lost])
+    await dialog.execute()
+    final dropped = await tryDropGongfaShard(rate: kJiejiFanBloodGongfaRate)
+    if (dropped != true) {
+      await Player.collect('money', kJiejiFanBloodMoney, incurIncident: false)
+      dialog.pushDialog('hint_jieji_fan_bloodfan_none', interpolations: [kJiejiFanBloodMoney])
+      await dialog.execute()
+    }
+  }
+
+  Game.updateUI()
+  return true
+}
+
+/// 赶路触发：教程锁与路遇相同；冷却 24 步；约 2.5%。出过则返回 true。
+async function tryJiejiFanOnMove(terrain) {
+  if (hero == null) return false
+  if (_jiejiFanTutorialLocked()) return false
+
+  final jieji = ensureJiejiFlags()
+  final moves = jieji.worldMoves ?? 0
+  final last = jieji.lastFanMove ?? -999
+  if (moves - last < kJiejiFanMoveCooldown) return false
+
+  var rate = kJiejiFanBaseRate
+  if (rate < 0) rate = 0
+  if (random.nextDouble() > rate) return false
+
+  jieji.lastFanMove = moves
+  await playJiejiFanEvent(terrain)
+  return true
+}
