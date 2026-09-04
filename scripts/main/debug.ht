@@ -415,6 +415,9 @@ namespace debug {
     } else if (kind == 'divan') {
       game.flags.dungeon.pendingEncounter = 'jiejiDivan'
       await playJiejiDungeonEncounter()
+    } else if (kind == 'bench') {
+      game.flags.dungeon.pendingEncounter = 'jiejiBench'
+      await playJiejiDungeonEncounter()
     } else if (kind == 'exit') {
       await playJiejiDungeonExitGift()
     } else {
