@@ -209,6 +209,8 @@ namespace debug {
       questKind = 'hidden_blood_pyre'
     } else if (kind == 'kiosk') {
       questKind = 'hidden_thunder_kiosk'
+    } else if (kind == 'spire') {
+      questKind = 'hidden_thunder_spire'
     }
     final ctor = Quests[questKind]
     if (ctor == null) return false
