@@ -1,0 +1,152 @@
+/// 赶路「劫墨」三选：研墨 / 收墨 / 血墨。隐藏、劫兆、野遇、赶路、行商、拾荒、扎营、残锋、残卷、雾灯、残鼓、汲泉、劫幡、劫铃、劫符、劫旌、劫烛、劫角、劫笛、劫笠、劫带、劫履、劫氅、劫扇、劫杖、劫伞、劫面、劫帔、劫手套、劫戒、劫镜、劫鼓、劫炬、劫梳、劫勺、劫碗、劫杯、劫罐、劫瓶都没中时才滚。
+const kJiejiInkBaseRate = 0.009
+const kJiejiInkMoveCooldown = 24
+const kJiejiInkGrindinkHerb = 1
+const kJiejiInkGrindinkLife = 5
+const kJiejiInkGrindinkGongfaRate = 0.08
+const kJiejiInkStowinkMoney = 8
+const kJiejiInkStowinkMoneyThunder = 4
+const kJiejiInkStowinkHerb = 2
+const kJiejiInkStowinkLife = 3
+const kJiejiInkBloodLife = 2
+const kJiejiInkBloodLifeBlood = 3
+const kJiejiInkBloodGongfaRate = 0.26
+const kJiejiInkBloodMoney = 16
+
+function _jiejiInkSeasonId() {
+  if (game.jieji != null && game.jieji.seasonId != null) {
+    return game.jieji.seasonId
+  }
+  return null
+}
+
+function _jiejiInkTutorialLocked() {
+  return game.enableTutorial && game.flags.tutorial.bountyQuest != true
+}
+
+function _jiejiInkGrindinkHerbCost(seasonId) {
+  if (seasonId == 'mist') return 0
+  return kJiejiInkGrindinkHerb
+}
+
+function _jiejiInkStowinkMoneyCost(seasonId) {
+  if (seasonId == 'thunder') return kJiejiInkStowinkMoneyThunder
+  return kJiejiInkStowinkMoney
+}
+
+function _jiejiInkBloodLifeCost(seasonId) {
+  if (seasonId == 'blood') return kJiejiInkBloodLifeBlood
+  return kJiejiInkBloodLife
+}
+
+function _jiejiInkCostLife(want) {
+  var lost = want
+  final life = hero.life ?? 1
+  if (life - lost < 1) lost = life - 1
+  if (lost < 0) lost = 0
+  if (lost > 0) {
+    Player.setLife(hero.life - lost)
+  }
+  return lost
+}
+
+function _jiejiInkNormalizeKind(kind) {
+  if (kind == 'grindink' || kind == 'jieji_ink_grindink') return 'grindink'
+  if (kind == 'stowink' || kind == 'jieji_ink_stowink') return 'stowink'
+  if (kind == 'bloodink' || kind == 'jieji_ink_bloodink') return 'bloodink'
+  return null
+}
+
+function _jiejiInkChoices() {
+  return [
+    {
+      text: 'jieji_ink_grindink',
+      description: 'hint_jieji_ink_grindink',
+    },
+    {
+      text: 'jieji_ink_stowink',
+      description: 'hint_jieji_ink_stowink',
+    },
+    {
+      text: 'jieji_ink_bloodink',
+      description: 'hint_jieji_ink_bloodink',
+    },
+  ]
+}
+
+/// 赶路劫墨三选。debug.forceJiejiEvent('ink') / forceInk 直接走这里，仍弹出三选。
+async function playJiejiInkEvent(terrain) {
+  if (hero == null) return false
+
+  dialog.pushDialog('hint_jieji_ink')
+  dialog.pushSelection('jiejiInk', _jiejiInkChoices())
+  await dialog.execute()
+  final picked = dialog.checkSelected('jiejiInk')
+  var selected = _jiejiInkNormalizeKind(picked)
+  if (selected == null) {
+    selected = 'grindink'
+  }
+
+  final seasonId = _jiejiInkSeasonId()
+  if (selected == 'grindink') {
+    final herbNeed = _jiejiInkGrindinkHerbCost(seasonId)
+    final herbHave = hero.materials['herb'] ?? 0
+    if (herbNeed > 0 && herbHave < herbNeed) {
+      dialog.pushDialog('hint_jieji_ink_grindink_broke', interpolations: [herbNeed])
+      await dialog.execute()
+    } else {
+      if (herbNeed > 0) {
+        Player.exhaust('herb', herbNeed)
+      }
+      final healed = Player.restoreLife(kJiejiInkGrindinkLife)
+      dialog.pushDialog('hint_jieji_ink_grindink_ok', interpolations: [healed])
+      await dialog.execute()
+      await tryDropGongfaShard(rate: kJiejiInkGrindinkGongfaRate)
+    }
+  } else if (selected == 'stowink') {
+    final moneyNeed = _jiejiInkStowinkMoneyCost(seasonId)
+    final moneyHave = hero.materials['money'] ?? 0
+    if (moneyHave < moneyNeed) {
+      dialog.pushDialog('hint_jieji_ink_stowink_broke', interpolations: [moneyNeed])
+      await dialog.execute()
+    } else {
+      Player.exhaust('money', moneyNeed)
+      await Player.collect('herb', kJiejiInkStowinkHerb, incurIncident: false)
+      final healed = Player.restoreLife(kJiejiInkStowinkLife)
+      dialog.pushDialog('hint_jieji_ink_stowink_ok', interpolations: [kJiejiInkStowinkHerb, healed])
+      await dialog.execute()
+    }
+  } else {
+    final lost = _jiejiInkCostLife(_jiejiInkBloodLifeCost(seasonId))
+    dialog.pushDialog('hint_jieji_ink_bloodink_ok', interpolations: [lost])
+    await dialog.execute()
+    final dropped = await tryDropGongfaShard(rate: kJiejiInkBloodGongfaRate)
+    if (dropped != true) {
+      await Player.collect('money', kJiejiInkBloodMoney, incurIncident: false)
+      dialog.pushDialog('hint_jieji_ink_bloodink_none', interpolations: [kJiejiInkBloodMoney])
+      await dialog.execute()
+    }
+  }
+
+  Game.updateUI()
+  return true
+}
+
+/// 赶路触发：教程锁与路遇相同；冷却 24 步；约 0.9%。出过则返回 true。
+async function tryJiejiInkOnMove(terrain) {
+  if (hero == null) return false
+  if (_jiejiInkTutorialLocked()) return false
+
+  final jieji = ensureJiejiFlags()
+  final moves = jieji.worldMoves ?? 0
+  final last = jieji.lastInkMove ?? -999
+  if (moves - last < kJiejiInkMoveCooldown) return false
+
+  var rate = kJiejiInkBaseRate
+  if (rate < 0) rate = 0
+  if (random.nextDouble() > rate) return false
+
+  jieji.lastInkMove = moves
+  await playJiejiInkEvent(terrain)
+  return true
+}

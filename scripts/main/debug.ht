@@ -376,6 +376,8 @@ namespace debug {
       await playJiejiJarEvent(terrain)
     } else if (kind == 'vial') {
       await playJiejiVialEvent(terrain)
+    } else if (kind == 'ink') {
+      await playJiejiInkEvent(terrain)
     } else {
       await playJiejiThunderRoadEvent(terrain)
     }
@@ -1091,6 +1093,11 @@ namespace debug {
   /// 忽略几率与冷却，仍弹出赶路劫瓶三选。
   async function forceVial() {
     return await playJiejiVialEvent({ kind: 'plain' })
+  }
+
+  /// 忽略几率与冷却，仍弹出赶路劫墨三选。
+  async function forceInk() {
+    return await playJiejiInkEvent({ kind: 'plain' })
   }
 
   /// 忽略冷却与花费，仍弹出幻术祭坛入幻三选。
