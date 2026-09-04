@@ -2998,6 +2998,30 @@ Future<void> _heroEnterJiejiIllusion(dynamic location) async {
   }
 }
 
+
+Future<void> _heroEchoJiejiIllusion(dynamic location) async {
+  final isRented = await GameLogic.checkRented(location);
+  if (!isRented) return;
+
+  final result = await engine.hetu.invoke('echoJiejiIllusion');
+  if (result == 'cooldown') {
+    dialog.pushDialog(
+      'hint_echoJiejiIllusion_cooldown',
+      npcId: location['npcId'],
+    );
+    await dialog.execute();
+    return;
+  }
+  if (result == 'poor') {
+    dialog.pushDialog(
+      'hint_echoJiejiIllusion_notEnough',
+      npcId: location['npcId'],
+    );
+    await dialog.execute();
+    return;
+  }
+}
+
 Future<void> _heroConsultJiejiPsychic(dynamic location) async {
   final isRented = await GameLogic.checkRented(location);
   if (!isRented) return;
@@ -3503,6 +3527,10 @@ Future<void> _onInteractSite(
       'text': 'enterJiejiIllusion',
       'description': 'hint_enterJiejiIllusion_description',
     });
+    siteOptions.add({
+      'text': 'echoJiejiIllusion',
+      'description': 'hint_echoJiejiIllusion_description',
+    });
   } else if (siteKind == 'psychictemple') {
     siteOptions.add({
       'text': 'consultJiejiPsychic',
@@ -3626,6 +3654,8 @@ Future<void> _onInteractSite(
       await _heroCastJiejiVeil(location);
     case 'enterJiejiIllusion':
       await _heroEnterJiejiIllusion(location);
+    case 'echoJiejiIllusion':
+      await _heroEchoJiejiIllusion(location);
     case 'consultJiejiPsychic':
       await _heroConsultJiejiPsychic(location);
     case 'againJiejiPsychic':

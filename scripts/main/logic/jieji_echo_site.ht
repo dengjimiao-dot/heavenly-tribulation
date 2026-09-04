@@ -1,0 +1,182 @@
+/// 幻术祭坛「映幻」三选：再观 / 映障 / 血映。不替换入幻与迷障。
+/// 与赶路残鼓 jieji_echo.ht 分立；冷却字段 lastEchoDay，勿与 lastEchoMove 混用。
+const kJiejiEchoSiteCooldownDays = 1
+const kJiejiEchoSiteGazeMoney = 20
+const kJiejiEchoSiteGazeMoneyThunder = 10
+const kJiejiEchoSiteGazeLife = 5
+const kJiejiEchoSiteGazeHerbMist = 1
+const kJiejiEchoSiteVeilHerb = 1
+const kJiejiEchoSiteVeilGongfaRate = 0.20
+const kJiejiEchoSiteBloodLife = 2
+const kJiejiEchoSiteBloodLifeBlood = 3
+const kJiejiEchoSiteBloodGongfaRate = 0.30
+const kJiejiEchoSiteBloodMoney = 45
+
+function _jiejiEchoSiteSeasonId() {
+  if (game.jieji != null && game.jieji.seasonId != null) {
+    return game.jieji.seasonId
+  }
+  return null
+}
+
+function _jiejiEchoSiteCurrentDay() {
+  if (game.timestamp == null) return null
+  if (Constants.ticksPerDay == null) return null
+  if (Constants.ticksPerDay <= 0) return null
+  return game.timestamp ~/ Constants.ticksPerDay
+}
+
+function _jiejiEchoSiteOnCooldown() {
+  final jieji = ensureJiejiFlags()
+  final day = _jiejiEchoSiteCurrentDay()
+  if (day == null) return false
+  if (jieji.lastEchoDay == null) return false
+  if (day - jieji.lastEchoDay < kJiejiEchoSiteCooldownDays) return true
+  return false
+}
+
+function _jiejiEchoSiteMark() {
+  final jieji = ensureJiejiFlags()
+  jieji.lastEchoDay = _jiejiEchoSiteCurrentDay()
+}
+
+function _jiejiEchoSiteCostLife(want) {
+  var lost = want
+  final life = hero.life ?? 1
+  if (life - lost < 1) lost = life - 1
+  if (lost < 0) lost = 0
+  if (lost > 0) {
+    Player.setLife(hero.life - lost)
+  }
+  return lost
+}
+
+function _jiejiEchoSiteGazeMoneyCost(seasonId) {
+  if (seasonId == 'thunder') return kJiejiEchoSiteGazeMoneyThunder
+  return kJiejiEchoSiteGazeMoney
+}
+
+function _jiejiEchoSiteBloodLifeCost(seasonId) {
+  if (seasonId == 'blood') return kJiejiEchoSiteBloodLifeBlood
+  return kJiejiEchoSiteBloodLife
+}
+
+function _jiejiEchoSiteNormalizeKind(kind) {
+  if (kind == 'gaze' || kind == 'jieji_echo_site_gaze') return 'gaze'
+  if (kind == 'veil' || kind == 'jieji_echo_site_veil') return 'veil'
+  if (kind == 'blood' || kind == 'jieji_echo_site_blood') return 'blood'
+  return null
+}
+
+function _jiejiEchoSiteChoices() {
+  return [
+    {
+      text: 'jieji_echo_site_gaze',
+      description: 'hint_jieji_echo_site_gaze',
+    },
+    {
+      text: 'jieji_echo_site_veil',
+      description: 'hint_jieji_echo_site_veil',
+    },
+    {
+      text: 'jieji_echo_site_blood',
+      description: 'hint_jieji_echo_site_blood',
+    },
+    'cancel',
+  ]
+}
+
+function _jiejiEchoSiteMoneyNeed(selected, seasonId) {
+  if (selected == 'gaze') return _jiejiEchoSiteGazeMoneyCost(seasonId)
+  return 0
+}
+
+function _jiejiEchoSiteHerbNeed(selected) {
+  if (selected == 'veil') return kJiejiEchoSiteVeilHerb
+  return 0
+}
+
+/// 幻术祭坛映幻三选。free 为 true 时不扣费、不检查冷却（debug），仍弹出三选。
+/// kind 为空则弹窗；null 选择在 free 时默认再观。
+/// 返回 'cooldown' | 'poor' | 'cancel' | 'gaze' | 'veil' | 'blood'。
+async function echoJiejiIllusion({ free = false, kind = null }) {
+  if (hero == null) return 'cancel'
+  if (free != true && _jiejiEchoSiteOnCooldown()) {
+    return 'cooldown'
+  }
+
+  var selected = _jiejiEchoSiteNormalizeKind(kind)
+  if (selected == null) {
+    dialog.pushDialog('hint_echoJiejiIllusion')
+    dialog.pushSelection('jiejiEchoSite', _jiejiEchoSiteChoices())
+    await dialog.execute()
+    final picked = dialog.checkSelected('jiejiEchoSite')
+    if (picked == null || picked == 'cancel') {
+      if (free == true && picked == null) {
+        selected = 'gaze'
+      } else {
+        return 'cancel'
+      }
+    } else {
+      selected = _jiejiEchoSiteNormalizeKind(picked)
+    }
+  }
+  if (selected == null) return 'cancel'
+
+  final seasonId = _jiejiEchoSiteSeasonId()
+  if (free != true) {
+    final moneyNeed = _jiejiEchoSiteMoneyNeed(selected, seasonId)
+    final herbNeed = _jiejiEchoSiteHerbNeed(selected)
+    final moneyHave = hero.materials['money'] ?? 0
+    final herbHave = hero.materials['herb'] ?? 0
+    if (moneyHave < moneyNeed || herbHave < herbNeed) {
+      return 'poor'
+    }
+  }
+
+  if (free != true) {
+    final moneyNeed = _jiejiEchoSiteMoneyNeed(selected, seasonId)
+    final herbNeed = _jiejiEchoSiteHerbNeed(selected)
+    if (moneyNeed > 0) {
+      Player.exhaust('money', moneyNeed)
+    }
+    if (herbNeed > 0) {
+      Player.exhaust('herb', herbNeed)
+    }
+    if (selected == 'blood') {
+      _jiejiEchoSiteCostLife(_jiejiEchoSiteBloodLifeCost(seasonId))
+    }
+    _jiejiEchoSiteMark()
+  }
+
+  if (selected == 'gaze') {
+    final healed = Player.restoreLife(kJiejiEchoSiteGazeLife)
+    if (seasonId == 'mist') {
+      await Player.collect('herb', kJiejiEchoSiteGazeHerbMist, incurIncident: false)
+    }
+    dialog.pushDialog('hint_echoJiejiIllusion_gaze', interpolations: [healed])
+    await dialog.execute()
+  } else if (selected == 'veil') {
+    final jieji = ensureJiejiFlags()
+    jieji.illusionVeil = true
+    final ok = await tryDropGongfaShard(rate: kJiejiEchoSiteVeilGongfaRate)
+    if (ok == true) {
+      dialog.pushDialog('hint_echoJiejiIllusion_veil')
+    } else {
+      dialog.pushDialog('hint_echoJiejiIllusion_veil_plain')
+    }
+    await dialog.execute()
+  } else if (selected == 'blood') {
+    dialog.pushDialog('hint_echoJiejiIllusion_blood')
+    await dialog.execute()
+    final ok = await tryDropGongfaShard(rate: kJiejiEchoSiteBloodGongfaRate)
+    if (ok != true) {
+      await Player.collect('money', kJiejiEchoSiteBloodMoney, incurIncident: false)
+      dialog.pushDialog('hint_echoJiejiIllusion_blood_none', interpolations: [kJiejiEchoSiteBloodMoney])
+      await dialog.execute()
+    }
+  }
+
+  Game.updateUI()
+  return selected
+}

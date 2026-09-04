@@ -682,6 +682,11 @@ namespace debug {
     return await enterJiejiIllusion(free: true)
   }
 
+  /// 忽略冷却与花费，仍弹出幻术祭坛映幻三选。
+  async function forceEchoIllusion() {
+    return await echoJiejiIllusion(free: true)
+  }
+
   /// 忽略费用与冷却，直接挂上迷障（下次野遇糊弄过去）。
   function forceVeil() {
     if (hero == null) return
