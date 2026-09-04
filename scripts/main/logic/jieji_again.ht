@@ -1,0 +1,175 @@
+/// 通灵殿「再卜」三选：温魂 / 听劫 / 血通。不替换通灵。
+const kJiejiAgainCooldownDays = 1
+const kJiejiAgainWarmHerb = 1
+const kJiejiAgainWarmHerbMist = 0
+const kJiejiAgainWarmLife = 6
+const kJiejiAgainListenMoney = 40
+const kJiejiAgainListenMoneyThunder = 20
+const kJiejiAgainBloodLife = 2
+const kJiejiAgainBloodLifeBlood = 3
+const kJiejiAgainBloodGongfaRate = 0.35
+const kJiejiAgainBloodMoney = 40
+
+function _jiejiAgainSeasonId() {
+  if (game.jieji != null && game.jieji.seasonId != null) {
+    return game.jieji.seasonId
+  }
+  return null
+}
+
+function _jiejiAgainCurrentDay() {
+  if (game.timestamp == null) return null
+  if (Constants.ticksPerDay == null) return null
+  if (Constants.ticksPerDay <= 0) return null
+  return game.timestamp ~/ Constants.ticksPerDay
+}
+
+function _jiejiAgainOnCooldown() {
+  final jieji = ensureJiejiFlags()
+  final day = _jiejiAgainCurrentDay()
+  if (day == null) return false
+  if (jieji.lastAgainDay == null) return false
+  if (day - jieji.lastAgainDay < kJiejiAgainCooldownDays) return true
+  return false
+}
+
+function _jiejiAgainMark() {
+  final jieji = ensureJiejiFlags()
+  jieji.lastAgainDay = _jiejiAgainCurrentDay()
+}
+
+function _jiejiAgainCostLife(want) {
+  var lost = want
+  final life = hero.life ?? 1
+  if (life - lost < 1) lost = life - 1
+  if (lost < 0) lost = 0
+  if (lost > 0) {
+    Player.setLife(hero.life - lost)
+  }
+  return lost
+}
+
+function _jiejiAgainWarmHerbCost(seasonId) {
+  if (seasonId == 'mist') return kJiejiAgainWarmHerbMist
+  return kJiejiAgainWarmHerb
+}
+
+function _jiejiAgainListenMoneyCost(seasonId) {
+  if (seasonId == 'thunder') return kJiejiAgainListenMoneyThunder
+  return kJiejiAgainListenMoney
+}
+
+function _jiejiAgainBloodLifeCost(seasonId) {
+  if (seasonId == 'blood') return kJiejiAgainBloodLifeBlood
+  return kJiejiAgainBloodLife
+}
+
+function _jiejiAgainNormalizeKind(kind) {
+  if (kind == 'warm' || kind == 'jieji_again_warm') return 'warm'
+  if (kind == 'listen' || kind == 'jieji_again_listen') return 'listen'
+  if (kind == 'blood' || kind == 'jieji_again_blood') return 'blood'
+  return null
+}
+
+function _jiejiAgainChoices() {
+  return [
+    {
+      text: 'jieji_again_warm',
+      description: 'hint_jieji_again_warm',
+    },
+    {
+      text: 'jieji_again_listen',
+      description: 'hint_jieji_again_listen',
+    },
+    {
+      text: 'jieji_again_blood',
+      description: 'hint_jieji_again_blood',
+    },
+    'cancel',
+  ]
+}
+
+function _jiejiAgainHerbNeed(selected, seasonId) {
+  if (selected == 'warm') return _jiejiAgainWarmHerbCost(seasonId)
+  return 0
+}
+
+function _jiejiAgainMoneyNeed(selected, seasonId) {
+  if (selected == 'listen') return _jiejiAgainListenMoneyCost(seasonId)
+  return 0
+}
+
+/// 通灵殿再卜三选。free 为 true 时不扣费、不检查冷却（debug），仍弹出三选。
+/// 返回 'ok' | 'cooldown' | 'poor' | 'cancel'。
+async function againJiejiPsychic({ free = false }) {
+  if (hero == null) return 'cancel'
+  if (free != true && _jiejiAgainOnCooldown()) {
+    return 'cooldown'
+  }
+
+  dialog.pushDialog('hint_againJiejiPsychic')
+  dialog.pushSelection('jiejiAgain', _jiejiAgainChoices())
+  await dialog.execute()
+  final picked = dialog.checkSelected('jiejiAgain')
+  var selected = null
+  if (picked == null || picked == 'cancel') {
+    if (free == true && picked == null) {
+      selected = 'warm'
+    } else {
+      return 'cancel'
+    }
+  } else {
+    selected = _jiejiAgainNormalizeKind(picked)
+  }
+  if (selected == null) return 'cancel'
+
+  final seasonId = _jiejiAgainSeasonId()
+  if (free != true) {
+    final herbNeed = _jiejiAgainHerbNeed(selected, seasonId)
+    final moneyNeed = _jiejiAgainMoneyNeed(selected, seasonId)
+    final herbHave = hero.materials['herb'] ?? 0
+    final moneyHave = hero.materials['money'] ?? 0
+    if (herbHave < herbNeed || moneyHave < moneyNeed) {
+      return 'poor'
+    }
+  }
+
+  if (free != true) {
+    final herbNeed = _jiejiAgainHerbNeed(selected, seasonId)
+    final moneyNeed = _jiejiAgainMoneyNeed(selected, seasonId)
+    if (herbNeed > 0) {
+      Player.exhaust('herb', herbNeed)
+    }
+    if (moneyNeed > 0) {
+      Player.exhaust('money', moneyNeed)
+    }
+    if (selected == 'blood') {
+      _jiejiAgainCostLife(_jiejiAgainBloodLifeCost(seasonId))
+    }
+    _jiejiAgainMark()
+  }
+
+  if (selected == 'listen') {
+    final jieji = ensureJiejiFlags()
+    jieji.illusionVeil = true
+    dialog.pushDialog('hint_againJiejiPsychic_listen')
+    await dialog.execute()
+  } else if (selected == 'blood') {
+    final dropped = await tryDropGongfaShard(rate: kJiejiAgainBloodGongfaRate)
+    if (dropped != true) {
+      await Player.collect('money', kJiejiAgainBloodMoney, incurIncident: false)
+      dialog.pushDialog('hint_againJiejiPsychic_blood_money')
+      await dialog.execute()
+    } else {
+      dialog.pushDialog('hint_againJiejiPsychic_blood')
+      await dialog.execute()
+    }
+  } else {
+    Player.restoreLife(kJiejiAgainWarmLife)
+    dialog.pushDialog('hint_againJiejiPsychic_warm')
+    await dialog.execute()
+  }
+
+  Game.updateUI()
+  return 'ok'
+}

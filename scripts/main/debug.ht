@@ -499,6 +499,11 @@ namespace debug {
     return await consultJiejiPsychic(free: true, kind: k)
   }
 
+  /// 忽略冷却与花费，仍弹出通灵殿再卜三选。
+  async function forceAgain() {
+    return await againJiejiPsychic(free: true)
+  }
+
   async function forceTheurgy(kind) {
     var k = kind
     if (k != 'ward' && k != 'fury' && k != 'heal') {
