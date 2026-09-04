@@ -2471,6 +2471,26 @@ Future<void> _heroDrillJiejiArena(dynamic location) async {
   }
 }
 
+Future<void> _heroTrainJiejiArena(dynamic location) async {
+  final result = await engine.hetu.invoke('trainJiejiArena');
+  if (result == 'cooldown') {
+    dialog.pushDialog(
+      'hint_trainJiejiArena_cooldown',
+      npcId: location['npcId'],
+    );
+    await dialog.execute();
+    return;
+  }
+  if (result == 'poor') {
+    dialog.pushDialog(
+      'hint_trainJiejiArena_notEnough',
+      npcId: location['npcId'],
+    );
+    await dialog.execute();
+    return;
+  }
+}
+
 Future<void> _heroVisitJiejiTomb(dynamic location) async {
   final result = await engine.hetu.invoke('visitJiejiTomb');
   if (result == 'cooldown') {
@@ -3430,6 +3450,10 @@ Future<void> _onInteractSite(
       'text': 'drillJiejiArena',
       'description': 'hint_drillJiejiArena_description',
     });
+    siteOptions.add({
+      'text': 'trainJiejiArena',
+      'description': 'hint_trainJiejiArena_description',
+    });
   } else if (siteKind == 'justicehall') {
     siteOptions.add({
       'text': 'washJiejiCurse',
@@ -3674,6 +3698,8 @@ Future<void> _onInteractSite(
       await _heroDuelJiejiArena(location);
     case 'drillJiejiArena':
       await _heroDrillJiejiArena(location);
+    case 'trainJiejiArena':
+      await _heroTrainJiejiArena(location);
     case 'bidJiejiBlackLot':
       await _heroBidJiejiBlackLot(location);
     case 'raiseJiejiBlackLot':

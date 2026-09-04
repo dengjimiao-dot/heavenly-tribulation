@@ -448,6 +448,11 @@ namespace debug {
     return await drillJiejiArena(free: true)
   }
 
+  /// 忽略冷却与花费，仍弹出演武场复练三选。
+  async function forceTrain() {
+    return await trainJiejiArena(free: true)
+  }
+
   /// 忽略冷却与花费，仍弹出秘境入口剑冢三选。
   async function forceTomb() {
     return await visitJiejiTomb(free: true)

@@ -1,0 +1,186 @@
+/// 演武场「复练」：再桩 / 再招 / 血复。不替换切磋、挑战与加练。
+const kJiejiTrainCooldownDays = 1
+const kJiejiTrainStanceMoney = 25
+const kJiejiTrainStanceMoneyThunder = 12
+const kJiejiTrainStanceLife = 4
+const kJiejiTrainStanceHerbMist = 1
+const kJiejiTrainFormHerb = 1
+const kJiejiTrainFormGongfaRate = 0.15
+const kJiejiTrainFormMoneyMist = 20
+const kJiejiTrainBloodLife = 2
+const kJiejiTrainBloodLifeBlood = 3
+const kJiejiTrainBloodHeal = 6
+const kJiejiTrainBloodGongfaRate = 0.25
+
+function _jiejiTrainSeasonId() {
+  if (game.jieji != null && game.jieji.seasonId != null) {
+    return game.jieji.seasonId
+  }
+  return null
+}
+
+function _jiejiTrainCurrentDay() {
+  if (game.timestamp == null) return null
+  if (Constants.ticksPerDay == null) return null
+  if (Constants.ticksPerDay <= 0) return null
+  return game.timestamp ~/ Constants.ticksPerDay
+}
+
+function _jiejiTrainOnCooldown() {
+  final jieji = ensureJiejiFlags()
+  final day = _jiejiTrainCurrentDay()
+  if (day == null) return false
+  if (jieji.lastTrainDay == null) return false
+  if (day - jieji.lastTrainDay < kJiejiTrainCooldownDays) return true
+  return false
+}
+
+function _jiejiTrainMark() {
+  final jieji = ensureJiejiFlags()
+  jieji.lastTrainDay = _jiejiTrainCurrentDay()
+}
+
+function _jiejiTrainCostLife(want) {
+  var lost = want
+  final life = hero.life ?? 1
+  if (life - lost < 1) lost = life - 1
+  if (lost < 0) lost = 0
+  if (lost > 0) {
+    Player.setLife(hero.life - lost)
+  }
+  return lost
+}
+
+function _jiejiTrainStanceMoneyCost(seasonId) {
+  if (seasonId == 'thunder') return kJiejiTrainStanceMoneyThunder
+  return kJiejiTrainStanceMoney
+}
+
+function _jiejiTrainBloodLifeCost(seasonId) {
+  if (seasonId == 'blood') return kJiejiTrainBloodLifeBlood
+  return kJiejiTrainBloodLife
+}
+
+function _jiejiTrainNormalizeKind(kind) {
+  if (kind == 'stance' || kind == 'jieji_train_stance') return 'stance'
+  if (kind == 'form' || kind == 'jieji_train_form') return 'form'
+  if (kind == 'blood' || kind == 'jieji_train_blood') return 'blood'
+  return null
+}
+
+function _jiejiTrainChoices() {
+  return [
+    {
+      text: 'jieji_train_stance',
+      description: 'hint_jieji_train_stance',
+    },
+    {
+      text: 'jieji_train_form',
+      description: 'hint_jieji_train_form',
+    },
+    {
+      text: 'jieji_train_blood',
+      description: 'hint_jieji_train_blood',
+    },
+    'cancel',
+  ]
+}
+
+function _jiejiTrainMoneyNeed(selected, seasonId) {
+  if (selected == 'stance') return _jiejiTrainStanceMoneyCost(seasonId)
+  return 0
+}
+
+function _jiejiTrainHerbNeed(selected) {
+  if (selected == 'form') return kJiejiTrainFormHerb
+  return 0
+}
+
+/// 演武场复练三选。free 为 true 时不扣费、不检查冷却（debug），仍弹出三选。
+/// kind 为空则弹窗；null 选择在 free 时默认再桩。
+/// 返回 'cooldown' | 'poor' | 'cancel' | 'stance' | 'form' | 'blood'。
+async function trainJiejiArena({ free = false, kind = null }) {
+  if (hero == null) return 'cancel'
+  if (free != true && _jiejiTrainOnCooldown()) {
+    return 'cooldown'
+  }
+
+  var selected = _jiejiTrainNormalizeKind(kind)
+  if (selected == null) {
+    dialog.pushDialog('hint_trainJiejiArena')
+    dialog.pushSelection('jiejiTrain', _jiejiTrainChoices())
+    await dialog.execute()
+    final picked = dialog.checkSelected('jiejiTrain')
+    if (picked == null || picked == 'cancel') {
+      if (free == true && picked == null) {
+        selected = 'stance'
+      } else {
+        return 'cancel'
+      }
+    } else {
+      selected = _jiejiTrainNormalizeKind(picked)
+    }
+  }
+  if (selected == null) return 'cancel'
+
+  final seasonId = _jiejiTrainSeasonId()
+  if (free != true) {
+    final moneyNeed = _jiejiTrainMoneyNeed(selected, seasonId)
+    final herbNeed = _jiejiTrainHerbNeed(selected)
+    final moneyHave = hero.materials['money'] ?? 0
+    final herbHave = hero.materials['herb'] ?? 0
+    if (moneyHave < moneyNeed || herbHave < herbNeed) {
+      return 'poor'
+    }
+  }
+
+  if (free != true) {
+    final moneyNeed = _jiejiTrainMoneyNeed(selected, seasonId)
+    final herbNeed = _jiejiTrainHerbNeed(selected)
+    if (moneyNeed > 0) {
+      Player.exhaust('money', moneyNeed)
+    }
+    if (herbNeed > 0) {
+      Player.exhaust('herb', herbNeed)
+    }
+    if (selected == 'blood') {
+      _jiejiTrainCostLife(_jiejiTrainBloodLifeCost(seasonId))
+    }
+    _jiejiTrainMark()
+  }
+
+  if (selected == 'stance') {
+    final healed = Player.restoreLife(kJiejiTrainStanceLife)
+    if (seasonId == 'mist') {
+      await Player.collect('herb', kJiejiTrainStanceHerbMist, incurIncident: false)
+    }
+    dialog.pushDialog('hint_trainJiejiArena_stance', interpolations: [healed])
+    await dialog.execute()
+  } else if (selected == 'form') {
+    jiejiDungeonGrantBlank()
+    if (seasonId == 'mist') {
+      await Player.collect('money', kJiejiTrainFormMoneyMist, incurIncident: false)
+    }
+    final ok = await tryDropGongfaShard(rate: kJiejiTrainFormGongfaRate)
+    if (ok == true) {
+      dialog.pushDialog('hint_trainJiejiArena_form')
+    } else {
+      dialog.pushDialog('hint_trainJiejiArena_form_plain')
+    }
+    await dialog.execute()
+  } else if (selected == 'blood') {
+    final jieji = ensureJiejiFlags()
+    if (jieji.arrayWard != true) {
+      jieji.arrayWard = true
+      dialog.pushDialog('hint_trainJiejiArena_blood')
+    } else {
+      Player.restoreLife(kJiejiTrainBloodHeal)
+      dialog.pushDialog('hint_trainJiejiArena_blood_heal')
+    }
+    await dialog.execute()
+    await tryDropGongfaShard(rate: kJiejiTrainBloodGongfaRate)
+  }
+
+  Game.updateUI()
+  return selected
+}
