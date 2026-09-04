@@ -2930,6 +2930,30 @@ Future<void> _heroWatchJiejiStele(dynamic location) async {
   }
 }
 
+
+Future<void> _heroRubJiejiStele(dynamic location) async {
+  final isRented = await GameLogic.checkRented(location);
+  if (!isRented) return;
+
+  final result = await engine.hetu.invoke('rubJiejiStele');
+  if (result == 'cooldown') {
+    dialog.pushDialog(
+      'hint_rubJiejiStele_cooldown',
+      npcId: location['npcId'],
+    );
+    await dialog.execute();
+    return;
+  }
+  if (result == 'poor') {
+    dialog.pushDialog(
+      'hint_rubJiejiStele_notEnough',
+      npcId: location['npcId'],
+    );
+    await dialog.execute();
+    return;
+  }
+}
+
 Future<void> _heroLayJiejiArray(dynamic location) async {
   final isRented = await GameLogic.checkRented(location);
   if (!isRented) return;
@@ -3524,6 +3548,10 @@ Future<void> _onInteractSite(
       'text': 'watchJiejiStele',
       'description': 'hint_watchJiejiStele_description',
     });
+    siteOptions.add({
+      'text': 'rubJiejiStele',
+      'description': 'hint_rubJiejiStele_description',
+    });
   } else if (siteKind == 'exparray') {
     siteOptions.add({
       'text': 'cultivateJiejiArray',
@@ -3676,6 +3704,8 @@ Future<void> _onInteractSite(
       await _heroInsightJiejiStele(location);
     case 'watchJiejiStele':
       await _heroWatchJiejiStele(location);
+    case 'rubJiejiStele':
+      await _heroRubJiejiStele(location);
     case 'layJiejiArray':
       await _heroLayJiejiArray(location);
     case 'breakJiejiArray':

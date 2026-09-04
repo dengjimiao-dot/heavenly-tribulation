@@ -1,0 +1,202 @@
+/// 问道碑「再摩」：再温 / 再借 / 血摩。不替换悟道与夜碑。
+const kJiejiRubCooldownDays = 1
+const kJiejiRubWarmMoney = 20
+const kJiejiRubWarmMoneyThunder = 10
+const kJiejiRubWarmLife = 5
+const kJiejiRubWarmHerbMist = 1
+const kJiejiRubKillHerb = 1
+const kJiejiRubKillGongfaRate = 0.15
+const kJiejiRubKillLife = 4
+const kJiejiRubBloodLife = 2
+const kJiejiRubBloodLifeBlood = 3
+const kJiejiRubBloodGongfaRate = 0.35
+const kJiejiRubBloodMoney = 40
+
+function _jiejiRubSeasonId() {
+  if (game.jieji != null && game.jieji.seasonId != null) {
+    return game.jieji.seasonId
+  }
+  return null
+}
+
+function _jiejiRubCurrentDay() {
+  if (game.timestamp == null) return null
+  if (Constants.ticksPerDay == null) return null
+  if (Constants.ticksPerDay <= 0) return null
+  return game.timestamp ~/ Constants.ticksPerDay
+}
+
+function _jiejiRubOnCooldown() {
+  final jieji = ensureJiejiFlags()
+  final day = _jiejiRubCurrentDay()
+  if (day == null) return false
+  if (jieji.lastRubDay == null) return false
+  if (day - jieji.lastRubDay < kJiejiRubCooldownDays) return true
+  return false
+}
+
+function _jiejiRubMark() {
+  final jieji = ensureJiejiFlags()
+  jieji.lastRubDay = _jiejiRubCurrentDay()
+}
+
+function _jiejiRubCostLife(want) {
+  var lost = want
+  final life = hero.life ?? 1
+  if (life - lost < 1) lost = life - 1
+  if (lost < 0) lost = 0
+  if (lost > 0) {
+    Player.setLife(hero.life - lost)
+  }
+  return lost
+}
+
+function _jiejiRubWarmMoneyCost(seasonId) {
+  if (seasonId == 'thunder') return kJiejiRubWarmMoneyThunder
+  return kJiejiRubWarmMoney
+}
+
+function _jiejiRubBloodLifeCost(seasonId) {
+  if (seasonId == 'blood') return kJiejiRubBloodLifeBlood
+  return kJiejiRubBloodLife
+}
+
+function _jiejiRubNormalizeKind(kind) {
+  if (kind == 'warm' || kind == 'jieji_rub_warm') return 'warm'
+  if (kind == 'kill' || kind == 'jieji_rub_kill') return 'kill'
+  if (kind == 'blood' || kind == 'jieji_rub_blood') return 'blood'
+  return null
+}
+
+function _jiejiRubChoices() {
+  return [
+    {
+      text: 'jieji_rub_warm',
+      description: 'hint_jieji_rub_warm',
+    },
+    {
+      text: 'jieji_rub_kill',
+      description: 'hint_jieji_rub_kill',
+    },
+    {
+      text: 'jieji_rub_blood',
+      description: 'hint_jieji_rub_blood',
+    },
+    'cancel',
+  ]
+}
+
+function _jiejiRubMoneyNeed(selected, seasonId) {
+  if (selected == 'warm') return _jiejiRubWarmMoneyCost(seasonId)
+  return 0
+}
+
+function _jiejiRubHerbNeed(selected) {
+  if (selected == 'kill') return kJiejiRubKillHerb
+  return 0
+}
+
+/// 破军未挂则挂 arrayFury；已挂则挂 feastFury。两者都有则只回血。
+function _jiejiRubApplyFury() {
+  final jieji = ensureJiejiFlags()
+  if (jieji.arrayFury != true) {
+    jieji.arrayFury = true
+    return 'array'
+  }
+  if (jieji.feastFury != true) {
+    jieji.feastFury = true
+    return 'feast'
+  }
+  return null
+}
+
+/// 问道碑再摩三选。free 为 true 时不扣费、不检查冷却（debug），仍弹出三选。
+/// kind 为空则弹窗；null 选择在 free 时默认再温。
+/// 返回 'cooldown' | 'poor' | 'cancel' | 'warm' | 'kill' | 'blood'。
+async function rubJiejiStele({ free = false, kind = null }) {
+  if (hero == null) return 'cancel'
+  if (free != true && _jiejiRubOnCooldown()) {
+    return 'cooldown'
+  }
+
+  var selected = _jiejiRubNormalizeKind(kind)
+  if (selected == null) {
+    dialog.pushDialog('hint_rubJiejiStele')
+    dialog.pushSelection('jiejiRub', _jiejiRubChoices())
+    await dialog.execute()
+    final picked = dialog.checkSelected('jiejiRub')
+    if (picked == null || picked == 'cancel') {
+      if (free == true && picked == null) {
+        selected = 'warm'
+      } else {
+        return 'cancel'
+      }
+    } else {
+      selected = _jiejiRubNormalizeKind(picked)
+    }
+  }
+  if (selected == null) return 'cancel'
+
+  final seasonId = _jiejiRubSeasonId()
+  if (free != true) {
+    final moneyNeed = _jiejiRubMoneyNeed(selected, seasonId)
+    final herbNeed = _jiejiRubHerbNeed(selected)
+    final moneyHave = hero.materials['money'] ?? 0
+    final herbHave = hero.materials['herb'] ?? 0
+    if (moneyHave < moneyNeed || herbHave < herbNeed) {
+      return 'poor'
+    }
+  }
+
+  if (free != true) {
+    final moneyNeed = _jiejiRubMoneyNeed(selected, seasonId)
+    final herbNeed = _jiejiRubHerbNeed(selected)
+    if (moneyNeed > 0) {
+      Player.exhaust('money', moneyNeed)
+    }
+    if (herbNeed > 0) {
+      Player.exhaust('herb', herbNeed)
+    }
+    if (selected == 'blood') {
+      _jiejiRubCostLife(_jiejiRubBloodLifeCost(seasonId))
+    }
+    _jiejiRubMark()
+  }
+
+  if (selected == 'warm') {
+    final healed = Player.restoreLife(kJiejiRubWarmLife)
+    if (seasonId == 'mist') {
+      await Player.collect('herb', kJiejiRubWarmHerbMist, incurIncident: false)
+    }
+    dialog.pushDialog('hint_rubJiejiStele_warm', interpolations: [healed])
+    await dialog.execute()
+  } else if (selected == 'kill') {
+    final fury = _jiejiRubApplyFury()
+    if (fury == 'array') {
+      dialog.pushDialog('hint_rubJiejiStele_kill_array')
+      await dialog.execute()
+      await tryDropGongfaShard(rate: kJiejiRubKillGongfaRate)
+    } else if (fury == 'feast') {
+      dialog.pushDialog('hint_rubJiejiStele_kill_feast')
+      await dialog.execute()
+      await tryDropGongfaShard(rate: kJiejiRubKillGongfaRate)
+    } else {
+      Player.restoreLife(kJiejiRubKillLife)
+      dialog.pushDialog('hint_rubJiejiStele_kill')
+      await dialog.execute()
+    }
+  } else if (selected == 'blood') {
+    final dropped = await tryDropGongfaShard(rate: kJiejiRubBloodGongfaRate)
+    if (dropped != true) {
+      await Player.collect('money', kJiejiRubBloodMoney, incurIncident: false)
+      dialog.pushDialog('hint_rubJiejiStele_blood_money')
+      await dialog.execute()
+    } else {
+      dialog.pushDialog('hint_rubJiejiStele_blood')
+      await dialog.execute()
+    }
+  }
+
+  Game.updateUI()
+  return selected
+}

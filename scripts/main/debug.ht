@@ -532,6 +532,10 @@ namespace debug {
     return await watchJiejiStele(free: true)
   }
 
+  async function forceRub() {
+    return await rubJiejiStele(free: true)
+  }
+
   async function forceSwapGoods() {
     return await swapJiejiGoods(free: true)
   }
