@@ -235,5 +235,13 @@
     contribution: 11,
     rank: 0,
   },
+  hidden_ore_slag: {
+    id: "hidden_ore_slag",
+    policy: null,
+    isBounty: false,
+    isHidden: true,
+    contribution: 11,
+    rank: 0,
+  },
 
 }
