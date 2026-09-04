@@ -583,6 +583,9 @@ namespace debug {
     } else if (kind == 'plaque') {
       game.flags.dungeon.pendingEncounter = 'jiejiPlaque'
       await playJiejiDungeonEncounter()
+    } else if (kind == 'lintel') {
+      game.flags.dungeon.pendingEncounter = 'jiejiLintel'
+      await playJiejiDungeonEncounter()
     } else if (kind == 'exit') {
       await playJiejiDungeonExitGift()
     } else {
