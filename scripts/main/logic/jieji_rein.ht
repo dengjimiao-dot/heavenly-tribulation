@@ -1,0 +1,152 @@
+/// 赶路「劫辔」三选：勒辔 / 收辔 / 血辔。隐藏、劫兆、野遇、赶路、行商、拾荒、扎营、残锋、残卷、雾灯、残鼓、汲泉、劫幡、劫铃、劫符、劫旌、劫烛、劫角、劫笛、劫笠、劫带、劫履、劫氅、劫扇、劫杖、劫伞、劫面、劫帔、劫手套、劫戒、劫镜、劫鼓、劫炬、劫梳、劫勺、劫碗、劫杯、劫罐、劫瓶、劫墨、劫袍、劫带、劫簪、劫笔、劫针、劫扣、劫绳、劫珠、劫钗、劫绦、劫穗、劫缎、劫缨、劫袖、劫领、劫缘、劫辫、劫翎、劫裹、劫轭都没中时才滚。
+const kJiejiReinBaseRate = 0.00012
+const kJiejiReinMoveCooldown = 24
+const kJiejiReinLereinHerb = 1
+const kJiejiReinLereinLife = 1
+const kJiejiReinLereinGongfaRate = 0.008
+const kJiejiReinStowreinMoney = 1
+const kJiejiReinStowreinMoneyThunder = 1
+const kJiejiReinStowreinHerb = 1
+const kJiejiReinStowreinLife = 1
+const kJiejiReinBloodLife = 1
+const kJiejiReinBloodLifeBlood = 2
+const kJiejiReinBloodGongfaRate = 0.06
+const kJiejiReinBloodMoney = 2
+
+function _jiejiReinSeasonId() {
+  if (game.jieji != null && game.jieji.seasonId != null) {
+    return game.jieji.seasonId
+  }
+  return null
+}
+
+function _jiejiReinTutorialLocked() {
+  return game.enableTutorial && game.flags.tutorial.bountyQuest != true
+}
+
+function _jiejiReinLereinHerbCost(seasonId) {
+  if (seasonId == 'mist') return 0
+  return kJiejiReinLereinHerb
+}
+
+function _jiejiReinStowreinMoneyCost(seasonId) {
+  if (seasonId == 'thunder') return kJiejiReinStowreinMoneyThunder
+  return kJiejiReinStowreinMoney
+}
+
+function _jiejiReinBloodLifeCost(seasonId) {
+  if (seasonId == 'blood') return kJiejiReinBloodLifeBlood
+  return kJiejiReinBloodLife
+}
+
+function _jiejiReinCostLife(want) {
+  var lost = want
+  final life = hero.life ?? 1
+  if (life - lost < 1) lost = life - 1
+  if (lost < 0) lost = 0
+  if (lost > 0) {
+    Player.setLife(hero.life - lost)
+  }
+  return lost
+}
+
+function _jiejiReinNormalizeKind(kind) {
+  if (kind == 'lerein' || kind == 'jieji_rein_lerein') return 'lerein'
+  if (kind == 'stowrein' || kind == 'jieji_rein_stowrein') return 'stowrein'
+  if (kind == 'bloodrein' || kind == 'jieji_rein_bloodrein') return 'bloodrein'
+  return null
+}
+
+function _jiejiReinChoices() {
+  return [
+    {
+      text: 'jieji_rein_lerein',
+      description: 'hint_jieji_rein_lerein',
+    },
+    {
+      text: 'jieji_rein_stowrein',
+      description: 'hint_jieji_rein_stowrein',
+    },
+    {
+      text: 'jieji_rein_bloodrein',
+      description: 'hint_jieji_rein_bloodrein',
+    },
+  ]
+}
+
+/// 赶路劫辔三选。debug.forceJiejiEvent('rein') / forceRein 直接走这里，仍弹出三选。
+async function playJiejiReinEvent(terrain) {
+  if (hero == null) return false
+
+  dialog.pushDialog('hint_jieji_rein')
+  dialog.pushSelection('jiejiRein', _jiejiReinChoices())
+  await dialog.execute()
+  final picked = dialog.checkSelected('jiejiRein')
+  var selected = _jiejiReinNormalizeKind(picked)
+  if (selected == null) {
+    selected = 'lerein'
+  }
+
+  final seasonId = _jiejiReinSeasonId()
+  if (selected == 'lerein') {
+    final herbNeed = _jiejiReinLereinHerbCost(seasonId)
+    final herbHave = hero.materials['herb'] ?? 0
+    if (herbNeed > 0 && herbHave < herbNeed) {
+      dialog.pushDialog('hint_jieji_rein_lerein_broke', interpolations: [herbNeed])
+      await dialog.execute()
+    } else {
+      if (herbNeed > 0) {
+        Player.exhaust('herb', herbNeed)
+      }
+      final healed = Player.restoreLife(kJiejiReinLereinLife)
+      dialog.pushDialog('hint_jieji_rein_lerein_ok', interpolations: [healed])
+      await dialog.execute()
+      await tryDropGongfaShard(rate: kJiejiReinLereinGongfaRate)
+    }
+  } else if (selected == 'stowrein') {
+    final moneyNeed = _jiejiReinStowreinMoneyCost(seasonId)
+    final moneyHave = hero.materials['money'] ?? 0
+    if (moneyHave < moneyNeed) {
+      dialog.pushDialog('hint_jieji_rein_stowrein_broke', interpolations: [moneyNeed])
+      await dialog.execute()
+    } else {
+      Player.exhaust('money', moneyNeed)
+      await Player.collect('herb', kJiejiReinStowreinHerb, incurIncident: false)
+      final healed = Player.restoreLife(kJiejiReinStowreinLife)
+      dialog.pushDialog('hint_jieji_rein_stowrein_ok', interpolations: [kJiejiReinStowreinHerb, healed])
+      await dialog.execute()
+    }
+  } else {
+    final lost = _jiejiReinCostLife(_jiejiReinBloodLifeCost(seasonId))
+    dialog.pushDialog('hint_jieji_rein_bloodrein_ok', interpolations: [lost])
+    await dialog.execute()
+    final dropped = await tryDropGongfaShard(rate: kJiejiReinBloodGongfaRate)
+    if (dropped != true) {
+      await Player.collect('money', kJiejiReinBloodMoney, incurIncident: false)
+      dialog.pushDialog('hint_jieji_rein_bloodrein_none', interpolations: [kJiejiReinBloodMoney])
+      await dialog.execute()
+    }
+  }
+
+  Game.updateUI()
+  return true
+}
+
+/// 赶路触发：教程锁与路遇相同；冷却 24 步；约 0.012%。出过则返回 true。
+async function tryJiejiReinOnMove(terrain) {
+  if (hero == null) return false
+  if (_jiejiReinTutorialLocked()) return false
+
+  final jieji = ensureJiejiFlags()
+  final moves = jieji.worldMoves ?? 0
+  final last = jieji.lastReinMove ?? -999
+  if (moves - last < kJiejiReinMoveCooldown) return false
+
+  var rate = kJiejiReinBaseRate
+  if (rate < 0) rate = 0
+  if (random.nextDouble() > rate) return false
+
+  jieji.lastReinMove = moves
+  await playJiejiReinEvent(terrain)
+  return true
+}

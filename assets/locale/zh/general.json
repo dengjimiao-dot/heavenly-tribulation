@@ -4408,6 +4408,20 @@
   "hint_jieji_yoke_bloodyoke_ok": "你割了 {0} 点生机去染劫轭。",
   "hint_jieji_yoke_bloodyoke_none": "血轭下去，轭影却散了。袋里多了 {0} 铜钱。",
 
+  "hint_jieji_rein": "路遇一副劫辔。你可以勒辔、收辔，或以血染辔。",
+  "jieji_rein_lerein": "勒辔",
+  "jieji_rein_stowrein": "收辔",
+  "jieji_rein_bloodrein": "血辔",
+  "hint_jieji_rein_lerein": "勒辔：耗 1 药材（雾月不耗）。回 1 命，八毫摸残页。药材不够则空手。",
+  "hint_jieji_rein_stowrein": "收辔：花 1 铜钱（雷月 1）。得 1 药材，并回 1 命。袋里不够则空手。",
+  "hint_jieji_rein_bloodrein": "血辔：扣 1 点生机（至少留 1，血月 2）。六厘摸残页，不成则得 2 铜钱。",
+  "hint_jieji_rein_lerein_ok": "你勒紧劫辔。生机回了 {0} 点。",
+  "hint_jieji_rein_lerein_broke": "勒辔要 {0} 药材。你拿不出来。",
+  "hint_jieji_rein_stowrein_ok": "你收起劫辔。得了 {0} 药材，生机回了 {1} 点。",
+  "hint_jieji_rein_stowrein_broke": "收辔要 {0} 铜钱。袋里不够。",
+  "hint_jieji_rein_bloodrein_ok": "你割了 {0} 点生机去染劫辔。",
+  "hint_jieji_rein_bloodrein_none": "血辔下去，辔影却散了。袋里多了 {0} 铜钱。",
+
 
   "jiejiMenpaiDemo": "劫季门派 · Demo",
   "jiejiMenpaiPitch": "带着业力赶天劫的门派肉鸽",
