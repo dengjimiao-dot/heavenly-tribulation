@@ -257,6 +257,8 @@ namespace debug {
       questKind = 'hidden_mist_reef'
     } else if (kind == 'gore') {
       questKind = 'hidden_blood_gore'
+    } else if (kind == 'beam') {
+      questKind = 'hidden_thunder_beam'
     }
     final ctor = Quests[questKind]
     if (ctor == null) return false
