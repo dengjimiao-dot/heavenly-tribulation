@@ -3880,6 +3880,22 @@
   "hint_jieji_belt_bloodbelt_none": "血带下去，带影却散了。袋里多了 {0} 铜钱。",
 
 
+  "jiejiPin": "劫簪",
+  "hint_jieji_pin": "路遇一支劫簪。你可以簪发、折簪，或以血染簪。",
+  "jieji_pin_wearpin": "簪发",
+  "jieji_pin_foldpin": "折簪",
+  "jieji_pin_bloodpin": "血染簪",
+  "hint_jieji_pin_wearpin": "簪发：耗 1 药材（雾月不耗）。回 5 命，八厘摸残页。药材不够则空手。",
+  "hint_jieji_pin_foldpin": "折簪：花 8 铜钱（雷月 4）。得 2 药材，并回 3 命。袋里不够则空手。",
+  "hint_jieji_pin_bloodpin": "血染：扣 2 点生机（至少留 1，血月 3）。二成六摸残页，不成则得 16 铜钱。",
+  "hint_jieji_pin_wearpin_ok": "你簪上劫簪。生机回了 {0} 点。",
+  "hint_jieji_pin_wearpin_broke": "簪发要 {0} 药材。你拿不出来。",
+  "hint_jieji_pin_foldpin_ok": "你折起劫簪。得了 {0} 药材，生机回了 {1} 点。",
+  "hint_jieji_pin_foldpin_broke": "折簪要 {0} 铜钱。袋里不够。",
+  "hint_jieji_pin_bloodpin_ok": "你割了 {0} 点生机去染劫簪。",
+  "hint_jieji_pin_bloodpin_none": "血簪下去，簪影却散了。袋里多了 {0} 铜钱。",
+
+
   "jiejiMenpaiDemo": "劫季门派 · Demo",
   "jiejiMenpaiPitch": "带着业力赶天劫的门派肉鸽",
   "knownIssues": "已知问题",

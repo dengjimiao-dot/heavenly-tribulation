@@ -1,0 +1,152 @@
+/// 赶路「劫簪」三选：簪发 / 折簪 / 血染。隐藏、劫兆、野遇、赶路、行商、拾荒、扎营、残锋、残卷、雾灯、残鼓、汲泉、劫幡、劫铃、劫符、劫旌、劫烛、劫角、劫笛、劫笠、劫带、劫履、劫氅、劫扇、劫杖、劫伞、劫面、劫帔、劫手套、劫戒、劫镜、劫鼓、劫炬、劫梳、劫勺、劫碗、劫杯、劫罐、劫瓶、劫墨、劫袍、劫带都没中时才滚。
+const kJiejiPinBaseRate = 0.006
+const kJiejiPinMoveCooldown = 24
+const kJiejiPinWearpinHerb = 1
+const kJiejiPinWearpinLife = 5
+const kJiejiPinWearpinGongfaRate = 0.08
+const kJiejiPinFoldpinMoney = 8
+const kJiejiPinFoldpinMoneyThunder = 4
+const kJiejiPinFoldpinHerb = 2
+const kJiejiPinFoldpinLife = 3
+const kJiejiPinBloodLife = 2
+const kJiejiPinBloodLifeBlood = 3
+const kJiejiPinBloodGongfaRate = 0.26
+const kJiejiPinBloodMoney = 16
+
+function _jiejiPinSeasonId() {
+  if (game.jieji != null && game.jieji.seasonId != null) {
+    return game.jieji.seasonId
+  }
+  return null
+}
+
+function _jiejiPinTutorialLocked() {
+  return game.enableTutorial && game.flags.tutorial.bountyQuest != true
+}
+
+function _jiejiPinWearpinHerbCost(seasonId) {
+  if (seasonId == 'mist') return 0
+  return kJiejiPinWearpinHerb
+}
+
+function _jiejiPinFoldpinMoneyCost(seasonId) {
+  if (seasonId == 'thunder') return kJiejiPinFoldpinMoneyThunder
+  return kJiejiPinFoldpinMoney
+}
+
+function _jiejiPinBloodLifeCost(seasonId) {
+  if (seasonId == 'blood') return kJiejiPinBloodLifeBlood
+  return kJiejiPinBloodLife
+}
+
+function _jiejiPinCostLife(want) {
+  var lost = want
+  final life = hero.life ?? 1
+  if (life - lost < 1) lost = life - 1
+  if (lost < 0) lost = 0
+  if (lost > 0) {
+    Player.setLife(hero.life - lost)
+  }
+  return lost
+}
+
+function _jiejiPinNormalizeKind(kind) {
+  if (kind == 'wearpin' || kind == 'jieji_pin_wearpin') return 'wearpin'
+  if (kind == 'foldpin' || kind == 'jieji_pin_foldpin') return 'foldpin'
+  if (kind == 'bloodpin' || kind == 'jieji_pin_bloodpin') return 'bloodpin'
+  return null
+}
+
+function _jiejiPinChoices() {
+  return [
+    {
+      text: 'jieji_pin_wearpin',
+      description: 'hint_jieji_pin_wearpin',
+    },
+    {
+      text: 'jieji_pin_foldpin',
+      description: 'hint_jieji_pin_foldpin',
+    },
+    {
+      text: 'jieji_pin_bloodpin',
+      description: 'hint_jieji_pin_bloodpin',
+    },
+  ]
+}
+
+/// 赶路劫簪三选。debug.forceJiejiEvent('pin') / forcePin 直接走这里，仍弹出三选。
+async function playJiejiPinEvent(terrain) {
+  if (hero == null) return false
+
+  dialog.pushDialog('hint_jieji_pin')
+  dialog.pushSelection('jiejiPin', _jiejiPinChoices())
+  await dialog.execute()
+  final picked = dialog.checkSelected('jiejiPin')
+  var selected = _jiejiPinNormalizeKind(picked)
+  if (selected == null) {
+    selected = 'wearpin'
+  }
+
+  final seasonId = _jiejiPinSeasonId()
+  if (selected == 'wearpin') {
+    final herbNeed = _jiejiPinWearpinHerbCost(seasonId)
+    final herbHave = hero.materials['herb'] ?? 0
+    if (herbNeed > 0 && herbHave < herbNeed) {
+      dialog.pushDialog('hint_jieji_pin_wearpin_broke', interpolations: [herbNeed])
+      await dialog.execute()
+    } else {
+      if (herbNeed > 0) {
+        Player.exhaust('herb', herbNeed)
+      }
+      final healed = Player.restoreLife(kJiejiPinWearpinLife)
+      dialog.pushDialog('hint_jieji_pin_wearpin_ok', interpolations: [healed])
+      await dialog.execute()
+      await tryDropGongfaShard(rate: kJiejiPinWearpinGongfaRate)
+    }
+  } else if (selected == 'foldpin') {
+    final moneyNeed = _jiejiPinFoldpinMoneyCost(seasonId)
+    final moneyHave = hero.materials['money'] ?? 0
+    if (moneyHave < moneyNeed) {
+      dialog.pushDialog('hint_jieji_pin_foldpin_broke', interpolations: [moneyNeed])
+      await dialog.execute()
+    } else {
+      Player.exhaust('money', moneyNeed)
+      await Player.collect('herb', kJiejiPinFoldpinHerb, incurIncident: false)
+      final healed = Player.restoreLife(kJiejiPinFoldpinLife)
+      dialog.pushDialog('hint_jieji_pin_foldpin_ok', interpolations: [kJiejiPinFoldpinHerb, healed])
+      await dialog.execute()
+    }
+  } else {
+    final lost = _jiejiPinCostLife(_jiejiPinBloodLifeCost(seasonId))
+    dialog.pushDialog('hint_jieji_pin_bloodpin_ok', interpolations: [lost])
+    await dialog.execute()
+    final dropped = await tryDropGongfaShard(rate: kJiejiPinBloodGongfaRate)
+    if (dropped != true) {
+      await Player.collect('money', kJiejiPinBloodMoney, incurIncident: false)
+      dialog.pushDialog('hint_jieji_pin_bloodpin_none', interpolations: [kJiejiPinBloodMoney])
+      await dialog.execute()
+    }
+  }
+
+  Game.updateUI()
+  return true
+}
+
+/// 赶路触发：教程锁与路遇相同；冷却 24 步；约 0.6%。出过则返回 true。
+async function tryJiejiPinOnMove(terrain) {
+  if (hero == null) return false
+  if (_jiejiPinTutorialLocked()) return false
+
+  final jieji = ensureJiejiFlags()
+  final moves = jieji.worldMoves ?? 0
+  final last = jieji.lastPinMove ?? -999
+  if (moves - last < kJiejiPinMoveCooldown) return false
+
+  var rate = kJiejiPinBaseRate
+  if (rate < 0) rate = 0
+  if (random.nextDouble() > rate) return false
+
+  jieji.lastPinMove = moves
+  await playJiejiPinEvent(terrain)
+  return true
+}
