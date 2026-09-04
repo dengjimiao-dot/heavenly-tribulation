@@ -3850,6 +3850,22 @@
   "hint_jieji_robe_bloodrobe_none": "血袍下去，袍影却散了。袋里多了 {0} 铜钱。",
 
 
+  "jiejiBelt": "劫带",
+  "hint_jieji_belt": "路遇一根劫带。你可以系带、折带，或以血染带。",
+  "jieji_belt_tiebelt": "系带",
+  "jieji_belt_foldbelt": "折带",
+  "jieji_belt_bloodbelt": "血染带",
+  "hint_jieji_belt_tiebelt": "系带：耗 1 药材（雾月不耗）。回 5 命，八厘摸残页。药材不够则空手。",
+  "hint_jieji_belt_foldbelt": "折带：花 8 铜钱（雷月 4）。得 2 药材，并回 3 命。袋里不够则空手。",
+  "hint_jieji_belt_bloodbelt": "血染：扣 2 点生机（至少留 1，血月 3）。二成六摸残页，不成则得 16 铜钱。",
+  "hint_jieji_belt_tiebelt_ok": "你系上劫带。生机回了 {0} 点。",
+  "hint_jieji_belt_tiebelt_broke": "系带要 {0} 药材。你拿不出来。",
+  "hint_jieji_belt_foldbelt_ok": "你折起劫带。得了 {0} 药材，生机回了 {1} 点。",
+  "hint_jieji_belt_foldbelt_broke": "折带要 {0} 铜钱。袋里不够。",
+  "hint_jieji_belt_bloodbelt_ok": "你割了 {0} 点生机去染劫带。",
+  "hint_jieji_belt_bloodbelt_none": "血带下去，带影却散了。袋里多了 {0} 铜钱。",
+
+
   "jiejiMenpaiDemo": "劫季门派 · Demo",
   "jiejiMenpaiPitch": "带着业力赶天劫的门派肉鸽",
   "knownIssues": "已知问题",

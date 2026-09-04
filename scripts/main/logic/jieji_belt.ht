@@ -1,0 +1,152 @@
+/// 赶路「劫带」三选：系带 / 折带 / 血染。隐藏、劫兆、野遇、赶路、行商、拾荒、扎营、残锋、残卷、雾灯、残鼓、汲泉、劫幡、劫铃、劫符、劫旌、劫烛、劫角、劫笛、劫笠、劫带、劫履、劫氅、劫扇、劫杖、劫伞、劫面、劫帔、劫手套、劫戒、劫镜、劫鼓、劫炬、劫梳、劫勺、劫碗、劫杯、劫罐、劫瓶、劫墨、劫袍都没中时才滚。
+const kJiejiBeltBaseRate = 0.007
+const kJiejiBeltMoveCooldown = 24
+const kJiejiBeltTiebeltHerb = 1
+const kJiejiBeltTiebeltLife = 5
+const kJiejiBeltTiebeltGongfaRate = 0.08
+const kJiejiBeltFoldbeltMoney = 8
+const kJiejiBeltFoldbeltMoneyThunder = 4
+const kJiejiBeltFoldbeltHerb = 2
+const kJiejiBeltFoldbeltLife = 3
+const kJiejiBeltBloodLife = 2
+const kJiejiBeltBloodLifeBlood = 3
+const kJiejiBeltBloodGongfaRate = 0.26
+const kJiejiBeltBloodMoney = 16
+
+function _jiejiBeltSeasonId() {
+  if (game.jieji != null && game.jieji.seasonId != null) {
+    return game.jieji.seasonId
+  }
+  return null
+}
+
+function _jiejiBeltTutorialLocked() {
+  return game.enableTutorial && game.flags.tutorial.bountyQuest != true
+}
+
+function _jiejiBeltTiebeltHerbCost(seasonId) {
+  if (seasonId == 'mist') return 0
+  return kJiejiBeltTiebeltHerb
+}
+
+function _jiejiBeltFoldbeltMoneyCost(seasonId) {
+  if (seasonId == 'thunder') return kJiejiBeltFoldbeltMoneyThunder
+  return kJiejiBeltFoldbeltMoney
+}
+
+function _jiejiBeltBloodLifeCost(seasonId) {
+  if (seasonId == 'blood') return kJiejiBeltBloodLifeBlood
+  return kJiejiBeltBloodLife
+}
+
+function _jiejiBeltCostLife(want) {
+  var lost = want
+  final life = hero.life ?? 1
+  if (life - lost < 1) lost = life - 1
+  if (lost < 0) lost = 0
+  if (lost > 0) {
+    Player.setLife(hero.life - lost)
+  }
+  return lost
+}
+
+function _jiejiBeltNormalizeKind(kind) {
+  if (kind == 'tiebelt' || kind == 'jieji_belt_tiebelt') return 'tiebelt'
+  if (kind == 'foldbelt' || kind == 'jieji_belt_foldbelt') return 'foldbelt'
+  if (kind == 'bloodbelt' || kind == 'jieji_belt_bloodbelt') return 'bloodbelt'
+  return null
+}
+
+function _jiejiBeltChoices() {
+  return [
+    {
+      text: 'jieji_belt_tiebelt',
+      description: 'hint_jieji_belt_tiebelt',
+    },
+    {
+      text: 'jieji_belt_foldbelt',
+      description: 'hint_jieji_belt_foldbelt',
+    },
+    {
+      text: 'jieji_belt_bloodbelt',
+      description: 'hint_jieji_belt_bloodbelt',
+    },
+  ]
+}
+
+/// 赶路劫带三选。debug.forceJiejiEvent('belt') / forceBelt 直接走这里，仍弹出三选。
+async function playJiejiBeltEvent(terrain) {
+  if (hero == null) return false
+
+  dialog.pushDialog('hint_jieji_belt')
+  dialog.pushSelection('jiejiBelt', _jiejiBeltChoices())
+  await dialog.execute()
+  final picked = dialog.checkSelected('jiejiBelt')
+  var selected = _jiejiBeltNormalizeKind(picked)
+  if (selected == null) {
+    selected = 'tiebelt'
+  }
+
+  final seasonId = _jiejiBeltSeasonId()
+  if (selected == 'tiebelt') {
+    final herbNeed = _jiejiBeltTiebeltHerbCost(seasonId)
+    final herbHave = hero.materials['herb'] ?? 0
+    if (herbNeed > 0 && herbHave < herbNeed) {
+      dialog.pushDialog('hint_jieji_belt_tiebelt_broke', interpolations: [herbNeed])
+      await dialog.execute()
+    } else {
+      if (herbNeed > 0) {
+        Player.exhaust('herb', herbNeed)
+      }
+      final healed = Player.restoreLife(kJiejiBeltTiebeltLife)
+      dialog.pushDialog('hint_jieji_belt_tiebelt_ok', interpolations: [healed])
+      await dialog.execute()
+      await tryDropGongfaShard(rate: kJiejiBeltTiebeltGongfaRate)
+    }
+  } else if (selected == 'foldbelt') {
+    final moneyNeed = _jiejiBeltFoldbeltMoneyCost(seasonId)
+    final moneyHave = hero.materials['money'] ?? 0
+    if (moneyHave < moneyNeed) {
+      dialog.pushDialog('hint_jieji_belt_foldbelt_broke', interpolations: [moneyNeed])
+      await dialog.execute()
+    } else {
+      Player.exhaust('money', moneyNeed)
+      await Player.collect('herb', kJiejiBeltFoldbeltHerb, incurIncident: false)
+      final healed = Player.restoreLife(kJiejiBeltFoldbeltLife)
+      dialog.pushDialog('hint_jieji_belt_foldbelt_ok', interpolations: [kJiejiBeltFoldbeltHerb, healed])
+      await dialog.execute()
+    }
+  } else {
+    final lost = _jiejiBeltCostLife(_jiejiBeltBloodLifeCost(seasonId))
+    dialog.pushDialog('hint_jieji_belt_bloodbelt_ok', interpolations: [lost])
+    await dialog.execute()
+    final dropped = await tryDropGongfaShard(rate: kJiejiBeltBloodGongfaRate)
+    if (dropped != true) {
+      await Player.collect('money', kJiejiBeltBloodMoney, incurIncident: false)
+      dialog.pushDialog('hint_jieji_belt_bloodbelt_none', interpolations: [kJiejiBeltBloodMoney])
+      await dialog.execute()
+    }
+  }
+
+  Game.updateUI()
+  return true
+}
+
+/// 赶路触发：教程锁与路遇相同；冷却 24 步；约 0.7%。出过则返回 true。
+async function tryJiejiBeltOnMove(terrain) {
+  if (hero == null) return false
+  if (_jiejiBeltTutorialLocked()) return false
+
+  final jieji = ensureJiejiFlags()
+  final moves = jieji.worldMoves ?? 0
+  final last = jieji.lastBeltMove ?? -999
+  if (moves - last < kJiejiBeltMoveCooldown) return false
+
+  var rate = kJiejiBeltBaseRate
+  if (rate < 0) rate = 0
+  if (random.nextDouble() > rate) return false
+
+  jieji.lastBeltMove = moves
+  await playJiejiBeltEvent(terrain)
+  return true
+}

@@ -384,6 +384,8 @@ namespace debug {
       await playJiejiInkEvent(terrain)
     } else if (kind == 'robe') {
       await playJiejiRobeEvent(terrain)
+    } else if (kind == 'belt') {
+      await playJiejiBeltEvent(terrain)
     } else {
       await playJiejiThunderRoadEvent(terrain)
     }
@@ -1115,6 +1117,11 @@ namespace debug {
   /// 忽略几率与冷却，仍弹出赶路劫袍三选。
   async function forceRobe() {
     return await playJiejiRobeEvent({ kind: 'plain' })
+  }
+
+  /// 忽略几率与冷却，仍弹出赶路劫带三选。
+  async function forceBelt() {
+    return await playJiejiBeltEvent({ kind: 'plain' })
   }
 
   /// 忽略冷却与花费，仍弹出幻术祭坛入幻三选。
