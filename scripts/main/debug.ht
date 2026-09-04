@@ -569,6 +569,9 @@ namespace debug {
     } else if (kind == 'gong') {
       game.flags.dungeon.pendingEncounter = 'jiejiGong'
       await playJiejiDungeonEncounter()
+    } else if (kind == 'tapestry') {
+      game.flags.dungeon.pendingEncounter = 'jiejiTapestry'
+      await playJiejiDungeonEncounter()
     } else if (kind == 'exit') {
       await playJiejiDungeonExitGift()
     } else {
