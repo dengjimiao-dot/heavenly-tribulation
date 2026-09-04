@@ -233,7 +233,6 @@ namespace debug {
       questKind = 'hidden_mist_quay'
     } else if (kind == 'vat') {
       questKind = 'hidden_blood_vat'
-    }
     } else if (kind == 'dais') {
       questKind = 'hidden_thunder_dais'
     }
