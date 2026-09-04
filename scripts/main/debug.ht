@@ -234,6 +234,9 @@ namespace debug {
     } else if (kind == 'vat') {
       questKind = 'hidden_blood_vat'
     }
+    } else if (kind == 'dais') {
+      questKind = 'hidden_thunder_dais'
+    }
     final ctor = Quests[questKind]
     if (ctor == null) return false
     final quest = ctor(fromSite, difficulty: 0)
