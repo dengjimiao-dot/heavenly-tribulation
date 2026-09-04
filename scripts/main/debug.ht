@@ -406,6 +406,11 @@ namespace debug {
     return await tillJiejiFarm(free: true)
   }
 
+  /// 忽略冷却与花费，仍弹出农田再播三选。
+  async function forceSow() {
+    return await sowJiejiFarm(free: true)
+  }
+
   async function forceGather(kind) {
     var k = kind
     if (k != 'mine' && k != 'fishery' && k != 'timberland' && k != 'huntingground') {

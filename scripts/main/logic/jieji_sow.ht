@@ -1,0 +1,194 @@
+/// 农田「再播」三选：再温 / 再听 / 血播。不替换祈年与夜耕。
+const kJiejiSowCooldownDays = 1
+const kJiejiSowWarmMoney = 20
+const kJiejiSowWarmMoneyThunder = 10
+const kJiejiSowWarmHerb = 2
+const kJiejiSowWarmHerbMistExtra = 1
+const kJiejiSowListenHerb = 1
+const kJiejiSowListenHerbMist = 0
+const kJiejiSowListenGrain = 3
+const kJiejiSowListenMoneyFallback = 40
+const kJiejiSowBloodLife = 2
+const kJiejiSowBloodLifeBlood = 3
+const kJiejiSowBloodGongfaRate = 0.30
+const kJiejiSowBloodHerb = 3
+
+function _jiejiSowSeasonId() {
+  if (game.jieji != null && game.jieji.seasonId != null) {
+    return game.jieji.seasonId
+  }
+  return null
+}
+
+function _jiejiSowCurrentDay() {
+  if (game.timestamp == null) return null
+  if (Constants.ticksPerDay == null) return null
+  if (Constants.ticksPerDay <= 0) return null
+  return game.timestamp ~/ Constants.ticksPerDay
+}
+
+function _jiejiSowOnCooldown() {
+  final jieji = ensureJiejiFlags()
+  final day = _jiejiSowCurrentDay()
+  if (day == null) return false
+  if (jieji.lastSowDay == null) return false
+  if (day - jieji.lastSowDay < kJiejiSowCooldownDays) return true
+  return false
+}
+
+function _jiejiSowMark() {
+  final jieji = ensureJiejiFlags()
+  jieji.lastSowDay = _jiejiSowCurrentDay()
+}
+
+function _jiejiSowCostLife(want) {
+  var lost = want
+  final life = hero.life ?? 1
+  if (life - lost < 1) lost = life - 1
+  if (lost < 0) lost = 0
+  if (lost > 0) {
+    Player.setLife(hero.life - lost)
+  }
+  return lost
+}
+
+function _jiejiSowWarmMoneyCost(seasonId) {
+  if (seasonId == 'thunder') return kJiejiSowWarmMoneyThunder
+  return kJiejiSowWarmMoney
+}
+
+function _jiejiSowListenHerbCost(seasonId) {
+  if (seasonId == 'mist') return kJiejiSowListenHerbMist
+  return kJiejiSowListenHerb
+}
+
+function _jiejiSowBloodLifeCost(seasonId) {
+  if (seasonId == 'blood') return kJiejiSowBloodLifeBlood
+  return kJiejiSowBloodLife
+}
+
+function _jiejiSowNormalizeKind(kind) {
+  if (kind == 'warm' || kind == 'jieji_sow_warm') return 'warm'
+  if (kind == 'listen' || kind == 'jieji_sow_listen') return 'listen'
+  if (kind == 'blood' || kind == 'jieji_sow_blood') return 'blood'
+  return null
+}
+
+function _jiejiSowChoices() {
+  return [
+    {
+      text: 'jieji_sow_warm',
+      description: 'hint_jieji_sow_warm',
+    },
+    {
+      text: 'jieji_sow_listen',
+      description: 'hint_jieji_sow_listen',
+    },
+    {
+      text: 'jieji_sow_blood',
+      description: 'hint_jieji_sow_blood',
+    },
+    'cancel',
+  ]
+}
+
+function _jiejiSowHerbNeed(selected, seasonId) {
+  if (selected == 'listen') return _jiejiSowListenHerbCost(seasonId)
+  return 0
+}
+
+function _jiejiSowMoneyNeed(selected, seasonId) {
+  if (selected == 'warm') return _jiejiSowWarmMoneyCost(seasonId)
+  return 0
+}
+
+function _jiejiSowCanCollectGrain() {
+  return kMaterialGrain != null
+}
+
+/// 农田再播三选。free 为 true 时不扣费、不检查冷却（debug），仍弹出三选。
+/// null 选择在 free 时默认再温。
+/// 返回 'ok' | 'cooldown' | 'poor' | 'cancel'。
+async function sowJiejiFarm({ free = false }) {
+  if (hero == null) return 'cancel'
+  if (free != true && _jiejiSowOnCooldown()) {
+    return 'cooldown'
+  }
+
+  dialog.pushDialog('hint_sowJiejiFarm')
+  dialog.pushSelection('jiejiSow', _jiejiSowChoices())
+  await dialog.execute()
+  final picked = dialog.checkSelected('jiejiSow')
+  var selected = null
+  if (picked == null || picked == 'cancel') {
+    if (free == true && picked == null) {
+      selected = 'warm'
+    } else {
+      return 'cancel'
+    }
+  } else {
+    selected = _jiejiSowNormalizeKind(picked)
+  }
+  if (selected == null) return 'cancel'
+
+  final seasonId = _jiejiSowSeasonId()
+  if (free != true) {
+    final herbNeed = _jiejiSowHerbNeed(selected, seasonId)
+    final moneyNeed = _jiejiSowMoneyNeed(selected, seasonId)
+    final herbHave = hero.materials['herb'] ?? 0
+    final moneyHave = hero.materials['money'] ?? 0
+    if (herbHave < herbNeed || moneyHave < moneyNeed) {
+      return 'poor'
+    }
+  }
+
+  if (free != true) {
+    final herbNeed = _jiejiSowHerbNeed(selected, seasonId)
+    final moneyNeed = _jiejiSowMoneyNeed(selected, seasonId)
+    if (herbNeed > 0) {
+      Player.exhaust('herb', herbNeed)
+    }
+    if (moneyNeed > 0) {
+      Player.exhaust('money', moneyNeed)
+    }
+    if (selected == 'blood') {
+      _jiejiSowCostLife(_jiejiSowBloodLifeCost(seasonId))
+    }
+    _jiejiSowMark()
+  }
+
+  if (selected == 'warm') {
+    var gain = kJiejiSowWarmHerb
+    if (seasonId == 'mist') {
+      gain = gain + kJiejiSowWarmHerbMistExtra
+      await Player.collect('herb', gain, incurIncident: false)
+      dialog.pushDialog('hint_sowJiejiFarm_warm_mist', interpolations: [gain])
+    } else {
+      await Player.collect('herb', gain, incurIncident: false)
+      dialog.pushDialog('hint_sowJiejiFarm_warm', interpolations: [gain])
+    }
+    await dialog.execute()
+  } else if (selected == 'listen') {
+    if (_jiejiSowCanCollectGrain()) {
+      await Player.collect('grain', kJiejiSowListenGrain, incurIncident: false)
+      dialog.pushDialog('hint_sowJiejiFarm_listen', interpolations: [kJiejiSowListenGrain])
+    } else {
+      await Player.collect('money', kJiejiSowListenMoneyFallback, incurIncident: false)
+      dialog.pushDialog('hint_sowJiejiFarm_listen_money', interpolations: [kJiejiSowListenMoneyFallback])
+    }
+    await dialog.execute()
+  } else {
+    final dropped = await tryDropGongfaShard(rate: kJiejiSowBloodGongfaRate)
+    if (dropped == true) {
+      dialog.pushDialog('hint_sowJiejiFarm_blood')
+      await dialog.execute()
+    } else {
+      await Player.collect('herb', kJiejiSowBloodHerb, incurIncident: false)
+      dialog.pushDialog('hint_sowJiejiFarm_blood_herb', interpolations: [kJiejiSowBloodHerb])
+      await dialog.execute()
+    }
+  }
+
+  Game.updateUI()
+  return 'ok'
+}
