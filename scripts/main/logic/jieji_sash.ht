@@ -1,0 +1,152 @@
+/// 赶路「劫带」三选：系带 / 收带 / 血带。隐藏、劫兆、野遇、赶路、行商、拾荒、扎营、残锋、残卷、雾灯、残鼓、汲泉、劫幡、劫铃、劫符、劫旌、劫烛、劫角、劫笛、劫笠都没中时才滚。
+const kJiejiSashBaseRate = 0.03
+const kJiejiSashMoveCooldown = 22
+const kJiejiSashTieHerb = 1
+const kJiejiSashTieLife = 5
+const kJiejiSashTieGongfaRate = 0.10
+const kJiejiSashCoilMoney = 10
+const kJiejiSashCoilMoneyThunder = 5
+const kJiejiSashCoilHerb = 2
+const kJiejiSashCoilLife = 3
+const kJiejiSashBloodLife = 2
+const kJiejiSashBloodLifeBlood = 3
+const kJiejiSashBloodGongfaRate = 0.30
+const kJiejiSashBloodMoney = 20
+
+function _jiejiSashSeasonId() {
+  if (game.jieji != null && game.jieji.seasonId != null) {
+    return game.jieji.seasonId
+  }
+  return null
+}
+
+function _jiejiSashTutorialLocked() {
+  return game.enableTutorial && game.flags.tutorial.bountyQuest != true
+}
+
+function _jiejiSashTieHerbCost(seasonId) {
+  if (seasonId == 'mist') return 0
+  return kJiejiSashTieHerb
+}
+
+function _jiejiSashCoilMoneyCost(seasonId) {
+  if (seasonId == 'thunder') return kJiejiSashCoilMoneyThunder
+  return kJiejiSashCoilMoney
+}
+
+function _jiejiSashBloodLifeCost(seasonId) {
+  if (seasonId == 'blood') return kJiejiSashBloodLifeBlood
+  return kJiejiSashBloodLife
+}
+
+function _jiejiSashCostLife(want) {
+  var lost = want
+  final life = hero.life ?? 1
+  if (life - lost < 1) lost = life - 1
+  if (lost < 0) lost = 0
+  if (lost > 0) {
+    Player.setLife(hero.life - lost)
+  }
+  return lost
+}
+
+function _jiejiSashNormalizeKind(kind) {
+  if (kind == 'tie' || kind == 'jieji_sash_tie') return 'tie'
+  if (kind == 'coil' || kind == 'jieji_sash_coil') return 'coil'
+  if (kind == 'bloodsash' || kind == 'jieji_sash_bloodsash') return 'bloodsash'
+  return null
+}
+
+function _jiejiSashChoices() {
+  return [
+    {
+      text: 'jieji_sash_tie',
+      description: 'hint_jieji_sash_tie',
+    },
+    {
+      text: 'jieji_sash_coil',
+      description: 'hint_jieji_sash_coil',
+    },
+    {
+      text: 'jieji_sash_bloodsash',
+      description: 'hint_jieji_sash_bloodsash',
+    },
+  ]
+}
+
+/// 赶路劫带三选。debug.forceJiejiEvent('sash') / forceSash 直接走这里，仍弹出三选。
+async function playJiejiSashEvent(terrain) {
+  if (hero == null) return false
+
+  dialog.pushDialog('hint_jieji_sash')
+  dialog.pushSelection('jiejiSash', _jiejiSashChoices())
+  await dialog.execute()
+  final picked = dialog.checkSelected('jiejiSash')
+  var selected = _jiejiSashNormalizeKind(picked)
+  if (selected == null) {
+    selected = 'tie'
+  }
+
+  final seasonId = _jiejiSashSeasonId()
+  if (selected == 'tie') {
+    final herbNeed = _jiejiSashTieHerbCost(seasonId)
+    final herbHave = hero.materials['herb'] ?? 0
+    if (herbNeed > 0 && herbHave < herbNeed) {
+      dialog.pushDialog('hint_jieji_sash_tie_broke', interpolations: [herbNeed])
+      await dialog.execute()
+    } else {
+      if (herbNeed > 0) {
+        Player.exhaust('herb', herbNeed)
+      }
+      final healed = Player.restoreLife(kJiejiSashTieLife)
+      dialog.pushDialog('hint_jieji_sash_tie_ok', interpolations: [healed])
+      await dialog.execute()
+      await tryDropGongfaShard(rate: kJiejiSashTieGongfaRate)
+    }
+  } else if (selected == 'coil') {
+    final moneyNeed = _jiejiSashCoilMoneyCost(seasonId)
+    final moneyHave = hero.materials['money'] ?? 0
+    if (moneyHave < moneyNeed) {
+      dialog.pushDialog('hint_jieji_sash_coil_broke', interpolations: [moneyNeed])
+      await dialog.execute()
+    } else {
+      Player.exhaust('money', moneyNeed)
+      await Player.collect('herb', kJiejiSashCoilHerb, incurIncident: false)
+      final healed = Player.restoreLife(kJiejiSashCoilLife)
+      dialog.pushDialog('hint_jieji_sash_coil_ok', interpolations: [kJiejiSashCoilHerb, healed])
+      await dialog.execute()
+    }
+  } else {
+    final lost = _jiejiSashCostLife(_jiejiSashBloodLifeCost(seasonId))
+    dialog.pushDialog('hint_jieji_sash_bloodsash_ok', interpolations: [lost])
+    await dialog.execute()
+    final dropped = await tryDropGongfaShard(rate: kJiejiSashBloodGongfaRate)
+    if (dropped != true) {
+      await Player.collect('money', kJiejiSashBloodMoney, incurIncident: false)
+      dialog.pushDialog('hint_jieji_sash_bloodsash_none', interpolations: [kJiejiSashBloodMoney])
+      await dialog.execute()
+    }
+  }
+
+  Game.updateUI()
+  return true
+}
+
+/// 赶路触发：教程锁与路遇相同；冷却 22 步；约 3%。出过则返回 true。
+async function tryJiejiSashOnMove(terrain) {
+  if (hero == null) return false
+  if (_jiejiSashTutorialLocked()) return false
+
+  final jieji = ensureJiejiFlags()
+  final moves = jieji.worldMoves ?? 0
+  final last = jieji.lastSashMove ?? -999
+  if (moves - last < kJiejiSashMoveCooldown) return false
+
+  var rate = kJiejiSashBaseRate
+  if (rate < 0) rate = 0
+  if (random.nextDouble() > rate) return false
+
+  jieji.lastSashMove = moves
+  await playJiejiSashEvent(terrain)
+  return true
+}
