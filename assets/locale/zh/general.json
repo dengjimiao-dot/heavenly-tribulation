@@ -2984,6 +2984,7 @@
   "jieji_dungeon_next_jiejiEaves": "劫檐",
   "jieji_dungeon_next_jiejiFrame": "劫框",
   "jieji_dungeon_next_jiejiPanel": "劫板",
+  "jieji_dungeon_next_jiejiBoard": "劫枋",
   "hint_jieji_dungeon_gate_room": "厅里有一道劫门。你可以叩门、推门，或以血启门。",
   "jieji_dungeon_knock": "叩门",
   "jieji_dungeon_push": "推门",
@@ -3441,6 +3442,18 @@
   "hint_jieji_dungeon_sealpanel_broke": "封板要 {0} 铜钱。袋里不够，封符自己落了。",
   "hint_jieji_dungeon_bloodpanel": "你割了 {0} 点生机以血启板。业力入袖。",
   "hint_jieji_dungeon_bloodpanel_none": "血启落下，残卷却散了。袋里多了 {0} 铜钱。",
+
+  "hint_jieji_dungeon_board_room": "厅中立着一道劫枋。你可以观枋、封枋，或以血启枋。",
+  "jieji_dungeon_readboard": "观枋",
+  "jieji_dungeon_sealboard": "封枋",
+  "jieji_dungeon_bloodboard": "血启",
+  "hint_jieji_dungeon_readboard": "你耗了 {0} 药材观了枋。袖中多了一枚牌胚。",
+  "hint_jieji_dungeon_readboard_mist": "你耗了 {0} 药材观了枋。袖中多了一枚牌胚，另落下 {1} 铜钱。",
+  "hint_jieji_dungeon_readboard_broke": "观枋要 {0} 药材。袋里不够，枋上劫纹自己暗了。",
+  "hint_jieji_dungeon_sealboard": "你花了 {0} 铜钱封住劫枋。生机回了 {1} 点，护身印挂上。",
+  "hint_jieji_dungeon_sealboard_broke": "封枋要 {0} 铜钱。袋里不够，封符自己落了。",
+  "hint_jieji_dungeon_bloodboard": "你割了 {0} 点生机以血启枋。业力入袖。",
+  "hint_jieji_dungeon_bloodboard_none": "血启落下，残卷却散了。袋里多了 {0} 铜钱。",
 
 
   "jiejiDungeonExitGift": "劫礼",
