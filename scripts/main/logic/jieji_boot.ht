@@ -1,0 +1,152 @@
+/// 赶路「劫履」三选：穿履 / 收履 / 血履。隐藏、劫兆、野遇、赶路、行商、拾荒、扎营、残锋、残卷、雾灯、残鼓、汲泉、劫幡、劫铃、劫符、劫旌、劫烛、劫角、劫笛、劫笠、劫带都没中时才滚。
+const kJiejiBootBaseRate = 0.028
+const kJiejiBootMoveCooldown = 23
+const kJiejiBootDonHerb = 1
+const kJiejiBootDonLife = 6
+const kJiejiBootDonGongfaRate = 0.09
+const kJiejiBootStowMoney = 9
+const kJiejiBootStowMoneyThunder = 5
+const kJiejiBootStowHerb = 2
+const kJiejiBootStowLife = 3
+const kJiejiBootBloodLife = 2
+const kJiejiBootBloodLifeBlood = 3
+const kJiejiBootBloodGongfaRate = 0.28
+const kJiejiBootBloodMoney = 18
+
+function _jiejiBootSeasonId() {
+  if (game.jieji != null && game.jieji.seasonId != null) {
+    return game.jieji.seasonId
+  }
+  return null
+}
+
+function _jiejiBootTutorialLocked() {
+  return game.enableTutorial && game.flags.tutorial.bountyQuest != true
+}
+
+function _jiejiBootDonHerbCost(seasonId) {
+  if (seasonId == 'mist') return 0
+  return kJiejiBootDonHerb
+}
+
+function _jiejiBootStowMoneyCost(seasonId) {
+  if (seasonId == 'thunder') return kJiejiBootStowMoneyThunder
+  return kJiejiBootStowMoney
+}
+
+function _jiejiBootBloodLifeCost(seasonId) {
+  if (seasonId == 'blood') return kJiejiBootBloodLifeBlood
+  return kJiejiBootBloodLife
+}
+
+function _jiejiBootCostLife(want) {
+  var lost = want
+  final life = hero.life ?? 1
+  if (life - lost < 1) lost = life - 1
+  if (lost < 0) lost = 0
+  if (lost > 0) {
+    Player.setLife(hero.life - lost)
+  }
+  return lost
+}
+
+function _jiejiBootNormalizeKind(kind) {
+  if (kind == 'don' || kind == 'jieji_boot_don') return 'don'
+  if (kind == 'stowboot' || kind == 'jieji_boot_stowboot') return 'stowboot'
+  if (kind == 'bloodboot' || kind == 'jieji_boot_bloodboot') return 'bloodboot'
+  return null
+}
+
+function _jiejiBootChoices() {
+  return [
+    {
+      text: 'jieji_boot_don',
+      description: 'hint_jieji_boot_don',
+    },
+    {
+      text: 'jieji_boot_stowboot',
+      description: 'hint_jieji_boot_stowboot',
+    },
+    {
+      text: 'jieji_boot_bloodboot',
+      description: 'hint_jieji_boot_bloodboot',
+    },
+  ]
+}
+
+/// 赶路劫履三选。debug.forceJiejiEvent('boot') / forceBoot 直接走这里，仍弹出三选。
+async function playJiejiBootEvent(terrain) {
+  if (hero == null) return false
+
+  dialog.pushDialog('hint_jieji_boot')
+  dialog.pushSelection('jiejiBoot', _jiejiBootChoices())
+  await dialog.execute()
+  final picked = dialog.checkSelected('jiejiBoot')
+  var selected = _jiejiBootNormalizeKind(picked)
+  if (selected == null) {
+    selected = 'don'
+  }
+
+  final seasonId = _jiejiBootSeasonId()
+  if (selected == 'don') {
+    final herbNeed = _jiejiBootDonHerbCost(seasonId)
+    final herbHave = hero.materials['herb'] ?? 0
+    if (herbNeed > 0 && herbHave < herbNeed) {
+      dialog.pushDialog('hint_jieji_boot_don_broke', interpolations: [herbNeed])
+      await dialog.execute()
+    } else {
+      if (herbNeed > 0) {
+        Player.exhaust('herb', herbNeed)
+      }
+      final healed = Player.restoreLife(kJiejiBootDonLife)
+      dialog.pushDialog('hint_jieji_boot_don_ok', interpolations: [healed])
+      await dialog.execute()
+      await tryDropGongfaShard(rate: kJiejiBootDonGongfaRate)
+    }
+  } else if (selected == 'stowboot') {
+    final moneyNeed = _jiejiBootStowMoneyCost(seasonId)
+    final moneyHave = hero.materials['money'] ?? 0
+    if (moneyHave < moneyNeed) {
+      dialog.pushDialog('hint_jieji_boot_stowboot_broke', interpolations: [moneyNeed])
+      await dialog.execute()
+    } else {
+      Player.exhaust('money', moneyNeed)
+      await Player.collect('herb', kJiejiBootStowHerb, incurIncident: false)
+      final healed = Player.restoreLife(kJiejiBootStowLife)
+      dialog.pushDialog('hint_jieji_boot_stowboot_ok', interpolations: [kJiejiBootStowHerb, healed])
+      await dialog.execute()
+    }
+  } else {
+    final lost = _jiejiBootCostLife(_jiejiBootBloodLifeCost(seasonId))
+    dialog.pushDialog('hint_jieji_boot_bloodboot_ok', interpolations: [lost])
+    await dialog.execute()
+    final dropped = await tryDropGongfaShard(rate: kJiejiBootBloodGongfaRate)
+    if (dropped != true) {
+      await Player.collect('money', kJiejiBootBloodMoney, incurIncident: false)
+      dialog.pushDialog('hint_jieji_boot_bloodboot_none', interpolations: [kJiejiBootBloodMoney])
+      await dialog.execute()
+    }
+  }
+
+  Game.updateUI()
+  return true
+}
+
+/// 赶路触发：教程锁与路遇相同；冷却 23 步；约 2.8%。出过则返回 true。
+async function tryJiejiBootOnMove(terrain) {
+  if (hero == null) return false
+  if (_jiejiBootTutorialLocked()) return false
+
+  final jieji = ensureJiejiFlags()
+  final moves = jieji.worldMoves ?? 0
+  final last = jieji.lastBootMove ?? -999
+  if (moves - last < kJiejiBootMoveCooldown) return false
+
+  var rate = kJiejiBootBaseRate
+  if (rate < 0) rate = 0
+  if (random.nextDouble() > rate) return false
+
+  jieji.lastBootMove = moves
+  await playJiejiBootEvent(terrain)
+  return true
+}

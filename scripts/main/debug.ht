@@ -304,6 +304,8 @@ namespace debug {
       await playJiejiHatEvent(terrain)
     } else if (kind == 'sash') {
       await playJiejiSashEvent(terrain)
+    } else if (kind == 'boot') {
+      await playJiejiBootEvent(terrain)
     } else {
       await playJiejiThunderRoadEvent(terrain)
     }
@@ -875,6 +877,11 @@ namespace debug {
   /// 忽略几率与冷却，仍弹出赶路劫带三选。
   async function forceSash() {
     return await playJiejiSashEvent({ kind: 'plain' })
+  }
+
+  /// 忽略几率与冷却，仍弹出赶路劫履三选。
+  async function forceBoot() {
+    return await playJiejiBootEvent({ kind: 'plain' })
   }
 
   /// 忽略冷却与花费，仍弹出幻术祭坛入幻三选。
