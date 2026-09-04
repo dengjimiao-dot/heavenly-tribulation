@@ -697,4 +697,13 @@
     rank: 0,
   },
 
+  hidden_blood_scab: {
+    id: "hidden_blood_scab",
+    policy: null,
+    isBounty: false,
+    isHidden: true,
+    contribution: 11,
+    rank: 0,
+  },
+
 }
