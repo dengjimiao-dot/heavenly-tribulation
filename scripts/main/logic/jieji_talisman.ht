@@ -1,0 +1,152 @@
+/// 赶路「劫符」三选：贴符 / 揭符 / 血符。隐藏、劫兆、野遇、赶路、行商、拾荒、扎营、残锋、残卷、雾灯、残鼓、汲泉、劫幡、劫铃都没中时才滚。
+const kJiejiTalismanBaseRate = 0.045
+const kJiejiTalismanMoveCooldown = 16
+const kJiejiTalismanPasteHerb = 1
+const kJiejiTalismanPasteLife = 5
+const kJiejiTalismanPasteGongfaRate = 0.16
+const kJiejiTalismanPeelMoney = 20
+const kJiejiTalismanPeelMoneyThunder = 10
+const kJiejiTalismanPeelHerb = 2
+const kJiejiTalismanPeelLife = 4
+const kJiejiTalismanBloodLife = 2
+const kJiejiTalismanBloodLifeBlood = 3
+const kJiejiTalismanBloodGongfaRate = 0.42
+const kJiejiTalismanBloodMoney = 35
+
+function _jiejiTalismanSeasonId() {
+  if (game.jieji != null && game.jieji.seasonId != null) {
+    return game.jieji.seasonId
+  }
+  return null
+}
+
+function _jiejiTalismanTutorialLocked() {
+  return game.enableTutorial && game.flags.tutorial.bountyQuest != true
+}
+
+function _jiejiTalismanPasteHerbCost(seasonId) {
+  if (seasonId == 'mist') return 0
+  return kJiejiTalismanPasteHerb
+}
+
+function _jiejiTalismanPeelMoneyCost(seasonId) {
+  if (seasonId == 'thunder') return kJiejiTalismanPeelMoneyThunder
+  return kJiejiTalismanPeelMoney
+}
+
+function _jiejiTalismanBloodLifeCost(seasonId) {
+  if (seasonId == 'blood') return kJiejiTalismanBloodLifeBlood
+  return kJiejiTalismanBloodLife
+}
+
+function _jiejiTalismanCostLife(want) {
+  var lost = want
+  final life = hero.life ?? 1
+  if (life - lost < 1) lost = life - 1
+  if (lost < 0) lost = 0
+  if (lost > 0) {
+    Player.setLife(hero.life - lost)
+  }
+  return lost
+}
+
+function _jiejiTalismanNormalizeKind(kind) {
+  if (kind == 'paste' || kind == 'jieji_talisman_paste') return 'paste'
+  if (kind == 'peel' || kind == 'jieji_talisman_peel') return 'peel'
+  if (kind == 'blood' || kind == 'jieji_talisman_blood') return 'blood'
+  return null
+}
+
+function _jiejiTalismanChoices() {
+  return [
+    {
+      text: 'jieji_talisman_paste',
+      description: 'hint_jieji_talisman_paste',
+    },
+    {
+      text: 'jieji_talisman_peel',
+      description: 'hint_jieji_talisman_peel',
+    },
+    {
+      text: 'jieji_talisman_blood',
+      description: 'hint_jieji_talisman_blood',
+    },
+  ]
+}
+
+/// 赶路劫符三选。debug.forceJiejiEvent('talisman') / forceTalisman 直接走这里，仍弹出三选。
+async function playJiejiTalismanEvent(terrain) {
+  if (hero == null) return false
+
+  dialog.pushDialog('hint_jieji_talisman')
+  dialog.pushSelection('jiejiTalisman', _jiejiTalismanChoices())
+  await dialog.execute()
+  final picked = dialog.checkSelected('jiejiTalisman')
+  var selected = _jiejiTalismanNormalizeKind(picked)
+  if (selected == null) {
+    selected = 'paste'
+  }
+
+  final seasonId = _jiejiTalismanSeasonId()
+  if (selected == 'paste') {
+    final herbNeed = _jiejiTalismanPasteHerbCost(seasonId)
+    final herbHave = hero.materials['herb'] ?? 0
+    if (herbNeed > 0 && herbHave < herbNeed) {
+      dialog.pushDialog('hint_jieji_talisman_paste_broke', interpolations: [herbNeed])
+      await dialog.execute()
+    } else {
+      if (herbNeed > 0) {
+        Player.exhaust('herb', herbNeed)
+      }
+      final healed = Player.restoreLife(kJiejiTalismanPasteLife)
+      dialog.pushDialog('hint_jieji_talisman_paste_ok', interpolations: [healed])
+      await dialog.execute()
+      await tryDropGongfaShard(rate: kJiejiTalismanPasteGongfaRate)
+    }
+  } else if (selected == 'peel') {
+    final moneyNeed = _jiejiTalismanPeelMoneyCost(seasonId)
+    final moneyHave = hero.materials['money'] ?? 0
+    if (moneyHave < moneyNeed) {
+      dialog.pushDialog('hint_jieji_talisman_peel_broke', interpolations: [moneyNeed])
+      await dialog.execute()
+    } else {
+      Player.exhaust('money', moneyNeed)
+      await Player.collect('herb', kJiejiTalismanPeelHerb, incurIncident: false)
+      final healed = Player.restoreLife(kJiejiTalismanPeelLife)
+      dialog.pushDialog('hint_jieji_talisman_peel_ok', interpolations: [kJiejiTalismanPeelHerb, healed])
+      await dialog.execute()
+    }
+  } else {
+    final lost = _jiejiTalismanCostLife(_jiejiTalismanBloodLifeCost(seasonId))
+    dialog.pushDialog('hint_jieji_talisman_blood_ok', interpolations: [lost])
+    await dialog.execute()
+    final dropped = await tryDropGongfaShard(rate: kJiejiTalismanBloodGongfaRate)
+    if (dropped != true) {
+      await Player.collect('money', kJiejiTalismanBloodMoney, incurIncident: false)
+      dialog.pushDialog('hint_jieji_talisman_blood_none', interpolations: [kJiejiTalismanBloodMoney])
+      await dialog.execute()
+    }
+  }
+
+  Game.updateUI()
+  return true
+}
+
+/// 赶路触发：教程锁与路遇相同；冷却 16 步；约 4.5%。出过则返回 true。
+async function tryJiejiTalismanOnMove(terrain) {
+  if (hero == null) return false
+  if (_jiejiTalismanTutorialLocked()) return false
+
+  final jieji = ensureJiejiFlags()
+  final moves = jieji.worldMoves ?? 0
+  final last = jieji.lastTalismanMove ?? -999
+  if (moves - last < kJiejiTalismanMoveCooldown) return false
+
+  var rate = kJiejiTalismanBaseRate
+  if (rate < 0) rate = 0
+  if (random.nextDouble() > rate) return false
+
+  jieji.lastTalismanMove = moves
+  await playJiejiTalismanEvent(terrain)
+  return true
+}
