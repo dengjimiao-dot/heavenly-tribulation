@@ -373,6 +373,9 @@ namespace debug {
     } else if (kind == 'rack') {
       game.flags.dungeon.pendingEncounter = 'jiejiRack'
       await playJiejiDungeonEncounter()
+    } else if (kind == 'basin') {
+      game.flags.dungeon.pendingEncounter = 'jiejiBasin'
+      await playJiejiDungeonEncounter()
     } else if (kind == 'exit') {
       await playJiejiDungeonExitGift()
     } else {
