@@ -3520,6 +3520,21 @@
   "hint_jieji_ring_bloodring_none": "血戒下去，戒影却散了。袋里多了 {0} 铜钱。",
 
 
+  "jiejiMirror": "劫镜",
+  "hint_jieji_mirror": "路边搁着一面劫镜。你可以照镜、收镜，或以血镜。",
+  "jieji_mirror_gazemirror": "照镜",
+  "jieji_mirror_stowmirror": "收镜",
+  "jieji_mirror_bloodmirror": "血镜",
+  "hint_jieji_mirror_gazemirror": "照镜：耗 1 药材（雾月不耗）。回 5 命，八厘摸残页。药材不够则空手。",
+  "hint_jieji_mirror_stowmirror": "收镜：花 8 铜钱（雷月 4）。得 2 药材，并回 3 命。袋里不够则空手。",
+  "hint_jieji_mirror_bloodmirror": "血镜：扣 2 点生机（至少留 1，血月 3）。二成六摸残页，不成则得 16 铜钱。",
+  "hint_jieji_mirror_gazemirror_ok": "你照了劫镜。生机回了 {0} 点。",
+  "hint_jieji_mirror_gazemirror_broke": "照镜要 {0} 药材。你拿不出来。",
+  "hint_jieji_mirror_stowmirror_ok": "你收起劫镜。得了 {0} 药材，生机回了 {1} 点。",
+  "hint_jieji_mirror_stowmirror_broke": "收镜要 {0} 铜钱。袋里不够。",
+  "hint_jieji_mirror_bloodmirror_ok": "你割了 {0} 点生机去染劫镜。",
+  "hint_jieji_mirror_bloodmirror_none": "血镜下去，镜影却散了。袋里多了 {0} 铜钱。",
+
 
   "jiejiMenpaiDemo": "劫季门派 · Demo",
   "jiejiMenpaiPitch": "带着业力赶天劫的门派肉鸽",

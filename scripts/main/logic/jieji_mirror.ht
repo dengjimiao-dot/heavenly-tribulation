@@ -1,0 +1,152 @@
+/// 赶路「劫镜」三选：照镜 / 收镜 / 血镜。隐藏、劫兆、野遇、赶路、行商、拾荒、扎营、残锋、残卷、雾灯、残鼓、汲泉、劫幡、劫铃、劫符、劫旌、劫烛、劫角、劫笛、劫笠、劫带、劫履、劫氅、劫扇、劫杖、劫伞、劫面、劫帔、劫手套、劫戒都没中时才滚。
+const kJiejiMirrorBaseRate = 0.018
+const kJiejiMirrorMoveCooldown = 24
+const kJiejiMirrorGazemirrorHerb = 1
+const kJiejiMirrorGazemirrorLife = 5
+const kJiejiMirrorGazemirrorGongfaRate = 0.08
+const kJiejiMirrorStowmirrorMoney = 8
+const kJiejiMirrorStowmirrorMoneyThunder = 4
+const kJiejiMirrorStowmirrorHerb = 2
+const kJiejiMirrorStowmirrorLife = 3
+const kJiejiMirrorBloodLife = 2
+const kJiejiMirrorBloodLifeBlood = 3
+const kJiejiMirrorBloodGongfaRate = 0.26
+const kJiejiMirrorBloodMoney = 16
+
+function _jiejiMirrorSeasonId() {
+  if (game.jieji != null && game.jieji.seasonId != null) {
+    return game.jieji.seasonId
+  }
+  return null
+}
+
+function _jiejiMirrorTutorialLocked() {
+  return game.enableTutorial && game.flags.tutorial.bountyQuest != true
+}
+
+function _jiejiMirrorGazemirrorHerbCost(seasonId) {
+  if (seasonId == 'mist') return 0
+  return kJiejiMirrorGazemirrorHerb
+}
+
+function _jiejiMirrorStowmirrorMoneyCost(seasonId) {
+  if (seasonId == 'thunder') return kJiejiMirrorStowmirrorMoneyThunder
+  return kJiejiMirrorStowmirrorMoney
+}
+
+function _jiejiMirrorBloodLifeCost(seasonId) {
+  if (seasonId == 'blood') return kJiejiMirrorBloodLifeBlood
+  return kJiejiMirrorBloodLife
+}
+
+function _jiejiMirrorCostLife(want) {
+  var lost = want
+  final life = hero.life ?? 1
+  if (life - lost < 1) lost = life - 1
+  if (lost < 0) lost = 0
+  if (lost > 0) {
+    Player.setLife(hero.life - lost)
+  }
+  return lost
+}
+
+function _jiejiMirrorNormalizeKind(kind) {
+  if (kind == 'gazemirror' || kind == 'jieji_mirror_gazemirror') return 'gazemirror'
+  if (kind == 'stowmirror' || kind == 'jieji_mirror_stowmirror') return 'stowmirror'
+  if (kind == 'bloodmirror' || kind == 'jieji_mirror_bloodmirror') return 'bloodmirror'
+  return null
+}
+
+function _jiejiMirrorChoices() {
+  return [
+    {
+      text: 'jieji_mirror_gazemirror',
+      description: 'hint_jieji_mirror_gazemirror',
+    },
+    {
+      text: 'jieji_mirror_stowmirror',
+      description: 'hint_jieji_mirror_stowmirror',
+    },
+    {
+      text: 'jieji_mirror_bloodmirror',
+      description: 'hint_jieji_mirror_bloodmirror',
+    },
+  ]
+}
+
+/// 赶路劫镜三选。debug.forceJiejiEvent('mirror') / forceMirror 直接走这里，仍弹出三选。
+async function playJiejiMirrorEvent(terrain) {
+  if (hero == null) return false
+
+  dialog.pushDialog('hint_jieji_mirror')
+  dialog.pushSelection('jiejiMirror', _jiejiMirrorChoices())
+  await dialog.execute()
+  final picked = dialog.checkSelected('jiejiMirror')
+  var selected = _jiejiMirrorNormalizeKind(picked)
+  if (selected == null) {
+    selected = 'gazemirror'
+  }
+
+  final seasonId = _jiejiMirrorSeasonId()
+  if (selected == 'gazemirror') {
+    final herbNeed = _jiejiMirrorGazemirrorHerbCost(seasonId)
+    final herbHave = hero.materials['herb'] ?? 0
+    if (herbNeed > 0 && herbHave < herbNeed) {
+      dialog.pushDialog('hint_jieji_mirror_gazemirror_broke', interpolations: [herbNeed])
+      await dialog.execute()
+    } else {
+      if (herbNeed > 0) {
+        Player.exhaust('herb', herbNeed)
+      }
+      final healed = Player.restoreLife(kJiejiMirrorGazemirrorLife)
+      dialog.pushDialog('hint_jieji_mirror_gazemirror_ok', interpolations: [healed])
+      await dialog.execute()
+      await tryDropGongfaShard(rate: kJiejiMirrorGazemirrorGongfaRate)
+    }
+  } else if (selected == 'stowmirror') {
+    final moneyNeed = _jiejiMirrorStowmirrorMoneyCost(seasonId)
+    final moneyHave = hero.materials['money'] ?? 0
+    if (moneyHave < moneyNeed) {
+      dialog.pushDialog('hint_jieji_mirror_stowmirror_broke', interpolations: [moneyNeed])
+      await dialog.execute()
+    } else {
+      Player.exhaust('money', moneyNeed)
+      await Player.collect('herb', kJiejiMirrorStowmirrorHerb, incurIncident: false)
+      final healed = Player.restoreLife(kJiejiMirrorStowmirrorLife)
+      dialog.pushDialog('hint_jieji_mirror_stowmirror_ok', interpolations: [kJiejiMirrorStowmirrorHerb, healed])
+      await dialog.execute()
+    }
+  } else {
+    final lost = _jiejiMirrorCostLife(_jiejiMirrorBloodLifeCost(seasonId))
+    dialog.pushDialog('hint_jieji_mirror_bloodmirror_ok', interpolations: [lost])
+    await dialog.execute()
+    final dropped = await tryDropGongfaShard(rate: kJiejiMirrorBloodGongfaRate)
+    if (dropped != true) {
+      await Player.collect('money', kJiejiMirrorBloodMoney, incurIncident: false)
+      dialog.pushDialog('hint_jieji_mirror_bloodmirror_none', interpolations: [kJiejiMirrorBloodMoney])
+      await dialog.execute()
+    }
+  }
+
+  Game.updateUI()
+  return true
+}
+
+/// 赶路触发：教程锁与路遇相同；冷却 24 步；约 1.8%。出过则返回 true。
+async function tryJiejiMirrorOnMove(terrain) {
+  if (hero == null) return false
+  if (_jiejiMirrorTutorialLocked()) return false
+
+  final jieji = ensureJiejiFlags()
+  final moves = jieji.worldMoves ?? 0
+  final last = jieji.lastMirrorMove ?? -999
+  if (moves - last < kJiejiMirrorMoveCooldown) return false
+
+  var rate = kJiejiMirrorBaseRate
+  if (rate < 0) rate = 0
+  if (random.nextDouble() > rate) return false
+
+  jieji.lastMirrorMove = moves
+  await playJiejiMirrorEvent(terrain)
+  return true
+}
