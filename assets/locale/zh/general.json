@@ -4465,6 +4465,21 @@
   "hint_jieji_bridle_bloodbridle_none": "血缰下去，缰影却散了。袋里多了 {0} 铜钱。",
 
 
+  "hint_jieji_stirrup": "路遇一副劫镫。你可以踩镫、收镫，或以血染镫。",
+  "jieji_stirrup_stepstirrup": "踩镫",
+  "jieji_stirrup_stowstirrup": "收镫",
+  "jieji_stirrup_bloodstirrup": "血镫",
+  "hint_jieji_stirrup_stepstirrup": "踩镫：耗 1 药材（雾月不耗）。回 1 命，六毫摸残页。药材不够则空手。",
+  "hint_jieji_stirrup_stowstirrup": "收镫：花 1 铜钱（雷月 1）。得 1 药材，并回 1 命。袋里不够则空手。",
+  "hint_jieji_stirrup_bloodstirrup": "血镫：扣 1 点生机（至少留 1，血月 2）。四厘摸残页，不成则得 2 铜钱。",
+  "hint_jieji_stirrup_stepstirrup_ok": "你踩上劫镫。生机回了 {0} 点。",
+  "hint_jieji_stirrup_stepstirrup_broke": "踩镫要 {0} 药材。你拿不出来。",
+  "hint_jieji_stirrup_stowstirrup_ok": "你收起劫镫。得了 {0} 药材，生机回了 {1} 点。",
+  "hint_jieji_stirrup_stowstirrup_broke": "收镫要 {0} 铜钱。袋里不够。",
+  "hint_jieji_stirrup_bloodstirrup_ok": "你割了 {0} 点生机去染劫镫。",
+  "hint_jieji_stirrup_bloodstirrup_none": "血镫下去，镫影却散了。袋里多了 {0} 铜钱。",
+
+
   "jiejiMenpaiDemo": "劫季门派 · Demo",
   "jiejiMenpaiPitch": "带着业力赶天劫的门派肉鸽",
   "knownIssues": "已知问题",

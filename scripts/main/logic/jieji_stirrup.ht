@@ -1,0 +1,152 @@
+/// 赶路「劫镫」三选：踩镫 / 收镫 / 血镫。隐藏、劫兆、野遇、赶路、行商、拾荒、扎营、残锋、残卷、雾灯、残鼓、汲泉、劫幡、劫铃、劫符、劫旌、劫烛、劫角、劫笛、劫笠、劫带、劫履、劫氅、劫扇、劫杖、劫伞、劫面、劫帔、劫手套、劫戒、劫镜、劫鼓、劫炬、劫梳、劫勺、劫碗、劫杯、劫罐、劫瓶、劫墨、劫袍、劫带、劫簪、劫笔、劫针、劫扣、劫绳、劫珠、劫钗、劫绦、劫穗、劫缎、劫缨、劫袖、劫领、劫缘、劫辫、劫翎、劫裹、劫轭、劫辔、劫缰都没中时才滚。
+const kJiejiStirrupBaseRate = 0.00008
+const kJiejiStirrupMoveCooldown = 24
+const kJiejiStirrupStepstirrupHerb = 1
+const kJiejiStirrupStepstirrupLife = 1
+const kJiejiStirrupStepstirrupGongfaRate = 0.006
+const kJiejiStirrupStowstirrupMoney = 1
+const kJiejiStirrupStowstirrupMoneyThunder = 1
+const kJiejiStirrupStowstirrupHerb = 1
+const kJiejiStirrupStowstirrupLife = 1
+const kJiejiStirrupBloodLife = 1
+const kJiejiStirrupBloodLifeBlood = 2
+const kJiejiStirrupBloodGongfaRate = 0.04
+const kJiejiStirrupBloodMoney = 2
+
+function _jiejiStirrupSeasonId() {
+  if (game.jieji != null && game.jieji.seasonId != null) {
+    return game.jieji.seasonId
+  }
+  return null
+}
+
+function _jiejiStirrupTutorialLocked() {
+  return game.enableTutorial && game.flags.tutorial.bountyQuest != true
+}
+
+function _jiejiStirrupStepstirrupHerbCost(seasonId) {
+  if (seasonId == 'mist') return 0
+  return kJiejiStirrupStepstirrupHerb
+}
+
+function _jiejiStirrupStowstirrupMoneyCost(seasonId) {
+  if (seasonId == 'thunder') return kJiejiStirrupStowstirrupMoneyThunder
+  return kJiejiStirrupStowstirrupMoney
+}
+
+function _jiejiStirrupBloodLifeCost(seasonId) {
+  if (seasonId == 'blood') return kJiejiStirrupBloodLifeBlood
+  return kJiejiStirrupBloodLife
+}
+
+function _jiejiStirrupCostLife(want) {
+  var lost = want
+  final life = hero.life ?? 1
+  if (life - lost < 1) lost = life - 1
+  if (lost < 0) lost = 0
+  if (lost > 0) {
+    Player.setLife(hero.life - lost)
+  }
+  return lost
+}
+
+function _jiejiStirrupNormalizeKind(kind) {
+  if (kind == 'stepstirrup' || kind == 'jieji_stirrup_stepstirrup') return 'stepstirrup'
+  if (kind == 'stowstirrup' || kind == 'jieji_stirrup_stowstirrup') return 'stowstirrup'
+  if (kind == 'bloodstirrup' || kind == 'jieji_stirrup_bloodstirrup') return 'bloodstirrup'
+  return null
+}
+
+function _jiejiStirrupChoices() {
+  return [
+    {
+      text: 'jieji_stirrup_stepstirrup',
+      description: 'hint_jieji_stirrup_stepstirrup',
+    },
+    {
+      text: 'jieji_stirrup_stowstirrup',
+      description: 'hint_jieji_stirrup_stowstirrup',
+    },
+    {
+      text: 'jieji_stirrup_bloodstirrup',
+      description: 'hint_jieji_stirrup_bloodstirrup',
+    },
+  ]
+}
+
+/// 赶路劫镫三选。debug.forceJiejiEvent('stirrup') / forceStirrup 直接走这里，仍弹出三选。
+async function playJiejiStirrupEvent(terrain) {
+  if (hero == null) return false
+
+  dialog.pushDialog('hint_jieji_stirrup')
+  dialog.pushSelection('jiejiStirrup', _jiejiStirrupChoices())
+  await dialog.execute()
+  final picked = dialog.checkSelected('jiejiStirrup')
+  var selected = _jiejiStirrupNormalizeKind(picked)
+  if (selected == null) {
+    selected = 'stepstirrup'
+  }
+
+  final seasonId = _jiejiStirrupSeasonId()
+  if (selected == 'stepstirrup') {
+    final herbNeed = _jiejiStirrupStepstirrupHerbCost(seasonId)
+    final herbHave = hero.materials['herb'] ?? 0
+    if (herbNeed > 0 && herbHave < herbNeed) {
+      dialog.pushDialog('hint_jieji_stirrup_stepstirrup_broke', interpolations: [herbNeed])
+      await dialog.execute()
+    } else {
+      if (herbNeed > 0) {
+        Player.exhaust('herb', herbNeed)
+      }
+      final healed = Player.restoreLife(kJiejiStirrupStepstirrupLife)
+      dialog.pushDialog('hint_jieji_stirrup_stepstirrup_ok', interpolations: [healed])
+      await dialog.execute()
+      await tryDropGongfaShard(rate: kJiejiStirrupStepstirrupGongfaRate)
+    }
+  } else if (selected == 'stowstirrup') {
+    final moneyNeed = _jiejiStirrupStowstirrupMoneyCost(seasonId)
+    final moneyHave = hero.materials['money'] ?? 0
+    if (moneyHave < moneyNeed) {
+      dialog.pushDialog('hint_jieji_stirrup_stowstirrup_broke', interpolations: [moneyNeed])
+      await dialog.execute()
+    } else {
+      Player.exhaust('money', moneyNeed)
+      await Player.collect('herb', kJiejiStirrupStowstirrupHerb, incurIncident: false)
+      final healed = Player.restoreLife(kJiejiStirrupStowstirrupLife)
+      dialog.pushDialog('hint_jieji_stirrup_stowstirrup_ok', interpolations: [kJiejiStirrupStowstirrupHerb, healed])
+      await dialog.execute()
+    }
+  } else {
+    final lost = _jiejiStirrupCostLife(_jiejiStirrupBloodLifeCost(seasonId))
+    dialog.pushDialog('hint_jieji_stirrup_bloodstirrup_ok', interpolations: [lost])
+    await dialog.execute()
+    final dropped = await tryDropGongfaShard(rate: kJiejiStirrupBloodGongfaRate)
+    if (dropped != true) {
+      await Player.collect('money', kJiejiStirrupBloodMoney, incurIncident: false)
+      dialog.pushDialog('hint_jieji_stirrup_bloodstirrup_none', interpolations: [kJiejiStirrupBloodMoney])
+      await dialog.execute()
+    }
+  }
+
+  Game.updateUI()
+  return true
+}
+
+/// 赶路触发：教程锁与路遇相同；冷却 24 步；约 0.008%。出过则返回 true。
+async function tryJiejiStirrupOnMove(terrain) {
+  if (hero == null) return false
+  if (_jiejiStirrupTutorialLocked()) return false
+
+  final jieji = ensureJiejiFlags()
+  final moves = jieji.worldMoves ?? 0
+  final last = jieji.lastStirrupMove ?? -999
+  if (moves - last < kJiejiStirrupMoveCooldown) return false
+
+  var rate = kJiejiStirrupBaseRate
+  if (rate < 0) rate = 0
+  if (random.nextDouble() > rate) return false
+
+  jieji.lastStirrupMove = moves
+  await playJiejiStirrupEvent(terrain)
+  return true
+}
