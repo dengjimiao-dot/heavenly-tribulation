@@ -616,4 +616,13 @@
     rank: 0,
   },
 
+  hidden_blood_bruise: {
+    id: "hidden_blood_bruise",
+    policy: null,
+    isBounty: false,
+    isHidden: true,
+    contribution: 11,
+    rank: 0,
+  },
+
 }
