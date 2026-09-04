@@ -4030,6 +4030,22 @@
   "hint_jieji_cord_bloodcord_none": "血绳下去，绳影却散了。袋里多了 {0} 铜钱。",
 
 
+  "jiejiBead": "劫珠",
+  "hint_jieji_bead": "路遇一颗劫珠。你可以佩珠、折珠，或以血染珠。",
+  "jieji_bead_wearbead": "佩珠",
+  "jieji_bead_foldbead": "折珠",
+  "jieji_bead_bloodbead": "血染珠",
+  "hint_jieji_bead_wearbead": "佩珠：耗 1 药材（雾月不耗）。回 5 命，八厘摸残页。药材不够则空手。",
+  "hint_jieji_bead_foldbead": "折珠：花 8 铜钱（雷月 4）。得 2 药材，并回 3 命。袋里不够则空手。",
+  "hint_jieji_bead_bloodbead": "血染：扣 2 点生机（至少留 1，血月 3）。二成六摸残页，不成则得 16 铜钱。",
+  "hint_jieji_bead_wearbead_ok": "你佩上劫珠。生机回了 {0} 点。",
+  "hint_jieji_bead_wearbead_broke": "佩珠要 {0} 药材。你拿不出来。",
+  "hint_jieji_bead_foldbead_ok": "你折起劫珠。得了 {0} 药材，生机回了 {1} 点。",
+  "hint_jieji_bead_foldbead_broke": "折珠要 {0} 铜钱。袋里不够。",
+  "hint_jieji_bead_bloodbead_ok": "你割了 {0} 点生机去染劫珠。",
+  "hint_jieji_bead_bloodbead_none": "血珠下去，珠影却散了。袋里多了 {0} 铜钱。",
+
+
   "jiejiMenpaiDemo": "劫季门派 · Demo",
   "jiejiMenpaiPitch": "带着业力赶天劫的门派肉鸽",
   "knownIssues": "已知问题",

@@ -1,0 +1,152 @@
+/// 赶路「劫珠」三选：佩珠 / 折珠 / 血染。隐藏、劫兆、野遇、赶路、行商、拾荒、扎营、残锋、残卷、雾灯、残鼓、汲泉、劫幡、劫铃、劫符、劫旌、劫烛、劫角、劫笛、劫笠、劫带、劫履、劫氅、劫扇、劫杖、劫伞、劫面、劫帔、劫手套、劫戒、劫镜、劫鼓、劫炬、劫梳、劫勺、劫碗、劫杯、劫罐、劫瓶、劫墨、劫袍、劫带、劫簪、劫笔、劫针、劫扣、劫绳都没中时才滚。
+const kJiejiBeadBaseRate = 0.0025
+const kJiejiBeadMoveCooldown = 24
+const kJiejiBeadWearbeadHerb = 1
+const kJiejiBeadWearbeadLife = 5
+const kJiejiBeadWearbeadGongfaRate = 0.08
+const kJiejiBeadFoldbeadMoney = 8
+const kJiejiBeadFoldbeadMoneyThunder = 4
+const kJiejiBeadFoldbeadHerb = 2
+const kJiejiBeadFoldbeadLife = 3
+const kJiejiBeadBloodLife = 2
+const kJiejiBeadBloodLifeBlood = 3
+const kJiejiBeadBloodGongfaRate = 0.26
+const kJiejiBeadBloodMoney = 16
+
+function _jiejiBeadSeasonId() {
+  if (game.jieji != null && game.jieji.seasonId != null) {
+    return game.jieji.seasonId
+  }
+  return null
+}
+
+function _jiejiBeadTutorialLocked() {
+  return game.enableTutorial && game.flags.tutorial.bountyQuest != true
+}
+
+function _jiejiBeadWearbeadHerbCost(seasonId) {
+  if (seasonId == 'mist') return 0
+  return kJiejiBeadWearbeadHerb
+}
+
+function _jiejiBeadFoldbeadMoneyCost(seasonId) {
+  if (seasonId == 'thunder') return kJiejiBeadFoldbeadMoneyThunder
+  return kJiejiBeadFoldbeadMoney
+}
+
+function _jiejiBeadBloodLifeCost(seasonId) {
+  if (seasonId == 'blood') return kJiejiBeadBloodLifeBlood
+  return kJiejiBeadBloodLife
+}
+
+function _jiejiBeadCostLife(want) {
+  var lost = want
+  final life = hero.life ?? 1
+  if (life - lost < 1) lost = life - 1
+  if (lost < 0) lost = 0
+  if (lost > 0) {
+    Player.setLife(hero.life - lost)
+  }
+  return lost
+}
+
+function _jiejiBeadNormalizeKind(kind) {
+  if (kind == 'wearbead' || kind == 'jieji_bead_wearbead') return 'wearbead'
+  if (kind == 'foldbead' || kind == 'jieji_bead_foldbead') return 'foldbead'
+  if (kind == 'bloodbead' || kind == 'jieji_bead_bloodbead') return 'bloodbead'
+  return null
+}
+
+function _jiejiBeadChoices() {
+  return [
+    {
+      text: 'jieji_bead_wearbead',
+      description: 'hint_jieji_bead_wearbead',
+    },
+    {
+      text: 'jieji_bead_foldbead',
+      description: 'hint_jieji_bead_foldbead',
+    },
+    {
+      text: 'jieji_bead_bloodbead',
+      description: 'hint_jieji_bead_bloodbead',
+    },
+  ]
+}
+
+/// 赶路劫珠三选。debug.forceJiejiEvent('bead') / forceBead 直接走这里，仍弹出三选。
+async function playJiejiBeadEvent(terrain) {
+  if (hero == null) return false
+
+  dialog.pushDialog('hint_jieji_bead')
+  dialog.pushSelection('jiejiBead', _jiejiBeadChoices())
+  await dialog.execute()
+  final picked = dialog.checkSelected('jiejiBead')
+  var selected = _jiejiBeadNormalizeKind(picked)
+  if (selected == null) {
+    selected = 'wearbead'
+  }
+
+  final seasonId = _jiejiBeadSeasonId()
+  if (selected == 'wearbead') {
+    final herbNeed = _jiejiBeadWearbeadHerbCost(seasonId)
+    final herbHave = hero.materials['herb'] ?? 0
+    if (herbNeed > 0 && herbHave < herbNeed) {
+      dialog.pushDialog('hint_jieji_bead_wearbead_broke', interpolations: [herbNeed])
+      await dialog.execute()
+    } else {
+      if (herbNeed > 0) {
+        Player.exhaust('herb', herbNeed)
+      }
+      final healed = Player.restoreLife(kJiejiBeadWearbeadLife)
+      dialog.pushDialog('hint_jieji_bead_wearbead_ok', interpolations: [healed])
+      await dialog.execute()
+      await tryDropGongfaShard(rate: kJiejiBeadWearbeadGongfaRate)
+    }
+  } else if (selected == 'foldbead') {
+    final moneyNeed = _jiejiBeadFoldbeadMoneyCost(seasonId)
+    final moneyHave = hero.materials['money'] ?? 0
+    if (moneyHave < moneyNeed) {
+      dialog.pushDialog('hint_jieji_bead_foldbead_broke', interpolations: [moneyNeed])
+      await dialog.execute()
+    } else {
+      Player.exhaust('money', moneyNeed)
+      await Player.collect('herb', kJiejiBeadFoldbeadHerb, incurIncident: false)
+      final healed = Player.restoreLife(kJiejiBeadFoldbeadLife)
+      dialog.pushDialog('hint_jieji_bead_foldbead_ok', interpolations: [kJiejiBeadFoldbeadHerb, healed])
+      await dialog.execute()
+    }
+  } else {
+    final lost = _jiejiBeadCostLife(_jiejiBeadBloodLifeCost(seasonId))
+    dialog.pushDialog('hint_jieji_bead_bloodbead_ok', interpolations: [lost])
+    await dialog.execute()
+    final dropped = await tryDropGongfaShard(rate: kJiejiBeadBloodGongfaRate)
+    if (dropped != true) {
+      await Player.collect('money', kJiejiBeadBloodMoney, incurIncident: false)
+      dialog.pushDialog('hint_jieji_bead_bloodbead_none', interpolations: [kJiejiBeadBloodMoney])
+      await dialog.execute()
+    }
+  }
+
+  Game.updateUI()
+  return true
+}
+
+/// 赶路触发：教程锁与路遇相同；冷却 24 步；约 0.25%。出过则返回 true。
+async function tryJiejiBeadOnMove(terrain) {
+  if (hero == null) return false
+  if (_jiejiBeadTutorialLocked()) return false
+
+  final jieji = ensureJiejiFlags()
+  final moves = jieji.worldMoves ?? 0
+  final last = jieji.lastBeadMove ?? -999
+  if (moves - last < kJiejiBeadMoveCooldown) return false
+
+  var rate = kJiejiBeadBaseRate
+  if (rate < 0) rate = 0
+  if (random.nextDouble() > rate) return false
+
+  jieji.lastBeadMove = moves
+  await playJiejiBeadEvent(terrain)
+  return true
+}
