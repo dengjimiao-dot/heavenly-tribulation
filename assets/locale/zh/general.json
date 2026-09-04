@@ -3760,6 +3760,22 @@
   "hint_jieji_jar_bloodjar_none": "血罐下去，罐影却散了。袋里多了 {0} 铜钱。",
 
 
+  "jiejiVial": "劫瓶",
+  "hint_jieji_vial": "路边搁着一只劫瓶。你可以启瓶、收瓶，或以血瓶。",
+  "jieji_vial_openvial": "启瓶",
+  "jieji_vial_stowvial": "收瓶",
+  "jieji_vial_bloodvial": "血瓶",
+  "hint_jieji_vial_openvial": "启瓶：耗 1 药材（雾月不耗）。回 5 命，八厘摸残页。药材不够则空手。",
+  "hint_jieji_vial_stowvial": "收瓶：花 8 铜钱（雷月 4）。得 2 药材，并回 3 命。袋里不够则空手。",
+  "hint_jieji_vial_bloodvial": "血瓶：扣 2 点生机（至少留 1，血月 3）。二成六摸残页，不成则得 16 铜钱。",
+  "hint_jieji_vial_openvial_ok": "你启开劫瓶。生机回了 {0} 点。",
+  "hint_jieji_vial_openvial_broke": "启瓶要 {0} 药材。你拿不出来。",
+  "hint_jieji_vial_stowvial_ok": "你收起劫瓶。得了 {0} 药材，生机回了 {1} 点。",
+  "hint_jieji_vial_stowvial_broke": "收瓶要 {0} 铜钱。袋里不够。",
+  "hint_jieji_vial_bloodvial_ok": "你割了 {0} 点生机去染劫瓶。",
+  "hint_jieji_vial_bloodvial_none": "血瓶下去，瓶影却散了。袋里多了 {0} 铜钱。",
+
+
   "jiejiMenpaiDemo": "劫季门派 · Demo",
   "jiejiMenpaiPitch": "带着业力赶天劫的门派肉鸽",
   "knownIssues": "已知问题",

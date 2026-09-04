@@ -1,0 +1,152 @@
+/// 赶路「劫瓶」三选：启瓶 / 收瓶 / 血瓶。隐藏、劫兆、野遇、赶路、行商、拾荒、扎营、残锋、残卷、雾灯、残鼓、汲泉、劫幡、劫铃、劫符、劫旌、劫烛、劫角、劫笛、劫笠、劫带、劫履、劫氅、劫扇、劫杖、劫伞、劫面、劫帔、劫手套、劫戒、劫镜、劫鼓、劫炬、劫梳、劫勺、劫碗、劫杯、劫罐都没中时才滚。
+const kJiejiVialBaseRate = 0.010
+const kJiejiVialMoveCooldown = 24
+const kJiejiVialOpenvialHerb = 1
+const kJiejiVialOpenvialLife = 5
+const kJiejiVialOpenvialGongfaRate = 0.08
+const kJiejiVialStowvialMoney = 8
+const kJiejiVialStowvialMoneyThunder = 4
+const kJiejiVialStowvialHerb = 2
+const kJiejiVialStowvialLife = 3
+const kJiejiVialBloodLife = 2
+const kJiejiVialBloodLifeBlood = 3
+const kJiejiVialBloodGongfaRate = 0.26
+const kJiejiVialBloodMoney = 16
+
+function _jiejiVialSeasonId() {
+  if (game.jieji != null && game.jieji.seasonId != null) {
+    return game.jieji.seasonId
+  }
+  return null
+}
+
+function _jiejiVialTutorialLocked() {
+  return game.enableTutorial && game.flags.tutorial.bountyQuest != true
+}
+
+function _jiejiVialOpenvialHerbCost(seasonId) {
+  if (seasonId == 'mist') return 0
+  return kJiejiVialOpenvialHerb
+}
+
+function _jiejiVialStowvialMoneyCost(seasonId) {
+  if (seasonId == 'thunder') return kJiejiVialStowvialMoneyThunder
+  return kJiejiVialStowvialMoney
+}
+
+function _jiejiVialBloodLifeCost(seasonId) {
+  if (seasonId == 'blood') return kJiejiVialBloodLifeBlood
+  return kJiejiVialBloodLife
+}
+
+function _jiejiVialCostLife(want) {
+  var lost = want
+  final life = hero.life ?? 1
+  if (life - lost < 1) lost = life - 1
+  if (lost < 0) lost = 0
+  if (lost > 0) {
+    Player.setLife(hero.life - lost)
+  }
+  return lost
+}
+
+function _jiejiVialNormalizeKind(kind) {
+  if (kind == 'openvial' || kind == 'jieji_vial_openvial') return 'openvial'
+  if (kind == 'stowvial' || kind == 'jieji_vial_stowvial') return 'stowvial'
+  if (kind == 'bloodvial' || kind == 'jieji_vial_bloodvial') return 'bloodvial'
+  return null
+}
+
+function _jiejiVialChoices() {
+  return [
+    {
+      text: 'jieji_vial_openvial',
+      description: 'hint_jieji_vial_openvial',
+    },
+    {
+      text: 'jieji_vial_stowvial',
+      description: 'hint_jieji_vial_stowvial',
+    },
+    {
+      text: 'jieji_vial_bloodvial',
+      description: 'hint_jieji_vial_bloodvial',
+    },
+  ]
+}
+
+/// 赶路劫瓶三选。debug.forceJiejiEvent('vial') / forceVial 直接走这里，仍弹出三选。
+async function playJiejiVialEvent(terrain) {
+  if (hero == null) return false
+
+  dialog.pushDialog('hint_jieji_vial')
+  dialog.pushSelection('jiejiVial', _jiejiVialChoices())
+  await dialog.execute()
+  final picked = dialog.checkSelected('jiejiVial')
+  var selected = _jiejiVialNormalizeKind(picked)
+  if (selected == null) {
+    selected = 'openvial'
+  }
+
+  final seasonId = _jiejiVialSeasonId()
+  if (selected == 'openvial') {
+    final herbNeed = _jiejiVialOpenvialHerbCost(seasonId)
+    final herbHave = hero.materials['herb'] ?? 0
+    if (herbNeed > 0 && herbHave < herbNeed) {
+      dialog.pushDialog('hint_jieji_vial_openvial_broke', interpolations: [herbNeed])
+      await dialog.execute()
+    } else {
+      if (herbNeed > 0) {
+        Player.exhaust('herb', herbNeed)
+      }
+      final healed = Player.restoreLife(kJiejiVialOpenvialLife)
+      dialog.pushDialog('hint_jieji_vial_openvial_ok', interpolations: [healed])
+      await dialog.execute()
+      await tryDropGongfaShard(rate: kJiejiVialOpenvialGongfaRate)
+    }
+  } else if (selected == 'stowvial') {
+    final moneyNeed = _jiejiVialStowvialMoneyCost(seasonId)
+    final moneyHave = hero.materials['money'] ?? 0
+    if (moneyHave < moneyNeed) {
+      dialog.pushDialog('hint_jieji_vial_stowvial_broke', interpolations: [moneyNeed])
+      await dialog.execute()
+    } else {
+      Player.exhaust('money', moneyNeed)
+      await Player.collect('herb', kJiejiVialStowvialHerb, incurIncident: false)
+      final healed = Player.restoreLife(kJiejiVialStowvialLife)
+      dialog.pushDialog('hint_jieji_vial_stowvial_ok', interpolations: [kJiejiVialStowvialHerb, healed])
+      await dialog.execute()
+    }
+  } else {
+    final lost = _jiejiVialCostLife(_jiejiVialBloodLifeCost(seasonId))
+    dialog.pushDialog('hint_jieji_vial_bloodvial_ok', interpolations: [lost])
+    await dialog.execute()
+    final dropped = await tryDropGongfaShard(rate: kJiejiVialBloodGongfaRate)
+    if (dropped != true) {
+      await Player.collect('money', kJiejiVialBloodMoney, incurIncident: false)
+      dialog.pushDialog('hint_jieji_vial_bloodvial_none', interpolations: [kJiejiVialBloodMoney])
+      await dialog.execute()
+    }
+  }
+
+  Game.updateUI()
+  return true
+}
+
+/// 赶路触发：教程锁与路遇相同；冷却 24 步；约 1.0%。出过则返回 true。
+async function tryJiejiVialOnMove(terrain) {
+  if (hero == null) return false
+  if (_jiejiVialTutorialLocked()) return false
+
+  final jieji = ensureJiejiFlags()
+  final moves = jieji.worldMoves ?? 0
+  final last = jieji.lastVialMove ?? -999
+  if (moves - last < kJiejiVialMoveCooldown) return false
+
+  var rate = kJiejiVialBaseRate
+  if (rate < 0) rate = 0
+  if (random.nextDouble() > rate) return false
+
+  jieji.lastVialMove = moves
+  await playJiejiVialEvent(terrain)
+  return true
+}
