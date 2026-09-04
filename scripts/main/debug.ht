@@ -360,6 +360,11 @@ namespace debug {
     return await patrolJiejiResidence(free: true)
   }
 
+  /// 忽略冷却与花费，仍弹出外门寮门守三选。
+  async function forceGuard() {
+    return await guardJiejiResidence(free: true)
+  }
+
   async function forceConsultXianming() {
     return await consultJiejiXianming(free: true)
   }

@@ -1,0 +1,178 @@
+/// 外门寮「门守」三选：守门 / 拦劫 / 血守。外门寮与家；不替换夜巡、招外援。
+const kJiejiGuardCooldownDays = 1
+const kJiejiGuardKeepMoney = 25
+const kJiejiGuardKeepMoneyThunder = 12
+const kJiejiGuardKeepLife = 4
+const kJiejiGuardKeepHerbMist = 1
+const kJiejiGuardBarHerb = 1
+const kJiejiGuardBarGongfaRate = 0.15
+const kJiejiGuardBloodLife = 2
+const kJiejiGuardBloodLifeBlood = 3
+const kJiejiGuardBloodGongfaRate = 0.30
+const kJiejiGuardBloodMoney = 45
+
+function _jiejiGuardSeasonId() {
+  if (game.jieji != null && game.jieji.seasonId != null) {
+    return game.jieji.seasonId
+  }
+  return null
+}
+
+function _jiejiGuardCurrentDay() {
+  if (game.timestamp == null) return null
+  if (Constants.ticksPerDay == null) return null
+  if (Constants.ticksPerDay <= 0) return null
+  return game.timestamp ~/ Constants.ticksPerDay
+}
+
+function _jiejiGuardOnCooldown() {
+  final jieji = ensureJiejiFlags()
+  final day = _jiejiGuardCurrentDay()
+  if (day == null) return false
+  if (jieji.lastGuardDay == null) return false
+  if (day - jieji.lastGuardDay < kJiejiGuardCooldownDays) return true
+  return false
+}
+
+function _jiejiGuardMark() {
+  final jieji = ensureJiejiFlags()
+  jieji.lastGuardDay = _jiejiGuardCurrentDay()
+}
+
+function _jiejiGuardCostLife(want) {
+  var lost = want
+  final life = hero.life ?? 1
+  if (life - lost < 1) lost = life - 1
+  if (lost < 0) lost = 0
+  if (lost > 0) {
+    Player.setLife(hero.life - lost)
+  }
+  return lost
+}
+
+function _jiejiGuardKeepMoneyCost(seasonId) {
+  if (seasonId == 'thunder') return kJiejiGuardKeepMoneyThunder
+  return kJiejiGuardKeepMoney
+}
+
+function _jiejiGuardBloodLifeCost(seasonId) {
+  if (seasonId == 'blood') return kJiejiGuardBloodLifeBlood
+  return kJiejiGuardBloodLife
+}
+
+function _jiejiGuardNormalizeKind(kind) {
+  if (kind == 'keep' || kind == 'jieji_guard_keep') return 'keep'
+  if (kind == 'bar' || kind == 'jieji_guard_bar') return 'bar'
+  if (kind == 'blood' || kind == 'jieji_guard_blood') return 'blood'
+  return null
+}
+
+function _jiejiGuardChoices() {
+  return [
+    {
+      text: 'jieji_guard_keep',
+      description: 'hint_jieji_guard_keep',
+    },
+    {
+      text: 'jieji_guard_bar',
+      description: 'hint_jieji_guard_bar',
+    },
+    {
+      text: 'jieji_guard_blood',
+      description: 'hint_jieji_guard_blood',
+    },
+    'cancel',
+  ]
+}
+
+function _jiejiGuardMoneyNeed(selected, seasonId) {
+  if (selected == 'keep') return _jiejiGuardKeepMoneyCost(seasonId)
+  return 0
+}
+
+function _jiejiGuardHerbNeed(selected) {
+  if (selected == 'bar') return kJiejiGuardBarHerb
+  return 0
+}
+
+/// 外门寮门守三选。free 为 true 时不扣费、不检查冷却（debug），仍弹出三选。
+/// kind 为空则弹窗；null 选择在 free 时默认守门。
+/// 返回 'cooldown' | 'poor' | 'cancel' | 'keep' | 'bar' | 'blood'。
+async function guardJiejiResidence({ free = false, kind = null }) {
+  if (hero == null) return 'cancel'
+  if (free != true && _jiejiGuardOnCooldown()) {
+    return 'cooldown'
+  }
+
+  var selected = _jiejiGuardNormalizeKind(kind)
+  if (selected == null) {
+    dialog.pushDialog('hint_guardJiejiResidence')
+    dialog.pushSelection('jiejiGuard', _jiejiGuardChoices())
+    await dialog.execute()
+    final picked = dialog.checkSelected('jiejiGuard')
+    if (picked == null || picked == 'cancel') {
+      if (free == true && picked == null) {
+        selected = 'keep'
+      } else {
+        return 'cancel'
+      }
+    } else {
+      selected = _jiejiGuardNormalizeKind(picked)
+    }
+  }
+  if (selected == null) return 'cancel'
+
+  final seasonId = _jiejiGuardSeasonId()
+  if (free != true) {
+    final moneyNeed = _jiejiGuardMoneyNeed(selected, seasonId)
+    final herbNeed = _jiejiGuardHerbNeed(selected)
+    final moneyHave = hero.materials['money'] ?? 0
+    final herbHave = hero.materials['herb'] ?? 0
+    if (moneyHave < moneyNeed || herbHave < herbNeed) {
+      return 'poor'
+    }
+  }
+
+  if (free != true) {
+    final moneyNeed = _jiejiGuardMoneyNeed(selected, seasonId)
+    final herbNeed = _jiejiGuardHerbNeed(selected)
+    if (moneyNeed > 0) {
+      Player.exhaust('money', moneyNeed)
+    }
+    if (herbNeed > 0) {
+      Player.exhaust('herb', herbNeed)
+    }
+    if (selected == 'blood') {
+      _jiejiGuardCostLife(_jiejiGuardBloodLifeCost(seasonId))
+    }
+    _jiejiGuardMark()
+  }
+
+  if (selected == 'keep') {
+    final healed = Player.restoreLife(kJiejiGuardKeepLife)
+    if (seasonId == 'mist') {
+      await Player.collect('herb', kJiejiGuardKeepHerbMist, incurIncident: false)
+    }
+    dialog.pushDialog('hint_guardJiejiResidence_keep', interpolations: [healed])
+    await dialog.execute()
+  } else if (selected == 'bar') {
+    final jieji = ensureJiejiFlags()
+    jieji.illusionVeil = true
+    dialog.pushDialog('hint_guardJiejiResidence_bar')
+    await dialog.execute()
+    await tryDropGongfaShard(rate: kJiejiGuardBarGongfaRate)
+  } else if (selected == 'blood') {
+    final ok = await tryDropGongfaShard(rate: kJiejiGuardBloodGongfaRate)
+    if (ok == true) {
+      dialog.pushDialog('hint_guardJiejiResidence_blood')
+      await dialog.execute()
+    } else {
+      await Player.collect('money', kJiejiGuardBloodMoney, incurIncident: false)
+      dialog.pushDialog('hint_guardJiejiResidence_blood_money')
+      await dialog.execute()
+    }
+  }
+
+  Game.updateUI()
+  return selected
+}
