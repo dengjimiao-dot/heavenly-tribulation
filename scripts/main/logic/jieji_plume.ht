@@ -1,0 +1,152 @@
+/// 赶路「劫翎」三选：系翎 / 解翎 / 血翎。隐藏、劫兆、野遇、赶路、行商、拾荒、扎营、残锋、残卷、雾灯、残鼓、汲泉、劫幡、劫铃、劫符、劫旌、劫烛、劫角、劫笛、劫笠、劫带、劫履、劫氅、劫扇、劫杖、劫伞、劫面、劫帔、劫手套、劫戒、劫镜、劫鼓、劫炬、劫梳、劫勺、劫碗、劫杯、劫罐、劫瓶、劫墨、劫袍、劫带、劫簪、劫笔、劫针、劫扣、劫绳、劫珠、劫钗、劫绦、劫穗、劫缎、劫缨、劫袖、劫领、劫缘、劫辫都没中时才滚。
+const kJiejiPlumeBaseRate = 0.00025
+const kJiejiPlumeMoveCooldown = 24
+const kJiejiPlumeTieplumeHerb = 1
+const kJiejiPlumeTieplumeLife = 1
+const kJiejiPlumeTieplumeGongfaRate = 0.02
+const kJiejiPlumeLooseplumeMoney = 2
+const kJiejiPlumeLooseplumeMoneyThunder = 1
+const kJiejiPlumeLooseplumeHerb = 1
+const kJiejiPlumeLooseplumeLife = 1
+const kJiejiPlumeBloodLife = 1
+const kJiejiPlumeBloodLifeBlood = 2
+const kJiejiPlumeBloodGongfaRate = 0.09
+const kJiejiPlumeBloodMoney = 3
+
+function _jiejiPlumeSeasonId() {
+  if (game.jieji != null && game.jieji.seasonId != null) {
+    return game.jieji.seasonId
+  }
+  return null
+}
+
+function _jiejiPlumeTutorialLocked() {
+  return game.enableTutorial && game.flags.tutorial.bountyQuest != true
+}
+
+function _jiejiPlumeTieplumeHerbCost(seasonId) {
+  if (seasonId == 'mist') return 0
+  return kJiejiPlumeTieplumeHerb
+}
+
+function _jiejiPlumeLooseplumeMoneyCost(seasonId) {
+  if (seasonId == 'thunder') return kJiejiPlumeLooseplumeMoneyThunder
+  return kJiejiPlumeLooseplumeMoney
+}
+
+function _jiejiPlumeBloodLifeCost(seasonId) {
+  if (seasonId == 'blood') return kJiejiPlumeBloodLifeBlood
+  return kJiejiPlumeBloodLife
+}
+
+function _jiejiPlumeCostLife(want) {
+  var lost = want
+  final life = hero.life ?? 1
+  if (life - lost < 1) lost = life - 1
+  if (lost < 0) lost = 0
+  if (lost > 0) {
+    Player.setLife(hero.life - lost)
+  }
+  return lost
+}
+
+function _jiejiPlumeNormalizeKind(kind) {
+  if (kind == 'tieplume' || kind == 'jieji_plume_tieplume') return 'tieplume'
+  if (kind == 'looseplume' || kind == 'jieji_plume_looseplume') return 'looseplume'
+  if (kind == 'bloodplume' || kind == 'jieji_plume_bloodplume') return 'bloodplume'
+  return null
+}
+
+function _jiejiPlumeChoices() {
+  return [
+    {
+      text: 'jieji_plume_tieplume',
+      description: 'hint_jieji_plume_tieplume',
+    },
+    {
+      text: 'jieji_plume_looseplume',
+      description: 'hint_jieji_plume_looseplume',
+    },
+    {
+      text: 'jieji_plume_bloodplume',
+      description: 'hint_jieji_plume_bloodplume',
+    },
+  ]
+}
+
+/// 赶路劫翎三选。debug.forceJiejiEvent('plume') / forcePlume 直接走这里，仍弹出三选。
+async function playJiejiPlumeEvent(terrain) {
+  if (hero == null) return false
+
+  dialog.pushDialog('hint_jieji_plume')
+  dialog.pushSelection('jiejiPlume', _jiejiPlumeChoices())
+  await dialog.execute()
+  final picked = dialog.checkSelected('jiejiPlume')
+  var selected = _jiejiPlumeNormalizeKind(picked)
+  if (selected == null) {
+    selected = 'tieplume'
+  }
+
+  final seasonId = _jiejiPlumeSeasonId()
+  if (selected == 'tieplume') {
+    final herbNeed = _jiejiPlumeTieplumeHerbCost(seasonId)
+    final herbHave = hero.materials['herb'] ?? 0
+    if (herbNeed > 0 && herbHave < herbNeed) {
+      dialog.pushDialog('hint_jieji_plume_tieplume_broke', interpolations: [herbNeed])
+      await dialog.execute()
+    } else {
+      if (herbNeed > 0) {
+        Player.exhaust('herb', herbNeed)
+      }
+      final healed = Player.restoreLife(kJiejiPlumeTieplumeLife)
+      dialog.pushDialog('hint_jieji_plume_tieplume_ok', interpolations: [healed])
+      await dialog.execute()
+      await tryDropGongfaShard(rate: kJiejiPlumeTieplumeGongfaRate)
+    }
+  } else if (selected == 'looseplume') {
+    final moneyNeed = _jiejiPlumeLooseplumeMoneyCost(seasonId)
+    final moneyHave = hero.materials['money'] ?? 0
+    if (moneyHave < moneyNeed) {
+      dialog.pushDialog('hint_jieji_plume_looseplume_broke', interpolations: [moneyNeed])
+      await dialog.execute()
+    } else {
+      Player.exhaust('money', moneyNeed)
+      await Player.collect('herb', kJiejiPlumeLooseplumeHerb, incurIncident: false)
+      final healed = Player.restoreLife(kJiejiPlumeLooseplumeLife)
+      dialog.pushDialog('hint_jieji_plume_looseplume_ok', interpolations: [kJiejiPlumeLooseplumeHerb, healed])
+      await dialog.execute()
+    }
+  } else {
+    final lost = _jiejiPlumeCostLife(_jiejiPlumeBloodLifeCost(seasonId))
+    dialog.pushDialog('hint_jieji_plume_bloodplume_ok', interpolations: [lost])
+    await dialog.execute()
+    final dropped = await tryDropGongfaShard(rate: kJiejiPlumeBloodGongfaRate)
+    if (dropped != true) {
+      await Player.collect('money', kJiejiPlumeBloodMoney, incurIncident: false)
+      dialog.pushDialog('hint_jieji_plume_bloodplume_none', interpolations: [kJiejiPlumeBloodMoney])
+      await dialog.execute()
+    }
+  }
+
+  Game.updateUI()
+  return true
+}
+
+/// 赶路触发：教程锁与路遇相同；冷却 24 步；约 0.025%。出过则返回 true。
+async function tryJiejiPlumeOnMove(terrain) {
+  if (hero == null) return false
+  if (_jiejiPlumeTutorialLocked()) return false
+
+  final jieji = ensureJiejiFlags()
+  final moves = jieji.worldMoves ?? 0
+  final last = jieji.lastPlumeMove ?? -999
+  if (moves - last < kJiejiPlumeMoveCooldown) return false
+
+  var rate = kJiejiPlumeBaseRate
+  if (rate < 0) rate = 0
+  if (random.nextDouble() > rate) return false
+
+  jieji.lastPlumeMove = moves
+  await playJiejiPlumeEvent(terrain)
+  return true
+}

@@ -448,6 +448,8 @@ namespace debug {
       await playJiejiHemEvent(terrain)
     } else if (kind == 'braid') {
       await playJiejiBraidEvent(terrain)
+    } else if (kind == 'plume') {
+      await playJiejiPlumeEvent(terrain)
     } else {
       await playJiejiThunderRoadEvent(terrain)
     }
@@ -1307,6 +1309,11 @@ namespace debug {
   /// 忽略几率与冷却，仍弹出赶路劫辫三选。
   async function forceBraid() {
     return await playJiejiBraidEvent({ kind: 'plain' })
+  }
+
+  /// 忽略几率与冷却，仍弹出赶路劫翎三选。
+  async function forcePlume() {
+    return await playJiejiPlumeEvent({ kind: 'plain' })
   }
 
   /// 忽略冷却与花费，仍弹出幻术祭坛入幻三选。
