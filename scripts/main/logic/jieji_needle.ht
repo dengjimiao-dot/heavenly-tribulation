@@ -1,0 +1,152 @@
+/// 赶路「劫针」三选：穿针 / 折针 / 血染。隐藏、劫兆、野遇、赶路、行商、拾荒、扎营、残锋、残卷、雾灯、残鼓、汲泉、劫幡、劫铃、劫符、劫旌、劫烛、劫角、劫笛、劫笠、劫带、劫履、劫氅、劫扇、劫杖、劫伞、劫面、劫帔、劫手套、劫戒、劫镜、劫鼓、劫炬、劫梳、劫勺、劫碗、劫杯、劫罐、劫瓶、劫墨、劫袍、劫带、劫簪、劫笔都没中时才滚。
+const kJiejiNeedleBaseRate = 0.004
+const kJiejiNeedleMoveCooldown = 24
+const kJiejiNeedleThreadneedleHerb = 1
+const kJiejiNeedleThreadneedleLife = 5
+const kJiejiNeedleThreadneedleGongfaRate = 0.08
+const kJiejiNeedleFoldneedleMoney = 8
+const kJiejiNeedleFoldneedleMoneyThunder = 4
+const kJiejiNeedleFoldneedleHerb = 2
+const kJiejiNeedleFoldneedleLife = 3
+const kJiejiNeedleBloodLife = 2
+const kJiejiNeedleBloodLifeBlood = 3
+const kJiejiNeedleBloodGongfaRate = 0.26
+const kJiejiNeedleBloodMoney = 16
+
+function _jiejiNeedleSeasonId() {
+  if (game.jieji != null && game.jieji.seasonId != null) {
+    return game.jieji.seasonId
+  }
+  return null
+}
+
+function _jiejiNeedleTutorialLocked() {
+  return game.enableTutorial && game.flags.tutorial.bountyQuest != true
+}
+
+function _jiejiNeedleThreadneedleHerbCost(seasonId) {
+  if (seasonId == 'mist') return 0
+  return kJiejiNeedleThreadneedleHerb
+}
+
+function _jiejiNeedleFoldneedleMoneyCost(seasonId) {
+  if (seasonId == 'thunder') return kJiejiNeedleFoldneedleMoneyThunder
+  return kJiejiNeedleFoldneedleMoney
+}
+
+function _jiejiNeedleBloodLifeCost(seasonId) {
+  if (seasonId == 'blood') return kJiejiNeedleBloodLifeBlood
+  return kJiejiNeedleBloodLife
+}
+
+function _jiejiNeedleCostLife(want) {
+  var lost = want
+  final life = hero.life ?? 1
+  if (life - lost < 1) lost = life - 1
+  if (lost < 0) lost = 0
+  if (lost > 0) {
+    Player.setLife(hero.life - lost)
+  }
+  return lost
+}
+
+function _jiejiNeedleNormalizeKind(kind) {
+  if (kind == 'threadneedle' || kind == 'jieji_needle_threadneedle') return 'threadneedle'
+  if (kind == 'foldneedle' || kind == 'jieji_needle_foldneedle') return 'foldneedle'
+  if (kind == 'bloodneedle' || kind == 'jieji_needle_bloodneedle') return 'bloodneedle'
+  return null
+}
+
+function _jiejiNeedleChoices() {
+  return [
+    {
+      text: 'jieji_needle_threadneedle',
+      description: 'hint_jieji_needle_threadneedle',
+    },
+    {
+      text: 'jieji_needle_foldneedle',
+      description: 'hint_jieji_needle_foldneedle',
+    },
+    {
+      text: 'jieji_needle_bloodneedle',
+      description: 'hint_jieji_needle_bloodneedle',
+    },
+  ]
+}
+
+/// 赶路劫针三选。debug.forceJiejiEvent('needle') / forceNeedle 直接走这里，仍弹出三选。
+async function playJiejiNeedleEvent(terrain) {
+  if (hero == null) return false
+
+  dialog.pushDialog('hint_jieji_needle')
+  dialog.pushSelection('jiejiNeedle', _jiejiNeedleChoices())
+  await dialog.execute()
+  final picked = dialog.checkSelected('jiejiNeedle')
+  var selected = _jiejiNeedleNormalizeKind(picked)
+  if (selected == null) {
+    selected = 'threadneedle'
+  }
+
+  final seasonId = _jiejiNeedleSeasonId()
+  if (selected == 'threadneedle') {
+    final herbNeed = _jiejiNeedleThreadneedleHerbCost(seasonId)
+    final herbHave = hero.materials['herb'] ?? 0
+    if (herbNeed > 0 && herbHave < herbNeed) {
+      dialog.pushDialog('hint_jieji_needle_threadneedle_broke', interpolations: [herbNeed])
+      await dialog.execute()
+    } else {
+      if (herbNeed > 0) {
+        Player.exhaust('herb', herbNeed)
+      }
+      final healed = Player.restoreLife(kJiejiNeedleThreadneedleLife)
+      dialog.pushDialog('hint_jieji_needle_threadneedle_ok', interpolations: [healed])
+      await dialog.execute()
+      await tryDropGongfaShard(rate: kJiejiNeedleThreadneedleGongfaRate)
+    }
+  } else if (selected == 'foldneedle') {
+    final moneyNeed = _jiejiNeedleFoldneedleMoneyCost(seasonId)
+    final moneyHave = hero.materials['money'] ?? 0
+    if (moneyHave < moneyNeed) {
+      dialog.pushDialog('hint_jieji_needle_foldneedle_broke', interpolations: [moneyNeed])
+      await dialog.execute()
+    } else {
+      Player.exhaust('money', moneyNeed)
+      await Player.collect('herb', kJiejiNeedleFoldneedleHerb, incurIncident: false)
+      final healed = Player.restoreLife(kJiejiNeedleFoldneedleLife)
+      dialog.pushDialog('hint_jieji_needle_foldneedle_ok', interpolations: [kJiejiNeedleFoldneedleHerb, healed])
+      await dialog.execute()
+    }
+  } else {
+    final lost = _jiejiNeedleCostLife(_jiejiNeedleBloodLifeCost(seasonId))
+    dialog.pushDialog('hint_jieji_needle_bloodneedle_ok', interpolations: [lost])
+    await dialog.execute()
+    final dropped = await tryDropGongfaShard(rate: kJiejiNeedleBloodGongfaRate)
+    if (dropped != true) {
+      await Player.collect('money', kJiejiNeedleBloodMoney, incurIncident: false)
+      dialog.pushDialog('hint_jieji_needle_bloodneedle_none', interpolations: [kJiejiNeedleBloodMoney])
+      await dialog.execute()
+    }
+  }
+
+  Game.updateUI()
+  return true
+}
+
+/// 赶路触发：教程锁与路遇相同；冷却 24 步；约 0.4%。出过则返回 true。
+async function tryJiejiNeedleOnMove(terrain) {
+  if (hero == null) return false
+  if (_jiejiNeedleTutorialLocked()) return false
+
+  final jieji = ensureJiejiFlags()
+  final moves = jieji.worldMoves ?? 0
+  final last = jieji.lastNeedleMove ?? -999
+  if (moves - last < kJiejiNeedleMoveCooldown) return false
+
+  var rate = kJiejiNeedleBaseRate
+  if (rate < 0) rate = 0
+  if (random.nextDouble() > rate) return false
+
+  jieji.lastNeedleMove = moves
+  await playJiejiNeedleEvent(terrain)
+  return true
+}

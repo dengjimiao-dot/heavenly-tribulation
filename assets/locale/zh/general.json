@@ -3940,6 +3940,22 @@
   "hint_jieji_brush_bloodbrush_none": "血笔下去，笔影却散了。袋里多了 {0} 铜钱。",
 
 
+  "jiejiNeedle": "劫针",
+  "hint_jieji_needle": "路遇一根劫针。你可以穿针、折针，或以血染针。",
+  "jieji_needle_threadneedle": "穿针",
+  "jieji_needle_foldneedle": "折针",
+  "jieji_needle_bloodneedle": "血染针",
+  "hint_jieji_needle_threadneedle": "穿针：耗 1 药材（雾月不耗）。回 5 命，八厘摸残页。药材不够则空手。",
+  "hint_jieji_needle_foldneedle": "折针：花 8 铜钱（雷月 4）。得 2 药材，并回 3 命。袋里不够则空手。",
+  "hint_jieji_needle_bloodneedle": "血染：扣 2 点生机（至少留 1，血月 3）。二成六摸残页，不成则得 16 铜钱。",
+  "hint_jieji_needle_threadneedle_ok": "你穿线于劫针。生机回了 {0} 点。",
+  "hint_jieji_needle_threadneedle_broke": "穿针要 {0} 药材。你拿不出来。",
+  "hint_jieji_needle_foldneedle_ok": "你折起劫针。得了 {0} 药材，生机回了 {1} 点。",
+  "hint_jieji_needle_foldneedle_broke": "折针要 {0} 铜钱。袋里不够。",
+  "hint_jieji_needle_bloodneedle_ok": "你割了 {0} 点生机去染劫针。",
+  "hint_jieji_needle_bloodneedle_none": "血针下去，针影却散了。袋里多了 {0} 铜钱。",
+
+
   "jiejiMenpaiDemo": "劫季门派 · Demo",
   "jiejiMenpaiPitch": "带着业力赶天劫的门派肉鸽",
   "knownIssues": "已知问题",

@@ -396,6 +396,8 @@ namespace debug {
       await playJiejiPinEvent(terrain)
     } else if (kind == 'brush') {
       await playJiejiBrushEvent(terrain)
+    } else if (kind == 'needle') {
+      await playJiejiNeedleEvent(terrain)
     } else {
       await playJiejiThunderRoadEvent(terrain)
     }
@@ -1151,6 +1153,11 @@ namespace debug {
   /// 忽略几率与冷却，仍弹出赶路劫笔三选。
   async function forceBrush() {
     return await playJiejiBrushEvent({ kind: 'plain' })
+  }
+
+  /// 忽略几率与冷却，仍弹出赶路劫针三选。
+  async function forceNeedle() {
+    return await playJiejiNeedleEvent({ kind: 'plain' })
   }
 
   /// 忽略冷却与花费，仍弹出幻术祭坛入幻三选。
