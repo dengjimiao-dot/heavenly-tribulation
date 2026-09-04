@@ -1979,6 +1979,42 @@ async function onAfterEnterLocation(location) -> bool {
         }
 
 
+        case 'hidden_thunder_stair': {
+          if (isLate) {
+            Player.progressJournalById(journal.id, stage: 2)
+            dialog.pushDialog('quest_hidden_late_failed', interpolations: [journal.title])
+            await dialog.execute()
+          } else {
+            Player.progressJournalById(journal.id)
+            var locName = ''
+            final loc = game.locations[journal.quest.targetLocationId]
+            if (loc != null) {
+              locName = loc.name
+            }
+            dialog.pushDialog('quest_hidden_thunder_stair_complete', interpolations: [
+              journal.title,
+              locName,
+            ])
+            await dialog.execute()
+            final items = await Player.loot(journal.quest.reward)
+            Game.promptItems(items)
+            if (random.nextDouble() < 0.5) {
+              await Player.collect('herb', 2, incurIncident: false)
+            } else {
+              await Player.collect('money', 40, incurIncident: false)
+            }
+            Player.restoreLife(4)
+            dialog.pushDialog('hint_jieji_thunder_stair_extra')
+            await dialog.execute()
+            await tryDropGongfaShard(rate: 0.25)
+            await grantJiejiHiddenQuestExtra('stair')
+          }
+          return true
+        }
+
+
+
+
       }
     }
   }
@@ -2558,6 +2594,22 @@ async function grantJiejiHiddenQuestExtra(kind) {
       await dialog.execute()
     }
   }
+
+
+  if (kind == 'stair') {
+    if (seasonId == 'thunder') {
+      if (Constants.materialKinds != null && Constants.materialKinds.contains('ore')) {
+        await Player.collect('ore', 2, incurIncident: false)
+      } else if (Constants.materialKinds != null && Constants.materialKinds.contains('stone')) {
+        await Player.collect('stone', 1, incurIncident: false)
+      } else {
+        await Player.collect('money', 20, incurIncident: false)
+      }
+      dialog.pushDialog('hint_jieji_thunder_stair_extra_thunder')
+      await dialog.execute()
+    }
+  }
+
 
 }
 
