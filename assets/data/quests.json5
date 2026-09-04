@@ -203,5 +203,13 @@
     contribution: 11,
     rank: 0,
   },
+  hidden_night_field: {
+    id: "hidden_night_field",
+    policy: null,
+    isBounty: false,
+    isHidden: true,
+    contribution: 11,
+    rank: 0,
+  },
 
 }

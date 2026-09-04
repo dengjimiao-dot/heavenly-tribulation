@@ -75,6 +75,7 @@
   "quest_hidden_stele_shade": "劫纹碑阴",
   "quest_hidden_haggle_stall": "劫纹议摊",
   "quest_hidden_blank_cache": "劫纹残胚",
+  "quest_hidden_night_field": "劫纹夜垄",
 
   "quest_hidden_ruins_explore_description": "行路听闻{0}附近有荒墟异象。亲自走一趟探明虚实。",
   "quest_hidden_karma_shrine_description": "有人在{0}看见无名祠。据说祭过的人会沾上业力，也会得一份机缘。",
@@ -94,6 +95,7 @@
   "quest_hidden_stele_shade_description": "行路听闻{0}城里有劫纹碑阴。去走一遭，或可挂上一层护身。",
   "quest_hidden_haggle_stall_description": "行路听闻{0}城里有劫纹议摊。去走一遭，或可换得铜钱并披上一层迷障。",
   "quest_hidden_blank_cache_description": "行路听闻{0}城里有劫纹残胚。去走一遭，或可拾得一枚牌胚。",
+  "quest_hidden_night_field_description": "行路听闻{0}城外有劫纹夜垄。去走一遭，或可采得药材并回些生机。",
 
   "quest_hidden_rumor": "路遇一位行色匆匆的修士，压低声音说：<yellow>{0}</>……去{1}看看。说完便隐入雾里。",
   "quest_hidden_spawned": "你察觉到一桩隐秘机缘：<yellow>{0}</>。去{1}探明虚实。",
@@ -115,5 +117,6 @@
   "quest_hidden_remnant_spring_complete": "「{0}」有了着落。你在{1}的残泉边汲回了生机。",
   "quest_hidden_stele_shade_complete": "「{0}」有了着落。你在{1}的碑阴下走了一遭。",
   "quest_hidden_haggle_stall_complete": "「{0}」有了着落。你在{1}的议摊边走了一遭。",
-  "quest_hidden_blank_cache_complete": "「{0}」有了着落。你在{1}的残胚堆里翻出一枚牌胚。"
+  "quest_hidden_blank_cache_complete": "「{0}」有了着落。你在{1}的残胚堆里翻出一枚牌胚。",
+  "quest_hidden_night_field_complete": "「{0}」有了着落。你在{1}的夜垄边采了一遭。"
 }

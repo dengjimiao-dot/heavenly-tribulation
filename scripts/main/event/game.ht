@@ -839,6 +839,34 @@ async function onAfterEnterLocation(location) -> bool {
           }
           return true
         }
+        case 'hidden_night_field': {
+          if (isLate) {
+            Player.progressJournalById(journal.id, stage: 2)
+            dialog.pushDialog('quest_hidden_late_failed', interpolations: [journal.title])
+            await dialog.execute()
+          } else {
+            Player.progressJournalById(journal.id)
+            var locName = ''
+            final loc = game.locations[journal.quest.targetLocationId]
+            if (loc != null) {
+              locName = loc.name
+            }
+            dialog.pushDialog('quest_hidden_night_field_complete', interpolations: [
+              journal.title,
+              locName,
+            ])
+            await dialog.execute()
+            final items = await Player.loot(journal.quest.reward)
+            Game.promptItems(items)
+            await Player.collect('herb', 3, incurIncident: false)
+            Player.restoreLife(4)
+            dialog.pushDialog('hint_jieji_night_field_extra')
+            await dialog.execute()
+            await tryDropGongfaShard(rate: 0.25)
+            await grantJiejiHiddenQuestExtra('field')
+          }
+          return true
+        }
       }
     }
   }
@@ -981,6 +1009,13 @@ async function grantJiejiHiddenQuestExtra(kind) {
     if (seasonId == 'thunder') {
       await Player.collect('money', 20, incurIncident: false)
       dialog.pushDialog('hint_jieji_blank_cache_extra_thunder')
+      await dialog.execute()
+    }
+  }
+  if (kind == 'field') {
+    if (seasonId == 'mist') {
+      await Player.collect('herb', 2, incurIncident: false)
+      dialog.pushDialog('hint_jieji_night_field_extra_mist')
       await dialog.execute()
     }
   }
