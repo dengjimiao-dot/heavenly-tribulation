@@ -419,5 +419,13 @@
     contribution: 11,
     rank: 0,
   },
+  hidden_blood_ditch: {
+    id: "hidden_blood_ditch",
+    policy: null,
+    isBounty: false,
+    isHidden: true,
+    contribution: 11,
+    rank: 0,
+  },
 
 }
