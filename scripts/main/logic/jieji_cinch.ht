@@ -1,0 +1,152 @@
+/// 赶路「劫绊」三选：系绊 / 解绊 / 血绊。隐藏、劫兆、野遇、赶路、行商、拾荒、扎营、残锋、残卷、雾灯、残鼓、汲泉、劫幡、劫铃、劫符、劫旌、劫烛、劫角、劫笛、劫笠、劫带、劫履、劫氅、劫扇、劫杖、劫伞、劫面、劫帔、劫手套、劫戒、劫镜、劫鼓、劫炬、劫梳、劫勺、劫碗、劫杯、劫罐、劫瓶、劫墨、劫袍、劫带、劫簪、劫笔、劫针、劫扣、劫绳、劫珠、劫钗、劫绦、劫穗、劫缎、劫缨、劫袖、劫领、劫缘、劫辫、劫翎、劫裹、劫轭、劫辔、劫缰、劫镫、劫鞦、劫勒、劫衔都没中时才滚。
+const kJiejiCinchBaseRate = 0.000035
+const kJiejiCinchMoveCooldown = 24
+const kJiejiCinchTiecinchHerb = 1
+const kJiejiCinchTiecinchLife = 1
+const kJiejiCinchTiecinchGongfaRate = 0.006
+const kJiejiCinchLoosecinchMoney = 1
+const kJiejiCinchLoosecinchMoneyThunder = 1
+const kJiejiCinchLoosecinchHerb = 1
+const kJiejiCinchLoosecinchLife = 1
+const kJiejiCinchBloodLife = 1
+const kJiejiCinchBloodLifeBlood = 2
+const kJiejiCinchBloodGongfaRate = 0.04
+const kJiejiCinchBloodMoney = 2
+
+function _jiejiCinchSeasonId() {
+  if (game.jieji != null && game.jieji.seasonId != null) {
+    return game.jieji.seasonId
+  }
+  return null
+}
+
+function _jiejiCinchTutorialLocked() {
+  return game.enableTutorial && game.flags.tutorial.bountyQuest != true
+}
+
+function _jiejiCinchTiecinchHerbCost(seasonId) {
+  if (seasonId == 'mist') return 0
+  return kJiejiCinchTiecinchHerb
+}
+
+function _jiejiCinchLoosecinchMoneyCost(seasonId) {
+  if (seasonId == 'thunder') return kJiejiCinchLoosecinchMoneyThunder
+  return kJiejiCinchLoosecinchMoney
+}
+
+function _jiejiCinchBloodLifeCost(seasonId) {
+  if (seasonId == 'blood') return kJiejiCinchBloodLifeBlood
+  return kJiejiCinchBloodLife
+}
+
+function _jiejiCinchCostLife(want) {
+  var lost = want
+  final life = hero.life ?? 1
+  if (life - lost < 1) lost = life - 1
+  if (lost < 0) lost = 0
+  if (lost > 0) {
+    Player.setLife(hero.life - lost)
+  }
+  return lost
+}
+
+function _jiejiCinchNormalizeKind(kind) {
+  if (kind == 'tiecinch' || kind == 'jieji_cinch_tiecinch') return 'tiecinch'
+  if (kind == 'loosecinch' || kind == 'jieji_cinch_loosecinch') return 'loosecinch'
+  if (kind == 'bloodcinch' || kind == 'jieji_cinch_bloodcinch') return 'bloodcinch'
+  return null
+}
+
+function _jiejiCinchChoices() {
+  return [
+    {
+      text: 'jieji_cinch_tiecinch',
+      description: 'hint_jieji_cinch_tiecinch',
+    },
+    {
+      text: 'jieji_cinch_loosecinch',
+      description: 'hint_jieji_cinch_loosecinch',
+    },
+    {
+      text: 'jieji_cinch_bloodcinch',
+      description: 'hint_jieji_cinch_bloodcinch',
+    },
+  ]
+}
+
+/// 赶路劫绊三选。debug.forceJiejiEvent('cinch') / forceCinch 直接走这里，仍弹出三选。
+async function playJiejiCinchEvent(terrain) {
+  if (hero == null) return false
+
+  dialog.pushDialog('hint_jieji_cinch')
+  dialog.pushSelection('jiejiCinch', _jiejiCinchChoices())
+  await dialog.execute()
+  final picked = dialog.checkSelected('jiejiCinch')
+  var selected = _jiejiCinchNormalizeKind(picked)
+  if (selected == null) {
+    selected = 'tiecinch'
+  }
+
+  final seasonId = _jiejiCinchSeasonId()
+  if (selected == 'tiecinch') {
+    final herbNeed = _jiejiCinchTiecinchHerbCost(seasonId)
+    final herbHave = hero.materials['herb'] ?? 0
+    if (herbNeed > 0 && herbHave < herbNeed) {
+      dialog.pushDialog('hint_jieji_cinch_tiecinch_broke', interpolations: [herbNeed])
+      await dialog.execute()
+    } else {
+      if (herbNeed > 0) {
+        Player.exhaust('herb', herbNeed)
+      }
+      final healed = Player.restoreLife(kJiejiCinchTiecinchLife)
+      dialog.pushDialog('hint_jieji_cinch_tiecinch_ok', interpolations: [healed])
+      await dialog.execute()
+      await tryDropGongfaShard(rate: kJiejiCinchTiecinchGongfaRate)
+    }
+  } else if (selected == 'loosecinch') {
+    final moneyNeed = _jiejiCinchLoosecinchMoneyCost(seasonId)
+    final moneyHave = hero.materials['money'] ?? 0
+    if (moneyHave < moneyNeed) {
+      dialog.pushDialog('hint_jieji_cinch_loosecinch_broke', interpolations: [moneyNeed])
+      await dialog.execute()
+    } else {
+      Player.exhaust('money', moneyNeed)
+      await Player.collect('herb', kJiejiCinchLoosecinchHerb, incurIncident: false)
+      final healed = Player.restoreLife(kJiejiCinchLoosecinchLife)
+      dialog.pushDialog('hint_jieji_cinch_loosecinch_ok', interpolations: [kJiejiCinchLoosecinchHerb, healed])
+      await dialog.execute()
+    }
+  } else {
+    final lost = _jiejiCinchCostLife(_jiejiCinchBloodLifeCost(seasonId))
+    dialog.pushDialog('hint_jieji_cinch_bloodcinch_ok', interpolations: [lost])
+    await dialog.execute()
+    final dropped = await tryDropGongfaShard(rate: kJiejiCinchBloodGongfaRate)
+    if (dropped != true) {
+      await Player.collect('money', kJiejiCinchBloodMoney, incurIncident: false)
+      dialog.pushDialog('hint_jieji_cinch_bloodcinch_none', interpolations: [kJiejiCinchBloodMoney])
+      await dialog.execute()
+    }
+  }
+
+  Game.updateUI()
+  return true
+}
+
+/// 赶路触发：教程锁与路遇相同；冷却 24 步；约 0.0035%。出过则返回 true。
+async function tryJiejiCinchOnMove(terrain) {
+  if (hero == null) return false
+  if (_jiejiCinchTutorialLocked()) return false
+
+  final jieji = ensureJiejiFlags()
+  final moves = jieji.worldMoves ?? 0
+  final last = jieji.lastCinchMove ?? -999
+  if (moves - last < kJiejiCinchMoveCooldown) return false
+
+  var rate = kJiejiCinchBaseRate
+  if (rate < 0) rate = 0
+  if (random.nextDouble() > rate) return false
+
+  jieji.lastCinchMove = moves
+  await playJiejiCinchEvent(terrain)
+  return true
+}
