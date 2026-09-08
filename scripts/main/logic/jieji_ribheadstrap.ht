@@ -1,0 +1,152 @@
+/// 赶路「劫肋头革」三选：系头 / 解头 / 血头。隐藏、劫兆、野遇、赶路、行商、拾荒、扎营、残锋、残卷、雾灯、残鼓、汲泉、劫幡、劫铃、劫符、劫旌、劫烛、劫角、劫笛、劫笠、劫带、劫履、劫氅、劫扇、劫杖、劫伞、劫面、劫帔、劫手套、劫戒、劫镜、劫鼓、劫炬、劫梳、劫勺、劫碗、劫杯、劫罐、劫瓶、劫墨、劫袍、劫带、劫簪、劫笔、劫针、劫扣、劫绳、劫珠、劫钗、劫绦、劫穗、劫缎、劫缨、劫袖、劫领、劫缘、劫辫、劫翎、劫裹、劫轭、劫辔、劫缰、劫镫、劫鞦、劫勒、劫衔、劫绊、劫鞍、劫刺、劫绊索、劫蹄铁、劫鞍垫、劫肚带、劫尻带、劫额革、劫鼻革、劫咽革、劫颊革、劫顶革、劫面革、劫障革、劫笼革、劫套革、劫羁革、劫络革、劫鬃革、劫罗革、劫甩革、劫肚革、劫裙革、劫翼革、劫扣革、劫环革、劫胸革、劫颈革、劫肩革、劫背革、劫腰革、劫胯革、劫胁革、劫肋革、劫股革、劫膝革、劫胫革、劫踝革、劫踵革、劫足革、劫趾革、劫爪革、劫掌革、劫腕革、劫指革、劫节革、劫甲革、劫拇革、劫肘革、劫肱革、劫膊革、劫桡革、劫鹰革、劫喙革、劫肩峰革、劫肩胛革、劫锁骨革、劫胸骨革、劫柄革、劫剑突革、劫肋软革、劫浮肋革、劫肋弓革、劫肋间革、劫真肋革、劫假肋革、劫肋头革都没中时才滚。
+const kJiejiRibheadstrapBaseRate = 0.000000000000005
+const kJiejiRibheadstrapMoveCooldown = 24
+const kJiejiRibheadstrapTieribheadstrapHerb = 1
+const kJiejiRibheadstrapTieribheadstrapLife = 1
+const kJiejiRibheadstrapTieribheadstrapGongfaRate = 0.005
+const kJiejiRibheadstrapLooseribheadstrapMoney = 1
+const kJiejiRibheadstrapLooseribheadstrapMoneyThunder = 1
+const kJiejiRibheadstrapLooseribheadstrapHerb = 1
+const kJiejiRibheadstrapLooseribheadstrapLife = 1
+const kJiejiRibheadstrapBloodLife = 1
+const kJiejiRibheadstrapBloodLifeBlood = 2
+const kJiejiRibheadstrapBloodGongfaRate = 0.03
+const kJiejiRibheadstrapBloodMoney = 2
+
+function _jiejiRibheadstrapSeasonId() {
+  if (game.jieji != null && game.jieji.seasonId != null) {
+    return game.jieji.seasonId
+  }
+  return null
+}
+
+function _jiejiRibheadstrapTutorialLocked() {
+  return game.enableTutorial && game.flags.tutorial.bountyQuest != true
+}
+
+function _jiejiRibheadstrapTieribheadstrapHerbCost(seasonId) {
+  if (seasonId == 'mist') return 0
+  return kJiejiRibheadstrapTieribheadstrapHerb
+}
+
+function _jiejiRibheadstrapLooseribheadstrapMoneyCost(seasonId) {
+  if (seasonId == 'thunder') return kJiejiRibheadstrapLooseribheadstrapMoneyThunder
+  return kJiejiRibheadstrapLooseribheadstrapMoney
+}
+
+function _jiejiRibheadstrapBloodLifeCost(seasonId) {
+  if (seasonId == 'blood') return kJiejiRibheadstrapBloodLifeBlood
+  return kJiejiRibheadstrapBloodLife
+}
+
+function _jiejiRibheadstrapCostLife(want) {
+  var lost = want
+  final life = hero.life ?? 1
+  if (life - lost < 1) lost = life - 1
+  if (lost < 0) lost = 0
+  if (lost > 0) {
+    Player.setLife(hero.life - lost)
+  }
+  return lost
+}
+
+function _jiejiRibheadstrapNormalizeKind(kind) {
+  if (kind == 'tieribheadstrap' || kind == 'jieji_ribheadstrap_tieribheadstrap') return 'tieribheadstrap'
+  if (kind == 'looseribheadstrap' || kind == 'jieji_ribheadstrap_looseribheadstrap') return 'looseribheadstrap'
+  if (kind == 'bloodribheadstrap' || kind == 'jieji_ribheadstrap_bloodribheadstrap') return 'bloodribheadstrap'
+  return null
+}
+
+function _jiejiRibheadstrapChoices() {
+  return [
+    {
+      text: 'jieji_ribheadstrap_tieribheadstrap',
+      description: 'hint_jieji_ribheadstrap_tieribheadstrap',
+    },
+    {
+      text: 'jieji_ribheadstrap_looseribheadstrap',
+      description: 'hint_jieji_ribheadstrap_looseribheadstrap',
+    },
+    {
+      text: 'jieji_ribheadstrap_bloodribheadstrap',
+      description: 'hint_jieji_ribheadstrap_bloodribheadstrap',
+    },
+  ]
+}
+
+/// 赶路劫肋头革三选。debug.forceJiejiEvent('ribheadstrap') / forceRibheadstrap 直接走这里，仍弹出三选。
+async function playJiejiRibheadstrapEvent(terrain) {
+  if (hero == null) return false
+
+  dialog.pushDialog('hint_jieji_ribheadstrap')
+  dialog.pushSelection('jiejiRibheadstrap', _jiejiRibheadstrapChoices())
+  await dialog.execute()
+  final picked = dialog.checkSelected('jiejiRibheadstrap')
+  var selected = _jiejiRibheadstrapNormalizeKind(picked)
+  if (selected == null) {
+    selected = 'tieribheadstrap'
+  }
+
+  final seasonId = _jiejiRibheadstrapSeasonId()
+  if (selected == 'tieribheadstrap') {
+    final herbNeed = _jiejiRibheadstrapTieribheadstrapHerbCost(seasonId)
+    final herbHave = hero.materials['herb'] ?? 0
+    if (herbNeed > 0 && herbHave < herbNeed) {
+      dialog.pushDialog('hint_jieji_ribheadstrap_tieribheadstrap_broke', interpolations: [herbNeed])
+      await dialog.execute()
+    } else {
+      if (herbNeed > 0) {
+        Player.exhaust('herb', herbNeed)
+      }
+      final healed = Player.restoreLife(kJiejiRibheadstrapTieribheadstrapLife)
+      dialog.pushDialog('hint_jieji_ribheadstrap_tieribheadstrap_ok', interpolations: [healed])
+      await dialog.execute()
+      await tryDropGongfaShard(rate: kJiejiRibheadstrapTieribheadstrapGongfaRate)
+    }
+  } else if (selected == 'looseribheadstrap') {
+    final moneyNeed = _jiejiRibheadstrapLooseribheadstrapMoneyCost(seasonId)
+    final moneyHave = hero.materials['money'] ?? 0
+    if (moneyHave < moneyNeed) {
+      dialog.pushDialog('hint_jieji_ribheadstrap_looseribheadstrap_broke', interpolations: [moneyNeed])
+      await dialog.execute()
+    } else {
+      Player.exhaust('money', moneyNeed)
+      await Player.collect('herb', kJiejiRibheadstrapLooseribheadstrapHerb, incurIncident: false)
+      final healed = Player.restoreLife(kJiejiRibheadstrapLooseribheadstrapLife)
+      dialog.pushDialog('hint_jieji_ribheadstrap_looseribheadstrap_ok', interpolations: [kJiejiRibheadstrapLooseribheadstrapHerb, healed])
+      await dialog.execute()
+    }
+  } else {
+    final lost = _jiejiRibheadstrapCostLife(_jiejiRibheadstrapBloodLifeCost(seasonId))
+    dialog.pushDialog('hint_jieji_ribheadstrap_bloodribheadstrap_ok', interpolations: [lost])
+    await dialog.execute()
+    final dropped = await tryDropGongfaShard(rate: kJiejiRibheadstrapBloodGongfaRate)
+    if (dropped != true) {
+      await Player.collect('money', kJiejiRibheadstrapBloodMoney, incurIncident: false)
+      dialog.pushDialog('hint_jieji_ribheadstrap_bloodribheadstrap_none', interpolations: [kJiejiRibheadstrapBloodMoney])
+      await dialog.execute()
+    }
+  }
+
+  Game.updateUI()
+  return true
+}
+
+/// 赶路触发：教程锁与路遇相同；冷却 24 步；约 0.0000000000005%。出过则返回 true。
+async function tryJiejiRibheadstrapOnMove(terrain) {
+  if (hero == null) return false
+  if (_jiejiRibheadstrapTutorialLocked()) return false
+
+  final jieji = ensureJiejiFlags()
+  final moves = jieji.worldMoves ?? 0
+  final last = jieji.lastRibheadstrapMove ?? -999
+  if (moves - last < kJiejiRibheadstrapMoveCooldown) return false
+
+  var rate = kJiejiRibheadstrapBaseRate
+  if (rate < 0) rate = 0
+  if (random.nextDouble() > rate) return false
+
+  jieji.lastRibheadstrapMove = moves
+  await playJiejiRibheadstrapEvent(terrain)
+  return true
+}

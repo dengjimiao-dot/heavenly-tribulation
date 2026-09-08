@@ -6164,7 +6164,20 @@
   "hint_jieji_falseribstrap_loosefalseribstrap_ok": "你解开劫假肋革。得了 {0} 药材，生机回了 {1} 点。",
   "hint_jieji_falseribstrap_loosefalseribstrap_broke": "解假要 {0} 铜钱。袋里不够。",
   "hint_jieji_falseribstrap_bloodfalseribstrap_ok": "你割了 {0} 点生机去染劫假肋革。",
-  "hint_jieji_falseribstrap_bloodfalseribstrap_none": "血假下去，假影却散了。袋里多了 {0} 铜钱。"
+  "hint_jieji_falseribstrap_bloodfalseribstrap_none": "血假下去，假影却散了。袋里多了 {0} 铜钱。",
+  "hint_jieji_ribheadstrap": "路遇一条劫肋头革。你可以系头、解头，或以血染头。",
+  "jieji_ribheadstrap_tieribheadstrap": "系头",
+  "jieji_ribheadstrap_looseribheadstrap": "解头",
+  "jieji_ribheadstrap_bloodribheadstrap": "血头",
+  "hint_jieji_ribheadstrap_tieribheadstrap": "系头：耗 1 药材（雾月不耗）。回 1 命，五毫摸残页。药材不够则空手。",
+  "hint_jieji_ribheadstrap_looseribheadstrap": "解头：花 1 铜钱（雷月 1）。得 1 药材，并回 1 命。袋里不够则空手。",
+  "hint_jieji_ribheadstrap_bloodribheadstrap": "血头：扣 1 点生机（至少留 1，血月 2）。三毫摸残页，不成则得 2 铜钱。",
+  "hint_jieji_ribheadstrap_tieribheadstrap_ok": "你系上劫肋头革。生机回了 {0} 点。",
+  "hint_jieji_ribheadstrap_tieribheadstrap_broke": "系头要 {0} 药材。你拿不出来。",
+  "hint_jieji_ribheadstrap_looseribheadstrap_ok": "你解开劫肋头革。得了 {0} 药材，生机回了 {1} 点。",
+  "hint_jieji_ribheadstrap_looseribheadstrap_broke": "解头要 {0} 铜钱。袋里不够。",
+  "hint_jieji_ribheadstrap_bloodribheadstrap_ok": "你割了 {0} 点生机去染劫肋头革。",
+  "hint_jieji_ribheadstrap_bloodribheadstrap_none": "血头下去，头影却散了。袋里多了 {0} 铜钱。"
 
 }
 
