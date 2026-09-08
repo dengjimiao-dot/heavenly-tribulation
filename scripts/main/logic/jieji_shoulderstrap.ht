@@ -74,7 +74,7 @@ function _jiejiShoulderstrapChoices() {
   ]
 }
 
-/// 赶路劫颈革三选。debug.forceJiejiEvent('shoulderstrap') / forceShoulderstrap 直接走这里，仍弹出三选。
+/// 赶路劫肩革三选。debug.forceJiejiEvent('shoulderstrap') / forceShoulderstrap 直接走这里，仍弹出三选。
 async function playJiejiShoulderstrapEvent(terrain) {
   if (hero == null) return false
 
