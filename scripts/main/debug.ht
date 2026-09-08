@@ -435,6 +435,8 @@ namespace debug {
       questKind = 'hidden_mist_arrowhead'
     } else if (kind == 'creek') {
       questKind = 'hidden_blood_creek'
+    } else if (kind == 'rhizome') {
+      questKind = 'hidden_mist_rhizome'
     }
     final ctor = Quests[questKind]
     if (ctor == null) return false
