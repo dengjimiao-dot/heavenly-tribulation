@@ -840,6 +840,8 @@ namespace debug {
       await playJiejiSternumstrapEvent(terrain)
     } else if (kind == 'manubriumstrap') {
       await playJiejiManubriumstrapEvent(terrain)
+    } else if (kind == 'xiphoidstrap') {
+      await playJiejiXiphoidstrapEvent(terrain)
     } else {
       await playJiejiThunderRoadEvent(terrain)
     }

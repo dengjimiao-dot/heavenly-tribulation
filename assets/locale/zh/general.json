@@ -5968,5 +5968,19 @@
   "hint_jieji_manubriumstrap_loosemanubriumstrap_ok": "你解开劫柄革。得了 {0} 药材，生机回了 {1} 点。",
   "hint_jieji_manubriumstrap_loosemanubriumstrap_broke": "解柄要 {0} 铜钱。袋里不够。",
   "hint_jieji_manubriumstrap_bloodmanubriumstrap_ok": "你割了 {0} 点生机去染劫柄革。",
-  "hint_jieji_manubriumstrap_bloodmanubriumstrap_none": "血柄下去，柄影却散了。袋里多了 {0} 铜钱。"
+  "hint_jieji_manubriumstrap_bloodmanubriumstrap_none": "血柄下去，柄影却散了。袋里多了 {0} 铜钱。",
+  "hint_jieji_xiphoidstrap": "路遇一条劫剑突革。你可以系突、解突，或以血染突。",
+  "jieji_xiphoidstrap_tiexiphoidstrap": "系突",
+  "jieji_xiphoidstrap_loosexiphoidstrap": "解突",
+  "jieji_xiphoidstrap_bloodxiphoidstrap": "血突",
+  "hint_jieji_xiphoidstrap_tiexiphoidstrap": "系突：耗 1 药材（雾月不耗）。回 1 命，五毫摸残页。药材不够则空手。",
+  "hint_jieji_xiphoidstrap_loosexiphoidstrap": "解突：花 1 铜钱（雷月 1）。得 1 药材，并回 1 命。袋里不够则空手。",
+  "hint_jieji_xiphoidstrap_bloodxiphoidstrap": "血突：扣 1 点生机（至少留 1，血月 2）。三毫摸残页，不成则得 2 铜钱。",
+  "hint_jieji_xiphoidstrap_tiexiphoidstrap_ok": "你系上劫剑突革。生机回了 {0} 点。",
+  "hint_jieji_xiphoidstrap_tiexiphoidstrap_broke": "系突要 {0} 药材。你拿不出来。",
+  "hint_jieji_xiphoidstrap_loosexiphoidstrap_ok": "你解开劫剑突革。得了 {0} 药材，生机回了 {1} 点。",
+  "hint_jieji_xiphoidstrap_loosexiphoidstrap_broke": "解突要 {0} 铜钱。袋里不够。",
+  "hint_jieji_xiphoidstrap_bloodxiphoidstrap_ok": "你割了 {0} 点生机去染劫剑突革。",
+  "hint_jieji_xiphoidstrap_bloodxiphoidstrap_none": "血突下去，突影却散了。袋里多了 {0} 铜钱。"
+
 }
