@@ -335,6 +335,8 @@ namespace debug {
       questKind = 'hidden_thunder_knell'
     } else if (kind == 'film') {
       questKind = 'hidden_mist_film'
+    } else if (kind == 'strand') {
+      questKind = 'hidden_blood_strand'
     }
     final ctor = Quests[questKind]
     if (ctor == null) return false

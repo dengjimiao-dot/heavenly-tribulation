@@ -4488,5 +4488,7 @@
   "hint_jieji_browband_loosebrowband_ok": "你解开劫额革。得了 {0} 药材，生机回了 {1} 点。",
   "hint_jieji_browband_loosebrowband_broke": "解额要 {0} 铜钱。袋里不够。",
   "hint_jieji_browband_bloodbrowband_ok": "你割了 {0} 点生机去染劫额革。",
-  "hint_jieji_browband_bloodbrowband_none": "血额下去，额影却散了。袋里多了 {0} 铜钱。"
+  "hint_jieji_browband_bloodbrowband_none": "血额下去，额影却散了。袋里多了 {0} 铜钱。",
+  "hint_jieji_blood_strand_extra": "血绪余纹入体。又采得 2 药材（或落下 40 铜钱），生机回了 4 点。",
+  "hint_jieji_blood_strand_extra_blood": "血月血绪更黏。又多得了一点生机机缘。"
 }
