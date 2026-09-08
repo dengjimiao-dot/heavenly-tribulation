@@ -1,0 +1,152 @@
+/// 赶路「劫胸骨革」三选：系胸 / 解胸 / 血胸。隐藏、劫兆、野遇、赶路、行商、拾荒、扎营、残锋、残卷、雾灯、残鼓、汲泉、劫幡、劫铃、劫符、劫旌、劫烛、劫角、劫笛、劫笠、劫带、劫履、劫氅、劫扇、劫杖、劫伞、劫面、劫帔、劫手套、劫戒、劫镜、劫鼓、劫炬、劫梳、劫勺、劫碗、劫杯、劫罐、劫瓶、劫墨、劫袍、劫带、劫簪、劫笔、劫针、劫扣、劫绳、劫珠、劫钗、劫绦、劫穗、劫缎、劫缨、劫袖、劫领、劫缘、劫辫、劫翎、劫裹、劫轭、劫辔、劫缰、劫镫、劫鞦、劫勒、劫衔、劫绊、劫鞍、劫刺、劫绊索、劫蹄铁、劫鞍垫、劫肚带、劫尻带、劫额革、劫鼻革、劫咽革、劫颊革、劫顶革、劫面革、劫障革、劫笼革、劫套革、劫羁革、劫络革、劫鬃革、劫罗革、劫甩革、劫肚革、劫裙革、劫翼革、劫扣革、劫环革、劫胸革、劫颈革、劫肩革、劫背革、劫腰革、劫胯革、劫胁革、劫肋革、劫股革、劫膝革、劫胫革、劫踝革、劫踵革、劫足革、劫趾革、劫爪革、劫掌革、劫腕革、劫指革、劫节革、劫甲革、劫拇革、劫肘革、劫肱革、劫膊革、劫桡革、劫鹰革、劫喙革、劫肩峰革、劫肩胛革、劫锁骨革、劫胸骨革都没中时才滚。
+const kJiejiSternumstrapBaseRate = 0.0000000000003
+const kJiejiSternumstrapMoveCooldown = 24
+const kJiejiSternumstrapTiesternumstrapHerb = 1
+const kJiejiSternumstrapTiesternumstrapLife = 1
+const kJiejiSternumstrapTiesternumstrapGongfaRate = 0.005
+const kJiejiSternumstrapLoosesternumstrapMoney = 1
+const kJiejiSternumstrapLoosesternumstrapMoneyThunder = 1
+const kJiejiSternumstrapLoosesternumstrapHerb = 1
+const kJiejiSternumstrapLoosesternumstrapLife = 1
+const kJiejiSternumstrapBloodLife = 1
+const kJiejiSternumstrapBloodLifeBlood = 2
+const kJiejiSternumstrapBloodGongfaRate = 0.03
+const kJiejiSternumstrapBloodMoney = 2
+
+function _jiejiSternumstrapSeasonId() {
+  if (game.jieji != null && game.jieji.seasonId != null) {
+    return game.jieji.seasonId
+  }
+  return null
+}
+
+function _jiejiSternumstrapTutorialLocked() {
+  return game.enableTutorial && game.flags.tutorial.bountyQuest != true
+}
+
+function _jiejiSternumstrapTiesternumstrapHerbCost(seasonId) {
+  if (seasonId == 'mist') return 0
+  return kJiejiSternumstrapTiesternumstrapHerb
+}
+
+function _jiejiSternumstrapLoosesternumstrapMoneyCost(seasonId) {
+  if (seasonId == 'thunder') return kJiejiSternumstrapLoosesternumstrapMoneyThunder
+  return kJiejiSternumstrapLoosesternumstrapMoney
+}
+
+function _jiejiSternumstrapBloodLifeCost(seasonId) {
+  if (seasonId == 'blood') return kJiejiSternumstrapBloodLifeBlood
+  return kJiejiSternumstrapBloodLife
+}
+
+function _jiejiSternumstrapCostLife(want) {
+  var lost = want
+  final life = hero.life ?? 1
+  if (life - lost < 1) lost = life - 1
+  if (lost < 0) lost = 0
+  if (lost > 0) {
+    Player.setLife(hero.life - lost)
+  }
+  return lost
+}
+
+function _jiejiSternumstrapNormalizeKind(kind) {
+  if (kind == 'tiesternumstrap' || kind == 'jieji_sternumstrap_tiesternumstrap') return 'tiesternumstrap'
+  if (kind == 'loosesternumstrap' || kind == 'jieji_sternumstrap_loosesternumstrap') return 'loosesternumstrap'
+  if (kind == 'bloodsternumstrap' || kind == 'jieji_sternumstrap_bloodsternumstrap') return 'bloodsternumstrap'
+  return null
+}
+
+function _jiejiSternumstrapChoices() {
+  return [
+    {
+      text: 'jieji_sternumstrap_tiesternumstrap',
+      description: 'hint_jieji_sternumstrap_tiesternumstrap',
+    },
+    {
+      text: 'jieji_sternumstrap_loosesternumstrap',
+      description: 'hint_jieji_sternumstrap_loosesternumstrap',
+    },
+    {
+      text: 'jieji_sternumstrap_bloodsternumstrap',
+      description: 'hint_jieji_sternumstrap_bloodsternumstrap',
+    },
+  ]
+}
+
+/// 赶路劫胸骨革三选。debug.forceJiejiEvent('sternumstrap') / forceSternumstrap 直接走这里，仍弹出三选。
+async function playJiejiSternumstrapEvent(terrain) {
+  if (hero == null) return false
+
+  dialog.pushDialog('hint_jieji_sternumstrap')
+  dialog.pushSelection('jiejiSternumstrap', _jiejiSternumstrapChoices())
+  await dialog.execute()
+  final picked = dialog.checkSelected('jiejiSternumstrap')
+  var selected = _jiejiSternumstrapNormalizeKind(picked)
+  if (selected == null) {
+    selected = 'tiesternumstrap'
+  }
+
+  final seasonId = _jiejiSternumstrapSeasonId()
+  if (selected == 'tiesternumstrap') {
+    final herbNeed = _jiejiSternumstrapTiesternumstrapHerbCost(seasonId)
+    final herbHave = hero.materials['herb'] ?? 0
+    if (herbNeed > 0 && herbHave < herbNeed) {
+      dialog.pushDialog('hint_jieji_sternumstrap_tiesternumstrap_broke', interpolations: [herbNeed])
+      await dialog.execute()
+    } else {
+      if (herbNeed > 0) {
+        Player.exhaust('herb', herbNeed)
+      }
+      final healed = Player.restoreLife(kJiejiSternumstrapTiesternumstrapLife)
+      dialog.pushDialog('hint_jieji_sternumstrap_tiesternumstrap_ok', interpolations: [healed])
+      await dialog.execute()
+      await tryDropGongfaShard(rate: kJiejiSternumstrapTiesternumstrapGongfaRate)
+    }
+  } else if (selected == 'loosesternumstrap') {
+    final moneyNeed = _jiejiSternumstrapLoosesternumstrapMoneyCost(seasonId)
+    final moneyHave = hero.materials['money'] ?? 0
+    if (moneyHave < moneyNeed) {
+      dialog.pushDialog('hint_jieji_sternumstrap_loosesternumstrap_broke', interpolations: [moneyNeed])
+      await dialog.execute()
+    } else {
+      Player.exhaust('money', moneyNeed)
+      await Player.collect('herb', kJiejiSternumstrapLoosesternumstrapHerb, incurIncident: false)
+      final healed = Player.restoreLife(kJiejiSternumstrapLoosesternumstrapLife)
+      dialog.pushDialog('hint_jieji_sternumstrap_loosesternumstrap_ok', interpolations: [kJiejiSternumstrapLoosesternumstrapHerb, healed])
+      await dialog.execute()
+    }
+  } else {
+    final lost = _jiejiSternumstrapCostLife(_jiejiSternumstrapBloodLifeCost(seasonId))
+    dialog.pushDialog('hint_jieji_sternumstrap_bloodsternumstrap_ok', interpolations: [lost])
+    await dialog.execute()
+    final dropped = await tryDropGongfaShard(rate: kJiejiSternumstrapBloodGongfaRate)
+    if (dropped != true) {
+      await Player.collect('money', kJiejiSternumstrapBloodMoney, incurIncident: false)
+      dialog.pushDialog('hint_jieji_sternumstrap_bloodsternumstrap_none', interpolations: [kJiejiSternumstrapBloodMoney])
+      await dialog.execute()
+    }
+  }
+
+  Game.updateUI()
+  return true
+}
+
+/// 赶路触发：教程锁与路遇相同；冷却 24 步；约 0.00000000003%。出过则返回 true。
+async function tryJiejiSternumstrapOnMove(terrain) {
+  if (hero == null) return false
+  if (_jiejiSternumstrapTutorialLocked()) return false
+
+  final jieji = ensureJiejiFlags()
+  final moves = jieji.worldMoves ?? 0
+  final last = jieji.lastSternumstrapMove ?? -999
+  if (moves - last < kJiejiSternumstrapMoveCooldown) return false
+
+  var rate = kJiejiSternumstrapBaseRate
+  if (rate < 0) rate = 0
+  if (random.nextDouble() > rate) return false
+
+  jieji.lastSternumstrapMove = moves
+  await playJiejiSternumstrapEvent(terrain)
+  return true
+}
