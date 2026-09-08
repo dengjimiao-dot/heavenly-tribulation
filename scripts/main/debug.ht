@@ -488,6 +488,8 @@ namespace debug {
       await playJiejiBitEvent(terrain)
     } else if (kind == 'cinch') {
       await playJiejiCinchEvent(terrain)
+    } else if (kind == 'saddle') {
+      await playJiejiSaddleEvent(terrain)
     } else {
       await playJiejiThunderRoadEvent(terrain)
     }
@@ -1427,6 +1429,11 @@ namespace debug {
   /// 忽略几率与冷却，仍弹出赶路劫绊三选。
   async function forceCinch() {
     return await playJiejiCinchEvent({ kind: 'plain' })
+  }
+
+  /// 忽略几率与冷却，仍弹出赶路劫鞍三选。
+  async function forceSaddle() {
+    return await playJiejiSaddleEvent({ kind: 'plain' })
   }
 
   /// 忽略冷却与花费，仍弹出幻术祭坛入幻三选。
