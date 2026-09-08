@@ -5888,5 +5888,18 @@
   "hint_jieji_thunder_qing_extra": "雷顷余纹入体。又采得 2 药材（或落下 40 铜钱），生机回了 4 点。",
   "hint_jieji_thunder_qing_extra_thunder": "雷月雷顷更亮。又多得了一点机缘。",
   "hint_jieji_mist_hilum_extra": "雾珠脐余纹入体。又采得 2 药材（或落下 40 铜钱），生机回了 4 点。",
-  "hint_jieji_mist_hilum_extra_mist": "雾月雾珠脐更薄。又多得了一点机缘。"
+  "hint_jieji_mist_hilum_extra_mist": "雾月雾珠脐更薄。又多得了一点机缘。",
+  "hint_jieji_claviclestrap": "路遇一条劫锁骨革。你可以系锁、解锁，或以血染锁。",
+  "jieji_claviclestrap_tieclaviclestrap": "系锁",
+  "jieji_claviclestrap_looseclaviclestrap": "解锁",
+  "jieji_claviclestrap_bloodclaviclestrap": "血锁",
+  "hint_jieji_claviclestrap_tieclaviclestrap": "系锁：耗 1 药材（雾月不耗）。回 1 命，五毫摸残页。药材不够则空手。",
+  "hint_jieji_claviclestrap_looseclaviclestrap": "解锁：花 1 铜钱（雷月 1）。得 1 药材，并回 1 命。袋里不够则空手。",
+  "hint_jieji_claviclestrap_bloodclaviclestrap": "血锁：扣 1 点生机（至少留 1，血月 2）。三毫摸残页，不成则得 2 铜钱。",
+  "hint_jieji_claviclestrap_tieclaviclestrap_ok": "你系上劫锁骨革。生机回了 {0} 点。",
+  "hint_jieji_claviclestrap_tieclaviclestrap_broke": "系锁要 {0} 药材。你拿不出来。",
+  "hint_jieji_claviclestrap_looseclaviclestrap_ok": "你解开劫锁骨革。得了 {0} 药材，生机回了 {1} 点。",
+  "hint_jieji_claviclestrap_looseclaviclestrap_broke": "解锁要 {0} 铜钱。袋里不够。",
+  "hint_jieji_claviclestrap_bloodclaviclestrap_ok": "你割了 {0} 点生机去染劫锁骨革。",
+  "hint_jieji_claviclestrap_bloodclaviclestrap_none": "血锁下去，锁影却散了。袋里多了 {0} 铜钱。"
 }

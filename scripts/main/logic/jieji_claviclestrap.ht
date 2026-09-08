@@ -1,0 +1,152 @@
+/// 赶路「劫锁骨革」三选：系锁 / 解锁 / 血锁。隐藏、劫兆、野遇、赶路、行商、拾荒、扎营、残锋、残卷、雾灯、残鼓、汲泉、劫幡、劫铃、劫符、劫旌、劫烛、劫角、劫笛、劫笠、劫带、劫履、劫氅、劫扇、劫杖、劫伞、劫面、劫帔、劫手套、劫戒、劫镜、劫鼓、劫炬、劫梳、劫勺、劫碗、劫杯、劫罐、劫瓶、劫墨、劫袍、劫带、劫簪、劫笔、劫针、劫扣、劫绳、劫珠、劫钗、劫绦、劫穗、劫缎、劫缨、劫袖、劫领、劫缘、劫辫、劫翎、劫裹、劫轭、劫辔、劫缰、劫镫、劫鞦、劫勒、劫衔、劫绊、劫鞍、劫刺、劫绊索、劫蹄铁、劫鞍垫、劫肚带、劫尻带、劫额革、劫鼻革、劫咽革、劫颊革、劫顶革、劫面革、劫障革、劫笼革、劫套革、劫羁革、劫络革、劫鬃革、劫罗革、劫甩革、劫肚革、劫裙革、劫翼革、劫扣革、劫环革、劫胸革、劫颈革、劫肩革、劫背革、劫腰革、劫胯革、劫胁革、劫肋革、劫股革、劫膝革、劫胫革、劫踝革、劫踵革、劫足革、劫趾革、劫爪革、劫掌革、劫腕革、劫指革、劫节革、劫甲革、劫拇革、劫肘革、劫肱革、劫膊革、劫桡革、劫鹰革、劫喙革、劫肩峰革、劫肩胛革、劫锁骨革都没中时才滚。
+const kJiejiClaviclestrapBaseRate = 0.0000000000004
+const kJiejiClaviclestrapMoveCooldown = 24
+const kJiejiClaviclestrapTieclaviclestrapHerb = 1
+const kJiejiClaviclestrapTieclaviclestrapLife = 1
+const kJiejiClaviclestrapTieclaviclestrapGongfaRate = 0.005
+const kJiejiClaviclestrapLooseclaviclestrapMoney = 1
+const kJiejiClaviclestrapLooseclaviclestrapMoneyThunder = 1
+const kJiejiClaviclestrapLooseclaviclestrapHerb = 1
+const kJiejiClaviclestrapLooseclaviclestrapLife = 1
+const kJiejiClaviclestrapBloodLife = 1
+const kJiejiClaviclestrapBloodLifeBlood = 2
+const kJiejiClaviclestrapBloodGongfaRate = 0.03
+const kJiejiClaviclestrapBloodMoney = 2
+
+function _jiejiClaviclestrapSeasonId() {
+  if (game.jieji != null && game.jieji.seasonId != null) {
+    return game.jieji.seasonId
+  }
+  return null
+}
+
+function _jiejiClaviclestrapTutorialLocked() {
+  return game.enableTutorial && game.flags.tutorial.bountyQuest != true
+}
+
+function _jiejiClaviclestrapTieclaviclestrapHerbCost(seasonId) {
+  if (seasonId == 'mist') return 0
+  return kJiejiClaviclestrapTieclaviclestrapHerb
+}
+
+function _jiejiClaviclestrapLooseclaviclestrapMoneyCost(seasonId) {
+  if (seasonId == 'thunder') return kJiejiClaviclestrapLooseclaviclestrapMoneyThunder
+  return kJiejiClaviclestrapLooseclaviclestrapMoney
+}
+
+function _jiejiClaviclestrapBloodLifeCost(seasonId) {
+  if (seasonId == 'blood') return kJiejiClaviclestrapBloodLifeBlood
+  return kJiejiClaviclestrapBloodLife
+}
+
+function _jiejiClaviclestrapCostLife(want) {
+  var lost = want
+  final life = hero.life ?? 1
+  if (life - lost < 1) lost = life - 1
+  if (lost < 0) lost = 0
+  if (lost > 0) {
+    Player.setLife(hero.life - lost)
+  }
+  return lost
+}
+
+function _jiejiClaviclestrapNormalizeKind(kind) {
+  if (kind == 'tieclaviclestrap' || kind == 'jieji_claviclestrap_tieclaviclestrap') return 'tieclaviclestrap'
+  if (kind == 'looseclaviclestrap' || kind == 'jieji_claviclestrap_looseclaviclestrap') return 'looseclaviclestrap'
+  if (kind == 'bloodclaviclestrap' || kind == 'jieji_claviclestrap_bloodclaviclestrap') return 'bloodclaviclestrap'
+  return null
+}
+
+function _jiejiClaviclestrapChoices() {
+  return [
+    {
+      text: 'jieji_claviclestrap_tieclaviclestrap',
+      description: 'hint_jieji_claviclestrap_tieclaviclestrap',
+    },
+    {
+      text: 'jieji_claviclestrap_looseclaviclestrap',
+      description: 'hint_jieji_claviclestrap_looseclaviclestrap',
+    },
+    {
+      text: 'jieji_claviclestrap_bloodclaviclestrap',
+      description: 'hint_jieji_claviclestrap_bloodclaviclestrap',
+    },
+  ]
+}
+
+/// 赶路劫锁骨革三选。debug.forceJiejiEvent('claviclestrap') / forceClaviclestrap 直接走这里，仍弹出三选。
+async function playJiejiClaviclestrapEvent(terrain) {
+  if (hero == null) return false
+
+  dialog.pushDialog('hint_jieji_claviclestrap')
+  dialog.pushSelection('jiejiClaviclestrap', _jiejiClaviclestrapChoices())
+  await dialog.execute()
+  final picked = dialog.checkSelected('jiejiClaviclestrap')
+  var selected = _jiejiClaviclestrapNormalizeKind(picked)
+  if (selected == null) {
+    selected = 'tieclaviclestrap'
+  }
+
+  final seasonId = _jiejiClaviclestrapSeasonId()
+  if (selected == 'tieclaviclestrap') {
+    final herbNeed = _jiejiClaviclestrapTieclaviclestrapHerbCost(seasonId)
+    final herbHave = hero.materials['herb'] ?? 0
+    if (herbNeed > 0 && herbHave < herbNeed) {
+      dialog.pushDialog('hint_jieji_claviclestrap_tieclaviclestrap_broke', interpolations: [herbNeed])
+      await dialog.execute()
+    } else {
+      if (herbNeed > 0) {
+        Player.exhaust('herb', herbNeed)
+      }
+      final healed = Player.restoreLife(kJiejiClaviclestrapTieclaviclestrapLife)
+      dialog.pushDialog('hint_jieji_claviclestrap_tieclaviclestrap_ok', interpolations: [healed])
+      await dialog.execute()
+      await tryDropGongfaShard(rate: kJiejiClaviclestrapTieclaviclestrapGongfaRate)
+    }
+  } else if (selected == 'looseclaviclestrap') {
+    final moneyNeed = _jiejiClaviclestrapLooseclaviclestrapMoneyCost(seasonId)
+    final moneyHave = hero.materials['money'] ?? 0
+    if (moneyHave < moneyNeed) {
+      dialog.pushDialog('hint_jieji_claviclestrap_looseclaviclestrap_broke', interpolations: [moneyNeed])
+      await dialog.execute()
+    } else {
+      Player.exhaust('money', moneyNeed)
+      await Player.collect('herb', kJiejiClaviclestrapLooseclaviclestrapHerb, incurIncident: false)
+      final healed = Player.restoreLife(kJiejiClaviclestrapLooseclaviclestrapLife)
+      dialog.pushDialog('hint_jieji_claviclestrap_looseclaviclestrap_ok', interpolations: [kJiejiClaviclestrapLooseclaviclestrapHerb, healed])
+      await dialog.execute()
+    }
+  } else {
+    final lost = _jiejiClaviclestrapCostLife(_jiejiClaviclestrapBloodLifeCost(seasonId))
+    dialog.pushDialog('hint_jieji_claviclestrap_bloodclaviclestrap_ok', interpolations: [lost])
+    await dialog.execute()
+    final dropped = await tryDropGongfaShard(rate: kJiejiClaviclestrapBloodGongfaRate)
+    if (dropped != true) {
+      await Player.collect('money', kJiejiClaviclestrapBloodMoney, incurIncident: false)
+      dialog.pushDialog('hint_jieji_claviclestrap_bloodclaviclestrap_none', interpolations: [kJiejiClaviclestrapBloodMoney])
+      await dialog.execute()
+    }
+  }
+
+  Game.updateUI()
+  return true
+}
+
+/// 赶路触发：教程锁与路遇相同；冷却 24 步；约 0.00000000004%。出过则返回 true。
+async function tryJiejiClaviclestrapOnMove(terrain) {
+  if (hero == null) return false
+  if (_jiejiClaviclestrapTutorialLocked()) return false
+
+  final jieji = ensureJiejiFlags()
+  final moves = jieji.worldMoves ?? 0
+  final last = jieji.lastClaviclestrapMove ?? -999
+  if (moves - last < kJiejiClaviclestrapMoveCooldown) return false
+
+  var rate = kJiejiClaviclestrapBaseRate
+  if (rate < 0) rate = 0
+  if (random.nextDouble() > rate) return false
+
+  jieji.lastClaviclestrapMove = moves
+  await playJiejiClaviclestrapEvent(terrain)
+  return true
+}
