@@ -4519,5 +4519,7 @@
   "hint_jieji_noseband_bloodnoseband_ok": "你割了 {0} 点生机去染劫鼻革。",
   "hint_jieji_noseband_bloodnoseband_none": "血鼻下去，鼻影却散了。袋里多了 {0} 铜钱。",
   "hint_jieji_mist_crepe_extra": "雾縠余纹入体。又采得 2 药材（或落下 40 铜钱），生机回了 4 点。",
-  "hint_jieji_mist_crepe_extra_mist": "雾月雾縠更薄。又多得了一点机缘。"
+  "hint_jieji_mist_crepe_extra_mist": "雾月雾縠更薄。又多得了一点机缘。",
+  "hint_jieji_blood_drip_extra": "血滴余纹入体。又采得 2 药材（或落下 40 铜钱），生机回了 4 点。",
+  "hint_jieji_blood_drip_extra_blood": "血月血滴更黏。又多得了一点生机机缘。"
 }
