@@ -4347,5 +4347,7 @@
   "hint_jieji_shoe_looseshoe_ok": "你卸下劫蹄铁。得了 {0} 药材，生机回了 {1} 点。",
   "hint_jieji_shoe_looseshoe_broke": "卸铁要 {0} 铜钱。袋里不够。",
   "hint_jieji_shoe_bloodshoe_ok": "你割了 {0} 点生机去染劫蹄铁。",
-  "hint_jieji_shoe_bloodshoe_none": "血铁下去，铁影却散了。袋里多了 {0} 铜钱。"
+  "hint_jieji_shoe_bloodshoe_none": "血铁下去，铁影却散了。袋里多了 {0} 铜钱。",
+  "hint_jieji_thunder_peal_extra": "雷弦余纹入体。又采得 2 药材（或落下 40 铜钱），生机回了 4 点。",
+  "hint_jieji_thunder_peal_extra_thunder": "雷月雷弦更紧。又多得了一点机缘。"
 }
