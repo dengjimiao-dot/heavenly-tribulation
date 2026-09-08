@@ -397,6 +397,8 @@ namespace debug {
       questKind = 'hidden_mist_duckweed'
     } else if (kind == 'fissure') {
       questKind = 'hidden_thunder_fissure'
+    } else if (kind == 'cress') {
+      questKind = 'hidden_mist_cress'
     }
     final ctor = Quests[questKind]
     if (ctor == null) return false
