@@ -1,0 +1,152 @@
+/// 赶路「劫鼻革」三选：系鼻 / 解鼻 / 血鼻。隐藏、劫兆、野遇、赶路、行商、拾荒、扎营、残锋、残卷、雾灯、残鼓、汲泉、劫幡、劫铃、劫符、劫旌、劫烛、劫角、劫笛、劫笠、劫带、劫履、劫氅、劫扇、劫杖、劫伞、劫面、劫帔、劫手套、劫戒、劫镜、劫鼓、劫炬、劫梳、劫勺、劫碗、劫杯、劫罐、劫瓶、劫墨、劫袍、劫带、劫簪、劫笔、劫针、劫扣、劫绳、劫珠、劫钗、劫绦、劫穗、劫缎、劫缨、劫袖、劫领、劫缘、劫辫、劫翎、劫裹、劫轭、劫辔、劫缰、劫镫、劫鞦、劫勒、劫衔、劫绊、劫鞍、劫刺、劫绊索、劫蹄铁、劫鞍垫、劫肚带、劫尻带、劫额革、劫鼻革都没中时才滚。
+const kJiejiNosebandBaseRate = 0.000005
+const kJiejiNosebandMoveCooldown = 24
+const kJiejiNosebandTienosebandHerb = 1
+const kJiejiNosebandTienosebandLife = 1
+const kJiejiNosebandTienosebandGongfaRate = 0.005
+const kJiejiNosebandLoosenosebandMoney = 1
+const kJiejiNosebandLoosenosebandMoneyThunder = 1
+const kJiejiNosebandLoosenosebandHerb = 1
+const kJiejiNosebandLoosenosebandLife = 1
+const kJiejiNosebandBloodLife = 1
+const kJiejiNosebandBloodLifeBlood = 2
+const kJiejiNosebandBloodGongfaRate = 0.03
+const kJiejiNosebandBloodMoney = 2
+
+function _jiejiNosebandSeasonId() {
+  if (game.jieji != null && game.jieji.seasonId != null) {
+    return game.jieji.seasonId
+  }
+  return null
+}
+
+function _jiejiNosebandTutorialLocked() {
+  return game.enableTutorial && game.flags.tutorial.bountyQuest != true
+}
+
+function _jiejiNosebandTienosebandHerbCost(seasonId) {
+  if (seasonId == 'mist') return 0
+  return kJiejiNosebandTienosebandHerb
+}
+
+function _jiejiNosebandLoosenosebandMoneyCost(seasonId) {
+  if (seasonId == 'thunder') return kJiejiNosebandLoosenosebandMoneyThunder
+  return kJiejiNosebandLoosenosebandMoney
+}
+
+function _jiejiNosebandBloodLifeCost(seasonId) {
+  if (seasonId == 'blood') return kJiejiNosebandBloodLifeBlood
+  return kJiejiNosebandBloodLife
+}
+
+function _jiejiNosebandCostLife(want) {
+  var lost = want
+  final life = hero.life ?? 1
+  if (life - lost < 1) lost = life - 1
+  if (lost < 0) lost = 0
+  if (lost > 0) {
+    Player.setLife(hero.life - lost)
+  }
+  return lost
+}
+
+function _jiejiNosebandNormalizeKind(kind) {
+  if (kind == 'tienoseband' || kind == 'jieji_noseband_tienoseband') return 'tienoseband'
+  if (kind == 'loosenoseband' || kind == 'jieji_noseband_loosenoseband') return 'loosenoseband'
+  if (kind == 'bloodnoseband' || kind == 'jieji_noseband_bloodnoseband') return 'bloodnoseband'
+  return null
+}
+
+function _jiejiNosebandChoices() {
+  return [
+    {
+      text: 'jieji_noseband_tienoseband',
+      description: 'hint_jieji_noseband_tienoseband',
+    },
+    {
+      text: 'jieji_noseband_loosenoseband',
+      description: 'hint_jieji_noseband_loosenoseband',
+    },
+    {
+      text: 'jieji_noseband_bloodnoseband',
+      description: 'hint_jieji_noseband_bloodnoseband',
+    },
+  ]
+}
+
+/// 赶路劫鼻革三选。debug.forceJiejiEvent('noseband') / forceNoseband 直接走这里，仍弹出三选。
+async function playJiejiNosebandEvent(terrain) {
+  if (hero == null) return false
+
+  dialog.pushDialog('hint_jieji_noseband')
+  dialog.pushSelection('jiejiNoseband', _jiejiNosebandChoices())
+  await dialog.execute()
+  final picked = dialog.checkSelected('jiejiNoseband')
+  var selected = _jiejiNosebandNormalizeKind(picked)
+  if (selected == null) {
+    selected = 'tienoseband'
+  }
+
+  final seasonId = _jiejiNosebandSeasonId()
+  if (selected == 'tienoseband') {
+    final herbNeed = _jiejiNosebandTienosebandHerbCost(seasonId)
+    final herbHave = hero.materials['herb'] ?? 0
+    if (herbNeed > 0 && herbHave < herbNeed) {
+      dialog.pushDialog('hint_jieji_noseband_tienoseband_broke', interpolations: [herbNeed])
+      await dialog.execute()
+    } else {
+      if (herbNeed > 0) {
+        Player.exhaust('herb', herbNeed)
+      }
+      final healed = Player.restoreLife(kJiejiNosebandTienosebandLife)
+      dialog.pushDialog('hint_jieji_noseband_tienoseband_ok', interpolations: [healed])
+      await dialog.execute()
+      await tryDropGongfaShard(rate: kJiejiNosebandTienosebandGongfaRate)
+    }
+  } else if (selected == 'loosenoseband') {
+    final moneyNeed = _jiejiNosebandLoosenosebandMoneyCost(seasonId)
+    final moneyHave = hero.materials['money'] ?? 0
+    if (moneyHave < moneyNeed) {
+      dialog.pushDialog('hint_jieji_noseband_loosenoseband_broke', interpolations: [moneyNeed])
+      await dialog.execute()
+    } else {
+      Player.exhaust('money', moneyNeed)
+      await Player.collect('herb', kJiejiNosebandLoosenosebandHerb, incurIncident: false)
+      final healed = Player.restoreLife(kJiejiNosebandLoosenosebandLife)
+      dialog.pushDialog('hint_jieji_noseband_loosenoseband_ok', interpolations: [kJiejiNosebandLoosenosebandHerb, healed])
+      await dialog.execute()
+    }
+  } else {
+    final lost = _jiejiNosebandCostLife(_jiejiNosebandBloodLifeCost(seasonId))
+    dialog.pushDialog('hint_jieji_noseband_bloodnoseband_ok', interpolations: [lost])
+    await dialog.execute()
+    final dropped = await tryDropGongfaShard(rate: kJiejiNosebandBloodGongfaRate)
+    if (dropped != true) {
+      await Player.collect('money', kJiejiNosebandBloodMoney, incurIncident: false)
+      dialog.pushDialog('hint_jieji_noseband_bloodnoseband_none', interpolations: [kJiejiNosebandBloodMoney])
+      await dialog.execute()
+    }
+  }
+
+  Game.updateUI()
+  return true
+}
+
+/// 赶路触发：教程锁与路遇相同；冷却 24 步；约 0.0005%。出过则返回 true。
+async function tryJiejiNosebandOnMove(terrain) {
+  if (hero == null) return false
+  if (_jiejiNosebandTutorialLocked()) return false
+
+  final jieji = ensureJiejiFlags()
+  final moves = jieji.worldMoves ?? 0
+  final last = jieji.lastNosebandMove ?? -999
+  if (moves - last < kJiejiNosebandMoveCooldown) return false
+
+  var rate = kJiejiNosebandBaseRate
+  if (rate < 0) rate = 0
+  if (random.nextDouble() > rate) return false
+
+  jieji.lastNosebandMove = moves
+  await playJiejiNosebandEvent(terrain)
+  return true
+}

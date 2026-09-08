@@ -4504,5 +4504,18 @@
   "hint_jieji_blood_strand_extra": "血绪余纹入体。又采得 2 药材（或落下 40 铜钱），生机回了 4 点。",
   "hint_jieji_blood_strand_extra_blood": "血月血绪更黏。又多得了一点生机机缘。",
   "hint_jieji_thunder_clang_extra": "雷铿余纹入体。又采得 2 药材（或落下 40 铜钱），生机回了 4 点。",
-  "hint_jieji_thunder_clang_extra_thunder": "雷月雷铿更烈。又多拣了一回。"
+  "hint_jieji_thunder_clang_extra_thunder": "雷月雷铿更烈。又多拣了一回。",
+  "hint_jieji_noseband": "路遇一条劫鼻革。你可以系鼻、解鼻，或以血染鼻。",
+  "jieji_noseband_tienoseband": "系鼻",
+  "jieji_noseband_loosenoseband": "解鼻",
+  "jieji_noseband_bloodnoseband": "血鼻",
+  "hint_jieji_noseband_tienoseband": "系鼻：耗 1 药材（雾月不耗）。回 1 命，五毫摸残页。药材不够则空手。",
+  "hint_jieji_noseband_loosenoseband": "解鼻：花 1 铜钱（雷月 1）。得 1 药材，并回 1 命。袋里不够则空手。",
+  "hint_jieji_noseband_bloodnoseband": "血鼻：扣 1 点生机（至少留 1，血月 2）。三毫摸残页，不成则得 2 铜钱。",
+  "hint_jieji_noseband_tienoseband_ok": "你系上劫鼻革。生机回了 {0} 点。",
+  "hint_jieji_noseband_tienoseband_broke": "系鼻要 {0} 药材。你拿不出来。",
+  "hint_jieji_noseband_loosenoseband_ok": "你解开劫鼻革。得了 {0} 药材，生机回了 {1} 点。",
+  "hint_jieji_noseband_loosenoseband_broke": "解鼻要 {0} 铜钱。袋里不够。",
+  "hint_jieji_noseband_bloodnoseband_ok": "你割了 {0} 点生机去染劫鼻革。",
+  "hint_jieji_noseband_bloodnoseband_none": "血鼻下去，鼻影却散了。袋里多了 {0} 铜钱。"
 }

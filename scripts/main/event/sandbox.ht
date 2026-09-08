@@ -265,6 +265,7 @@ async function onAfterMove(terrain) {
     if (await tryJiejiCrupperOnMove(terrain)) return true
     if (await tryJiejiMartingaleOnMove(terrain)) return true
     if (await tryJiejiBrowbandOnMove(terrain)) return true
+    if (await tryJiejiNosebandOnMove(terrain)) return true
   }
   return fought
 }
