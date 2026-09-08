@@ -1,16 +1,13 @@
 {
   "languageId": "zh",
   "languageName": "简体中文",
-
   "theHeavenlyWay": "天道",
   "heavenlyTribulation": "天劫",
-
   "localization": "本地化文本",
   "code": "代码",
   "module": "模组",
   "script": "脚本",
   "wiki": "资料库",
-
   "debug": "DEBUG信息",
   "console": "控制台",
   "confirm": "确定",
@@ -39,7 +36,6 @@
   "untitled": "未命名",
   "execute": "执行",
   "progress": "进度",
-
   "musicVolume": "音乐音量",
   "soundEffectVolume": "音效音量",
   "showFps": "显示帧率",
@@ -49,24 +45,18 @@
   "noModsFound": "没有可用的模组",
   "restartRequired": "重启生效",
   "hint_restartRequired": "部分选项修改后需要重新启动游戏才能生效。",
-
   "noUsableItems": "无可用项目",
   "noExtractableAffixes": "没有可提取的词条",
-
   "generateZone": "自动生成地域",
   "reloadGameData": "重新载入游戏数据",
   "reloadGameDataPrompt": "已重置所有游戏数据和脚本模块。",
-
   "priceFactor": "物价系数",
   "priceFactor_description_location": "交易所的材料物价和季节、纬度和城市类型有关。",
   "priceFactor_description_character": "角色物价和人物关系以及亲密度有关。",
   "priceFactor_description_productionSite": "生产建筑的物价和地块的自然资源有关。",
-
   "openAll": "全部打开",
   "selectAll": "选择全部",
-
   "available_count": "剩余次数",
-
   "id": "ID",
   "characterId": "角色ID",
   "locationId": "场景ID",
@@ -93,21 +83,15 @@
   "detail": "详情",
   "character": "人物",
   "mapObject": "对象",
-
   "homeOwner": "家主",
-
   "sort": "排序",
   "acquiredTime": "获得时间",
-
   "pause": "暂停",
   "paused": "已暂停",
-
   "ascending": "升序",
   "descending": "降序",
-
   "filter": "筛选",
   "search": "搜索",
-
   "topLeft": "↖",
   "topCenter": "↑",
   "topRight": "↗",
@@ -117,7 +101,6 @@
   "bottomLeft": "↙",
   "bottomCenter": "↓",
   "bottomRight": "↘",
-
   "start": "开始",
   "restart": "重新开始",
   "nextTurn": "下一回合",
@@ -133,13 +116,10 @@
   "unchecked": "×",
   "continue": "继续",
   "gameOver": "游戏失败",
-
   "error": "错误",
   "invalid": "无效",
   "invalidData": "无效数据",
-
   "invalidSelectionData": "错误：无效的选择对话框数据",
-
   "input": "输入",
   "selectAmount": "选择数量",
   "inputInteger": "输入一个数字",
@@ -158,7 +138,6 @@
   "selectSect": "选择门派",
   "selectItem": "选择物品",
   "selectCardpack": "选择秘籍",
-
   "debugMode": "开发者模式",
   "tutorial": "引导教程",
   "goBack": "返回",
@@ -173,22 +152,16 @@
   "saveAs": "另存为",
   "load": "载入",
   "reload": "重新载入",
-
   "checkJournal": "查看事项",
-
   "tiny": "微小",
   "medium": "适中",
   "huge": "庞大",
   "gigantic": "广阔",
-
   "dangerOperationPrompt": "这个操作无法撤销，确认继续吗？",
-
   "savedSuccessfully": "成功保存至：[<yellow>{0}</>]",
   "saveFailed": "保存失败！",
-
   "enterCultivation": "进入修炼",
   "enterLibrary": "进入功法图录",
-
   "exp": "修为经验",
   "rank2": "境",
   "rank3": "期",
@@ -219,11 +192,9 @@
   "update": "更新",
   "refresh": "刷新",
   "titleScreen": "标题画面",
-
   "leaveMaze": "离开场景",
   "backToPreviousLevel": "返回上个地图",
   "proceedToNextLevel": "前往下个地图",
-
   "surrender": "投降",
   "handOver": "交出财物",
   "escape": "逃跑",
@@ -233,80 +204,62 @@
   "beg": "求饶",
   "askForDirections": "问路",
   "leave": "离开",
-
   "haveMet": "认识",
-
   "talk": "对话",
-
   "chitchat": "闲聊",
   "journalTopic": "任务相关",
   "objectiveTopic": "我想要……",
-
   "martialArts": "武艺",
   "sorcery": "法术",
   "other": "其他",
-
   "show": "出示",
   "tradeMaterial": "贸易",
   "trade": "交易",
   "exchange": "交换",
-
   "depositBox": "箱子",
   "deposit": "存入",
   "depositAll": "全部存入",
   "take": "取出",
   "takeAll": "全部取出",
-
   "depositMaterials": "存入物资",
   "depositMaterialsDevelopmentCost": "存入扩建所需费用",
   "depositMaterials30Days": "存入 1 个月维护费用",
   "depositMaterials90Days": "存入 3 个月维护费用",
   "depositMaterials180Days": "存入 6 个月维护费用",
   "depositMaterials360Days": "存入 1 年维护费用",
-
   "gift": "赠礼",
   "attack": "攻击",
   "steal": "偷取",
   "hint_steal_success": "偷取成功！",
   "hint_steal_fail": "偷取失败，被发现了！",
-
   "court": "追求",
   "breakup": "分手",
-
   "proposed": "求婚",
   "divorce": "离婚",
-
   "baishi": "拜师",
   "shoutu": "收徒",
   "consult": "请教",
   "tutor": "教学",
-
   "apply": "加入",
   "recruit": "招募",
-
   "sneakAttack": "偷袭",
-
   "world": "世界",
   "worldPosition": "坐标",
-
   "inventory": "物品",
   "equipments": "装备",
   "rarity": "品级",
-
   "common": "凡品",
   "rare": "良品",
   "epic": "上品",
   "legendary": "极品",
   "mythic": "绝品",
   "arcane": "神品",
-
   "tier5": "五品",
   "tier4": "四品",
   "tier3": "三品",
   "tier2": "二品",
   "tier1": "一品",
   "tier0": "神品",
-
   "easy": "轻松",
   "normal": "普通",
   "challenging": "挑战",
@@ -316,7 +269,6 @@
   "torment": "折磨",
   "nightmare": "梦魇",
   "purgatory": "炼狱",
-
   "zone": "地域",
   "family": "家族",
   "sect": "门派",
@@ -332,7 +284,6 @@
   "coordinates": "坐标",
   "size": "大小",
   "standby": "待机",
-
   "skill": "技能",
   "dialog": "对话",
   "type": "类型",
@@ -340,9 +291,7 @@
   "kind": "种类",
   "genre": "流派",
   "genre2": "流",
-
   "ideology": "主导思想",
-
   "you": "你",
   "me": "我",
   "surName": "姓",
@@ -351,16 +300,13 @@
   "noname": "无名",
   "unnamed": "未命名",
   "anonymous": "无名氏",
-
   "icon": "图标",
   "illustration": "立绘",
   "image": "图片",
   "background": "背景图",
   "skin": "外观",
   "offsetY": "Y轴偏移",
-
   "createNpc": "创建NPC",
-
   "gender": "性别",
   "age": "年龄",
   "ageYear": "岁",
@@ -386,48 +332,36 @@
   "timeOfDay3": "傍晚",
   "timeOfDay4": "午夜",
   "timeflow": "时间流逝",
-
   "landZone": "土地",
   "waterZone": "水域",
-
   "continent": "大陆",
   "islands": "群岛",
   "island": "岛屿",
   "coast": "滨海",
   "harbor": "港口",
   "inland": "内陆",
-
   "sea": "海洋",
   "lake": "湖泊",
   "shore": "岸边",
   "shelf": "浅滩",
-
   "river": "河流",
   "road": "道路",
-
   "plain": "平原",
   "mountain": "山地",
   "forest": "森林",
   "snow_plain": "雪原",
   "snow_mountain": "雪山",
   "snow_forest": "雪林",
-
   "arcana": "洞天",
   "mirage": "福地",
-
   "dungeon": "秘境",
   "portalArray": "传送阵",
-
   "markArrow": "箭头标记",
-
   "spirit": "灵气",
-
   "fishTile": "鱼群",
   "stormTile": "暴风雨",
   "spiritTile": "灵气喷涌",
-
   "doNothing": "什么都不做",
-
   "information": "情报",
   "sectInformation": "门派情报",
   "cityInformation": "据点情报",
@@ -452,34 +386,26 @@
   "cardlibrary": "功法图录",
   "cardCount": "功法数量",
   "deckCount": "卡组数量",
-
   "cardlibrary_description": "只有在藏书阁或玄机碑处打开功法图录时，你才可以进行卡牌精炼。花费材料升级卡牌、修改卡牌词条属性，或者制作符箓版本的卡牌。",
-
   "decks": "卡组",
   "identify": "鉴定",
   "orderBy": "排序",
-
   "byAcquiredTimeDescending": "获得时间 - 降序",
   "byAcquiredTimeAscending": "获得时间 - 升序",
   "byLevelDescending": "等级 - 降序",
   "byLevelAscending": "等级 - 升序",
   "byRankDescending": "境界 - 降序",
   "byRankAscending": "境界 - 升序",
-
   "requirementsMet": "满足需求",
   "categoryAttack": "类别：攻击",
   "categoryBuff": "类别：加持",
-
   "mapLevel": "第 {0} 层",
-
   "diagnose": "诊断",
-
   "jobTitle": "职位",
   "managingLocations": "辖地",
   "reportCity": "驻地",
   "superior": "上级",
   "superiorId": "上级 ID",
-
   "headId": "掌门 ID",
   "headquarters": "总堂",
   "headquartersTilePosition": "总堂位置",
@@ -487,25 +413,18 @@
   "territory": "疆域",
   "territorySize": "疆域大小",
   "memberNumber": "成员数量",
-
   "residents": "居民",
   "residentsCount": "居民数量",
   "development": "规模",
   "recruitMonth": "招募月份",
-
   "citySites": "据点建筑",
   "worldMapSites": "地图建筑",
-
   "coordination": "协同",
-
   "contribution": "功勋",
   "contribution_note": "非门派成员减半",
-
   "credit": "积分",
-
   "levelUp": "提升修为等级",
   "dismiss": "解散",
-
   "cultivationRank_0": "无",
   "cultivationRank_1": "凝气",
   "cultivationRank_1_description": "<yellow bold>凝气境</>\n劫数上限：32\n从灵光中获取的经验：120\n体力上限: +20\n装备上限: 4\n卡组上限: 4\n职级上限：执事",
@@ -517,17 +436,14 @@
   "cultivationRank_4_description": "<yellow bold>还婴境</>\n劫数上限：4\n从灵光中获取的经验：840\n体力上限: +200\n装备上限: 7\n卡组上限: 7\n职级上限：长老",
   "cultivationRank_5": "化神",
   "cultivationRank_5_description": "<yellow bold>化神境</>\n劫数上限：2\n从灵光中获取的经验：1240\n体力上限: +300\n装备上限: 8\n卡组上限: 8\n职级上限：掌门",
-
   "fightSkillGenre": "战斗流派",
   "supportSkillGenre": "辅助流派",
-
   "neutral": "通用",
   "spellcraft": "悟道",
   "bodyforge": "锻体",
   "avatar": "法身",
   "vitality": "炼魂",
   "swordcraft": "御剑",
-
   "array": "阵法",
   "scroll": "符箓",
   "scroll2": "符",
@@ -535,25 +451,17 @@
   "forging": "炼器",
   "divination": "占卜",
   "illusion": "幻术",
-
   "leisureSkillGenre": "休闲流派",
-
   "painting": "书画",
   "story": "小说",
-
   "watchScene": "观看剧情",
   "skipScene": "跳过剧情",
-
   "functionDisabled": "功能当前不可用",
   "functionOnlyAvailableInLibrary": "此功能只能在藏书阁或玄机碑处使用",
-
   "skillPoints": "天道技能点",
-
   "condenseAll": "自动收集",
-
   "cultivationSkills": "修炼",
   "supportSkills": "技艺",
-
   "interact": "互动",
   "moveTo": "移动",
   "moveToHere": "移动到此",
@@ -570,89 +478,64 @@
   "build": "建造",
   "buildSite": "建造场景",
   "dispatchMaterials": "派遣物资",
-
   "days": "天数",
-
   "storage": "仓库",
   "storage_description": "仓库中的物资仅能用于建造和运营。",
-
   "maintenanceCostPerDay": "维护费用(每日)",
   "maintenanceCostPerMonth": "维护费用(每月)",
   "maintenanceCost_description": "建筑自动从仓库中扣减维护或扩建所需物资。若没有足够的物资，将不能使用商店和工作台等功能，正在进行的扩建进度也将停滞。",
   "developmentCost_description": "扩建可以提升「规模」。扩建需要花费时间，并且额外增加每月维护费用。扩建期间不影响正常运营。但如果当前仓库中没有足够的物资，将会暂停扩建和运营。",
   "developmentDays": "扩建所需天数",
   "maintenanceCostIncreasedToDuringDevelopment": "扩建期期间维护费用总计",
-
   "updateStatusNormal": "运转正常",
   "updateStatusPaused": "运转停滞",
   "updateStatusDeveloping": "建设中...",
   "updateStatusDevelopingPaused": "建设停滞",
-
   "meditate": "打坐",
   "rest": "休息",
-
   "guestRoom": "客房",
-
   "rest1Days": "休息 1 天",
   "rest5Days": "休息 5 天",
   "rest15Days": "休息 15 天",
   "restTillNextMonth": "休息到下个月",
   "restTillFullHealth": "休息到体力全满",
   "restIndefinitely": "无限期休息",
-
   "produce5Days": "生产 5 天",
   "produce15Days": "生产 15 天",
   "produceTillNextMonth": "生产到下个月 1 日",
   "produceTillEmptyHealth": "生产到体力耗尽",
-
   "battlecard": "功法",
-
   "familyName": "氏",
   "sectName": "宗",
-
   "newItems": "获得物品",
   "newJournal": "新增事项",
   "journalUpdate": "事项更新",
-
   "rentFacility": "租用此设施",
-
   "rentFacility_description": "花费 <yellow>{0} {1}</>",
-
   "do_tribulation": "挑战天劫",
-
   "useLocation": "使用场地",
   "rentLocation": "租用场地",
-
   "work10Days": "工作 10 天",
   "work30Days": "工作 30 天",
   "workTillNextMonth": "工作到下个月 1 日",
   "workTillHealthExhausted": "工作到体力耗尽",
-
   "baseSalary": "基本工资",
   "staminaCost": "体力消耗",
   "workableMonths": "可工作月份",
-
   "manage": "管理",
-
   "cost": "消耗",
-
   "pay_money": "支付 {0} 铜钱",
   "pay_shard": "支付 {0} 灵石",
-
   "difficulty": "难度",
   "timeLimit": "时限",
   "deadline": "截止日期",
-
   "budget": "预算",
   "reward": "报酬",
-
   "worldMap": "大地图",
-
   "policy": "政策",
   "growth": "发展",
   "consolidation": "巩固",
   "expansion": "扩张",
-
   "gameDataMap": "地图",
   "gameDataCard": "战斗卡牌",
   "gameDataCardAffix": "战斗卡牌词条",
@@ -661,20 +544,15 @@
   "gameDataPassive": "天道技能",
   "gameDataJournal": "事项",
   "gameDataQuest": "任务",
-
   "enemyStranger": "陌生修士",
   "trialCompetitor": "入门试炼竞争者",
   "trialTester": "入门试炼考官",
-
   "donate": "捐献",
   "checkSectContribution": "查看门派功勋",
   "checkCityContribution": "查看据点功勋",
-
   "yourTitleHere": "你在此处的职位",
   "moveHere": "搬家到此处",
-
   "estimatedPrice": "估价",
-
   "file": "文件",
   "create": "创建",
   "check": "查看",
@@ -687,24 +565,17 @@
   "switchWorld": "切换地图",
   "deleteWorld": "删除地图",
   "expandWorld": "扩大地图",
-
   "spriteIndex": "地形基座",
-
   "generatedZone": "生成了 {0} 个地域。",
-
   "objectIdNonExist": "对象 [{0}] 不存在！",
   "cannotDeleteCurrentWorld": "不能删除当前打开的地图！",
-
   "isDiscovered": "已被发现",
   "isMainWorld": "主世界",
-
   "checkInformation": "查看信息",
   "editIdAndImage": "编辑信息",
   "editDescription": "小传",
   "editFlags": "事件标记",
-
   "addBond": "添加羁绊",
-
   "gameEntity": "游戏对象",
   "createCharacter": "创建人物",
   "setNpc": "设置NPC",
@@ -719,14 +590,11 @@
   "bindObject": "绑定对象",
   "clearObject": "清除对象",
   "clearDecoration": "清除装饰",
-
   "hint_mustEnterId": "必须输入一个 ID！",
   "hint_selectTilePrompt": "需要先选择一个地块才能进行此操作。",
   "hint_selectCityPrompt": "需要先选择一个城市才能进行此操作。",
   "hint_selectedTileOccupied": "该地块已经是门派领地了，不能在此创建新的门派。",
-
   "inputObjectSource": "输入脚本对象 (JSON5)",
-
   "setAsHero": "设置为主角",
   "setWorldId": "设置所在地图",
   "setWorldPosition": "设置所在地图位置",
@@ -742,7 +610,6 @@
   "checkCultivation": "查看天赋树",
   "setRankLevel": "设置境界和修为等级",
   "allocatePassives": "自动分配天赋技能",
-
   "terrainDetail": "地块信息",
   "setTerrainKind": "设置地块类型",
   "clearTerrainSprite": "清除地块贴图",
@@ -752,14 +619,11 @@
   "setInteractable": "设置可否进入",
   "isNotEnterable": "不可进入",
   "isEnterable": "可以进入",
-
   "useCustomLogic": "使用自定义事件处理函数",
-
   "terrainTiles": "地形区块",
   "decorationTiles": "地面贴图",
   "tileMapDecoration": "地面装饰",
   "objectTiles": "物体和NPC",
-
   "custom": "自定义",
   "preset": "预设",
   "portal": "传送门",
@@ -780,10 +644,8 @@
   "bloodStain": "血迹",
   "oldWell": "古井",
   "meditationCushion": "蒲团",
-
   "dungeonStoneGate": "石门",
   "dungeonStonePavedTile": "石砖",
-
   "characterBoy": "少年男",
   "characterYoungMan": "青年男",
   "characterMan": "中年男",
@@ -792,31 +654,24 @@
   "characterYoungWoman": "青年女",
   "characterWoman": "中年女",
   "characterOldWoman": "老年女",
-
   "python": "怪蟒",
-
   "meteorCrater": "陨石坑",
   "deadBody": "尸体残骸",
-
   "regenerateZone": "重新生成地域",
   "updateCharacterStats": "更新人物属性",
   "saveMapAs": "地图另存为",
-
   "hotelRoom_stable": "马厩",
   "hotelRoom_normal": "普通客房",
   "hotelRoom_vip": "豪华客房",
   "hotelRoom_description": "每天花费: <yellow>{0} 铜钱</>\n每天回复: <yellow>{1} 点体力</>",
-
   "hint_destroy": "销毁了{0}。",
   "hint_dismantle": "分解了{0}。",
   "hint_expGained": "获得了 {0} 点修为经验。",
   "hint_staminaRestored": "恢复了 {0} 点体力。",
-
   "entityAcquire": "{0}得到了{1}。",
   "entityAcquireMultiple": "{0}得到了 {1} 个{2}。",
   "entityLose": "{0}失去了{1}。",
   "entityLoseMultiple": "{0}失去了 {1} 个{2}。",
-
   "characterExpGained": "{0}获得了 {1} 点修为经验。",
   "characterStaminaRestored": "{0}恢复了 {1} 点体力。",
   "characterEquip": "{0}装备了{1}。",
@@ -853,51 +708,40 @@
   "characterGainCredit": "{0}在{1}的积分增加了 {2}。",
   "characterSteal": "{0}偷走了{1}的: {2}",
   "characterStealthPut": "{0}偷偷将: {1} 塞给了{2}",
-
   "locationDeveloped": "{0}的规模扩大到了 {1}。",
   "sectBuild": "{0}在{1}建立了{2}。",
-
   "hint_console": "按 [Ctrl+回车] 提交。按 [Ctrl+上/下] 浏览输入历史。",
   "hint_chat": "按 [回车] 提交。",
-
   "hint_checkSectContribution": "您在本门派的功勋是 <yellow>{0}</>。\n您可以通过完成每月门派任务、据点会堂悬赏任务，以及捐献资源等方式提升您在门派中的功勋。",
   "hint_checkCityContribution": "您在本地的功勋是 <yellow>{0}</>。\n您可以通过完成据点会堂悬赏任务、以及捐献资源等方式提升您在本地功勋。",
   "hint_moveHere": "搬家到此处需要花费<yellow> {0} 铜钱</>。确定要搬家吗？",
-
   "hint_dying": "你感到一阵眩晕，随之眼前一黑，失去了意识……",
   "hint_lose": "失去了{0}。",
   "hint_loseMultiple": "失去了 {0} 个{1}。",
-
   "hint_return_home_afterDying_1": "我……这是在哪？头好痛……好像是我的房间。我是怎么回来的？",
   "hint_return_home_afterDying_2": "刚才发生了什么？我只记得眼前一黑，就什么都不知道了。还好捡回了一条命。",
   "hint_return_home_afterDying_3": "可恶，就差一点……没想到竟然会昏过去。必须得想办法变得更强才行。",
   "hint_return_home_afterDying_4": "身体好沉重……看来伤得不轻。得先想办法恢复一下体力。",
   "hint_return_home_afterDying_5": "是被人送回来的吗？完全没有印象了。总之，先检查一下身体状况吧。",
-
   "hint_emptySeed": "地图种子不能为空。",
-
   "hint_alreadyFullHealthNoNeedRest": "体力已经全满，不需要休息了。",
   "hint_notEnoughStamina": "体力不足！",
   "hint_notEnoughStaminaToWork": "你的体力不足，无法工作，先回家休息好再来吧。",
   "hint_notWorkSeason": "现在是淡季，无需非本门派之人帮忙。你可以等到 {0} 月份再来。",
-
   "hint_work_description": "消耗体力和时间，工作结束后根据时长获得工资。不同场所的基本工资、体力消耗、用工季节不同。",
   "hint_produce_description": "消耗体力和时间，生产结束后根据时长获得材料。不同场所的体力消耗、获取材料的种类和概率不同。",
-
   "hint_materialpack": "使用后转化为不占用物品栏且不可交易的资源",
   "hint_unidentifiedItem": "这件物品还没有鉴定，无法使用。",
   "hint_cursedEquipment": "这件装备被施加了禁制，你无法将其取下。",
   "hint_consumable": "这件物品是消耗品，使用后会消失。",
   "hint_restrictedEquipment": "不能再装备更多的{0}了。",
   "hint_itemFullyCharged": "这件物品已经充能完毕了。",
-
   "hint_notEnough_money": "你没有足够的铜钱。",
   "hint_notEnough_shard": "你没有足够的灵石。",
   "hint_notEnoughExp": "你没有足够的修为经验。",
   "hint_notEnoughMaterial": "你没有足够的材料。",
   "hint_notEnough": "你没有足够的{0}。",
   "hint_storageNotEnough": "仓库中没有足够的{0}！请先存入扩建所需全部物资再进行此操作。",
-
   "hint_merchantNotEnough_money": "对方身上没有足够的钱。",
   "hint_merchantNotEnough_shard": "对方身上没有足够的灵石。",
   "hint_noJournals": "我目前似乎没有什么要紧的事情。",
@@ -905,107 +749,67 @@
   "hint_requirementNotMetForSkill": "你不满足学习此天道技能的要求：{0}",
   "hint_cultivateMode": "点击左键切换到打坐修炼模式",
   "hint_passiveTreeMode": "点击左键切换到天道技能模式",
-
   "hint_expArray": "这是一座聚灵阵，在这里你可以通过打坐，花费灵石和时间来获取灵光。",
   "hint_cardLibraryStele": "这是一座玄机碑，在这里你可以花费灵光进行卡牌词条的精炼，从而提升或修改卡牌属性。",
-
   "hint_sectFacilityNotMember": "您并非本门派的修士，要想使用这里的设施，需要支付一定的费用才行。",
-
   "hint_scrollCrafter": "你身上有用不了的秘籍功法的话，可以在我这里将其转化为没有境界和装备需求的符箓。怎么样，是不是很划算？",
-
   "hint_usedObject": "这件物品上附着的灵光已经消失，无法再次使用了。",
   "hint_fullHPRest": "你的生命值已满，无需再休息了。",
-
   "hint_dungeonEntrance": "这里是通往<yellow>「秘境」</>的入口。秘境中充满了各种奇异的宝藏，但也有无数同样想要获取这些宝藏的竞争者。\n你可以在这里挑战秘境，获得修为经验和战利品。\n秘境的难度和境界有关，无境界秘境可以随时进入。但更高境界的秘境则需要消耗<yellow>「秘境石」</>才可以开启。\n但如果是非本门派的成员，进入秘境同样需要支付一笔费用。",
-
   "hint_dungeon_cost": "你可以进入这里的秘境，不过每次进入还有额外的消耗。对于普通秘境，每次进入需要<yellow> {0} 铜钱</>。",
   "hint_dungeon_cost2": "你可以进入这里的秘境，不过每次进入还有额外的消耗。对于高阶秘境，需要使用<yellow>秘境石</>才能开启。",
-
   "hint_dungeonAlreadyEntered": "你这个月已经进入过一次这个秘境了。因此目前无法进入，你还是请回吧。",
-
   "hint_exitDungeon_description": "确定要离开秘境吗？离开后将会重置探索进度。",
   "hint_enterNextLevel_description": "确定要进入下一层秘境吗？所有敌人的强度都将提升。",
   "hint_enterNextDungeonRank_description": "确定要进入下一层吗？你已完成此境界的所有层数，继续挑战的话，所有敌人的境界都将提升。",
   "hint_dungeon_failed": "挑战失败",
-
   "hint_dungeon_spiritWell_description": "这是一个长满了青苔的古井。井里面似乎有什么东西，此刻正在向外散发出星星点点的淡蓝色光芒。",
   "hint_dungeon_spiritWell_description2": "这是一个长满了青苔的古井。之前你在井中感受到的那丝灵气此刻已经无影无踪。",
-
   "hint_cultivate": "花费<yellow>时间</>修炼，获得经验以提升修为等级。\n在聚灵阵修炼时会先消耗阵法本身的<yellow>灵光</>。\n灵光用完后会转而消耗<yellow>灵石</>。",
-
   "hint_ship": "需要先装备船只才可以在水面上移动……",
   "hint_boots": "需要先装备登山靴才可以在山地中移动……",
   "hint_nonEnterableTile": "前方被一阵无形的阻力挡住了。",
   "hint_searchFailed": "没能成功找到奇怪踪迹的原因，可能还是要继续「搜索」这里才能有收获。",
   "hint_sensedUndiscovered": "这里似乎有些奇怪的踪迹。可能「搜索」这里的话会有收获。",
-
   "hint_switch": "好像有什么地方的机关打开了……",
   "hint_deadend": "这里看样子无法前进了，看来得想想别的办法……",
-
   "hint_tutorial": "这好像是你第一次使用这个功能，要听取使用教程吗？",
-
   "hint_cultivation": "修为经验达到修为等级需求时可以升级。每次升级你的基础生命值 + 10，并获得 1 个天道技能点。\n点击屏幕中间的角色可以切换天道技能界面。\n学习天道技能后可以提升自身属性，或者解锁使用某些功法的能力。",
-
   "hint_cultivation_facility": "在聚灵阵处修炼时，打坐会消耗聚灵阵自身的灵光。聚灵阵的灵光数量每个月初一恢复。\n没有灵光时，打坐会消耗自身所携带的灵石。\n打坐时，每次时间流逝消耗 1 点灵光并获得至少 10 点修为经验。\n当你的境界变高时，每次获得的经验也会更多。",
-
   "hint_cardLibrary": "在功法图录中可以打开秘籍，获得一个指定境界、流派和种类的功法，以及两本随机功法。\n点击功法图录右侧的卡组图标可以创建战斗卡组，创建战斗卡组后设定为出战方可在战斗中使用该套卡牌。\n注意：某些功法需要点出某些天道技能，或是装备某些特定武器或法宝才可使用。",
-
   "hint_cardLibrary_facility": "在藏书阁或者玄机碑等处打开功法图录时，可以消耗材料对卡牌进行淬炼以提升或修改卡牌效果数值。",
-
   "hint_cardCraft": "当前可以进行功法精炼。\n右键点击功法卡牌即可进入精炼界面，消耗背包中的打造材料修改卡牌的词条。",
   "hint_scrollCraft": "当前可以制作符箓。\n右键点击功法卡牌即可进入制符界面，消耗背包中的符纸可以将功法制成符箓卡牌。\n符箓卡牌没有任何境界、装备需求，但在次数用尽后会从卡牌库和卡组中消失。",
-
   "hint_visitEmptyVillage": "似乎没有任何重要人物居住在此。",
   "hint_visitEmptyHome": "这里空无一人，看来{0}现在不在家。",
   "hint_noAvailableQuests": "目前暂时没有悬赏发布，你可以去别的城镇问问。",
-
   "hint_rentedFacility": "没问题，直到下个月前你都可以使用这里的设施了。",
-
   "hint_outOfLight": "灵光耗尽！",
   "hint_outOfShard": "灵石耗尽！",
   "hint_insufficientLight": "此地没有足够灵光，无法继续修炼。",
   "hint_insufficientShard": "你没有足够的灵石，无法继续修炼。",
-
   "hint_datetime": "每年有 12 个月。\n每个月有 30 天。\n每天有四个阶段：上午、下午、傍晚、午夜。\n每个阶段有 24 个 tick。\n时间的最小单位是 tick 。",
-
   "hint_movement": "操作指引：点击<yellow>鼠标左键</>移动角色，使用<yellow>[W,S,A,D]</>键或者点击并拖动<yellow>鼠标右键</>移动地图。",
-
   "hint_tribulation_1": "就在你运功凝聚灵光的时候，你突然有所顿悟。\n你似乎窥视到了一丝更高境界的天道。但与此同时，你也立刻感受到一股极为强大的气息。",
   "hint_tribulation_2": "\n此乃天道感应所化的一具幻象法身。\n如果你能够在战斗中取胜，就可以直接突破到下一个境界。但如果失败，不但修为经验不会返还，还会获得一层劫数。\n无论是失败还是放弃，你在下一次升级时必将再次触发天道劫数。",
   "hint_tribulation_3": "\n你要挑战天道吗？",
   "hint_tribulation_4": "放弃天道挑战后，扣掉的修为经验不会返还。",
   "hint_tribulation_5": "你现在的修为已经达到了目前境界所允许的巅峰。你需要在天道技能中解锁更高的境界节点才能继续提升。",
-
   "hint_generateAttributes": "你感到四肢百骸一阵酥麻，体内的真气也变得异常畅通。你的灵力、体魄、身法、念力、神识似乎被重塑了一遍。",
-
   "hint_replenishLocation": "商店重置日期: 每月 {0} 日\n本月手动刷新次数：{1}\n本次手动刷新花费: {2} 文",
-
   "hint_notYourHomeToRest": "您并非本门派的修士，不能在这里休息。",
-
   "hint_restAtHotel": "您要在我们这歇息吗？我们这有上好的客房，还有洗浴和酒菜，保管让你舒舒服服的休息一番。",
-
   "hint_hotelRoom_selected": "好的，这就给你安排房间。\n您打算住多久？",
-
   "hint_donation": "你每月仅可捐献一次，若是价值不够无法获得功勋的话，物品也不会退还，还望慎重。",
-
   "hint_sect_donation": "哦？你竟有此心，甚好。宗门的发展，离不开各位弟子的贡献。",
-
   "hint_location_donation": "哦？阁下打算给我们捐献？太好了，我们城镇的发展有希望了。这可以直接算作你在此城中的功勋。",
-
   "hint_donation_item_value_low": "此物灵光甚微。你的心意我们领了，但此次捐献无法算作你的功勋。",
-
   "hint_donation_item_value_high": "不错，此物颇为不凡。你这次算是大功一件。此物折算为功勋 {0} 点，已记入你的名下。",
-
   "hint_already_donated": "你本月已经捐献过一次了。修行之道，贵在持之以恒，而非一蹴而就。\n想要再次捐献的话，等到下个月 {0} 日之后再来吧。",
-
   "hint_updateCharacterStats": "已重新计算所有人物属性。",
-
   "hint_developmentStarted": "扩建工程将会<yellow>持续 {0} 天</>，在此期间每日维护费用将<cyan>额外增加</>。\n在此期间建筑的正常功能<cyan>不受影响</>。但如果仓库中没有足够的物资，建筑本身的运营和扩建工程都将会<yellow>暂停</>。",
-
   "hint_developmentCompleted": "{0}的扩建工程已经完成！规模增加到了 {1}。",
-
   "hint_cancelDevelopment": "确定要取消扩建工程吗？取消后已消耗的物资将不会返还，且扩建进度将会全部丢失。",
-
   "hint_relocatedHome": "你的家宅现在搬到了<yellow>{0}</>。",
   "forgeCardBlank": "铸牌",
   "hint_forgeCardBlank_description": "耗费药材与铜钱，按选定流派铸一枚牌胚。牌胚带底色，词缀坑很少，可直接入牌库。",
@@ -1360,7 +1164,6 @@
   "hint_shameJiejiCrowd_blood": "血证递上。赏了 80 铜钱。",
   "hint_shameJiejiCrowd_cooldown": "刑场未散。过一日再来示众。",
   "hint_shameJiejiCrowd_notEnough": "围观要 20 铜钱（雷月 10），告发要 1 药材。",
-
   "exposeJiejiCrowd": "再示",
   "jiejiExpose": "再示",
   "hint_exposeJiejiCrowd_description": "镇魔司另可再示。一日一次，与示众分开计。再观耗 20 铜钱（雷月 10）得 1 药材（雾月 2）；再告耗 1 药材得 40 铜钱并挂迷障，约一成半残页；血示扣 2 命（血月 3），三成残页，否则 50 铜钱。",
@@ -1378,7 +1181,6 @@
   "hint_exposeJiejiCrowd_blood_money": "血示未成残页。袋里落下 50 铜钱。",
   "hint_exposeJiejiCrowd_cooldown": "再示余气未散。过一日再来再示。",
   "hint_exposeJiejiCrowd_notEnough": "再观要 20 铜钱（雷月 10），再告要 1 药材。",
-
   "cultivateJiejiArray": "吐纳",
   "jiejiCultivate": "吐纳",
   "hint_cultivateJiejiArray_description": "盘坐吐纳，耗 1 点生机（至少留 1），换一份修为。一日一次。雷月可急吐，雾月可雾隐吐得药，血月可血吐。",
@@ -1398,7 +1200,6 @@
   "hint_cultivateJiejiArray_done_herb": "雾里吐纳有成。修为 +{0}，得药材 ×{1}。",
   "hint_cultivateJiejiArray_cooldown": "灵息未匀。过一日再来吐纳。",
   "hint_cultivateJiejiArray_notEnough": "这一次吐纳你撑不住所选的吐法。",
-
   "blessJiejiArray": "加持",
   "jiejiBless": "加持",
   "hint_blessJiejiArray_description": "聚灵阵可加持。一日一次。温养耗 1 药材（雾月免）回 6 命，两成残页；破军耗 40 铜钱（雷月 20）挂破军或拼酒劲（下场出手 +8%），两者都有则回 4 命；血阵扣 2 命（血月 3）挂护身阵（下场承伤 -8%），三成五残页，没残页则得 40 铜钱。",
@@ -1417,7 +1218,6 @@
   "hint_blessJiejiArray_blood_money": "血阵入阵。残页未现，袖里多了 40 铜钱。",
   "hint_blessJiejiArray_cooldown": "阵息未匀。过一日再来加持。",
   "hint_blessJiejiArray_notEnough": "温养要 1 药材（雾月免），破军要 40 铜钱（雷月 20）。",
-
   "chargeJiejiArray": "蓄阵",
   "jiejiCharge": "蓄阵",
   "hint_chargeJiejiArray_description": "聚灵阵另可蓄阵。一日一次，与加持分开计。蓄灵耗 25 铜钱（雷月 12）回 5 命（雾月另得 1 药材）；蓄锋耗 1 药材挂破军或拼酒劲，约一成半残页；血蓄扣 2 命（血月 3）挂护身阵或残页/铜钱。",
@@ -1436,7 +1236,6 @@
   "hint_chargeJiejiArray_blood_money": "血蓄入阵。残页未现，袖里多了 40 铜钱。",
   "hint_chargeJiejiArray_cooldown": "阵息未匀。过一日再来蓄阵。",
   "hint_chargeJiejiArray_notEnough": "蓄灵要 25 铜钱（雷月 12），蓄锋要 1 药材。",
-
   "insightJiejiStele": "悟道",
   "jiejiInsight": "悟道",
   "hint_insightJiejiStele_description": "耗 1 点生机（至少留 1）向碑问悟。两日一次。拓印得零阶牌胚，观文试残页，静坐回命。雷月拓印或余火，雾月观文得药，血月静坐回得更多。",
@@ -1453,7 +1252,6 @@
   "hint_insightJiejiStele_done_read_herb": "雾里另得药材 ×{0}。",
   "hint_insightJiejiStele_done_sit": "你对着碑静坐。生机回了 {0} 点。",
   "hint_insightJiejiStele_cooldown": "碑意未散。过两日再来悟道。",
-
   "watchJiejiStele": "夜碑",
   "jiejiWatch": "夜碑",
   "hint_watchJiejiStele_description": "问道碑可夜碑。一日一次。温碑耗 1 药材（雾月免）回 6 命；借杀耗 40 铜钱（雷月 20）挂破军或拼酒劲；血拓扣 2 命（血月 3）三成五残页，没掉则得 40 铜钱。",
@@ -1472,8 +1270,6 @@
   "hint_watchJiejiStele_blood_money": "血拓落成。残页未现，袖里多了 40 铜钱。",
   "hint_watchJiejiStele_cooldown": "碑阴余温未散。过一日再来夜碑。",
   "hint_watchJiejiStele_notEnough": "温碑要 1 药材（雾月免），借杀要 40 铜钱（雷月 20）。",
-
-
   "rubJiejiStele": "再摩",
   "jiejiRub": "再摩",
   "hint_rubJiejiStele_description": "问道碑另可再摩。一日一次，与夜碑分开计。再温耗 20 铜钱（雷月 10）回 5 命（雾月另得 1 药材）；再借耗 1 药材挂破军或拼酒劲，约一成半残页；血摩扣 2 命（血月 3），三成半残页，否则 40 铜钱。",
@@ -1492,7 +1288,6 @@
   "hint_rubJiejiStele_blood_money": "血摩落成。残页未现，袖里多了 40 铜钱。",
   "hint_rubJiejiStele_cooldown": "碑侧余温未散。过一日再来再摩。",
   "hint_rubJiejiStele_notEnough": "再温要 20 铜钱（雷月 10），再借要 1 药材。",
-
   "swapJiejiGoods": "劫季换货",
   "jiejiSwap": "劫季换货",
   "hint_swapJiejiGoods_description": "按当季牌价换药材、铜钱或粮食。一日一次。雷月药贵卖、药贱买；雾月药贱卖、药贵买，粮换药更多；血月居中。不改原交易货架。",
@@ -1508,7 +1303,6 @@
   "hint_swapJiejiGoods_done_grain": "粮换了药。粮食 ×{0} 换成药材 ×{1}。",
   "hint_swapJiejiGoods_cooldown": "今日牌价已换过一次。过一日再来。",
   "hint_swapJiejiGoods_notEnough": "柜上这桩换货，你手头不够。",
-
   "haggleJiejiGoods": "议价",
   "jiejiHaggle": "议价",
   "hint_haggleJiejiGoods_description": "交易所可议价。一日一次。压价耗 1 药材（雾月免）换 50 铜钱（雷月 70）；赊账耗 40 铜钱（雷月 20）挂迷障，下次野遇糊弄过去；血账扣 2 命（血月 3）得 3 药材，两成五残页。",
@@ -1524,8 +1318,6 @@
   "hint_haggleJiejiGoods_blood": "血账落成。药材 ×3 入手。",
   "hint_haggleJiejiGoods_cooldown": "今日柜上已议过一次。过一日再来。",
   "hint_haggleJiejiGoods_notEnough": "压价要 1 药材（雾月免），赊账要 40 铜钱（雷月 20）。",
-
-
   "hoardJiejiGoods": "囤货",
   "jiejiHoard": "囤货",
   "hint_hoardJiejiGoods_description": "交易所可囤货。一日一次。囤药耗 30 铜钱（雷月 15）得 2 药材（雾月再多 1）；囤粮耗 1 药材（雾月免）得 3 粮食；血囤扣 2 命（血月 3），两成五残页，否则 50 铜钱。",
@@ -1544,7 +1336,6 @@
   "hint_hoardJiejiGoods_blood_money": "血囤未成残页。袋里落下 {0} 铜钱。",
   "hint_hoardJiejiGoods_cooldown": "今日柜后已囤过一次。过一日再来。",
   "hint_hoardJiejiGoods_notEnough": "囤药要 30 铜钱（雷月 15），囤粮要 1 药材（雾月免）。",
-
   "layJiejiArray": "布劫阵",
   "jiejiArray": "布劫阵",
   "hint_layJiejiArray_description": "耗 2 药材、60 铜钱与 1 点生机（至少留 1），布下一座阵。一日一次。同时只能有一座。护身：下一场承伤 -8%。破军：下一场出手 +8%。迷雾：立刻回 4 命。",
@@ -1579,8 +1370,6 @@
   "hint_breakJiejiArray_blood_money": "血破落成。残页未现，袖里多了 40 铜钱。",
   "hint_breakJiejiArray_cooldown": "阵盘余纹未散。过一日再来破阵。",
   "hint_breakJiejiArray_notEnough": "拆纹要 1 药材（雾月免），借阵要 40 铜钱（雷月 20）。",
-
-
   "cleaveJiejiArray": "再破",
   "jiejiCleave": "再破",
   "hint_cleaveJiejiArray_description": "阵法所另可再破。一日一次，与破阵分开计。再拆耗 20 铜钱（雷月 10）回 5 命（雾月另得 1 药材）；再借耗 1 药材挂破军或拼酒劲，约一成半残页；血再扣 2 命（血月 3），三成残页，否则 45 铜钱。",
@@ -1599,8 +1388,6 @@
   "hint_cleaveJiejiArray_blood_money": "血再落成。残页未现，袖里多了 45 铜钱。",
   "hint_cleaveJiejiArray_cooldown": "阵盘余纹未散。过一日再来再破。",
   "hint_cleaveJiejiArray_notEnough": "再拆要 20 铜钱（雷月 10），再借要 1 药材。",
-
-
   "castJiejiVeil": "迷障",
   "jiejiVeil": "迷障",
   "hint_castJiejiVeil_description": "耗 2 药材与 40 铜钱施迷障。一日一次。雾月 1 药材。雷月 50 铜钱。血月再耗 1 点生机（至少留 1）。迷障：下次野遇被糊弄过去。疑兵：立刻得 80 铜钱，不挂迷障。已有迷障再施会刷新。",
@@ -1615,7 +1402,6 @@
   "hint_castJiejiVeil_cooldown": "坛上余雾未散。过一日再来施术。",
   "hint_castJiejiVeil_notEnough": "迷障要 2 药材和 40 铜钱。雾月 1 药材。雷月 50 铜钱。血月再耗 1 点生机。",
   "hint_jieji_veil_dodge": "眼前一阵迷障。这一场野遇被糊弄过去了。",
-
   "enterJiejiIllusion": "入幻",
   "jiejiEnter": "入幻",
   "hint_enterJiejiIllusion_description": "幻术祭坛观影、借形或血影。一日一次。观影耗 1 药材（雾月不耗）回 5 命并两成五残页；借形花 40 铜钱（雷月 20）挂护身阵，已有则挂拼酒劲，两者都有则回 4 命；血影扣 2 命（血月 3）六成残页，不成再给一枚，仍没有则 50 铜钱。",
@@ -1634,8 +1420,6 @@
   "hint_enterJiejiIllusion_blood_none": "血影散了。袋里多了 {0} 铜钱。",
   "hint_enterJiejiIllusion_cooldown": "刚入过幻。再过一日才能再入。",
   "hint_enterJiejiIllusion_notEnough": "观影要 1 药材（雾月不耗），借形要 40 铜钱（雷月 20）。",
-
-
   "echoJiejiIllusion": "映幻",
   "jiejiEchoSite": "映幻",
   "hint_echoJiejiIllusion_description": "幻术祭坛另可映幻。一日一次，与入幻分开计。再观耗 20 铜钱（雷月 10）回 5 命（雾月另得 1 药材）；映障耗 1 药材挂迷障挡下次野遇，两成残页；血映扣 2 命（血月 3），三成残页，否则 45 铜钱。",
@@ -1653,7 +1437,6 @@
   "hint_echoJiejiIllusion_blood_none": "血映散了。袋里多了 {0} 铜钱。",
   "hint_echoJiejiIllusion_cooldown": "映幻余影未散。过一日再来映幻。",
   "hint_echoJiejiIllusion_notEnough": "再观要 20 铜钱（雷月 10），映障要 1 药材。",
-
   "consultJiejiPsychic": "通灵",
   "jiejiPsychic": "通灵",
   "hint_consultJiejiPsychic_description": "耗 2 药材与 45 铜钱通灵。一日一次。雾月 1 药材。雷月 55 铜钱。血月再耗 1 点生机（至少留 1）。窥劫：立刻得当季铜钱（雾月另得药材）。招魂：四成牌胚，否则药材或铜钱。引魂：下次野遇必升劫纹精英。已挂引魂再通会刷新。",
@@ -1674,7 +1457,6 @@
   "hint_consultJiejiPsychic_done_draw": "灵已挂上。下次野遇会被引成劫纹精英。",
   "hint_consultJiejiPsychic_cooldown": "殿中余响未散。过一日再来通灵。",
   "hint_consultJiejiPsychic_notEnough": "通灵要 2 药材和 45 铜钱。雾月 1 药材。雷月 55 铜钱。血月再耗 1 点生机。",
-
   "againJiejiPsychic": "再卜",
   "jiejiAgain": "再卜",
   "hint_againJiejiPsychic_description": "通灵殿可再卜。一日一次。温魂耗 1 药材（雾月免）回 6 命；听劫耗 40 铜钱（雷月 20）挂迷障，下次野遇糊弄过去；血通扣 2 命（血月 3）三成五残页，没掉则得 40 铜钱。",
@@ -1691,8 +1473,6 @@
   "hint_againJiejiPsychic_blood_money": "血通落成。残页未现，袖里多了 40 铜钱。",
   "hint_againJiejiPsychic_cooldown": "殿中余响未散。过一日再来再卜。",
   "hint_againJiejiPsychic_notEnough": "温魂要 1 药材（雾月免），听劫要 40 铜钱（雷月 20）。",
-
-
   "deepJiejiPsychic": "深通",
   "jiejiDeep": "深通",
   "hint_deepJiejiPsychic_description": "通灵殿另可深通。一日一次，与再卜分开计。深温耗 1 药材（雾月免）回 6 命；深听耗 40 铜钱（雷月 20）两成残页，没掉则回 4 命；血深扣 2 命（血月 3）三成五残页，没掉则得 40 铜钱。",
@@ -1710,7 +1490,6 @@
   "hint_deepJiejiPsychic_blood_money": "血深落成。残页未现，袖里多了 40 铜钱。",
   "hint_deepJiejiPsychic_cooldown": "殿中深通余响未散。过一日再来深通。",
   "hint_deepJiejiPsychic_notEnough": "深温要 1 药材（雾月免），深听要 40 铜钱（雷月 20）。",
-
   "invokeJiejiTheurgy": "请神",
   "jiejiTheurgy": "请神",
   "hint_invokeJiejiTheurgy_description": "耗 3 药材与 80 铜钱请神。一日一次。雾月 2 药材。雷月 60 铜钱。血月再耗 1 点生机（至少留 1）。护身神：下一场承伤 -10%，可与护身阵同挂。雷火神：下一场出手 +10%。甘露：立刻回 10 命，不挂战旗。新请会盖掉旧神。",
@@ -1726,7 +1505,6 @@
   "hint_invokeJiejiTheurgy_done_heal": "甘露入喉。生机回了 {0} 点。",
   "hint_invokeJiejiTheurgy_cooldown": "殿中余香未散。过一日再来请神。",
   "hint_invokeJiejiTheurgy_notEnough": "请神要 3 药材和 80 铜钱。雾月 2 药材。雷月 60 铜钱。血月再耗 1 点生机。",
-
   "vowJiejiTheurgy": "还愿",
   "jiejiVow": "还愿",
   "hint_vowJiejiTheurgy_description": "显圣殿可还愿。一日一次。清愿耗 1 药材（雾月免）回 6 命，若身上有请神则神退；求雷耗 40 铜钱（雷月 20）挂雷火神或拼酒劲；血祭扣 2 命（血月 3）三成五残页，没掉则得 40 铜钱。",
@@ -1746,8 +1524,6 @@
   "hint_vowJiejiTheurgy_blood_money": "血祭落成。残页未现，袖里多了 40 铜钱。",
   "hint_vowJiejiTheurgy_cooldown": "殿中愿香未散。过一日再来还愿。",
   "hint_vowJiejiTheurgy_notEnough": "清愿要 1 药材（雾月免），求雷要 40 铜钱（雷月 20）。",
-
-
   "renewJiejiTheurgy": "再愿",
   "jiejiRenew": "再愿",
   "hint_renewJiejiTheurgy_description": "显圣殿另可再愿。一日一次，与还愿分开计。再清耗 1 药材（雾月免）回 6 命，若身上有请神则神退；再求耗 40 铜钱（雷月 20）挂雷火神或拼酒劲，约一成半残页；血再扣 2 命（血月 3）三成五残页，没掉则得 40 铜钱。",
@@ -1767,8 +1543,6 @@
   "hint_renewJiejiTheurgy_blood_money": "血再落成。残页未现，袖里多了 40 铜钱。",
   "hint_renewJiejiTheurgy_cooldown": "殿中再愿余香未散。过一日再来再愿。",
   "hint_renewJiejiTheurgy_notEnough": "再清要 1 药材（雾月免），再求要 40 铜钱（雷月 20）。",
-
-
   "inkJiejiTattoo": "季纹",
   "jiejiTattoo": "季纹",
   "hint_inkJiejiTattoo_description": "耗 4 药材、100 铜钱与 1 点生机（至少留 1）刺当季纹身。雷月 80 铜钱。雾月 3 药材。血月 2 点生机。三种纹随时可选。当季一直生效，再刺会盖掉旧纹、再付一次。季末消散。雷纹出手 +4%。雾纹野遇更少。血纹吸血 +3%。",
@@ -1783,7 +1557,6 @@
   "hint_inkJiejiTattoo_done_mist": "雾纹落成。这一季野遇会疏一些。",
   "hint_inkJiejiTattoo_done_blood": "血纹落成。这一季你打人会回一点血。",
   "hint_inkJiejiTattoo_notEnough": "季纹要 4 药材和 100 铜钱，再耗 1 点生机。雾月 3 药材。雷月 80 铜钱。血月 2 点生机。",
-
   "mendJiejiTattoo": "补纹",
   "jiejiMend": "补纹",
   "hint_mendJiejiTattoo_description": "纹身铺可补纹。一日一次。温纹耗 1 药材（雾月免）回 6 命，身上是雾纹再回 2；改杀耗 40 铜钱（雷月 20），雷纹则挂破军或拼酒劲，否则改刺雷纹；血补扣 2 命（血月 3），血纹四成残页否则两成五，没掉则得 40 铜钱。",
@@ -1804,8 +1577,6 @@
   "hint_mendJiejiTattoo_blood_money": "血补落成。残页未现，袖里多了 40 铜钱。",
   "hint_mendJiejiTattoo_cooldown": "针脚余温未散。过一日再来补纹。",
   "hint_mendJiejiTattoo_notEnough": "温纹要 1 药材（雾月免），改杀要 40 铜钱（雷月 20）。",
-
-
   "retouchJiejiTattoo": "再补",
   "jiejiRetouch": "再补",
   "hint_retouchJiejiTattoo_description": "纹身铺另可再补。一日一次，与补纹分开计。再温耗 20 铜钱（雷月 10）回 5 命（雾月另得 1 药材）；再改耗 1 药材挂破军或拼酒劲，约一成半残页；血再扣 2 命（血月 3），三成残页，否则 40 铜钱。",
@@ -1824,8 +1595,6 @@
   "hint_retouchJiejiTattoo_blood_money": "血再落成。残页未现，袖里多了 40 铜钱。",
   "hint_retouchJiejiTattoo_cooldown": "针脚余纹未散。过一日再来再补。",
   "hint_retouchJiejiTattoo_notEnough": "再温要 20 铜钱（雷月 10），再改要 1 药材。",
-
-
   "recruitJiejiAid": "招外援",
   "hint_recruitJiejiAid_description": "耗费人力与铜钱，从外门寮招来三张当季外援战牌。雷月铜钱更省，血月以人力作血税，雾月或可多一张。季末或出秘境后消散。",
   "jieji_aid_genre": "选择外援流派",
@@ -1877,7 +1646,6 @@
   "hint_consultXianming_picked": "你改定为<yellow>{0}</>。效力即刻作用于当季。",
   "hint_consultXianming_nurture": "养门徒：这一季掉落再加 15%。若本季尚未选过养门徒，立刻来 2 名人手。",
   "hint_consultXianming_nurture_hands": "养门徒的人手到了。来了 2 名劳工。",
-
   "readJiejiNight": "夜读",
   "jiejiRead": "夜读",
   "hint_readJiejiNight_description": "藏经阁温卷、抄页或血注。一日一次。温卷耗 1 药材（雾月不耗）回 5 命并两成残页；抄页花 30 铜钱（雷月 15）得牌胚并回 2 命；血注扣 2 命（血月 3）几乎必掉残页，不成再给一枚，仍没有则 60 铜钱。",
@@ -1894,7 +1662,6 @@
   "hint_readJiejiNight_blood_none": "血注下去，书页却散了。袋里多了 {0} 铜钱。",
   "hint_readJiejiNight_cooldown": "刚夜读过。再过一日才能再读。",
   "hint_readJiejiNight_notEnough": "温卷要 1 药材（雾月不耗），抄页要 30 铜钱（雷月 15）。",
-
   "rereadJiejiNight": "再读",
   "jiejiReread": "再读",
   "hint_rereadJiejiNight_description": "藏经阁另可再读。一日一次，与夜读分开计。再温耗 20 铜钱（雷月 10）回 4 命（雾月另得 1 药材）；再抄耗 1 药材得牌胚，两成残页（雾月另得 20 铜钱）；血阅扣 2 命（血月 3），三成半残页，否则 50 铜钱。",
@@ -1912,12 +1679,11 @@
   "hint_rereadJiejiNight_blood_money": "血阅未成残页。袋里落下 50 铜钱。",
   "hint_rereadJiejiNight_cooldown": "再读余气未散。过一日再来再读。",
   "hint_rereadJiejiNight_notEnough": "再温要 20 铜钱（雷月 10），再抄要 1 药材。",
-
   "riteJiejiHarvest": "祈年",
   "hint_riteJiejiHarvest_description": "耗费一日生机，按当季在灵田里选一桩收成。两日或走六程才能再祈。雷月催熟或祭雷，雾月摸索或雇工，血月血祭或平收，亦可歇田回命。",
   "hint_riteJiejiHarvest_thunder": "雷月。田里要祈雷墒。催熟催苗，祭雷换种，或歇田养地。",
   "hint_riteJiejiHarvest_mist": "雾月。雾中薅。摸索着拔，雇工去薅，或歇田。",
-  "hint_riteJiejiHarvest_blood": "血月。血肥。血祭灌田，平收保本，或歇田。",
+  "hint_riteJiejiHarvest_blood": "血祭灌田。得了 8 药材。",
   "jieji_harvest_ripen": "催熟",
   "jieji_harvest_offer": "祭雷",
   "jieji_harvest_rest": "歇田",
@@ -1938,11 +1704,9 @@
   "hint_riteJiejiHarvest_rest": "歇田一日。地气回了 4 点生机。",
   "hint_riteJiejiHarvest_search": "雾里摸索。得了 2 药材和 40 铜钱。",
   "hint_riteJiejiHarvest_hire": "雇工薅完。得了 6 药材。",
-  "hint_riteJiejiHarvest_blood": "血祭灌田。得了 8 药材。",
   "hint_riteJiejiHarvest_plain": "平收保本。得了 3 药材。",
   "hint_riteJiejiHarvest_cooldown": "田里的气还没回。再过两日，或再走几程，才能再祈年。",
   "hint_riteJiejiHarvest_notEnough": "祭雷要 80 铜钱，雇工要 1 名人手。",
-
   "tillJiejiFarm": "夜耕",
   "hint_tillJiejiFarm_description": "农田可夜耕。一日一次。温土耗 20 铜钱（雷月 10）得 2 药材（雾月 3）；听垄耗 1 药材（雾月免）挂迷障；血耕扣 2 命（血月 3）得 3 药材，三成残页。",
   "hint_tillJiejiFarm": "垄上夜气可耕。温土、听垄、血耕，择一。一日一次。祈年与夜耕各不挡。",
@@ -1957,7 +1721,6 @@
   "hint_tillJiejiFarm_blood": "血耕落成。得了 3 药材。",
   "hint_tillJiejiFarm_cooldown": "夜耕余气未散。过一日再来夜耕。",
   "hint_tillJiejiFarm_notEnough": "温土要 20 铜钱（雷月 10），听垄要 1 药材（雾月免）。",
-
   "sowJiejiFarm": "再播",
   "jiejiSow": "再播",
   "hint_sowJiejiFarm_description": "农田可再播。一日一次，与夜耕分开计。再温耗 20 铜钱（雷月 10）得 2 药材（雾月再多 1）；再听耗 1 药材（雾月免）得 3 粮食；血播扣 2 命（血月 3），三成残页，否则 3 药材。",
@@ -1976,7 +1739,6 @@
   "hint_sowJiejiFarm_blood_herb": "血播未成残页。药材 ×{0} 入手。",
   "hint_sowJiejiFarm_cooldown": "今日垄上已再播过一次。过一日再来。",
   "hint_sowJiejiFarm_notEnough": "再温要 20 铜钱（雷月 10），再听要 1 药材（雾月免）。",
-
   "gatherJiejiSite": "季采",
   "jiejiGather": "季采",
   "hint_gatherJiejiSite_description": "耗费 1 名人手（没有则 1 生机加 40 铜钱；雷月 20 铜钱；血月不花钱改扣 2 生机），在矿、渔、林、猎季采。尽力得物产，走货换钱，冒险对半。四野共用两日一次。",
@@ -2000,7 +1762,6 @@
   "hint_gatherJiejiSite_risk_fail": "冒险失手。生机少了 {0}，空手而回。",
   "hint_gatherJiejiSite_cooldown": "四野的气还没回。再过两日才能再季采。",
   "hint_gatherJiejiSite_notEnough": "没有人手时，季采要 40 铜钱（雷月 20）。",
-
   "scourJiejiSite": "深采",
   "jiejiScour": "深采",
   "hint_scourJiejiSite_description": "四野另可深采。一日一次，与季采分开计。浅捞耗 20 铜钱（雷月 10）得主产 1（雾月另得 1 药材）；深采耗 1 药材得主产 2+副产 1，约一成半残页；血采扣 2 命（血月 3），三成残页，否则 40 铜钱。",
@@ -2043,7 +1804,6 @@
   "hint_skimJiejiSite_blood_money": "血捞未成残页。袋里落下 40 铜钱。",
   "hint_skimJiejiSite_cooldown": "刚再捞过。过一日再来。",
   "hint_skimJiejiSite_notEnough": "浅捞要 20 铜钱（雷月 10），再深要 1 药材。",
-
   "restJiejiSite": "歇息",
   "jiejiRest": "歇息",
   "hint_restJiejiSite_description": "在家免费、在酒楼花 40 铜钱，歇一日。一日只能歇一次。雷月静心回 8 命或听雷；雾月静心回 6 命或买酒；血月静心回 5 命或饮血酒。",
@@ -2072,7 +1832,6 @@
   "hint_restJiejiSite_bloodwine": "血酒入腹。下一场你出手更狠。",
   "hint_restJiejiSite_cooldown": "刚歇过。再过一日才能再歇。",
   "hint_restJiejiSite_notEnough": "酒楼歇息要 40 铜钱。买酒在酒楼 60、在家 30。",
-
   "studyJiejiHome": "夜课",
   "jiejiStudy": "夜课",
   "hint_studyJiejiHome_description": "灯下温书、抄录或苦读。一日一次。温书耗一日得约七成吐纳修为（雷月满额）；抄录耗 2 药材（雾月 1）三成牌胚否则 40 铜钱；苦读扣 2 命（血月 3）得约 1.3 倍修为并一成五残页。",
@@ -2089,8 +1848,6 @@
   "hint_studyJiejiHome_grind": "苦读有成。修为 +{0}。",
   "hint_studyJiejiHome_cooldown": "刚上过夜课。再过一日才能再读。",
   "hint_studyJiejiHome_notEnough": "抄录要 2 药材（雾月 1）。",
-
-
   "drillJiejiHome": "再习",
   "jiejiHomeDrill": "再习",
   "hint_drillJiejiHome_description": "灯下另可再习。一日一次，与夜课分开计。再温耗 1 药材（雾月免）回 6 命；再抄耗 2 药材（雾月 1）两成五牌胚否则 40 铜钱；血习扣 2 命（血月 3）两成残页，没掉则得 40 铜钱。",
@@ -2108,7 +1865,6 @@
   "hint_drillJiejiHome_blood_money": "血习落成。残页未现，袖里多了 40 铜钱。",
   "hint_drillJiejiHome_cooldown": "刚再习过。过一日再来再习。",
   "hint_drillJiejiHome_notEnough": "再温要 1 药材（雾月免），再抄要 2 药材（雾月 1）。",
-
   "feastJiejiHotel": "劫宴",
   "jiejiFeast": "劫宴",
   "hint_feastJiejiHotel_description": "酒楼请客、听曲或拼酒。两日一次。请客花 120 铜钱（雷月 90）回 8 命并两成残页；听曲花 60（雾月 40）三成牌胚否则 1 药材；拼酒扣 2 命（血月 3）下场出手 +8%。",
@@ -2125,7 +1881,6 @@
   "hint_feastJiejiHotel_drink": "拼酒入腹。下一场你出手更狠。",
   "hint_feastJiejiHotel_cooldown": "刚开过宴。再过两日才能再宴。",
   "hint_feastJiejiHotel_notEnough": "请客要 120 铜钱（雷月 90），听曲要 60（雾月 40）。",
-
   "nightJiejiHotel": "劫宵",
   "jiejiNight": "劫宵",
   "hint_nightJiejiHotel_description": "客栈可劫宵。一日一次。温宵耗 1 药材（雾月免）回 8 命；听宵耗 40 铜钱（雷月 20）挂迷障，下次野遇糊弄过去；血宵扣 2 命（血月 3）三成残页，没掉则得 40 铜钱。",
@@ -2142,7 +1897,6 @@
   "hint_nightJiejiHotel_blood_money": "血宵落成。残页未现，袖里多了 40 铜钱。",
   "hint_nightJiejiHotel_cooldown": "今夜已歇过。过一日再来劫宵。",
   "hint_nightJiejiHotel_notEnough": "温宵要 1 药材（雾月免），听宵要 40 铜钱（雷月 20）。",
-
   "consultJiejiStars": "问劫",
   "jiejiStarOmen": "问劫",
   "hint_consultJiejiStars_description": "耗费药材与铜钱，观一次当季星象。每季一次。雷月铜钱更省，雾月药材更省，血月再耗一线生机。观敌压下一场野遇、观财立刻得利、观劫赌业力或残页。",
@@ -2160,8 +1914,6 @@
   "hint_consultJiejiStars_ward_win": "星象应验。此战胜后多得 60 铜钱。",
   "hint_consultJiejiStars_cooldown": "本季已经问过一次劫。待下一季再来。",
   "hint_consultJiejiStars_notEnough": "问劫需要 {0} 药材和 {1} 铜钱。",
-
-
   "againJiejiStars": "再星",
   "jiejiStars": "再星",
   "hint_againJiejiStars_description": "卜算台可再星。一日一次。温星耗 1 药材（雾月免）回 6 命；借杀耗 40 铜钱（雷月 20）挂破军或拼酒劲；血星扣 2 命（血月 3）三成五残页，没掉则得 40 铜钱。",
@@ -2180,8 +1932,6 @@
   "hint_againJiejiStars_blood_money": "血星落成。残页未现，袖里多了 40 铜钱。",
   "hint_againJiejiStars_cooldown": "星象余辉未散。过一日再来再星。",
   "hint_againJiejiStars_notEnough": "温星要 1 药材（雾月免），借杀要 40 铜钱（雷月 20）。",
-
-
   "castJiejiStars": "再占",
   "jiejiCast": "再占",
   "hint_castJiejiStars_description": "卜算台另可再占。一日一次，与再星分开计。再温耗 1 药材（雾月免）回 6 命；再借耗 40 铜钱（雷月 20）两成残页，没掉则回 4 命；血占扣 2 命（血月 3）三成五残页，没掉则得 40 铜钱。",
@@ -2199,8 +1949,6 @@
   "hint_castJiejiStars_blood_money": "血占落成。残页未现，袖里多了 40 铜钱。",
   "hint_castJiejiStars_cooldown": "卦象余辉未散。过一日再来再占。",
   "hint_castJiejiStars_notEnough": "再温要 1 药材（雾月免），再借要 40 铜钱（雷月 20）。",
-
-
   "duelJiejiArena": "劫季切磋",
   "hint_duelJiejiArena_description": "花铜钱上台，与当季具名对手切磋。四程或一日才能再打。雷月入场 20，平常 40，血月 60。胜了拿彩头，败了只伤生机，不会丧命。",
   "hint_duelJiejiArena": "台下有人应了你的名帖。点到为止，败了也不过伤些筋骨。",
@@ -2230,7 +1978,6 @@
   "hint_drillJiejiArena_blood_heal": "血练过了。护身已在，生机回了 8 点。",
   "hint_drillJiejiArena_cooldown": "刚加练过。过一日再来。",
   "hint_drillJiejiArena_notEnough": "对桩要 30 铜钱（雷月 15），换招要 1 药材。",
-
   "trainJiejiArena": "复练",
   "jiejiTrain": "复练",
   "hint_trainJiejiArena_description": "演武场另可复练。一日一次，与加练分开计。再桩耗 25 铜钱（雷月 12）回 4 命（雾月另得 1 药材）；再招耗 1 药材得牌胚，约一成半残页（雾月另得 20 铜钱）；血复扣 2 命（血月 3）挂护身阵或回 6 命，两成五残页。",
@@ -2248,7 +1995,6 @@
   "hint_trainJiejiArena_blood_heal": "血复过了。护身已在，生机回了 6 点。",
   "hint_trainJiejiArena_cooldown": "复练余气未散。过一日再来复练。",
   "hint_trainJiejiArena_notEnough": "再桩要 25 铜钱（雷月 12），再招要 1 药材。",
-
   "visitJiejiTomb": "剑冢",
   "jiejiTomb": "剑冢",
   "hint_visitJiejiTomb_description": "秘境门口另有一座剑冢。一日一次。抚碑耗 30 铜钱（雷月 15）回 5 命并挂护身阵或护身神（下场承伤 -8%）；拔剑耗 1 药材得一枚牌胚，两成残页（雾月另得 20 铜钱）；血祭扣 2 命（血月 3）记一笔业力，血月另两成残页。",
@@ -2267,8 +2013,6 @@
   "hint_visitJiejiTomb_blood": "你在冢前祭了血。天道记下这一笔。",
   "hint_visitJiejiTomb_cooldown": "刚抚过冢。过一日再来。",
   "hint_visitJiejiTomb_notEnough": "抚碑要 30 铜钱（雷月 15），拔剑要 1 药材。",
-
-
   "delveJiejiTomb": "探穴",
   "jiejiDelve": "探穴",
   "hint_delveJiejiTomb_description": "冢旁另有浅穴可探。一日一次，与剑冢分开计。摸穴耗 25 铜钱（雷月 12）回 4 命（雾月另得 1 药材）；掘骨耗 1 药材得牌胚，两成残页（雾月另得 20 铜钱）；血穴扣 2 命（血月 3），三成残页，否则 45 铜钱。",
@@ -2306,8 +2050,6 @@
   "hint_probeJiejiTomb_blood_money": "血探未成残页。袋里落下 45 铜钱。",
   "hint_probeJiejiTomb_cooldown": "刚再探过穴。过一日再来。",
   "hint_probeJiejiTomb_notEnough": "再摸要 25 铜钱（雷月 12），再掘要 1 药材。",
-
-
   "bidJiejiBlackLot": "黑拍",
   "jiejiBlackLot": "黑拍",
   "hint_bidJiejiBlackLot_description": "柜台下另开一场黑拍。看三件货，拍一件。一日或走八程才能再来。雾月多雾货，雷月多雷晶，血月多血契。与路边黑市匣不同，这里是出价拍货。",
@@ -2334,7 +2076,6 @@
   "hint_bidJiejiBlackLot_thunder_money": "雷晶炸开。袋里多了 150 铜钱。",
   "hint_bidJiejiBlackLot_thunder_blank": "雷晶凝成一枚牌胚。",
   "hint_bidJiejiBlackLot_blood_money": "血契未成。袋里落下 200 铜钱。",
-
   "raiseJiejiBlackLot": "加拍",
   "jiejiRaise": "加拍",
   "hint_raiseJiejiBlackLot_description": "拍卖行可加拍。一日一次。围观耗 20 铜钱（雷月 10）得 1 药材（雾月 2）；加价耗 40 铜钱（雷月 20）挂迷障；血拍扣 2 命（血月 3）三成五残页，没掉则得 50 铜钱。",
@@ -2351,8 +2092,6 @@
   "hint_raiseJiejiBlackLot_blood_money": "血拍未成残页。袋里落下 50 铜钱。",
   "hint_raiseJiejiBlackLot_cooldown": "加拍余气未散。过一日再来加拍。",
   "hint_raiseJiejiBlackLot_notEnough": "围观要 20 铜钱（雷月 10），加价要 40 铜钱（雷月 20）。",
-
-
   "rebidJiejiBlackLot": "再拍",
   "jiejiRebid": "再拍",
   "hint_rebidJiejiBlackLot_description": "拍卖行可再拍。一日一次，与加拍分开计。再观耗 20 铜钱（雷月 10）得 1 药材（雾月再多 1）；再加耗 40 铜钱（雷月 20），两成残页，否则 2 药材；血再扣 2 命（血月 3），三成五残页，否则 50 铜钱。",
@@ -2371,13 +2110,11 @@
   "hint_rebidJiejiBlackLot_blood_money": "血再未成残页。袋里落下 {0} 铜钱。",
   "hint_rebidJiejiBlackLot_cooldown": "今日场边已再拍过一次。过一日再来。",
   "hint_rebidJiejiBlackLot_notEnough": "再观要 20 铜钱（雷月 10），再加要 40 铜钱（雷月 20）。",
-
   "hint_dungeon_need_deck": "进秘境前先指定一套出战卡组。没有卡组，锁门也锁不住。",
   "hint_dungeon_lock_deck": "此行将锁死出战卡组「{0}」。秘境内不能换整库、不能改构筑；拾取的季限牌离开时会消散。",
   "dungeonLockDeck": "确认锁卡组",
   "confirmLockDeck": "锁卡组，进门",
-  "hint_dungeon_deck_locked": "秘境门已落锁。此行不能换整库、不能改构筑。拾取仍可入牌。"
-  ,
+  "hint_dungeon_deck_locked": "秘境门已落锁。此行不能换整库、不能改构筑。拾取仍可入牌。",
   "karmaCodex": "业力录",
   "hint_karmaCodex_description": "翻看天道记下的业力牌。未见过的显示为未知。",
   "hint_karma_granted": "天道记下一笔。<yellow>{0}</>收入牌库（来源：{1}）。",
@@ -2392,7 +2129,6 @@
   "karma_source_gamble": "赌业",
   "karma_source_shrine": "业力祠",
   "karma_source_mist": "雾中邪路",
-
   "jieji_season_thunder": "雷月",
   "jieji_season_mist": "雾月",
   "jieji_season_blood": "血月",
@@ -2756,7 +2492,6 @@
   "karma_source_blade": "残锋",
   "karma_source_shame": "示众",
   "karma_source_lantern": "雾灯",
-
   "gongfa_thunder": "雷纹残页",
   "gongfa_guard": "守门残页",
   "gongfa_blood": "血祭残页",
@@ -2776,7 +2511,6 @@
   "hint_jieji_gongfa_skip": "未铭刻。当季残页化灰而去。",
   "hint_jieji_gongfa_none": "没有可收录的功法残页（已持有或无效）。",
   "jiejiGongfaEngrave": "铭刻残页",
-
   "jiejiDungeonEncampThunder": "雷月营地",
   "jiejiDungeonEncampMist": "雾月营地",
   "jiejiDungeonEncampBlood": "血月营地",
@@ -2981,7 +2715,7 @@
   "jieji_dungeon_next_jiejiDesk": "劫案",
   "jieji_dungeon_next_jiejiScreen": "劫屏",
   "jieji_dungeon_next_jiejiUrn": "劫瓮",
-    "jieji_dungeon_next_jiejiRack": "劫架",
+  "jieji_dungeon_next_jiejiRack": "劫架",
   "jieji_dungeon_next_jiejiBasin": "劫盆",
   "jieji_dungeon_next_jiejiPedestal": "劫座",
   "jieji_dungeon_next_jiejiCrate": "劫箱",
@@ -3417,7 +3151,6 @@
   "hint_jieji_dungeon_sealgong_broke": "封锣要 {0} 铜钱。袋里不够，封符自己落了。",
   "hint_jieji_dungeon_bloodgong": "你割了 {0} 点生机以血启锣。业力入袖。",
   "hint_jieji_dungeon_bloodgong_none": "血启落下，残卷却散了。袋里多了 {0} 铜钱。",
-
   "hint_jieji_dungeon_tapestry_room": "厅中垂着一幅劫帷。你可以掀帷、封帷，或以血启帷。",
   "jieji_dungeon_lifttapestry": "掀帷",
   "jieji_dungeon_sealtapestry": "封帷",
@@ -3429,7 +3162,6 @@
   "hint_jieji_dungeon_sealtapestry_broke": "封帷要 {0} 铜钱。袋里不够，封符自己落了。",
   "hint_jieji_dungeon_bloodtapestry": "你割了 {0} 点生机以血启帷。业力入袖。",
   "hint_jieji_dungeon_bloodtapestry_none": "血启落下，残卷却散了。袋里多了 {0} 铜钱。",
-
   "hint_jieji_dungeon_plaque_room": "厅中挂着一块劫匾。你可以观匾、封匾，或以血启匾。",
   "jieji_dungeon_readplaque": "观匾",
   "jieji_dungeon_sealplaque": "封匾",
@@ -3441,7 +3173,6 @@
   "hint_jieji_dungeon_sealplaque_broke": "封匾要 {0} 铜钱。袋里不够，封符自己落了。",
   "hint_jieji_dungeon_bloodplaque": "你割了 {0} 点生机以血启匾。业力入袖。",
   "hint_jieji_dungeon_bloodplaque_none": "血启落下，残卷却散了。袋里多了 {0} 铜钱。",
-
   "hint_jieji_dungeon_lintel_room": "厅中挂着一道劫楣。你可以观楣、封楣，或以血启楣。",
   "jieji_dungeon_readlintel": "观楣",
   "jieji_dungeon_seallintel": "封楣",
@@ -3453,7 +3184,6 @@
   "hint_jieji_dungeon_seallintel_broke": "封楣要 {0} 铜钱。袋里不够，封符自己落了。",
   "hint_jieji_dungeon_bloodlintel": "你割了 {0} 点生机以血启楣。业力入袖。",
   "hint_jieji_dungeon_bloodlintel_none": "血启落下，残卷却散了。袋里多了 {0} 铜钱。",
-
   "hint_jieji_dungeon_eaves_room": "厅中挂着一道劫檐。你可以观檐、封檐，或以血启檐。",
   "jieji_dungeon_readeaves": "观檐",
   "jieji_dungeon_sealeaves": "封檐",
@@ -3465,7 +3195,6 @@
   "hint_jieji_dungeon_sealeaves_broke": "封檐要 {0} 铜钱。袋里不够，封符自己落了。",
   "hint_jieji_dungeon_bloodeaves": "你割了 {0} 点生机以血启檐。业力入袖。",
   "hint_jieji_dungeon_bloodeaves_none": "血启落下，残卷却散了。袋里多了 {0} 铜钱。",
-
   "hint_jieji_dungeon_frame_room": "厅中立着一道劫框。你可以观框、封框，或以血启框。",
   "jieji_dungeon_readframe": "观框",
   "jieji_dungeon_sealframe": "封框",
@@ -3477,7 +3206,6 @@
   "hint_jieji_dungeon_sealframe_broke": "封框要 {0} 铜钱。袋里不够，封符自己落了。",
   "hint_jieji_dungeon_bloodframe": "你割了 {0} 点生机以血启框。业力入袖。",
   "hint_jieji_dungeon_bloodframe_none": "血启落下，残卷却散了。袋里多了 {0} 铜钱。",
-
   "hint_jieji_dungeon_panel_room": "厅中立着一道劫板。你可以观板、封板，或以血启板。",
   "jieji_dungeon_readpanel": "观板",
   "jieji_dungeon_sealpanel": "封板",
@@ -3489,7 +3217,6 @@
   "hint_jieji_dungeon_sealpanel_broke": "封板要 {0} 铜钱。袋里不够，封符自己落了。",
   "hint_jieji_dungeon_bloodpanel": "你割了 {0} 点生机以血启板。业力入袖。",
   "hint_jieji_dungeon_bloodpanel_none": "血启落下，残卷却散了。袋里多了 {0} 铜钱。",
-
   "hint_jieji_dungeon_board_room": "厅中立着一道劫枋。你可以观枋、封枋，或以血启枋。",
   "jieji_dungeon_readboard": "观枋",
   "jieji_dungeon_sealboard": "封枋",
@@ -3501,7 +3228,6 @@
   "hint_jieji_dungeon_sealboard_broke": "封枋要 {0} 铜钱。袋里不够，封符自己落了。",
   "hint_jieji_dungeon_bloodboard": "你割了 {0} 点生机以血启枋。业力入袖。",
   "hint_jieji_dungeon_bloodboard_none": "血启落下，残卷却散了。袋里多了 {0} 铜钱。",
-
   "hint_jieji_dungeon_slate_room": "厅中立着一道劫石。你可以观石、封石，或以血启石。",
   "jieji_dungeon_readslate": "观石",
   "jieji_dungeon_sealslate": "封石",
@@ -3513,7 +3239,6 @@
   "hint_jieji_dungeon_sealslate_broke": "封石要 {0} 铜钱。袋里不够，封符自己落了。",
   "hint_jieji_dungeon_bloodslate": "你割了 {0} 点生机以血启石。业力入袖。",
   "hint_jieji_dungeon_bloodslate_none": "血启落下，残卷却散了。袋里多了 {0} 铜钱。",
-
   "hint_jieji_dungeon_finial_room": "厅中立着一道劫顶。你可以观顶、封顶，或以血启顶。",
   "jieji_dungeon_readfinial": "观顶",
   "jieji_dungeon_sealfinial": "封顶",
@@ -3525,7 +3250,6 @@
   "hint_jieji_dungeon_sealfinial_broke": "封顶要 {0} 铜钱。袋里不够，封符自己落了。",
   "hint_jieji_dungeon_bloodfinial": "你割了 {0} 点生机以血启顶。业力入袖。",
   "hint_jieji_dungeon_bloodfinial_none": "血启落下，残卷却散了。袋里多了 {0} 铜钱。",
-
   "hint_jieji_dungeon_pediment_room": "厅中立着一道劫额。你可以观额、封额，或以血启额。",
   "jieji_dungeon_readpediment": "观额",
   "jieji_dungeon_sealpediment": "封额",
@@ -3537,7 +3261,6 @@
   "hint_jieji_dungeon_sealpediment_broke": "封额要 {0} 铜钱。袋里不够，封符自己落了。",
   "hint_jieji_dungeon_bloodpediment": "你割了 {0} 点生机以血启额。业力入袖。",
   "hint_jieji_dungeon_bloodpediment_none": "血启落下，残卷却散了。袋里多了 {0} 铜钱。",
-
   "hint_jieji_dungeon_frieze_room": "厅中立着一道劫饰。你可以观饰、封饰，或以血启饰。",
   "jieji_dungeon_readfrieze": "观饰",
   "jieji_dungeon_sealfrieze": "封饰",
@@ -3670,8 +3393,6 @@
   "hint_jieji_dungeon_sealkeystone_broke": "封心要 {0} 铜钱。袋里不够，封符自己落了。",
   "hint_jieji_dungeon_bloodkeystone": "你割了 {0} 点生机以血启心。业力入袖。",
   "hint_jieji_dungeon_bloodkeystone_none": "血启落下，残卷却散了。袋里多了 {0} 铜钱。",
-
-
   "jiejiDungeonExitGift": "劫礼",
   "hint_jieji_dungeon_exit": "出口处劫气未散。你可以清点行囊、包扎伤口，或疾行离开。",
   "jieji_dungeon_pack": "清点",
@@ -3681,7 +3402,6 @@
   "hint_jieji_dungeon_bind": "你包扎了伤口。生机回了 {0} 点。",
   "hint_jieji_dungeon_dash": "你赶了一日近路。生机回了 {0} 点，还摸到 {1} 药材。",
   "hint_jieji_dungeon_dash_noday": "你抄近路出了秘境。生机回了 {0} 点，还摸到 {1} 药材。",
-
   "jiejiCityRumor": "劫谣",
   "hint_jieji_city_rumor": "城门口有人低声传谣。你可以听一听、打点门卫，或不理。一城一季一次。",
   "jieji_rumor_listen": "听谣",
@@ -3694,7 +3414,6 @@
   "hint_jieji_city_rumor_listen_money": "你把谣听全了。袋里多了 40 铜钱。",
   "hint_jieji_city_rumor_bribe": "你塞了 {0} 铜钱。门卫让开，生机回了 {1} 点。",
   "hint_jieji_city_rumor_bribe_broke": "打点要 {0} 铜钱。袋里不够，门卫没看你。",
-
   "jiejiSeasonEve": "劫兆",
   "hint_jieji_season_eve": "天边劫气提前压了下来。季末将近，你可以备粮、祭刀，或闭门避一避。一季一次。",
   "jieji_eve_stock": "备粮",
@@ -3707,7 +3426,6 @@
   "hint_jieji_season_eve_stock_broke": "备粮要 {0} 铜钱。袋里不够，这一季的劫兆你没赶上备粮。",
   "hint_jieji_season_eve_rite": "你祭了刀，扣了 {0} 点生机。下一场你出手更狠。",
   "hint_jieji_season_eve_hide": "你闭门不出。生机回了 {0} 点。迷障挂上，下次野遇会被糊弄过去。",
-
   "jiejiScavenge": "拾荒",
   "hint_jieji_scavenge": "{0}边上堆着残物。你可以翻拣、深挖，或路过。",
   "jieji_scavenge_pick": "翻拣",
@@ -3720,7 +3438,6 @@
   "hint_jieji_scavenge_dig_ore": "你深挖了一日。摸出 {0} 矿石。",
   "hint_jieji_scavenge_dig_money": "你深挖了一日。袋里多了 {0} 铜钱。",
   "hint_jieji_scavenge_dig_hurt": "你深挖了一日。土里有刺，生机少了 {0} 点。",
-
   "jiejiCamp": "扎营",
   "hint_jieji_camp": "天色将晚。你可以歇火过夜、守一夜，或拔营赶路。",
   "jieji_camp_rest": "歇火",
@@ -3733,7 +3450,6 @@
   "hint_jieji_camp_watch_ok": "你守了一夜。生机少了 {0} 点。迷障挂上，下次野遇会被糊弄过去。",
   "hint_jieji_camp_watch_thunder": "你守了一夜。生机少了 {0} 点，袋里多了 {1} 铜钱。迷障挂上，下次野遇会被糊弄过去。",
   "hint_jieji_camp_leave_ok": "你拔营赶路。袋里多了 {0} 铜钱。",
-
   "jiejiBlade": "残锋",
   "hint_jieji_blade": "路边插着一截残锋。你可以拾起来、试一试刃，或路过。",
   "jieji_blade_pick": "拾锋",
@@ -3745,7 +3461,6 @@
   "hint_jieji_blade_pick_ok": "你拾起残锋。得了 {0} 药材、{1} 铜钱。",
   "hint_jieji_blade_test_blank": "你试了刃。残铁化作一枚牌胚。",
   "hint_jieji_blade_test_hurt": "你试了刃。锋口回咬，生机少了 {0} 点。",
-
   "jiejiScroll": "劫纹残卷",
   "hint_jieji_scroll": "路边落着一卷残页。你可以展开来读、抄录一份，或按上血印。",
   "jieji_scroll_read": "展卷",
@@ -3760,7 +3475,6 @@
   "hint_jieji_scroll_copy_broke": "抄录要 {0} 铜钱。袋里不够。",
   "hint_jieji_scroll_smear_ok": "你割了 {0} 点生机按上血印。",
   "hint_jieji_scroll_smear_none": "血印下去，残卷却散了。袋里多了 {0} 铜钱。",
-
   "jiejiLantern": "雾灯",
   "hint_jieji_lantern": "路边一盏雾灯摇着。你可以跟着走、摘下来，或拿血去续。",
   "jieji_lantern_follow": "随灯",
@@ -3775,7 +3489,6 @@
   "hint_jieji_lantern_take_broke": "摘灯要 {0} 铜钱。袋里不够。",
   "hint_jieji_lantern_blood_ok": "你割了 {0} 点生机续上雾灯。",
   "hint_jieji_lantern_blood_none": "血灯下去，灯焰却散了。袋里多了 {0} 铜钱。",
-
   "jiejiEcho": "残鼓",
   "hint_jieji_echo": "路边一面残鼓还在响。你可以应一声、拾一层皮，或拿血去应。",
   "jieji_echo_answer": "应声",
@@ -3792,7 +3505,6 @@
   "hint_jieji_echo_take_broke": "拾皮要 {0} 铜钱。袋里不够。",
   "hint_jieji_echo_blood_ok": "你割了 {0} 点生机去应残鼓。",
   "hint_jieji_echo_blood_none": "血应下去，鼓声却散了。袋里多了 {0} 铜钱。",
-
   "jiejiDraw": "汲泉",
   "hint_jieji_draw": "路边一口浅泉还在冒。你可以捧来喝、灌进袋，或拿血去汲。",
   "jieji_draw_drink": "捧饮",
@@ -3807,7 +3519,6 @@
   "hint_jieji_draw_fill_broke": "灌袋要 {0} 铜钱。袋里不够。",
   "hint_jieji_draw_blood_ok": "你割了 {0} 点生机去汲泉。",
   "hint_jieji_draw_blood_none": "血汲下去，泉眼却散了。袋里多了 {0} 铜钱。",
-
   "jiejiPennant": "劫幡",
   "hint_jieji_pennant": "路边一面劫幡还在晃。你可以扶稳它、收起来，或拿血去染。",
   "jieji_pennant_raise": "扶幡",
@@ -3822,7 +3533,6 @@
   "hint_jieji_pennant_take_broke": "收幡要 {0} 铜钱。袋里不够。",
   "hint_jieji_pennant_blood_ok": "你割了 {0} 点生机去染劫幡。",
   "hint_jieji_pennant_blood_none": "血幡下去，幡影却散了。袋里多了 {0} 铜钱。",
-
   "jiejiChime": "劫铃",
   "hint_jieji_chime": "路边一串劫铃还在响。你可以听一听、摘下来，或拿血去染。",
   "jieji_chime_listen": "听铃",
@@ -3837,7 +3547,6 @@
   "hint_jieji_chime_pick_broke": "摘铃要 {0} 铜钱。袋里不够。",
   "hint_jieji_chime_blood_ok": "你割了 {0} 点生机去染劫铃。",
   "hint_jieji_chime_blood_none": "血铃下去，铃声却散了。袋里多了 {0} 铜钱。",
-
   "jiejiTalisman": "劫符",
   "hint_jieji_talisman": "路边有一张半脱落的劫符。你可以贴符、揭符，或以血符。",
   "jieji_talisman_paste": "贴符",
@@ -3852,7 +3561,6 @@
   "hint_jieji_talisman_peel_broke": "揭符要 {0} 铜钱。袋里不够。",
   "hint_jieji_talisman_blood_ok": "你割了 {0} 点生机去写血符。",
   "hint_jieji_talisman_blood_none": "血符下去，符影却散了。袋里多了 {0} 铜钱。",
-
   "jiejiStreamer": "劫旌",
   "hint_jieji_streamer": "路边立着一杆半倒的劫旌。你可以扶旌、收旌，或以血旌。",
   "jieji_streamer_raise": "扶旌",
@@ -3867,8 +3575,6 @@
   "hint_jieji_streamer_take_broke": "收旌要 {0} 铜钱。袋里不够。",
   "hint_jieji_streamer_blood_ok": "你割了 {0} 点生机去染劫旌。",
   "hint_jieji_streamer_blood_none": "血旌下去，旌影却散了。袋里多了 {0} 铜钱。",
-
-
   "jiejiCandle": "劫烛",
   "hint_jieji_candle": "路边残着半截劫烛。你可以燃烛、收烛，或以血烛。",
   "jieji_candle_light": "燃烛",
@@ -3883,7 +3589,6 @@
   "hint_jieji_candle_snuff_broke": "收烛要 {0} 铜钱。袋里不够。",
   "hint_jieji_candle_bloodcandle_ok": "你割了 {0} 点生机去染劫烛。",
   "hint_jieji_candle_bloodcandle_none": "血烛下去，烛影却散了。袋里多了 {0} 铜钱。",
-
   "jiejiHorn": "劫角",
   "hint_jieji_horn": "路边搁着一只半裂的劫角。你可以吹角、收角，或以血角。",
   "jieji_horn_blow": "吹角",
@@ -3898,8 +3603,6 @@
   "hint_jieji_horn_pack_broke": "收角要 {0} 铜钱。袋里不够。",
   "hint_jieji_horn_bloodhorn_ok": "你割了 {0} 点生机去染劫角。",
   "hint_jieji_horn_bloodhorn_none": "血角下去，角声却散了。袋里多了 {0} 铜钱。",
-
-
   "jiejiFlute": "劫笛",
   "hint_jieji_flute": "路边落着一支劫笛。你可以吹笛、收笛，或以血笛。",
   "jieji_flute_play": "吹笛",
@@ -3914,7 +3617,6 @@
   "hint_jieji_flute_pocket_broke": "收笛要 {0} 铜钱。袋里不够。",
   "hint_jieji_flute_bloodflute_ok": "你割了 {0} 点生机去染劫笛。",
   "hint_jieji_flute_bloodflute_none": "血笛下去，笛声却散了。袋里多了 {0} 铜钱。",
-
   "jiejiHat": "劫笠",
   "hint_jieji_hat": "路边倒着一顶劫笠。你可以戴笠、收笠，或以血笠。",
   "jieji_hat_wear": "戴笠",
@@ -3929,7 +3631,6 @@
   "hint_jieji_hat_stow_broke": "收笠要 {0} 铜钱。袋里不够。",
   "hint_jieji_hat_bloodhat_ok": "你割了 {0} 点生机去染劫笠。",
   "hint_jieji_hat_bloodhat_none": "血笠下去，笠影却散了。袋里多了 {0} 铜钱。",
-
   "jiejiSash": "劫带",
   "hint_jieji_sash": "路边散着一条劫带。你可以系带、收带，或以血带。",
   "jieji_sash_tie": "系带",
@@ -4000,7 +3701,6 @@
   "hint_jieji_staff_stowstaff_broke": "收杖要 {0} 铜钱。袋里不够。",
   "hint_jieji_staff_bloodstaff_ok": "你割了 {0} 点生机去染劫杖。",
   "hint_jieji_staff_bloodstaff_none": "血杖下去，杖影却散了。袋里多了 {0} 铜钱。",
-
   "jiejiUmbrella": "劫伞",
   "hint_jieji_umbrella": "路边斜靠着一把劫伞。你可以撑伞、收伞，或以血伞。",
   "jieji_umbrella_openumb": "撑伞",
@@ -4015,7 +3715,6 @@
   "hint_jieji_umbrella_stowumb_broke": "收伞要 {0} 铜钱。袋里不够。",
   "hint_jieji_umbrella_bloodumb_ok": "你割了 {0} 点生机去染劫伞。",
   "hint_jieji_umbrella_bloodumb_none": "血伞下去，伞影却散了。袋里多了 {0} 铜钱。",
-
   "jiejiMask": "劫面",
   "hint_jieji_mask": "路边落着一副劫面。你可以戴面、收面，或以血面。",
   "jieji_mask_donmask": "戴面",
@@ -4030,7 +3729,6 @@
   "hint_jieji_mask_stowmask_broke": "收面要 {0} 铜钱。袋里不够。",
   "hint_jieji_mask_bloodmask_ok": "你割了 {0} 点生机去染劫面。",
   "hint_jieji_mask_bloodmask_none": "血面下去，面影却散了。袋里多了 {0} 铜钱。",
-
   "jiejiShawl": "劫帔",
   "hint_jieji_shawl": "路边搭着一件劫帔。你可以披帔、收帔，或以血帔。",
   "jieji_shawl_donshawl": "披帔",
@@ -4045,8 +3743,6 @@
   "hint_jieji_shawl_stowshawl_broke": "收帔要 {0} 铜钱。袋里不够。",
   "hint_jieji_shawl_bloodshawl_ok": "你割了 {0} 点生机去染劫帔。",
   "hint_jieji_shawl_bloodshawl_none": "血帔下去，帔影却散了。袋里多了 {0} 铜钱。",
-
-
   "jiejiGlove": "劫手套",
   "hint_jieji_glove": "路边搁着一双劫手套。你可以戴套、收套，或以血套。",
   "jieji_glove_donglove": "戴套",
@@ -4061,8 +3757,6 @@
   "hint_jieji_glove_stowglove_broke": "收套要 {0} 铜钱。袋里不够。",
   "hint_jieji_glove_bloodglove_ok": "你割了 {0} 点生机去染劫手套。",
   "hint_jieji_glove_bloodglove_none": "血套下去，套影却散了。袋里多了 {0} 铜钱。",
-
-
   "jiejiRing": "劫戒",
   "hint_jieji_ring": "路边闪着一枚劫戒。你可以戴戒、收戒，或以血戒。",
   "jieji_ring_donring": "戴戒",
@@ -4077,8 +3771,6 @@
   "hint_jieji_ring_stowring_broke": "收戒要 {0} 铜钱。袋里不够。",
   "hint_jieji_ring_bloodring_ok": "你割了 {0} 点生机去染劫戒。",
   "hint_jieji_ring_bloodring_none": "血戒下去，戒影却散了。袋里多了 {0} 铜钱。",
-
-
   "jiejiMirror": "劫镜",
   "hint_jieji_mirror": "路边搁着一面劫镜。你可以照镜、收镜，或以血镜。",
   "jieji_mirror_gazemirror": "照镜",
@@ -4093,8 +3785,6 @@
   "hint_jieji_mirror_stowmirror_broke": "收镜要 {0} 铜钱。袋里不够。",
   "hint_jieji_mirror_bloodmirror_ok": "你割了 {0} 点生机去染劫镜。",
   "hint_jieji_mirror_bloodmirror_none": "血镜下去，镜影却散了。袋里多了 {0} 铜钱。",
-
-
   "jiejiDrum": "劫鼓",
   "hint_jieji_drum": "路边搁着一面劫鼓。你可以击鼓、收鼓，或以血鼓。",
   "jieji_drum_beatdrum": "击鼓",
@@ -4109,8 +3799,6 @@
   "hint_jieji_drum_stowdrum_broke": "收鼓要 {0} 铜钱。袋里不够。",
   "hint_jieji_drum_blooddrum_ok": "你割了 {0} 点生机去染劫鼓。",
   "hint_jieji_drum_blooddrum_none": "血鼓下去，鼓影却散了。袋里多了 {0} 铜钱。",
-
-
   "jiejiTorch": "劫炬",
   "hint_jieji_torch": "路边搁着一支劫炬。你可以燃炬、收炬，或以血炬。",
   "jieji_torch_lighttorch": "燃炬",
@@ -4125,8 +3813,6 @@
   "hint_jieji_torch_stowtorch_broke": "收炬要 {0} 铜钱。袋里不够。",
   "hint_jieji_torch_bloodtorch_ok": "你割了 {0} 点生机去染劫炬。",
   "hint_jieji_torch_bloodtorch_none": "血炬下去，炬影却散了。袋里多了 {0} 铜钱。",
-
-
   "jiejiComb": "劫梳",
   "hint_jieji_comb": "路边搁着一把劫梳。你可以梳头、收梳，或以血梳。",
   "jieji_comb_drawcomb": "梳头",
@@ -4141,8 +3827,6 @@
   "hint_jieji_comb_stowcomb_broke": "收梳要 {0} 铜钱。袋里不够。",
   "hint_jieji_comb_bloodcomb_ok": "你割了 {0} 点生机去染劫梳。",
   "hint_jieji_comb_bloodcomb_none": "血梳下去，梳影却散了。袋里多了 {0} 铜钱。",
-
-
   "jiejiLadle": "劫勺",
   "hint_jieji_ladle": "路边搁着一把劫勺。你可以舀勺、收勺，或以血勺。",
   "jieji_ladle_scoopladle": "舀勺",
@@ -4157,8 +3841,6 @@
   "hint_jieji_ladle_stowladle_broke": "收勺要 {0} 铜钱。袋里不够。",
   "hint_jieji_ladle_bloodladle_ok": "你割了 {0} 点生机去染劫勺。",
   "hint_jieji_ladle_bloodladle_none": "血勺下去，勺影却散了。袋里多了 {0} 铜钱。",
-
-
   "jiejiBowl": "劫碗",
   "hint_jieji_bowl": "路边搁着一只劫碗。你可以捧碗、收碗，或以血碗。",
   "jieji_bowl_holdbowl": "捧碗",
@@ -4173,8 +3855,6 @@
   "hint_jieji_bowl_stowbowl_broke": "收碗要 {0} 铜钱。袋里不够。",
   "hint_jieji_bowl_bloodbowl_ok": "你割了 {0} 点生机去染劫碗。",
   "hint_jieji_bowl_bloodbowl_none": "血碗下去，碗影却散了。袋里多了 {0} 铜钱。",
-
-
   "jiejiCup": "劫杯",
   "hint_jieji_cup": "路边搁着一只劫杯。你可以举杯、收杯，或以血杯。",
   "jieji_cup_raisecup": "举杯",
@@ -4189,8 +3869,6 @@
   "hint_jieji_cup_stowcup_broke": "收杯要 {0} 铜钱。袋里不够。",
   "hint_jieji_cup_bloodcup_ok": "你割了 {0} 点生机去染劫杯。",
   "hint_jieji_cup_bloodcup_none": "血杯下去，杯影却散了。袋里多了 {0} 铜钱。",
-
-
   "jiejiJar": "劫罐",
   "hint_jieji_jar": "路边搁着一只劫罐。你可以启罐、收罐，或以血罐。",
   "jieji_jar_openjar": "启罐",
@@ -4205,8 +3883,6 @@
   "hint_jieji_jar_stowjar_broke": "收罐要 {0} 铜钱。袋里不够。",
   "hint_jieji_jar_bloodjar_ok": "你割了 {0} 点生机去染劫罐。",
   "hint_jieji_jar_bloodjar_none": "血罐下去，罐影却散了。袋里多了 {0} 铜钱。",
-
-
   "jiejiVial": "劫瓶",
   "hint_jieji_vial": "路边搁着一只劫瓶。你可以启瓶、收瓶，或以血瓶。",
   "jieji_vial_openvial": "启瓶",
@@ -4221,8 +3897,6 @@
   "hint_jieji_vial_stowvial_broke": "收瓶要 {0} 铜钱。袋里不够。",
   "hint_jieji_vial_bloodvial_ok": "你割了 {0} 点生机去染劫瓶。",
   "hint_jieji_vial_bloodvial_none": "血瓶下去，瓶影却散了。袋里多了 {0} 铜钱。",
-
-
   "jiejiInk": "劫墨",
   "hint_jieji_ink": "路边搁着一锭劫墨。你可以研墨、收墨，或以血墨。",
   "jieji_ink_grindink": "研墨",
@@ -4237,8 +3911,6 @@
   "hint_jieji_ink_stowink_broke": "收墨要 {0} 铜钱。袋里不够。",
   "hint_jieji_ink_bloodink_ok": "你割了 {0} 点生机去染劫墨。",
   "hint_jieji_ink_bloodink_none": "血墨下去，墨影却散了。袋里多了 {0} 铜钱。",
-
-
   "jiejiRobe": "劫袍",
   "hint_jieji_robe": "路遇一袭劫袍。你可以披袍、折袍，或以血染袍。",
   "jieji_robe_donrobe": "披袍",
@@ -4253,8 +3925,6 @@
   "hint_jieji_robe_foldrobe_broke": "折袍要 {0} 铜钱。袋里不够。",
   "hint_jieji_robe_bloodrobe_ok": "你割了 {0} 点生机去染劫袍。",
   "hint_jieji_robe_bloodrobe_none": "血袍下去，袍影却散了。袋里多了 {0} 铜钱。",
-
-
   "jiejiBelt": "劫带",
   "hint_jieji_belt": "路遇一根劫带。你可以系带、折带，或以血染带。",
   "jieji_belt_tiebelt": "系带",
@@ -4269,8 +3939,6 @@
   "hint_jieji_belt_foldbelt_broke": "折带要 {0} 铜钱。袋里不够。",
   "hint_jieji_belt_bloodbelt_ok": "你割了 {0} 点生机去染劫带。",
   "hint_jieji_belt_bloodbelt_none": "血带下去，带影却散了。袋里多了 {0} 铜钱。",
-
-
   "jiejiPin": "劫簪",
   "hint_jieji_pin": "路遇一支劫簪。你可以簪发、折簪，或以血染簪。",
   "jieji_pin_wearpin": "簪发",
@@ -4285,8 +3953,6 @@
   "hint_jieji_pin_foldpin_broke": "折簪要 {0} 铜钱。袋里不够。",
   "hint_jieji_pin_bloodpin_ok": "你割了 {0} 点生机去染劫簪。",
   "hint_jieji_pin_bloodpin_none": "血簪下去，簪影却散了。袋里多了 {0} 铜钱。",
-
-
   "jiejiBrush": "劫笔",
   "hint_jieji_brush": "路遇一支劫笔。你可以落笔、折笔，或以血染笔。",
   "jieji_brush_writebrush": "落笔",
@@ -4301,8 +3967,6 @@
   "hint_jieji_brush_foldbrush_broke": "折笔要 {0} 铜钱。袋里不够。",
   "hint_jieji_brush_bloodbrush_ok": "你割了 {0} 点生机去染劫笔。",
   "hint_jieji_brush_bloodbrush_none": "血笔下去，笔影却散了。袋里多了 {0} 铜钱。",
-
-
   "jiejiNeedle": "劫针",
   "hint_jieji_needle": "路遇一根劫针。你可以穿针、折针，或以血染针。",
   "jieji_needle_threadneedle": "穿针",
@@ -4317,8 +3981,6 @@
   "hint_jieji_needle_foldneedle_broke": "折针要 {0} 铜钱。袋里不够。",
   "hint_jieji_needle_bloodneedle_ok": "你割了 {0} 点生机去染劫针。",
   "hint_jieji_needle_bloodneedle_none": "血针下去，针影却散了。袋里多了 {0} 铜钱。",
-
-
   "jiejiClasp": "劫扣",
   "hint_jieji_clasp": "路遇一枚劫扣。你可以扣合、折扣，或以血染扣。",
   "jieji_clasp_fastenclasp": "扣合",
@@ -4333,8 +3995,6 @@
   "hint_jieji_clasp_foldclasp_broke": "折扣要 {0} 铜钱。袋里不够。",
   "hint_jieji_clasp_bloodclasp_ok": "你割了 {0} 点生机去染劫扣。",
   "hint_jieji_clasp_bloodclasp_none": "血扣下去，扣影却散了。袋里多了 {0} 铜钱。",
-
-
   "jiejiCord": "劫绳",
   "hint_jieji_cord": "路遇一根劫绳。你可以结绳、折绳，或以血染绳。",
   "jieji_cord_knotcord": "结绳",
@@ -4349,8 +4009,6 @@
   "hint_jieji_cord_foldcord_broke": "折绳要 {0} 铜钱。袋里不够。",
   "hint_jieji_cord_bloodcord_ok": "你割了 {0} 点生机去染劫绳。",
   "hint_jieji_cord_bloodcord_none": "血绳下去，绳影却散了。袋里多了 {0} 铜钱。",
-
-
   "jiejiBead": "劫珠",
   "hint_jieji_bead": "路遇一颗劫珠。你可以佩珠、折珠，或以血染珠。",
   "jieji_bead_wearbead": "佩珠",
@@ -4365,8 +4023,6 @@
   "hint_jieji_bead_foldbead_broke": "折珠要 {0} 铜钱。袋里不够。",
   "hint_jieji_bead_bloodbead_ok": "你割了 {0} 点生机去染劫珠。",
   "hint_jieji_bead_bloodbead_none": "血珠下去，珠影却散了。袋里多了 {0} 铜钱。",
-
-
   "jiejiBrooch": "劫钗",
   "hint_jieji_brooch": "路遇一支劫钗。你可以佩钗、折钗，或以血染钗。",
   "jieji_brooch_wearbrooch": "佩钗",
@@ -4381,8 +4037,6 @@
   "hint_jieji_brooch_foldbrooch_broke": "折钗要 {0} 铜钱。袋里不够。",
   "hint_jieji_brooch_bloodbrooch_ok": "你割了 {0} 点生机去染劫钗。",
   "hint_jieji_brooch_bloodbrooch_none": "血钗下去，钗影却散了。袋里多了 {0} 铜钱。",
-
-
   "jiejiLace": "劫绦",
   "hint_jieji_lace": "路遇一条劫绦。你可以系绦、解绦，或以血染绦。",
   "jieji_lace_tiklace": "系绦",
@@ -4423,7 +4077,6 @@
   "hint_jieji_ribbon_looseribbon_broke": "解缎要 {0} 铜钱。袋里不够。",
   "hint_jieji_ribbon_bloodribbon_ok": "你割了 {0} 点生机去染劫缎。",
   "hint_jieji_ribbon_bloodribbon_none": "血缎下去，缎影却散了。袋里多了 {0} 铜钱。",
-
   "hint_jieji_fringe": "路遇一缕劫缨。你可以系缨、解缨，或以血染缨。",
   "jieji_fringe_tiefringe": "系缨",
   "jieji_fringe_loosefringe": "解缨",
@@ -4437,8 +4090,6 @@
   "hint_jieji_fringe_loosefringe_broke": "解缨要 {0} 铜钱。袋里不够。",
   "hint_jieji_fringe_bloodfringe_ok": "你割了 {0} 点生机去染劫缨。",
   "hint_jieji_fringe_bloodfringe_none": "血缨下去，缨影却散了。袋里多了 {0} 铜钱。",
-
-
   "hint_jieji_cuff": "路遇一只劫袖。你可以系袖、解袖，或以血染袖。",
   "jieji_cuff_tiecuff": "系袖",
   "jieji_cuff_loosecuff": "解袖",
@@ -4452,8 +4103,6 @@
   "hint_jieji_cuff_loosecuff_broke": "解袖要 {0} 铜钱。袋里不够。",
   "hint_jieji_cuff_bloodcuff_ok": "你割了 {0} 点生机去染劫袖。",
   "hint_jieji_cuff_bloodcuff_none": "血袖下去，袖影却散了。袋里多了 {0} 铜钱。",
-
-
   "hint_jieji_collar": "路遇一只劫领。你可以系领、解领，或以血染领。",
   "jieji_collar_tiecollar": "系领",
   "jieji_collar_loosecollar": "解领",
@@ -4467,8 +4116,6 @@
   "hint_jieji_collar_loosecollar_broke": "解领要 {0} 铜钱。袋里不够。",
   "hint_jieji_collar_bloodcollar_ok": "你割了 {0} 点生机去染劫领。",
   "hint_jieji_collar_bloodcollar_none": "血领下去，领影却散了。袋里多了 {0} 铜钱。",
-
-
   "hint_jieji_hem": "路遇一只劫缘。你可以系缘、解缘，或以血染缘。",
   "jieji_hem_tiehem": "系缘",
   "jieji_hem_loosehem": "解缘",
@@ -4521,7 +4168,6 @@
   "hint_jieji_wrap_loosewrap_broke": "解裹要 {0} 铜钱。袋里不够。",
   "hint_jieji_wrap_bloodwrap_ok": "你割了 {0} 点生机去染劫裹。",
   "hint_jieji_wrap_bloodwrap_none": "血裹下去，裹影却散了。袋里多了 {0} 铜钱。",
-
   "hint_jieji_yoke": "路遇一道劫轭。你可以系轭、解轭，或以血染轭。",
   "jieji_yoke_tieyoke": "系轭",
   "jieji_yoke_looseyoke": "解轭",
@@ -4535,7 +4181,6 @@
   "hint_jieji_yoke_looseyoke_broke": "解轭要 {0} 铜钱。袋里不够。",
   "hint_jieji_yoke_bloodyoke_ok": "你割了 {0} 点生机去染劫轭。",
   "hint_jieji_yoke_bloodyoke_none": "血轭下去，轭影却散了。袋里多了 {0} 铜钱。",
-
   "hint_jieji_rein": "路遇一副劫辔。你可以勒辔、收辔，或以血染辔。",
   "jieji_rein_lerein": "勒辔",
   "jieji_rein_stowrein": "收辔",
@@ -4549,7 +4194,6 @@
   "hint_jieji_rein_stowrein_broke": "收辔要 {0} 铜钱。袋里不够。",
   "hint_jieji_rein_bloodrein_ok": "你割了 {0} 点生机去染劫辔。",
   "hint_jieji_rein_bloodrein_none": "血辔下去，辔影却散了。袋里多了 {0} 铜钱。",
-
   "hint_jieji_bridle": "路遇一副劫缰。你可以勒缰、收缰，或以血染缰。",
   "jieji_bridle_lebridle": "勒缰",
   "jieji_bridle_stowbridle": "收缰",
@@ -4563,8 +4207,6 @@
   "hint_jieji_bridle_stowbridle_broke": "收缰要 {0} 铜钱。袋里不够。",
   "hint_jieji_bridle_bloodbridle_ok": "你割了 {0} 点生机去染劫缰。",
   "hint_jieji_bridle_bloodbridle_none": "血缰下去，缰影却散了。袋里多了 {0} 铜钱。",
-
-
   "hint_jieji_stirrup": "路遇一副劫镫。你可以踩镫、收镫，或以血染镫。",
   "jieji_stirrup_stepstirrup": "踩镫",
   "jieji_stirrup_stowstirrup": "收镫",
@@ -4669,8 +4311,6 @@
   "hint_jieji_hobble_loosehobble_broke": "解索要 {0} 铜钱。袋里不够。",
   "hint_jieji_hobble_bloodhobble_ok": "你割了 {0} 点生机去染劫绊索。",
   "hint_jieji_hobble_bloodhobble_none": "血索下去，索影却散了。袋里多了 {0} 铜钱。",
-
-
   "jiejiMenpaiDemo": "劫季门派 · Demo",
   "jiejiMenpaiPitch": "带着业力赶天劫的门派肉鸽",
   "knownIssues": "已知问题",
@@ -4682,6 +4322,17 @@
   "knownIssuesLocalExec": "Grok Bot 在用户本机上的 local-exec 不稳定。开发请走 GitHub 仓库，不要依赖本机直连。",
   "knownIssuesSliceQuality": "业力、秘境锁卡组、劫季系统都是竖切品质。能跑通主循环，数值、事件和表现都还薄。",
   "knownIssuesFeedback": "反馈请开 GitHub Issues。把下面地址复制到浏览器即可。",
-  "knownIssuesUrl": "https://github.com/dengjimiao-dot/heavenly-tribulation/issues"
-
+  "knownIssuesUrl": "https://github.com/dengjimiao-dot/heavenly-tribulation/issues",
+  "jieji_dungeon_next_jiejiImpost": "劫栱",
+  "hint_jieji_dungeon_impost_room": "厅柱顶着一截劫栱。纹在栱身。你可以观栱、封栱，或以血启栱。",
+  "jieji_dungeon_readimpost": "观栱",
+  "jieji_dungeon_sealimpost": "封栱",
+  "jieji_dungeon_bloodimpost": "血栱",
+  "hint_jieji_dungeon_readimpost": "你耗了 {0} 药材观了劫栱。袖中多了一枚牌胚。",
+  "hint_jieji_dungeon_readimpost_mist": "你耗了 {0} 药材观了劫栱。雾涎凝钱，袖中多了一枚牌胚，另落下 {1} 铜钱。",
+  "hint_jieji_dungeon_readimpost_broke": "观栱要 {0} 药材。袋里不够，栱身劫纹自己暗了。",
+  "hint_jieji_dungeon_sealimpost": "你花了 {0} 铜钱封住劫栱。生机回了 {1} 点，护身印挂上。",
+  "hint_jieji_dungeon_sealimpost_broke": "封栱要 {0} 铜钱。袋里不够，封符自己落了。",
+  "hint_jieji_dungeon_bloodimpost": "你割了 {0} 点生机以血启栱。业力入袖。",
+  "hint_jieji_dungeon_bloodimpost_none": "血启落下，残卷却散了。袋里多了 {0} 铜钱。"
 }

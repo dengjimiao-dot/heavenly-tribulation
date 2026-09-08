@@ -723,6 +723,9 @@ namespace debug {
     } else if (kind == 'keystone') {
       game.flags.dungeon.pendingEncounter = 'jiejiKeystone'
       await playJiejiDungeonEncounter()
+    } else if (kind == 'impost') {
+      game.flags.dungeon.pendingEncounter = 'jiejiImpost'
+      await playJiejiDungeonEncounter()
     } else if (kind == 'exit') {
       await playJiejiDungeonExitGift()
     } else {
