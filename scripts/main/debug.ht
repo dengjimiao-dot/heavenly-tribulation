@@ -800,6 +800,9 @@ namespace debug {
     } else if (kind == 'strut') {
       game.flags.dungeon.pendingEncounter = 'jiejiStrut'
       await playJiejiDungeonEncounter()
+    } else if (kind == 'girder') {
+      game.flags.dungeon.pendingEncounter = 'jiejiGirder'
+      await playJiejiDungeonEncounter()
     } else if (kind == 'exit') {
       await playJiejiDungeonExitGift()
     } else {
