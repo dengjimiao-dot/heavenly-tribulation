@@ -4390,5 +4390,18 @@
   "hint_jieji_dungeon_sealvolute": "你花了 {0} 铜钱封住劫涡卷。生机回了 {1} 点，护身印挂上。",
   "hint_jieji_dungeon_sealvolute_broke": "封涡要 {0} 铜钱。袋里不够，封符自己落了。",
   "hint_jieji_dungeon_bloodvolute": "你割了 {0} 点生机以血启涡。业力入袖。",
-  "hint_jieji_dungeon_bloodvolute_none": "血启落下，残卷却散了。袋里多了 {0} 铜钱。"
+  "hint_jieji_dungeon_bloodvolute_none": "血启落下，残卷却散了。袋里多了 {0} 铜钱。",
+  "hint_jieji_surcingle": "路遇一条劫肚带。你可以系带、解带，或以血染带。",
+  "jieji_surcingle_tiesurcingle": "系带",
+  "jieji_surcingle_loosesurcingle": "解带",
+  "jieji_surcingle_bloodsurcingle": "血带",
+  "hint_jieji_surcingle_tiesurcingle": "系带：耗 1 药材（雾月不耗）。回 1 命，九毫摸残页。药材不够则空手。",
+  "hint_jieji_surcingle_loosesurcingle": "解带：花 1 铜钱（雷月 1）。得 1 药材，并回 1 命。袋里不够则空手。",
+  "hint_jieji_surcingle_bloodsurcingle": "血带：扣 1 点生机（至少留 1，血月 2）。五毫摸残页，不成则得 2 铜钱。",
+  "hint_jieji_surcingle_tiesurcingle_ok": "你系上劫肚带。生机回了 {0} 点。",
+  "hint_jieji_surcingle_tiesurcingle_broke": "系带要 {0} 药材。你拿不出来。",
+  "hint_jieji_surcingle_loosesurcingle_ok": "你解开劫肚带。得了 {0} 药材，生机回了 {1} 点。",
+  "hint_jieji_surcingle_loosesurcingle_broke": "解带要 {0} 铜钱。袋里不够。",
+  "hint_jieji_surcingle_bloodsurcingle_ok": "你割了 {0} 点生机去染劫肚带。",
+  "hint_jieji_surcingle_bloodsurcingle_none": "血带下去，带影却散了。袋里多了 {0} 铜钱。"
 }

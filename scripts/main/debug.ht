@@ -510,6 +510,8 @@ namespace debug {
       await playJiejiShoeEvent(terrain)
     } else if (kind == 'pad') {
       await playJiejiPadEvent(terrain)
+    } else if (kind == 'surcingle') {
+      await playJiejiSurcingleEvent(terrain)
     } else {
       await playJiejiThunderRoadEvent(terrain)
     }
@@ -1489,6 +1491,11 @@ namespace debug {
   /// 忽略几率与冷却，仍弹出赶路劫鞍垫三选。
   async function forcePad() {
     return await playJiejiPadEvent({ kind: 'plain' })
+  }
+
+  /// 忽略几率与冷却，仍弹出赶路劫肚带三选。
+  async function forceSurcingle() {
+    return await playJiejiSurcingleEvent({ kind: 'plain' })
   }
 
   /// 忽略冷却与花费，仍弹出幻术祭坛入幻三选。
