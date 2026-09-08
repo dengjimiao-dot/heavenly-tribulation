@@ -379,6 +379,8 @@ namespace debug {
       questKind = 'hidden_mist_lawn'
     } else if (kind == 'flood') {
       questKind = 'hidden_blood_flood'
+    } else if (kind == 'moss') {
+      questKind = 'hidden_mist_moss'
     }
     final ctor = Quests[questKind]
     if (ctor == null) return false
