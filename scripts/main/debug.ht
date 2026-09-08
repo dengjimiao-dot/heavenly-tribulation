@@ -447,6 +447,8 @@ namespace debug {
       questKind = 'hidden_mist_bud'
     } else if (kind == 'berm') {
       questKind = 'hidden_thunder_berm'
+    } else if (kind == 'calyx') {
+      questKind = 'hidden_mist_calyx'
     }
     final ctor = Quests[questKind]
     if (ctor == null) return false
