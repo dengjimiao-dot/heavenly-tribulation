@@ -1,5 +1,21 @@
 
-async function onRested() {
+as
+
+  if (kind == 'lemma') {
+    if (seasonId == 'mist') {
+      final r = random.nextDouble()
+      if (r < 0.34) {
+        await Player.collect('herb', 1, incurIncident: false)
+      } else if (r < 0.67) {
+        await Player.collect('money', 30, incurIncident: false)
+      } else {
+        await Player.collect('money', 20, incurIncident: false)
+      }
+      dialog.pushDialog('hint_jieji_mist_lemma_extra_mist')
+      await dialog.execute()
+    }
+  }
+ync function onRested() {
   if (game.enableTutorial) {
     if (game.flags.tutorial.rested) return
 
@@ -5939,6 +5955,41 @@ async function onAfterEnterLocation(location) -> bool {
           }
           return true
         }
+
+        case 'hidden_mist_lemma': {
+          if (isLate) {
+            Player.progressJournalById(journal.id, stage: 2)
+            dialog.pushDialog('quest_hidden_late_failed', interpolations: [journal.title])
+            await dialog.execute()
+          } else {
+            Player.progressJournalById(journal.id)
+            var locName = ''
+            final loc = game.locations[journal.quest.targetLocationId]
+            if (loc != null) {
+              locName = loc.name
+            }
+            dialog.pushDialog('quest_hidden_mist_lemma_complete', interpolations: [
+              journal.title,
+              locName,
+            ])
+            await dialog.execute()
+            final items = await Player.loot(journal.quest.reward)
+            Game.promptItems(items)
+            if (random.nextDouble() < 0.5) {
+              await Player.collect('herb', 2, incurIncident: false)
+            } else {
+              await Player.collect('money', 40, incurIncident: false)
+            }
+            Player.restoreLife(4)
+            dialog.pushDialog('hint_jieji_mist_lemma_extra')
+            await dialog.execute()
+            await tryDropGongfaShard(rate: 0.25)
+            await grantJiejiHiddenQuestExtra('lemma')
+          }
+          return true
+        }
+
+
 
 
 
