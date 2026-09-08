@@ -208,6 +208,7 @@ const _kEncounterKinds = [
   'jiejiJinzhu',
   'jiejiYanzhu',
   'jiejiJiaozhu',
+  'jiejiZhongzhu',
 ]
 
 function _addEncampment() {
