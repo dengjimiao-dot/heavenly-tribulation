@@ -1,0 +1,152 @@
+/// 赶路「劫胯革」三选：系胯 / 解胯 / 血胯。隐藏、劫兆、野遇、赶路、行商、拾荒、扎营、残锋、残卷、雾灯、残鼓、汲泉、劫幡、劫铃、劫符、劫旌、劫烛、劫角、劫笛、劫笠、劫带、劫履、劫氅、劫扇、劫杖、劫伞、劫面、劫帔、劫手套、劫戒、劫镜、劫鼓、劫炬、劫梳、劫勺、劫碗、劫杯、劫罐、劫瓶、劫墨、劫袍、劫带、劫簪、劫笔、劫针、劫扣、劫绳、劫珠、劫钗、劫绦、劫穗、劫缎、劫缨、劫袖、劫领、劫缘、劫辫、劫翎、劫裹、劫轭、劫辔、劫缰、劫镫、劫鞦、劫勒、劫衔、劫绊、劫鞍、劫刺、劫绊索、劫蹄铁、劫鞍垫、劫肚带、劫尻带、劫额革、劫鼻革、劫咽革、劫颊革、劫顶革、劫面革、劫障革、劫笼革、劫套革、劫羁革、劫络革、劫鬃革、劫罗革、劫甩革、劫肚革、劫裙革、劫翼革、劫扣革、劫环革、劫胸革、劫颈革、劫肩革、劫背革、劫腰革、劫胯革都没中时才滚。
+const kJiejiHipstrapBaseRate = 0.000000025
+const kJiejiHipstrapMoveCooldown = 24
+const kJiejiHipstrapTiehipstrapHerb = 1
+const kJiejiHipstrapTiehipstrapLife = 1
+const kJiejiHipstrapTiehipstrapGongfaRate = 0.005
+const kJiejiHipstrapLoosehipstrapMoney = 1
+const kJiejiHipstrapLoosehipstrapMoneyThunder = 1
+const kJiejiHipstrapLoosehipstrapHerb = 1
+const kJiejiHipstrapLoosehipstrapLife = 1
+const kJiejiHipstrapBloodLife = 1
+const kJiejiHipstrapBloodLifeBlood = 2
+const kJiejiHipstrapBloodGongfaRate = 0.03
+const kJiejiHipstrapBloodMoney = 2
+
+function _jiejiHipstrapSeasonId() {
+  if (game.jieji != null && game.jieji.seasonId != null) {
+    return game.jieji.seasonId
+  }
+  return null
+}
+
+function _jiejiHipstrapTutorialLocked() {
+  return game.enableTutorial && game.flags.tutorial.bountyQuest != true
+}
+
+function _jiejiHipstrapTiehipstrapHerbCost(seasonId) {
+  if (seasonId == 'mist') return 0
+  return kJiejiHipstrapTiehipstrapHerb
+}
+
+function _jiejiHipstrapLoosehipstrapMoneyCost(seasonId) {
+  if (seasonId == 'thunder') return kJiejiHipstrapLoosehipstrapMoneyThunder
+  return kJiejiHipstrapLoosehipstrapMoney
+}
+
+function _jiejiHipstrapBloodLifeCost(seasonId) {
+  if (seasonId == 'blood') return kJiejiHipstrapBloodLifeBlood
+  return kJiejiHipstrapBloodLife
+}
+
+function _jiejiHipstrapCostLife(want) {
+  var lost = want
+  final life = hero.life ?? 1
+  if (life - lost < 1) lost = life - 1
+  if (lost < 0) lost = 0
+  if (lost > 0) {
+    Player.setLife(hero.life - lost)
+  }
+  return lost
+}
+
+function _jiejiHipstrapNormalizeKind(kind) {
+  if (kind == 'tiehipstrap' || kind == 'jieji_hipstrap_tiehipstrap') return 'tiehipstrap'
+  if (kind == 'loosehipstrap' || kind == 'jieji_hipstrap_loosehipstrap') return 'loosehipstrap'
+  if (kind == 'bloodhipstrap' || kind == 'jieji_hipstrap_bloodhipstrap') return 'bloodhipstrap'
+  return null
+}
+
+function _jiejiHipstrapChoices() {
+  return [
+    {
+      text: 'jieji_hipstrap_tiehipstrap',
+      description: 'hint_jieji_hipstrap_tiehipstrap',
+    },
+    {
+      text: 'jieji_hipstrap_loosehipstrap',
+      description: 'hint_jieji_hipstrap_loosehipstrap',
+    },
+    {
+      text: 'jieji_hipstrap_bloodhipstrap',
+      description: 'hint_jieji_hipstrap_bloodhipstrap',
+    },
+  ]
+}
+
+/// 赶路劫胯革三选。debug.forceJiejiEvent('hipstrap') / forceHipstrap 直接走这里，仍弹出三选。
+async function playJiejiHipstrapEvent(terrain) {
+  if (hero == null) return false
+
+  dialog.pushDialog('hint_jieji_hipstrap')
+  dialog.pushSelection('jiejiHipstrap', _jiejiHipstrapChoices())
+  await dialog.execute()
+  final picked = dialog.checkSelected('jiejiHipstrap')
+  var selected = _jiejiHipstrapNormalizeKind(picked)
+  if (selected == null) {
+    selected = 'tiehipstrap'
+  }
+
+  final seasonId = _jiejiHipstrapSeasonId()
+  if (selected == 'tiehipstrap') {
+    final herbNeed = _jiejiHipstrapTiehipstrapHerbCost(seasonId)
+    final herbHave = hero.materials['herb'] ?? 0
+    if (herbNeed > 0 && herbHave < herbNeed) {
+      dialog.pushDialog('hint_jieji_hipstrap_tiehipstrap_broke', interpolations: [herbNeed])
+      await dialog.execute()
+    } else {
+      if (herbNeed > 0) {
+        Player.exhaust('herb', herbNeed)
+      }
+      final healed = Player.restoreLife(kJiejiHipstrapTiehipstrapLife)
+      dialog.pushDialog('hint_jieji_hipstrap_tiehipstrap_ok', interpolations: [healed])
+      await dialog.execute()
+      await tryDropGongfaShard(rate: kJiejiHipstrapTiehipstrapGongfaRate)
+    }
+  } else if (selected == 'loosehipstrap') {
+    final moneyNeed = _jiejiHipstrapLoosehipstrapMoneyCost(seasonId)
+    final moneyHave = hero.materials['money'] ?? 0
+    if (moneyHave < moneyNeed) {
+      dialog.pushDialog('hint_jieji_hipstrap_loosehipstrap_broke', interpolations: [moneyNeed])
+      await dialog.execute()
+    } else {
+      Player.exhaust('money', moneyNeed)
+      await Player.collect('herb', kJiejiHipstrapLoosehipstrapHerb, incurIncident: false)
+      final healed = Player.restoreLife(kJiejiHipstrapLoosehipstrapLife)
+      dialog.pushDialog('hint_jieji_hipstrap_loosehipstrap_ok', interpolations: [kJiejiHipstrapLoosehipstrapHerb, healed])
+      await dialog.execute()
+    }
+  } else {
+    final lost = _jiejiHipstrapCostLife(_jiejiHipstrapBloodLifeCost(seasonId))
+    dialog.pushDialog('hint_jieji_hipstrap_bloodhipstrap_ok', interpolations: [lost])
+    await dialog.execute()
+    final dropped = await tryDropGongfaShard(rate: kJiejiHipstrapBloodGongfaRate)
+    if (dropped != true) {
+      await Player.collect('money', kJiejiHipstrapBloodMoney, incurIncident: false)
+      dialog.pushDialog('hint_jieji_hipstrap_bloodhipstrap_none', interpolations: [kJiejiHipstrapBloodMoney])
+      await dialog.execute()
+    }
+  }
+
+  Game.updateUI()
+  return true
+}
+
+/// 赶路触发：教程锁与路遇相同；冷却 24 步；约 0.0000025%。出过则返回 true。
+async function tryJiejiHipstrapOnMove(terrain) {
+  if (hero == null) return false
+  if (_jiejiHipstrapTutorialLocked()) return false
+
+  final jieji = ensureJiejiFlags()
+  final moves = jieji.worldMoves ?? 0
+  final last = jieji.lastHipstrapMove ?? -999
+  if (moves - last < kJiejiHipstrapMoveCooldown) return false
+
+  var rate = kJiejiHipstrapBaseRate
+  if (rate < 0) rate = 0
+  if (random.nextDouble() > rate) return false
+
+  jieji.lastHipstrapMove = moves
+  await playJiejiHipstrapEvent(terrain)
+  return true
+}
