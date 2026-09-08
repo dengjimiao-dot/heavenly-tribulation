@@ -5940,5 +5940,18 @@
   "hint_jieji_sternumstrap_loosesternumstrap_ok": "你解开劫胸骨革。得了 {0} 药材，生机回了 {1} 点。",
   "hint_jieji_sternumstrap_loosesternumstrap_broke": "解胸要 {0} 铜钱。袋里不够。",
   "hint_jieji_sternumstrap_bloodsternumstrap_ok": "你割了 {0} 点生机去染劫胸骨革。",
-  "hint_jieji_sternumstrap_bloodsternumstrap_none": "血胸下去，胸影却散了。袋里多了 {0} 铜钱。"
+  "hint_jieji_sternumstrap_bloodsternumstrap_none": "血胸下去，胸影却散了。袋里多了 {0} 铜钱。",
+  "hint_jieji_manubriumstrap": "路遇一条劫柄革。你可以系柄、解柄，或以血染柄。",
+  "jieji_manubriumstrap_tiemanubriumstrap": "系柄",
+  "jieji_manubriumstrap_loosemanubriumstrap": "解柄",
+  "jieji_manubriumstrap_bloodmanubriumstrap": "血柄",
+  "hint_jieji_manubriumstrap_tiemanubriumstrap": "系柄：耗 1 药材（雾月不耗）。回 1 命，五毫摸残页。药材不够则空手。",
+  "hint_jieji_manubriumstrap_loosemanubriumstrap": "解柄：花 1 铜钱（雷月 1）。得 1 药材，并回 1 命。袋里不够则空手。",
+  "hint_jieji_manubriumstrap_bloodmanubriumstrap": "血柄：扣 1 点生机（至少留 1，血月 2）。三毫摸残页，不成则得 2 铜钱。",
+  "hint_jieji_manubriumstrap_tiemanubriumstrap_ok": "你系上劫柄革。生机回了 {0} 点。",
+  "hint_jieji_manubriumstrap_tiemanubriumstrap_broke": "系柄要 {0} 药材。你拿不出来。",
+  "hint_jieji_manubriumstrap_loosemanubriumstrap_ok": "你解开劫柄革。得了 {0} 药材，生机回了 {1} 点。",
+  "hint_jieji_manubriumstrap_loosemanubriumstrap_broke": "解柄要 {0} 铜钱。袋里不够。",
+  "hint_jieji_manubriumstrap_bloodmanubriumstrap_ok": "你割了 {0} 点生机去染劫柄革。",
+  "hint_jieji_manubriumstrap_bloodmanubriumstrap_none": "血柄下去，柄影却散了。袋里多了 {0} 铜钱。"
 }
