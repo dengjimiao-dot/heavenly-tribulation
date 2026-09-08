@@ -4704,6 +4704,40 @@ async function onAfterEnterLocation(location) -> bool {
         }
 
 
+        case 'hidden_thunder_chasm': {
+          if (isLate) {
+            Player.progressJournalById(journal.id, stage: 2)
+            dialog.pushDialog('quest_hidden_late_failed', interpolations: [journal.title])
+            await dialog.execute()
+          } else {
+            Player.progressJournalById(journal.id)
+            var locName = ''
+            final loc = game.locations[journal.quest.targetLocationId]
+            if (loc != null) {
+              locName = loc.name
+            }
+            dialog.pushDialog('quest_hidden_thunder_chasm_complete', interpolations: [
+              journal.title,
+              locName,
+            ])
+            await dialog.execute()
+            final items = await Player.loot(journal.quest.reward)
+            Game.promptItems(items)
+            if (random.nextDouble() < 0.5) {
+              await Player.collect('herb', 2, incurIncident: false)
+            } else {
+              await Player.collect('money', 40, incurIncident: false)
+            }
+            Player.restoreLife(4)
+            dialog.pushDialog('hint_jieji_thunder_chasm_extra')
+            await dialog.execute()
+            await tryDropGongfaShard(rate: 0.25)
+            await grantJiejiHiddenQuestExtra('chasm')
+          }
+          return true
+        }
+
+
 
 
 
@@ -6600,6 +6634,22 @@ async function grantJiejiHiddenQuestExtra(kind) {
         await Player.collect('money', 20, incurIncident: false)
       }
       dialog.pushDialog('hint_jieji_blood_cataract_extra_blood')
+      await dialog.execute()
+    }
+  }
+
+
+  if (kind == 'chasm') {
+    if (seasonId == 'thunder') {
+      final r = random.nextDouble()
+      if (r < 0.34) {
+        await Player.collect('herb', 1, incurIncident: false)
+      } else if (r < 0.67) {
+        await Player.collect('money', 30, incurIncident: false)
+      } else {
+        await Player.collect('money', 20, incurIncident: false)
+      }
+      dialog.pushDialog('hint_jieji_thunder_chasm_extra_thunder')
       await dialog.execute()
     }
   }

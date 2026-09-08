@@ -409,6 +409,8 @@ namespace debug {
       questKind = 'hidden_mist_cattail'
     } else if (kind == 'cataract') {
       questKind = 'hidden_blood_cataract'
+    } else if (kind == 'chasm') {
+      questKind = 'hidden_thunder_chasm'
     }
     final ctor = Quests[questKind]
     if (ctor == null) return false
