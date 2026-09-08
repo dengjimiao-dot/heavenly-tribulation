@@ -1,21 +1,4 @@
-
-as
-
-  if (kind == 'lemma') {
-    if (seasonId == 'mist') {
-      final r = random.nextDouble()
-      if (r < 0.34) {
-        await Player.collect('herb', 1, incurIncident: false)
-      } else if (r < 0.67) {
-        await Player.collect('money', 30, incurIncident: false)
-      } else {
-        await Player.collect('money', 20, incurIncident: false)
-      }
-      dialog.pushDialog('hint_jieji_mist_lemma_extra_mist')
-      await dialog.execute()
-    }
-  }
-ync function onRested() {
+async function onRested() {
   if (game.enableTutorial) {
     if (game.flags.tutorial.rested) return
 
@@ -8624,6 +8607,22 @@ async function grantJiejiHiddenQuestExtra(kind) {
       await dialog.execute()
     }
   }
+
+  if (kind == 'lemma') {
+    if (seasonId == 'mist') {
+      final r = random.nextDouble()
+      if (r < 0.34) {
+        await Player.collect('herb', 1, incurIncident: false)
+      } else if (r < 0.67) {
+        await Player.collect('money', 30, incurIncident: false)
+      } else {
+        await Player.collect('money', 20, incurIncident: false)
+      }
+      dialog.pushDialog('hint_jieji_mist_lemma_extra_mist')
+      await dialog.execute()
+    }
+  }
+
 
 
 
