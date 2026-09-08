@@ -764,6 +764,9 @@ namespace debug {
     } else if (kind == 'purlin') {
       game.flags.dungeon.pendingEncounter = 'jiejiPurlin'
       await playJiejiDungeonEncounter()
+    } else if (kind == 'rafter') {
+      game.flags.dungeon.pendingEncounter = 'jiejiRafter'
+      await playJiejiDungeonEncounter()
     } else if (kind == 'exit') {
       await playJiejiDungeonExitGift()
     } else {
