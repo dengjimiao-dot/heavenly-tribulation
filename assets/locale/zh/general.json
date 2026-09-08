@@ -4403,5 +4403,7 @@
   "hint_jieji_surcingle_loosesurcingle_ok": "你解开劫肚带。得了 {0} 药材，生机回了 {1} 点。",
   "hint_jieji_surcingle_loosesurcingle_broke": "解带要 {0} 铜钱。袋里不够。",
   "hint_jieji_surcingle_bloodsurcingle_ok": "你割了 {0} 点生机去染劫肚带。",
-  "hint_jieji_surcingle_bloodsurcingle_none": "血带下去，带影却散了。袋里多了 {0} 铜钱。"
+  "hint_jieji_surcingle_bloodsurcingle_none": "血带下去，带影却散了。袋里多了 {0} 铜钱。",
+  "hint_jieji_thunder_toll_extra": "雷叩余纹入体。又采得 2 药材（或落下 40 铜钱），生机回了 4 点。",
+  "hint_jieji_thunder_toll_extra_thunder": "雷月雷叩更烈。又多拣了一回。"
 }
