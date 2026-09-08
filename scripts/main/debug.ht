@@ -487,6 +487,8 @@ namespace debug {
       questKind = 'hidden_mist_lemma'
     } else if (kind == 'islet') {
       questKind = 'hidden_blood_islet'
+    } else if (kind == 'long') {
+      questKind = 'hidden_thunder_long'
     }
     final ctor = Quests[questKind]
     if (ctor == null) return false
