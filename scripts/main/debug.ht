@@ -451,6 +451,8 @@ namespace debug {
       questKind = 'hidden_mist_calyx'
     } else if (kind == 'eyot') {
       questKind = 'hidden_blood_eyot'
+    } else if (kind == 'levee') {
+      questKind = 'hidden_thunder_levee'
     }
     final ctor = Quests[questKind]
     if (ctor == null) return false
