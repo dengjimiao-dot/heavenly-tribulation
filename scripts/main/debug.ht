@@ -550,6 +550,8 @@ namespace debug {
       await playJiejiThroatlatchEvent(terrain)
     } else if (kind == 'cheekpiece') {
       await playJiejiCheekpieceEvent(terrain)
+    } else if (kind == 'crownpiece') {
+      await playJiejiCrownpieceEvent(terrain)
     } else {
       await playJiejiThunderRoadEvent(terrain)
     }

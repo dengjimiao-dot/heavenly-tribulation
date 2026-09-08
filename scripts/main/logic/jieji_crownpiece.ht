@@ -1,0 +1,152 @@
+/// 赶路「劫顶革」三选：系顶 / 解顶 / 血顶。隐藏、劫兆、野遇、赶路、行商、拾荒、扎营、残锋、残卷、雾灯、残鼓、汲泉、劫幡、劫铃、劫符、劫旌、劫烛、劫角、劫笛、劫笠、劫带、劫履、劫氅、劫扇、劫杖、劫伞、劫面、劫帔、劫手套、劫戒、劫镜、劫鼓、劫炬、劫梳、劫勺、劫碗、劫杯、劫罐、劫瓶、劫墨、劫袍、劫带、劫簪、劫笔、劫针、劫扣、劫绳、劫珠、劫钗、劫绦、劫穗、劫缎、劫缨、劫袖、劫领、劫缘、劫辫、劫翎、劫裹、劫轭、劫辔、劫缰、劫镫、劫鞦、劫勒、劫衔、劫绊、劫鞍、劫刺、劫绊索、劫蹄铁、劫鞍垫、劫肚带、劫尻带、劫额革、劫鼻革、劫咽革、劫颊革、劫顶革都没中时才滚。
+const kJiejiCrownpieceBaseRate = 0.0000025
+const kJiejiCrownpieceMoveCooldown = 24
+const kJiejiCrownpieceTiecrownpieceHerb = 1
+const kJiejiCrownpieceTiecrownpieceLife = 1
+const kJiejiCrownpieceTiecrownpieceGongfaRate = 0.005
+const kJiejiCrownpieceLoosecrownpieceMoney = 1
+const kJiejiCrownpieceLoosecrownpieceMoneyThunder = 1
+const kJiejiCrownpieceLoosecrownpieceHerb = 1
+const kJiejiCrownpieceLoosecrownpieceLife = 1
+const kJiejiCrownpieceBloodLife = 1
+const kJiejiCrownpieceBloodLifeBlood = 2
+const kJiejiCrownpieceBloodGongfaRate = 0.03
+const kJiejiCrownpieceBloodMoney = 2
+
+function _jiejiCrownpieceSeasonId() {
+  if (game.jieji != null && game.jieji.seasonId != null) {
+    return game.jieji.seasonId
+  }
+  return null
+}
+
+function _jiejiCrownpieceTutorialLocked() {
+  return game.enableTutorial && game.flags.tutorial.bountyQuest != true
+}
+
+function _jiejiCrownpieceTiecrownpieceHerbCost(seasonId) {
+  if (seasonId == 'mist') return 0
+  return kJiejiCrownpieceTiecrownpieceHerb
+}
+
+function _jiejiCrownpieceLoosecrownpieceMoneyCost(seasonId) {
+  if (seasonId == 'thunder') return kJiejiCrownpieceLoosecrownpieceMoneyThunder
+  return kJiejiCrownpieceLoosecrownpieceMoney
+}
+
+function _jiejiCrownpieceBloodLifeCost(seasonId) {
+  if (seasonId == 'blood') return kJiejiCrownpieceBloodLifeBlood
+  return kJiejiCrownpieceBloodLife
+}
+
+function _jiejiCrownpieceCostLife(want) {
+  var lost = want
+  final life = hero.life ?? 1
+  if (life - lost < 1) lost = life - 1
+  if (lost < 0) lost = 0
+  if (lost > 0) {
+    Player.setLife(hero.life - lost)
+  }
+  return lost
+}
+
+function _jiejiCrownpieceNormalizeKind(kind) {
+  if (kind == 'tiecrownpiece' || kind == 'jieji_crownpiece_tiecrownpiece') return 'tiecrownpiece'
+  if (kind == 'loosecrownpiece' || kind == 'jieji_crownpiece_loosecrownpiece') return 'loosecrownpiece'
+  if (kind == 'bloodcrownpiece' || kind == 'jieji_crownpiece_bloodcrownpiece') return 'bloodcrownpiece'
+  return null
+}
+
+function _jiejiCrownpieceChoices() {
+  return [
+    {
+      text: 'jieji_crownpiece_tiecrownpiece',
+      description: 'hint_jieji_crownpiece_tiecrownpiece',
+    },
+    {
+      text: 'jieji_crownpiece_loosecrownpiece',
+      description: 'hint_jieji_crownpiece_loosecrownpiece',
+    },
+    {
+      text: 'jieji_crownpiece_bloodcrownpiece',
+      description: 'hint_jieji_crownpiece_bloodcrownpiece',
+    },
+  ]
+}
+
+/// 赶路劫顶革三选。debug.forceJiejiEvent('crownpiece') / forceCrownpiece 直接走这里，仍弹出三选。
+async function playJiejiCrownpieceEvent(terrain) {
+  if (hero == null) return false
+
+  dialog.pushDialog('hint_jieji_crownpiece')
+  dialog.pushSelection('jiejiCrownpiece', _jiejiCrownpieceChoices())
+  await dialog.execute()
+  final picked = dialog.checkSelected('jiejiCrownpiece')
+  var selected = _jiejiCrownpieceNormalizeKind(picked)
+  if (selected == null) {
+    selected = 'tiecrownpiece'
+  }
+
+  final seasonId = _jiejiCrownpieceSeasonId()
+  if (selected == 'tiecrownpiece') {
+    final herbNeed = _jiejiCrownpieceTiecrownpieceHerbCost(seasonId)
+    final herbHave = hero.materials['herb'] ?? 0
+    if (herbNeed > 0 && herbHave < herbNeed) {
+      dialog.pushDialog('hint_jieji_crownpiece_tiecrownpiece_broke', interpolations: [herbNeed])
+      await dialog.execute()
+    } else {
+      if (herbNeed > 0) {
+        Player.exhaust('herb', herbNeed)
+      }
+      final healed = Player.restoreLife(kJiejiCrownpieceTiecrownpieceLife)
+      dialog.pushDialog('hint_jieji_crownpiece_tiecrownpiece_ok', interpolations: [healed])
+      await dialog.execute()
+      await tryDropGongfaShard(rate: kJiejiCrownpieceTiecrownpieceGongfaRate)
+    }
+  } else if (selected == 'loosecrownpiece') {
+    final moneyNeed = _jiejiCrownpieceLoosecrownpieceMoneyCost(seasonId)
+    final moneyHave = hero.materials['money'] ?? 0
+    if (moneyHave < moneyNeed) {
+      dialog.pushDialog('hint_jieji_crownpiece_loosecrownpiece_broke', interpolations: [moneyNeed])
+      await dialog.execute()
+    } else {
+      Player.exhaust('money', moneyNeed)
+      await Player.collect('herb', kJiejiCrownpieceLoosecrownpieceHerb, incurIncident: false)
+      final healed = Player.restoreLife(kJiejiCrownpieceLoosecrownpieceLife)
+      dialog.pushDialog('hint_jieji_crownpiece_loosecrownpiece_ok', interpolations: [kJiejiCrownpieceLoosecrownpieceHerb, healed])
+      await dialog.execute()
+    }
+  } else {
+    final lost = _jiejiCrownpieceCostLife(_jiejiCrownpieceBloodLifeCost(seasonId))
+    dialog.pushDialog('hint_jieji_crownpiece_bloodcrownpiece_ok', interpolations: [lost])
+    await dialog.execute()
+    final dropped = await tryDropGongfaShard(rate: kJiejiCrownpieceBloodGongfaRate)
+    if (dropped != true) {
+      await Player.collect('money', kJiejiCrownpieceBloodMoney, incurIncident: false)
+      dialog.pushDialog('hint_jieji_crownpiece_bloodcrownpiece_none', interpolations: [kJiejiCrownpieceBloodMoney])
+      await dialog.execute()
+    }
+  }
+
+  Game.updateUI()
+  return true
+}
+
+/// 赶路触发：教程锁与路遇相同；冷却 24 步；约 0.00025%。出过则返回 true。
+async function tryJiejiCrownpieceOnMove(terrain) {
+  if (hero == null) return false
+  if (_jiejiCrownpieceTutorialLocked()) return false
+
+  final jieji = ensureJiejiFlags()
+  final moves = jieji.worldMoves ?? 0
+  final last = jieji.lastCrownpieceMove ?? -999
+  if (moves - last < kJiejiCrownpieceMoveCooldown) return false
+
+  var rate = kJiejiCrownpieceBaseRate
+  if (rate < 0) rate = 0
+  if (random.nextDouble() > rate) return false
+
+  jieji.lastCrownpieceMove = moves
+  await playJiejiCrownpieceEvent(terrain)
+  return true
+}
