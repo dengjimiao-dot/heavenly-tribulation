@@ -704,6 +704,8 @@ namespace debug {
       await playJiejiKneestrapEvent(terrain)
     } else if (kind == 'shinstrap') {
       await playJiejiShinstrapEvent(terrain)
+    } else if (kind == 'anklestrap') {
+      await playJiejiAnklestrapEvent(terrain)
     } else {
       await playJiejiThunderRoadEvent(terrain)
     }
