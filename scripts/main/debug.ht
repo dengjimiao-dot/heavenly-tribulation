@@ -506,6 +506,8 @@ namespace debug {
       await playJiejiHobbleEvent(terrain)
     } else if (kind == 'shoe') {
       await playJiejiShoeEvent(terrain)
+    } else if (kind == 'pad') {
+      await playJiejiPadEvent(terrain)
     } else {
       await playJiejiThunderRoadEvent(terrain)
     }
@@ -1477,6 +1479,11 @@ namespace debug {
   /// 忽略几率与冷却，仍弹出赶路劫蹄铁三选。
   async function forceShoe() {
     return await playJiejiShoeEvent({ kind: 'plain' })
+  }
+
+  /// 忽略几率与冷却，仍弹出赶路劫鞍垫三选。
+  async function forcePad() {
+    return await playJiejiPadEvent({ kind: 'plain' })
   }
 
   /// 忽略冷却与花费，仍弹出幻术祭坛入幻三选。
