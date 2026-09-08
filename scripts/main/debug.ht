@@ -628,6 +628,8 @@ namespace debug {
       await playJiejiSkirtEvent(terrain)
     } else if (kind == 'fender') {
       await playJiejiFenderEvent(terrain)
+    } else if (kind == 'billet') {
+      await playJiejiBilletEvent(terrain)
     } else {
       await playJiejiThunderRoadEvent(terrain)
     }
