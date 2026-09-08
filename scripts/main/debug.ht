@@ -559,6 +559,8 @@ namespace debug {
       questKind = 'hidden_blood_mesa'
     } else if (kind == 'embryo') {
       questKind = 'hidden_mist_embryo'
+    } else if (kind == 'dian') {
+      questKind = 'hidden_thunder_dian'
     }
     final ctor = Quests[questKind]
     if (ctor == null) return false
