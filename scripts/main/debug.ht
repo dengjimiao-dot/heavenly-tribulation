@@ -568,6 +568,8 @@ namespace debug {
       await playJiejiFrontletEvent(terrain)
     } else if (kind == 'blinker') {
       await playJiejiBlinkerEvent(terrain)
+    } else if (kind == 'cavesson') {
+      await playJiejiCavessonEvent(terrain)
     } else {
       await playJiejiThunderRoadEvent(terrain)
     }
