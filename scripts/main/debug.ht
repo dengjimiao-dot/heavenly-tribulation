@@ -353,6 +353,8 @@ namespace debug {
       questKind = 'hidden_thunder_roar'
     } else if (kind == 'chiffon') {
       questKind = 'hidden_mist_chiffon'
+    } else if (kind == 'ooze') {
+      questKind = 'hidden_blood_ooze'
     }
     final ctor = Quests[questKind]
     if (ctor == null) return false
