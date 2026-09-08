@@ -526,6 +526,8 @@ namespace debug {
       await playJiejiCrupperEvent(terrain)
     } else if (kind == 'martingale') {
       await playJiejiMartingaleEvent(terrain)
+    } else if (kind == 'browband') {
+      await playJiejiBrowbandEvent(terrain)
     } else {
       await playJiejiThunderRoadEvent(terrain)
     }
@@ -1529,6 +1531,11 @@ namespace debug {
   /// 忽略几率与冷却，仍弹出赶路劫攀胸三选。
   async function forceMartingale() {
     return await playJiejiMartingaleEvent({ kind: 'plain' })
+  }
+
+  /// 忽略几率与冷却，仍弹出赶路劫额革三选。
+  async function forceBrowband() {
+    return await playJiejiBrowbandEvent({ kind: 'plain' })
   }
 
   /// 忽略冷却与花费，仍弹出幻术祭坛入幻三选。

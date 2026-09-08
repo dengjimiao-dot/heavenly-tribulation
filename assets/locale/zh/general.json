@@ -4475,5 +4475,18 @@
   "hint_jieji_thunder_knell_extra": "雷铎余纹入体。又采得 2 药材（或落下 40 铜钱），生机回了 4 点。",
   "hint_jieji_thunder_knell_extra_thunder": "雷月雷铎更烈。又多拣了一回。",
   "hint_jieji_mist_film_extra": "雾膜余纹入体。又采得 2 药材（或落下 40 铜钱），生机回了 4 点。",
-  "hint_jieji_mist_film_extra_mist": "雾月雾膜更薄。又多得了一点机缘。"
+  "hint_jieji_mist_film_extra_mist": "雾月雾膜更薄。又多得了一点机缘。",
+  "hint_jieji_browband": "路遇一条劫额革。你可以系额、解额，或以血染额。",
+  "jieji_browband_tiebrowband": "系额",
+  "jieji_browband_loosebrowband": "解额",
+  "jieji_browband_bloodbrowband": "血额",
+  "hint_jieji_browband_tiebrowband": "系额：耗 1 药材（雾月不耗）。回 1 命，五毫摸残页。药材不够则空手。",
+  "hint_jieji_browband_loosebrowband": "解额：花 1 铜钱（雷月 1）。得 1 药材，并回 1 命。袋里不够则空手。",
+  "hint_jieji_browband_bloodbrowband": "血额：扣 1 点生机（至少留 1，血月 2）。三毫摸残页，不成则得 2 铜钱。",
+  "hint_jieji_browband_tiebrowband_ok": "你系上劫额革。生机回了 {0} 点。",
+  "hint_jieji_browband_tiebrowband_broke": "系额要 {0} 药材。你拿不出来。",
+  "hint_jieji_browband_loosebrowband_ok": "你解开劫额革。得了 {0} 药材，生机回了 {1} 点。",
+  "hint_jieji_browband_loosebrowband_broke": "解额要 {0} 铜钱。袋里不够。",
+  "hint_jieji_browband_bloodbrowband_ok": "你割了 {0} 点生机去染劫额革。",
+  "hint_jieji_browband_bloodbrowband_none": "血额下去，额影却散了。袋里多了 {0} 铜钱。"
 }
