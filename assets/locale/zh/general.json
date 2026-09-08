@@ -6024,6 +6024,19 @@
   "hint_jieji_costalstrap_loosecostalstrap_ok": "你解开劫肋软革。得了 {0} 药材，生机回了 {1} 点。",
   "hint_jieji_costalstrap_loosecostalstrap_broke": "解肋要 {0} 铜钱。袋里不够。",
   "hint_jieji_costalstrap_bloodcostalstrap_ok": "你割了 {0} 点生机去染劫肋软革。",
-  "hint_jieji_costalstrap_bloodcostalstrap_none": "血肋下去，肋影却散了。袋里多了 {0} 铜钱。"
+  "hint_jieji_costalstrap_bloodcostalstrap_none": "血肋下去，肋影却散了。袋里多了 {0} 铜钱。",
+  "hint_jieji_floatingribstrap": "路遇一条劫浮肋革。你可以系浮、解浮，或以血染浮。",
+  "jieji_floatingribstrap_tiefloatingribstrap": "系浮",
+  "jieji_floatingribstrap_loosefloatingribstrap": "解浮",
+  "jieji_floatingribstrap_bloodfloatingribstrap": "血浮",
+  "hint_jieji_floatingribstrap_tiefloatingribstrap": "系浮：耗 1 药材（雾月不耗）。回 1 命，五毫摸残页。药材不够则空手。",
+  "hint_jieji_floatingribstrap_loosefloatingribstrap": "解浮：花 1 铜钱（雷月 1）。得 1 药材，并回 1 命。袋里不够则空手。",
+  "hint_jieji_floatingribstrap_bloodfloatingribstrap": "血浮：扣 1 点生机（至少留 1，血月 2）。三毫摸残页，不成则得 2 铜钱。",
+  "hint_jieji_floatingribstrap_tiefloatingribstrap_ok": "你系上劫浮肋革。生机回了 {0} 点。",
+  "hint_jieji_floatingribstrap_tiefloatingribstrap_broke": "系浮要 {0} 药材。你拿不出来。",
+  "hint_jieji_floatingribstrap_loosefloatingribstrap_ok": "你解开劫浮肋革。得了 {0} 药材，生机回了 {1} 点。",
+  "hint_jieji_floatingribstrap_loosefloatingribstrap_broke": "解浮要 {0} 铜钱。袋里不够。",
+  "hint_jieji_floatingribstrap_bloodfloatingribstrap_ok": "你割了 {0} 点生机去染劫浮肋革。",
+  "hint_jieji_floatingribstrap_bloodfloatingribstrap_none": "血浮下去，浮影却散了。袋里多了 {0} 铜钱。"
 
 }

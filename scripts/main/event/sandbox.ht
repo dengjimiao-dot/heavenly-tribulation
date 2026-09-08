@@ -319,6 +319,7 @@ async function onAfterMove(terrain) {
     if (await tryJiejiManubriumstrapOnMove(terrain)) return true
     if (await tryJiejiXiphoidstrapOnMove(terrain)) return true
     if (await tryJiejiCostalstrapOnMove(terrain)) return true
+    if (await tryJiejiFloatingribstrapOnMove(terrain)) return true
   }
   return fought
 }
