@@ -439,6 +439,8 @@ namespace debug {
       questKind = 'hidden_mist_rhizome'
     } else if (kind == 'gulch') {
       questKind = 'hidden_thunder_gulch'
+    } else if (kind == 'shoot') {
+      questKind = 'hidden_mist_shoot'
     }
     final ctor = Quests[questKind]
     if (ctor == null) return false
