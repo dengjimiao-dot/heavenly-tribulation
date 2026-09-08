@@ -417,6 +417,8 @@ namespace debug {
       questKind = 'hidden_blood_abyss'
     } else if (kind == 'gorge') {
       questKind = 'hidden_thunder_gorge'
+    } else if (kind == 'lotus') {
+      questKind = 'hidden_mist_lotus'
     }
     final ctor = Quests[questKind]
     if (ctor == null) return false
