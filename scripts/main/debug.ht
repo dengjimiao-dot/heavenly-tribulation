@@ -427,6 +427,8 @@ namespace debug {
       questKind = 'hidden_thunder_ravine'
     } else if (kind == 'foxnut') {
       questKind = 'hidden_mist_foxnut'
+    } else if (kind == 'bay') {
+      questKind = 'hidden_blood_bay'
     }
     final ctor = Quests[questKind]
     if (ctor == null) return false
