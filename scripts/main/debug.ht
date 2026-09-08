@@ -544,6 +544,8 @@ namespace debug {
       await playJiejiNosebandEvent(terrain)
     } else if (kind == 'throatlatch') {
       await playJiejiThroatlatchEvent(terrain)
+    } else if (kind == 'cheekpiece') {
+      await playJiejiCheekpieceEvent(terrain)
     } else {
       await playJiejiThunderRoadEvent(terrain)
     }
