@@ -343,6 +343,8 @@ namespace debug {
       questKind = 'hidden_mist_crepe'
     } else if (kind == 'drip') {
       questKind = 'hidden_blood_drip'
+    } else if (kind == 'rumble') {
+      questKind = 'hidden_thunder_rumble'
     }
     final ctor = Quests[questKind]
     if (ctor == null) return false
