@@ -782,6 +782,9 @@ namespace debug {
     } else if (kind == 'ridge') {
       game.flags.dungeon.pendingEncounter = 'jiejiRidge'
       await playJiejiDungeonEncounter()
+    } else if (kind == 'kingpost') {
+      game.flags.dungeon.pendingEncounter = 'jiejiBeam'
+      await playJiejiDungeonEncounter()
     } else if (kind == 'exit') {
       await playJiejiDungeonExitGift()
     } else {

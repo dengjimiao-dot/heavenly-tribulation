@@ -776,6 +776,17 @@ const kJiejiDungeonRidgeBloodLife = 2
 const kJiejiDungeonRidgeBloodLifeBlood = 3
 const kJiejiDungeonRidgeBloodGongfaRate = 0.27
 const kJiejiDungeonRidgeBloodMoney = 27
+
+const kJiejiDungeonBeamReadbeamHerb = 1
+const kJiejiDungeonBeamReadbeamMistMoney = 15
+const kJiejiDungeonBeamSealMoney = 23
+const kJiejiDungeonBeamSealMoneyThunder = 16
+const kJiejiDungeonBeamSealLife = 2
+const kJiejiDungeonBeamSealGongfaRate = 0.17
+const kJiejiDungeonBeamBloodLife = 2
+const kJiejiDungeonBeamBloodLifeBlood = 3
+const kJiejiDungeonBeamBloodGongfaRate = 0.27
+const kJiejiDungeonBeamBloodMoney = 27
 const kJiejiDungeonExitPackMoney = 80
 const kJiejiDungeonExitPackMoneyThunder = 120
 const kJiejiDungeonExitPackMoneyBlood = 100
@@ -1083,6 +1094,8 @@ async function playJiejiDungeonEncounter() {
     await playJiejiDungeonRafter()
   } else if (kind == 'jiejiRidge') {
     await playJiejiDungeonRidge()
+  } else if (kind == 'jiejiBeam') {
+    await playJiejiDungeonBeam()
   }
   Game.updateUI()
 }
@@ -7359,6 +7372,89 @@ async function playJiejiDungeonRidge() {
     }
   }
 }
+
+
+
+function jiejiDungeonBeamSealMoney() {
+  if (jiejiDungeonSeasonId() == 'thunder') return kJiejiDungeonBeamSealMoneyThunder
+  return kJiejiDungeonBeamSealMoney
+}
+
+function jiejiDungeonBeamBloodLifeLoss() {
+  if (jiejiDungeonSeasonId() == 'blood') return kJiejiDungeonBeamBloodLifeBlood
+  return kJiejiDungeonBeamBloodLife
+}
+
+function jiejiDungeonBeamApplyWard() {
+  game.flags.jieji ??= {}
+  if (game.flags.jieji.arrayWard != true) {
+    game.flags.jieji.arrayWard = true
+  } else {
+    game.flags.jieji.feastFury = true
+  }
+}
+
+async function playJiejiDungeonBeam() {
+  dialog.pushDialog('hint_jieji_dungeon_beam_room')
+  dialog.pushSelection('jiejiDungeonBeam', [
+    'jieji_dungeon_readbeam',
+    'jieji_dungeon_sealbeam',
+    'jieji_dungeon_bloodbeam',
+  ])
+  await dialog.execute()
+  final selected = dialog.checkSelected('jiejiDungeonBeam')
+
+  if (selected == 'jieji_dungeon_sealbeam') {
+    final cost = jiejiDungeonBeamSealMoney()
+    final moneyHave = hero.materials['money'] ?? 0
+    if (moneyHave >= cost) {
+      Player.exhaust('money', cost)
+      final healed = Player.restoreLife(kJiejiDungeonBeamSealLife)
+      jiejiDungeonBeamApplyWard()
+      dialog.pushDialog('hint_jieji_dungeon_sealbeam', interpolations: ['${cost}', '${healed}'])
+      await dialog.execute()
+      await tryDropGongfaShard(rate: kJiejiDungeonBeamSealGongfaRate)
+    } else {
+      dialog.pushDialog('hint_jieji_dungeon_sealbeam_broke', interpolations: ['${cost}'])
+      await dialog.execute()
+    }
+  } else if (selected == 'jieji_dungeon_bloodbeam') {
+    final lost = jiejiDungeonClampLifeLoss(jiejiDungeonBeamBloodLifeLoss())
+    if (lost > 0) {
+      Player.setLife(hero.life - lost)
+    }
+    dialog.pushDialog('hint_jieji_dungeon_bloodbeam', interpolations: ['${lost}'])
+    await dialog.execute()
+    await grantKarmaCard(jiejiDungeonKarmaSource())
+    var ok = await tryDropGongfaShard(rate: kJiejiDungeonBeamBloodGongfaRate)
+    if (ok != true) {
+      final money = kJiejiDungeonBeamBloodMoney
+      await Player.collect('money', money, incurIncident: false)
+      dialog.pushDialog('hint_jieji_dungeon_bloodbeam_none', interpolations: ['${money}'])
+      await dialog.execute()
+    }
+  } else {
+    final herbCost = kJiejiDungeonBeamReadbeamHerb
+    final herbHave = hero.materials['herb'] ?? 0
+    if (herbHave >= herbCost) {
+      Player.exhaust('herb', herbCost)
+      jiejiDungeonGrantBlank()
+      if (jiejiDungeonSeasonId() == 'mist') {
+        final money = kJiejiDungeonBeamReadbeamMistMoney
+        await Player.collect('money', money, incurIncident: false)
+        dialog.pushDialog('hint_jieji_dungeon_readbeam_mist', interpolations: ['${herbCost}', '${money}'])
+        await dialog.execute()
+      } else {
+        dialog.pushDialog('hint_jieji_dungeon_readbeam', interpolations: ['${herbCost}'])
+        await dialog.execute()
+      }
+    } else {
+      dialog.pushDialog('hint_jieji_dungeon_readbeam_broke', interpolations: ['${herbCost}'])
+      await dialog.execute()
+    }
+  }
+}
+
 
 
 function jiejiDungeonExitPackMoney() {
