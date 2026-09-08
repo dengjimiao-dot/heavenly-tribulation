@@ -709,6 +709,9 @@ namespace debug {
     } else if (kind == 'astragal') {
       game.flags.dungeon.pendingEncounter = 'jiejiAstragal'
       await playJiejiDungeonEncounter()
+    } else if (kind == 'torus') {
+      game.flags.dungeon.pendingEncounter = 'jiejiTorus'
+      await playJiejiDungeonEncounter()
     } else if (kind == 'exit') {
       await playJiejiDungeonExitGift()
     } else {
