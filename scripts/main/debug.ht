@@ -495,6 +495,8 @@ namespace debug {
       questKind = 'hidden_blood_sandbar'
     } else if (kind == 'balk') {
       questKind = 'hidden_thunder_balk'
+    } else if (kind == 'lodicule') {
+      questKind = 'hidden_mist_lodicule'
     }
     final ctor = Quests[questKind]
     if (ctor == null) return false

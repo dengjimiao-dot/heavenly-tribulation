@@ -1557,4 +1557,15 @@
   },
 
 
+
+  {
+    id: "hidden_mist_lodicule",
+    policy: null,
+    isBounty: false,
+    isHidden: true,
+    contribution: 11,
+    rank: 0,
+  },
+
+
 }
