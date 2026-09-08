@@ -1,0 +1,152 @@
+/// 赶路「劫肋软革」三选：系肋 / 解肋 / 血肋。隐藏、劫兆、野遇、赶路、行商、拾荒、扎营、残锋、残卷、雾灯、残鼓、汲泉、劫幡、劫铃、劫符、劫旌、劫烛、劫角、劫笛、劫笠、劫带、劫履、劫氅、劫扇、劫杖、劫伞、劫面、劫帔、劫手套、劫戒、劫镜、劫鼓、劫炬、劫梳、劫勺、劫碗、劫杯、劫罐、劫瓶、劫墨、劫袍、劫带、劫簪、劫笔、劫针、劫扣、劫绳、劫珠、劫钗、劫绦、劫穗、劫缎、劫缨、劫袖、劫领、劫缘、劫辫、劫翎、劫裹、劫轭、劫辔、劫缰、劫镫、劫鞦、劫勒、劫衔、劫绊、劫鞍、劫刺、劫绊索、劫蹄铁、劫鞍垫、劫肚带、劫尻带、劫额革、劫鼻革、劫咽革、劫颊革、劫顶革、劫面革、劫障革、劫笼革、劫套革、劫羁革、劫络革、劫鬃革、劫罗革、劫甩革、劫肚革、劫裙革、劫翼革、劫扣革、劫环革、劫胸革、劫颈革、劫肩革、劫背革、劫腰革、劫胯革、劫胁革、劫肋革、劫股革、劫膝革、劫胫革、劫踝革、劫踵革、劫足革、劫趾革、劫爪革、劫掌革、劫腕革、劫指革、劫节革、劫甲革、劫拇革、劫肘革、劫肱革、劫膊革、劫桡革、劫鹰革、劫喙革、劫肩峰革、劫肩胛革、劫锁骨革、劫胸骨革、劫柄革、劫剑突革、劫肋软革都没中时才滚。
+const kJiejiCostalstrapBaseRate = 0.00000000000008
+const kJiejiCostalstrapMoveCooldown = 24
+const kJiejiCostalstrapTiecostalstrapHerb = 1
+const kJiejiCostalstrapTiecostalstrapLife = 1
+const kJiejiCostalstrapTiecostalstrapGongfaRate = 0.005
+const kJiejiCostalstrapLoosecostalstrapMoney = 1
+const kJiejiCostalstrapLoosecostalstrapMoneyThunder = 1
+const kJiejiCostalstrapLoosecostalstrapHerb = 1
+const kJiejiCostalstrapLoosecostalstrapLife = 1
+const kJiejiCostalstrapBloodLife = 1
+const kJiejiCostalstrapBloodLifeBlood = 2
+const kJiejiCostalstrapBloodGongfaRate = 0.03
+const kJiejiCostalstrapBloodMoney = 2
+
+function _jiejiCostalstrapSeasonId() {
+  if (game.jieji != null && game.jieji.seasonId != null) {
+    return game.jieji.seasonId
+  }
+  return null
+}
+
+function _jiejiCostalstrapTutorialLocked() {
+  return game.enableTutorial && game.flags.tutorial.bountyQuest != true
+}
+
+function _jiejiCostalstrapTiecostalstrapHerbCost(seasonId) {
+  if (seasonId == 'mist') return 0
+  return kJiejiCostalstrapTiecostalstrapHerb
+}
+
+function _jiejiCostalstrapLoosecostalstrapMoneyCost(seasonId) {
+  if (seasonId == 'thunder') return kJiejiCostalstrapLoosecostalstrapMoneyThunder
+  return kJiejiCostalstrapLoosecostalstrapMoney
+}
+
+function _jiejiCostalstrapBloodLifeCost(seasonId) {
+  if (seasonId == 'blood') return kJiejiCostalstrapBloodLifeBlood
+  return kJiejiCostalstrapBloodLife
+}
+
+function _jiejiCostalstrapCostLife(want) {
+  var lost = want
+  final life = hero.life ?? 1
+  if (life - lost < 1) lost = life - 1
+  if (lost < 0) lost = 0
+  if (lost > 0) {
+    Player.setLife(hero.life - lost)
+  }
+  return lost
+}
+
+function _jiejiCostalstrapNormalizeKind(kind) {
+  if (kind == 'tiecostalstrap' || kind == 'jieji_costalstrap_tiecostalstrap') return 'tiecostalstrap'
+  if (kind == 'loosecostalstrap' || kind == 'jieji_costalstrap_loosecostalstrap') return 'loosecostalstrap'
+  if (kind == 'bloodcostalstrap' || kind == 'jieji_costalstrap_bloodcostalstrap') return 'bloodcostalstrap'
+  return null
+}
+
+function _jiejiCostalstrapChoices() {
+  return [
+    {
+      text: 'jieji_costalstrap_tiecostalstrap',
+      description: 'hint_jieji_costalstrap_tiecostalstrap',
+    },
+    {
+      text: 'jieji_costalstrap_loosecostalstrap',
+      description: 'hint_jieji_costalstrap_loosecostalstrap',
+    },
+    {
+      text: 'jieji_costalstrap_bloodcostalstrap',
+      description: 'hint_jieji_costalstrap_bloodcostalstrap',
+    },
+  ]
+}
+
+/// 赶路劫肋软革三选。debug.forceJiejiEvent('costalstrap') / forceCostalstrap 直接走这里，仍弹出三选。
+async function playJiejiCostalstrapEvent(terrain) {
+  if (hero == null) return false
+
+  dialog.pushDialog('hint_jieji_costalstrap')
+  dialog.pushSelection('jiejiCostalstrap', _jiejiCostalstrapChoices())
+  await dialog.execute()
+  final picked = dialog.checkSelected('jiejiCostalstrap')
+  var selected = _jiejiCostalstrapNormalizeKind(picked)
+  if (selected == null) {
+    selected = 'tiecostalstrap'
+  }
+
+  final seasonId = _jiejiCostalstrapSeasonId()
+  if (selected == 'tiecostalstrap') {
+    final herbNeed = _jiejiCostalstrapTiecostalstrapHerbCost(seasonId)
+    final herbHave = hero.materials['herb'] ?? 0
+    if (herbNeed > 0 && herbHave < herbNeed) {
+      dialog.pushDialog('hint_jieji_costalstrap_tiecostalstrap_broke', interpolations: [herbNeed])
+      await dialog.execute()
+    } else {
+      if (herbNeed > 0) {
+        Player.exhaust('herb', herbNeed)
+      }
+      final healed = Player.restoreLife(kJiejiCostalstrapTiecostalstrapLife)
+      dialog.pushDialog('hint_jieji_costalstrap_tiecostalstrap_ok', interpolations: [healed])
+      await dialog.execute()
+      await tryDropGongfaShard(rate: kJiejiCostalstrapTiecostalstrapGongfaRate)
+    }
+  } else if (selected == 'loosecostalstrap') {
+    final moneyNeed = _jiejiCostalstrapLoosecostalstrapMoneyCost(seasonId)
+    final moneyHave = hero.materials['money'] ?? 0
+    if (moneyHave < moneyNeed) {
+      dialog.pushDialog('hint_jieji_costalstrap_loosecostalstrap_broke', interpolations: [moneyNeed])
+      await dialog.execute()
+    } else {
+      Player.exhaust('money', moneyNeed)
+      await Player.collect('herb', kJiejiCostalstrapLoosecostalstrapHerb, incurIncident: false)
+      final healed = Player.restoreLife(kJiejiCostalstrapLoosecostalstrapLife)
+      dialog.pushDialog('hint_jieji_costalstrap_loosecostalstrap_ok', interpolations: [kJiejiCostalstrapLoosecostalstrapHerb, healed])
+      await dialog.execute()
+    }
+  } else {
+    final lost = _jiejiCostalstrapCostLife(_jiejiCostalstrapBloodLifeCost(seasonId))
+    dialog.pushDialog('hint_jieji_costalstrap_bloodcostalstrap_ok', interpolations: [lost])
+    await dialog.execute()
+    final dropped = await tryDropGongfaShard(rate: kJiejiCostalstrapBloodGongfaRate)
+    if (dropped != true) {
+      await Player.collect('money', kJiejiCostalstrapBloodMoney, incurIncident: false)
+      dialog.pushDialog('hint_jieji_costalstrap_bloodcostalstrap_none', interpolations: [kJiejiCostalstrapBloodMoney])
+      await dialog.execute()
+    }
+  }
+
+  Game.updateUI()
+  return true
+}
+
+/// 赶路触发：教程锁与路遇相同；冷却 24 步；约 0.000000000008%。出过则返回 true。
+async function tryJiejiCostalstrapOnMove(terrain) {
+  if (hero == null) return false
+  if (_jiejiCostalstrapTutorialLocked()) return false
+
+  final jieji = ensureJiejiFlags()
+  final moves = jieji.worldMoves ?? 0
+  final last = jieji.lastCostalstrapMove ?? -999
+  if (moves - last < kJiejiCostalstrapMoveCooldown) return false
+
+  var rate = kJiejiCostalstrapBaseRate
+  if (rate < 0) rate = 0
+  if (random.nextDouble() > rate) return false
+
+  jieji.lastCostalstrapMove = moves
+  await playJiejiCostalstrapEvent(terrain)
+  return true
+}

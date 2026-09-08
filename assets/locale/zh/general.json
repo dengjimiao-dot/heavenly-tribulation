@@ -5996,6 +5996,19 @@
   "hint_jieji_xiphoidstrap_loosexiphoidstrap_ok": "你解开劫剑突革。得了 {0} 药材，生机回了 {1} 点。",
   "hint_jieji_xiphoidstrap_loosexiphoidstrap_broke": "解突要 {0} 铜钱。袋里不够。",
   "hint_jieji_xiphoidstrap_bloodxiphoidstrap_ok": "你割了 {0} 点生机去染劫剑突革。",
-  "hint_jieji_xiphoidstrap_bloodxiphoidstrap_none": "血突下去，突影却散了。袋里多了 {0} 铜钱。"
+  "hint_jieji_xiphoidstrap_bloodxiphoidstrap_none": "血突下去，突影却散了。袋里多了 {0} 铜钱。",
+  "hint_jieji_costalstrap": "路遇一条劫肋软革。你可以系肋、解肋，或以血染肋。",
+  "jieji_costalstrap_tiecostalstrap": "系肋",
+  "jieji_costalstrap_loosecostalstrap": "解肋",
+  "jieji_costalstrap_bloodcostalstrap": "血肋",
+  "hint_jieji_costalstrap_tiecostalstrap": "系肋：耗 1 药材（雾月不耗）。回 1 命，五毫摸残页。药材不够则空手。",
+  "hint_jieji_costalstrap_loosecostalstrap": "解肋：花 1 铜钱（雷月 1）。得 1 药材，并回 1 命。袋里不够则空手。",
+  "hint_jieji_costalstrap_bloodcostalstrap": "血肋：扣 1 点生机（至少留 1，血月 2）。三毫摸残页，不成则得 2 铜钱。",
+  "hint_jieji_costalstrap_tiecostalstrap_ok": "你系上劫肋软革。生机回了 {0} 点。",
+  "hint_jieji_costalstrap_tiecostalstrap_broke": "系肋要 {0} 药材。你拿不出来。",
+  "hint_jieji_costalstrap_loosecostalstrap_ok": "你解开劫肋软革。得了 {0} 药材，生机回了 {1} 点。",
+  "hint_jieji_costalstrap_loosecostalstrap_broke": "解肋要 {0} 铜钱。袋里不够。",
+  "hint_jieji_costalstrap_bloodcostalstrap_ok": "你割了 {0} 点生机去染劫肋软革。",
+  "hint_jieji_costalstrap_bloodcostalstrap_none": "血肋下去，肋影却散了。袋里多了 {0} 铜钱。"
 
 }
