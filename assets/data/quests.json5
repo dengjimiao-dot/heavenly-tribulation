@@ -1535,4 +1535,15 @@
   },
 
 
+
+  {
+    id: "hidden_blood_sandbar",
+    policy: null,
+    isBounty: false,
+    isHidden: true,
+    contribution: 11,
+    rank: 0,
+  },
+
+
 }
