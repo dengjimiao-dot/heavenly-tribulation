@@ -74,7 +74,7 @@ function _jiejiSkirtChoices() {
   ]
 }
 
-/// 赶路劫肚革三选。debug.forceJiejiEvent('skirt') / forceSkirt 直接走这里，仍弹出三选。
+/// 赶路劫裙革三选。debug.forceJiejiEvent('skirt') / forceSkirt 直接走这里，仍弹出三选。
 async function playJiejiSkirtEvent(terrain) {
   if (hero == null) return false
 
