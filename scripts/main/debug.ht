@@ -463,6 +463,8 @@ namespace debug {
       questKind = 'hidden_mist_stamen'
     } else if (kind == 'ait') {
       questKind = 'hidden_blood_ait'
+    } else if (kind == 'petal') {
+      questKind = 'hidden_mist_petal'
     }
     final ctor = Quests[questKind]
     if (ctor == null) return false
