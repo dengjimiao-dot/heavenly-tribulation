@@ -555,6 +555,8 @@ namespace debug {
       questKind = 'hidden_thunder_ting'
     } else if (kind == 'endosperm') {
       questKind = 'hidden_mist_endosperm'
+    } else if (kind == 'mesa') {
+      questKind = 'hidden_blood_mesa'
     }
     final ctor = Quests[questKind]
     if (ctor == null) return false
