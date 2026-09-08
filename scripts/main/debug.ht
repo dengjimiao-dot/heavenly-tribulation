@@ -594,6 +594,8 @@ namespace debug {
       await playJiejiBosalEvent(terrain)
     } else if (kind == 'fiador') {
       await playJiejiFiadorEvent(terrain)
+    } else if (kind == 'mecate') {
+      await playJiejiMecateEvent(terrain)
     } else {
       await playJiejiThunderRoadEvent(terrain)
     }

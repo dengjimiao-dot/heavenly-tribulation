@@ -1,0 +1,152 @@
+/// 赶路「劫鬃革」三选：系鬃 / 解鬃 / 血鬃。隐藏、劫兆、野遇、赶路、行商、拾荒、扎营、残锋、残卷、雾灯、残鼓、汲泉、劫幡、劫铃、劫符、劫旌、劫烛、劫角、劫笛、劫笠、劫带、劫履、劫氅、劫扇、劫杖、劫伞、劫面、劫帔、劫手套、劫戒、劫镜、劫鼓、劫炬、劫梳、劫勺、劫碗、劫杯、劫罐、劫瓶、劫墨、劫袍、劫带、劫簪、劫笔、劫针、劫扣、劫绳、劫珠、劫钗、劫绦、劫穗、劫缎、劫缨、劫袖、劫领、劫缘、劫辫、劫翎、劫裹、劫轭、劫辔、劫缰、劫镫、劫鞦、劫勒、劫衔、劫绊、劫鞍、劫刺、劫绊索、劫蹄铁、劫鞍垫、劫肚带、劫尻带、劫额革、劫鼻革、劫咽革、劫颊革、劫顶革、劫面革、劫障革、劫笼革、劫套革、劫羁革、劫络革、劫鬃革都没中时才滚。
+const kJiejiMecateBaseRate = 0.0000005
+const kJiejiMecateMoveCooldown = 24
+const kJiejiMecateTiemecateHerb = 1
+const kJiejiMecateTiemecateLife = 1
+const kJiejiMecateTiemecateGongfaRate = 0.005
+const kJiejiMecateLoosemecateMoney = 1
+const kJiejiMecateLoosemecateMoneyThunder = 1
+const kJiejiMecateLoosemecateHerb = 1
+const kJiejiMecateLoosemecateLife = 1
+const kJiejiMecateBloodLife = 1
+const kJiejiMecateBloodLifeBlood = 2
+const kJiejiMecateBloodGongfaRate = 0.03
+const kJiejiMecateBloodMoney = 2
+
+function _jiejiMecateSeasonId() {
+  if (game.jieji != null && game.jieji.seasonId != null) {
+    return game.jieji.seasonId
+  }
+  return null
+}
+
+function _jiejiMecateTutorialLocked() {
+  return game.enableTutorial && game.flags.tutorial.bountyQuest != true
+}
+
+function _jiejiMecateTiemecateHerbCost(seasonId) {
+  if (seasonId == 'mist') return 0
+  return kJiejiMecateTiemecateHerb
+}
+
+function _jiejiMecateLoosemecateMoneyCost(seasonId) {
+  if (seasonId == 'thunder') return kJiejiMecateLoosemecateMoneyThunder
+  return kJiejiMecateLoosemecateMoney
+}
+
+function _jiejiMecateBloodLifeCost(seasonId) {
+  if (seasonId == 'blood') return kJiejiMecateBloodLifeBlood
+  return kJiejiMecateBloodLife
+}
+
+function _jiejiMecateCostLife(want) {
+  var lost = want
+  final life = hero.life ?? 1
+  if (life - lost < 1) lost = life - 1
+  if (lost < 0) lost = 0
+  if (lost > 0) {
+    Player.setLife(hero.life - lost)
+  }
+  return lost
+}
+
+function _jiejiMecateNormalizeKind(kind) {
+  if (kind == 'tiemecate' || kind == 'jieji_mecate_tiemecate') return 'tiemecate'
+  if (kind == 'loosemecate' || kind == 'jieji_mecate_loosemecate') return 'loosemecate'
+  if (kind == 'bloodmecate' || kind == 'jieji_mecate_bloodmecate') return 'bloodmecate'
+  return null
+}
+
+function _jiejiMecateChoices() {
+  return [
+    {
+      text: 'jieji_mecate_tiemecate',
+      description: 'hint_jieji_mecate_tiemecate',
+    },
+    {
+      text: 'jieji_mecate_loosemecate',
+      description: 'hint_jieji_mecate_loosemecate',
+    },
+    {
+      text: 'jieji_mecate_bloodmecate',
+      description: 'hint_jieji_mecate_bloodmecate',
+    },
+  ]
+}
+
+/// 赶路劫鬃革三选。debug.forceJiejiEvent('mecate') / forceMecate 直接走这里，仍弹出三选。
+async function playJiejiMecateEvent(terrain) {
+  if (hero == null) return false
+
+  dialog.pushDialog('hint_jieji_mecate')
+  dialog.pushSelection('jiejiMecate', _jiejiMecateChoices())
+  await dialog.execute()
+  final picked = dialog.checkSelected('jiejiMecate')
+  var selected = _jiejiMecateNormalizeKind(picked)
+  if (selected == null) {
+    selected = 'tiemecate'
+  }
+
+  final seasonId = _jiejiMecateSeasonId()
+  if (selected == 'tiemecate') {
+    final herbNeed = _jiejiMecateTiemecateHerbCost(seasonId)
+    final herbHave = hero.materials['herb'] ?? 0
+    if (herbNeed > 0 && herbHave < herbNeed) {
+      dialog.pushDialog('hint_jieji_mecate_tiemecate_broke', interpolations: [herbNeed])
+      await dialog.execute()
+    } else {
+      if (herbNeed > 0) {
+        Player.exhaust('herb', herbNeed)
+      }
+      final healed = Player.restoreLife(kJiejiMecateTiemecateLife)
+      dialog.pushDialog('hint_jieji_mecate_tiemecate_ok', interpolations: [healed])
+      await dialog.execute()
+      await tryDropGongfaShard(rate: kJiejiMecateTiemecateGongfaRate)
+    }
+  } else if (selected == 'loosemecate') {
+    final moneyNeed = _jiejiMecateLoosemecateMoneyCost(seasonId)
+    final moneyHave = hero.materials['money'] ?? 0
+    if (moneyHave < moneyNeed) {
+      dialog.pushDialog('hint_jieji_mecate_loosemecate_broke', interpolations: [moneyNeed])
+      await dialog.execute()
+    } else {
+      Player.exhaust('money', moneyNeed)
+      await Player.collect('herb', kJiejiMecateLoosemecateHerb, incurIncident: false)
+      final healed = Player.restoreLife(kJiejiMecateLoosemecateLife)
+      dialog.pushDialog('hint_jieji_mecate_loosemecate_ok', interpolations: [kJiejiMecateLoosemecateHerb, healed])
+      await dialog.execute()
+    }
+  } else {
+    final lost = _jiejiMecateCostLife(_jiejiMecateBloodLifeCost(seasonId))
+    dialog.pushDialog('hint_jieji_mecate_bloodmecate_ok', interpolations: [lost])
+    await dialog.execute()
+    final dropped = await tryDropGongfaShard(rate: kJiejiMecateBloodGongfaRate)
+    if (dropped != true) {
+      await Player.collect('money', kJiejiMecateBloodMoney, incurIncident: false)
+      dialog.pushDialog('hint_jieji_mecate_bloodmecate_none', interpolations: [kJiejiMecateBloodMoney])
+      await dialog.execute()
+    }
+  }
+
+  Game.updateUI()
+  return true
+}
+
+/// 赶路触发：教程锁与路遇相同；冷却 24 步；约 0.00005%。出过则返回 true。
+async function tryJiejiMecateOnMove(terrain) {
+  if (hero == null) return false
+  if (_jiejiMecateTutorialLocked()) return false
+
+  final jieji = ensureJiejiFlags()
+  final moves = jieji.worldMoves ?? 0
+  final last = jieji.lastMecateMove ?? -999
+  if (moves - last < kJiejiMecateMoveCooldown) return false
+
+  var rate = kJiejiMecateBaseRate
+  if (rate < 0) rate = 0
+  if (random.nextDouble() > rate) return false
+
+  jieji.lastMecateMove = moves
+  await playJiejiMecateEvent(terrain)
+  return true
+}
