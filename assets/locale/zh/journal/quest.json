@@ -647,5 +647,8 @@
   "quest_hidden_blood_tor_complete": "「{0}」有了着落。你在{1}的血嶂边走了一遭。",
   "quest_hidden_thunder_mo": "劫纹雷陌",
   "quest_hidden_thunder_mo_description": "行路听闻{0}城外有劫纹雷陌。去走一遭，或可采得药材、拾得铜钱并回些生机。",
-  "quest_hidden_thunder_mo_complete": "「{0}」有了着落。你在{1}的雷陌边走了一遭。"
+  "quest_hidden_thunder_mo_complete": "「{0}」有了着落。你在{1}的雷陌边走了一遭。",
+  "quest_hidden_mist_tegmen": "劫纹雾内种皮",
+  "quest_hidden_mist_tegmen_description": "行路听闻{0}城外有劫纹雾内种皮。去走一遭，或可采得药材、拾得铜钱并回些生机。",
+  "quest_hidden_mist_tegmen_complete": "「{0}」有了着落。你在{1}的雾内种皮边走了一遭。"
 }
