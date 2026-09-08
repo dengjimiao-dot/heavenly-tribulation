@@ -74,7 +74,7 @@ function _jiejiBlinkerChoices() {
   ]
 }
 
-/// 赶路劫面革三选。debug.forceJiejiEvent('blinker') / forceBlinker 直接走这里，仍弹出三选。
+/// 赶路劫障革三选。debug.forceJiejiEvent('blinker') / forceBlinker 直接走这里，仍弹出三选。
 async function playJiejiBlinkerEvent(terrain) {
   if (hero == null) return false
 
