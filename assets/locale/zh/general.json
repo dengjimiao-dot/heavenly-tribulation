@@ -6108,6 +6108,19 @@
   "hint_jieji_intercostalstrap_looseintercostalstrap_ok": "你解开劫肋间革。得了 {0} 药材，生机回了 {1} 点。",
   "hint_jieji_intercostalstrap_looseintercostalstrap_broke": "解间要 {0} 铜钱。袋里不够。",
   "hint_jieji_intercostalstrap_bloodintercostalstrap_ok": "你割了 {0} 点生机去染劫肋间革。",
-  "hint_jieji_intercostalstrap_bloodintercostalstrap_none": "血间下去，间影却散了。袋里多了 {0} 铜钱。"
+  "hint_jieji_intercostalstrap_bloodintercostalstrap_none": "血间下去，间影却散了。袋里多了 {0} 铜钱。",
+  "hint_jieji_trueribstrap": "路遇一条劫真肋革。你可以系真、解真，或以血染真。",
+  "jieji_trueribstrap_tietrueribstrap": "系真",
+  "jieji_trueribstrap_loosetrueribstrap": "解真",
+  "jieji_trueribstrap_bloodtrueribstrap": "血真",
+  "hint_jieji_trueribstrap_tietrueribstrap": "系真：耗 1 药材（雾月不耗）。回 1 命，五毫摸残页。药材不够则空手。",
+  "hint_jieji_trueribstrap_loosetrueribstrap": "解真：花 1 铜钱（雷月 1）。得 1 药材，并回 1 命。袋里不够则空手。",
+  "hint_jieji_trueribstrap_bloodtrueribstrap": "血真：扣 1 点生机（至少留 1，血月 2）。三毫摸残页，不成则得 2 铜钱。",
+  "hint_jieji_trueribstrap_tietrueribstrap_ok": "你系上劫真肋革。生机回了 {0} 点。",
+  "hint_jieji_trueribstrap_tietrueribstrap_broke": "系真要 {0} 药材。你拿不出来。",
+  "hint_jieji_trueribstrap_loosetrueribstrap_ok": "你解开劫真肋革。得了 {0} 药材，生机回了 {1} 点。",
+  "hint_jieji_trueribstrap_loosetrueribstrap_broke": "解真要 {0} 铜钱。袋里不够。",
+  "hint_jieji_trueribstrap_bloodtrueribstrap_ok": "你割了 {0} 点生机去染劫真肋革。",
+  "hint_jieji_trueribstrap_bloodtrueribstrap_none": "血真下去，真影却散了。袋里多了 {0} 铜钱。"
 
 }
