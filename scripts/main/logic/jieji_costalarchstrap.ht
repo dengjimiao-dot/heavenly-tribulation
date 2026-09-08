@@ -1,0 +1,152 @@
+/// 赶路「劫肋弓革」三选：系弓 / 解弓 / 血弓。隐藏、劫兆、野遇、赶路、行商、拾荒、扎营、残锋、残卷、雾灯、残鼓、汲泉、劫幡、劫铃、劫符、劫旌、劫烛、劫角、劫笛、劫笠、劫带、劫履、劫氅、劫扇、劫杖、劫伞、劫面、劫帔、劫手套、劫戒、劫镜、劫鼓、劫炬、劫梳、劫勺、劫碗、劫杯、劫罐、劫瓶、劫墨、劫袍、劫带、劫簪、劫笔、劫针、劫扣、劫绳、劫珠、劫钗、劫绦、劫穗、劫缎、劫缨、劫袖、劫领、劫缘、劫辫、劫翎、劫裹、劫轭、劫辔、劫缰、劫镫、劫鞦、劫勒、劫衔、劫绊、劫鞍、劫刺、劫绊索、劫蹄铁、劫鞍垫、劫肚带、劫尻带、劫额革、劫鼻革、劫咽革、劫颊革、劫顶革、劫面革、劫障革、劫笼革、劫套革、劫羁革、劫络革、劫鬃革、劫罗革、劫甩革、劫肚革、劫裙革、劫翼革、劫扣革、劫环革、劫胸革、劫颈革、劫肩革、劫背革、劫腰革、劫胯革、劫胁革、劫肋革、劫股革、劫膝革、劫胫革、劫踝革、劫踵革、劫足革、劫趾革、劫爪革、劫掌革、劫腕革、劫指革、劫节革、劫甲革、劫拇革、劫肘革、劫肱革、劫膊革、劫桡革、劫鹰革、劫喙革、劫肩峰革、劫肩胛革、劫锁骨革、劫胸骨革、劫柄革、劫剑突革、劫肋软革、劫浮肋革、劫肋弓革都没中时才滚。
+const kJiejiCostalarchstrapBaseRate = 0.00000000000003
+const kJiejiCostalarchstrapMoveCooldown = 24
+const kJiejiCostalarchstrapTiecostalarchstrapHerb = 1
+const kJiejiCostalarchstrapTiecostalarchstrapLife = 1
+const kJiejiCostalarchstrapTiecostalarchstrapGongfaRate = 0.005
+const kJiejiCostalarchstrapLoosecostalarchstrapMoney = 1
+const kJiejiCostalarchstrapLoosecostalarchstrapMoneyThunder = 1
+const kJiejiCostalarchstrapLoosecostalarchstrapHerb = 1
+const kJiejiCostalarchstrapLoosecostalarchstrapLife = 1
+const kJiejiCostalarchstrapBloodLife = 1
+const kJiejiCostalarchstrapBloodLifeBlood = 2
+const kJiejiCostalarchstrapBloodGongfaRate = 0.03
+const kJiejiCostalarchstrapBloodMoney = 2
+
+function _jiejiCostalarchstrapSeasonId() {
+  if (game.jieji != null && game.jieji.seasonId != null) {
+    return game.jieji.seasonId
+  }
+  return null
+}
+
+function _jiejiCostalarchstrapTutorialLocked() {
+  return game.enableTutorial && game.flags.tutorial.bountyQuest != true
+}
+
+function _jiejiCostalarchstrapTiecostalarchstrapHerbCost(seasonId) {
+  if (seasonId == 'mist') return 0
+  return kJiejiCostalarchstrapTiecostalarchstrapHerb
+}
+
+function _jiejiCostalarchstrapLoosecostalarchstrapMoneyCost(seasonId) {
+  if (seasonId == 'thunder') return kJiejiCostalarchstrapLoosecostalarchstrapMoneyThunder
+  return kJiejiCostalarchstrapLoosecostalarchstrapMoney
+}
+
+function _jiejiCostalarchstrapBloodLifeCost(seasonId) {
+  if (seasonId == 'blood') return kJiejiCostalarchstrapBloodLifeBlood
+  return kJiejiCostalarchstrapBloodLife
+}
+
+function _jiejiCostalarchstrapCostLife(want) {
+  var lost = want
+  final life = hero.life ?? 1
+  if (life - lost < 1) lost = life - 1
+  if (lost < 0) lost = 0
+  if (lost > 0) {
+    Player.setLife(hero.life - lost)
+  }
+  return lost
+}
+
+function _jiejiCostalarchstrapNormalizeKind(kind) {
+  if (kind == 'tiecostalarchstrap' || kind == 'jieji_costalarchstrap_tiecostalarchstrap') return 'tiecostalarchstrap'
+  if (kind == 'loosecostalarchstrap' || kind == 'jieji_costalarchstrap_loosecostalarchstrap') return 'loosecostalarchstrap'
+  if (kind == 'bloodcostalarchstrap' || kind == 'jieji_costalarchstrap_bloodcostalarchstrap') return 'bloodcostalarchstrap'
+  return null
+}
+
+function _jiejiCostalarchstrapChoices() {
+  return [
+    {
+      text: 'jieji_costalarchstrap_tiecostalarchstrap',
+      description: 'hint_jieji_costalarchstrap_tiecostalarchstrap',
+    },
+    {
+      text: 'jieji_costalarchstrap_loosecostalarchstrap',
+      description: 'hint_jieji_costalarchstrap_loosecostalarchstrap',
+    },
+    {
+      text: 'jieji_costalarchstrap_bloodcostalarchstrap',
+      description: 'hint_jieji_costalarchstrap_bloodcostalarchstrap',
+    },
+  ]
+}
+
+/// 赶路劫肋弓革三选。debug.forceJiejiEvent('costalarchstrap') / forceCostalarchstrap 直接走这里，仍弹出三选。
+async function playJiejiCostalarchstrapEvent(terrain) {
+  if (hero == null) return false
+
+  dialog.pushDialog('hint_jieji_costalarchstrap')
+  dialog.pushSelection('jiejiCostalarchstrap', _jiejiCostalarchstrapChoices())
+  await dialog.execute()
+  final picked = dialog.checkSelected('jiejiCostalarchstrap')
+  var selected = _jiejiCostalarchstrapNormalizeKind(picked)
+  if (selected == null) {
+    selected = 'tiecostalarchstrap'
+  }
+
+  final seasonId = _jiejiCostalarchstrapSeasonId()
+  if (selected == 'tiecostalarchstrap') {
+    final herbNeed = _jiejiCostalarchstrapTiecostalarchstrapHerbCost(seasonId)
+    final herbHave = hero.materials['herb'] ?? 0
+    if (herbNeed > 0 && herbHave < herbNeed) {
+      dialog.pushDialog('hint_jieji_costalarchstrap_tiecostalarchstrap_broke', interpolations: [herbNeed])
+      await dialog.execute()
+    } else {
+      if (herbNeed > 0) {
+        Player.exhaust('herb', herbNeed)
+      }
+      final healed = Player.restoreLife(kJiejiCostalarchstrapTiecostalarchstrapLife)
+      dialog.pushDialog('hint_jieji_costalarchstrap_tiecostalarchstrap_ok', interpolations: [healed])
+      await dialog.execute()
+      await tryDropGongfaShard(rate: kJiejiCostalarchstrapTiecostalarchstrapGongfaRate)
+    }
+  } else if (selected == 'loosecostalarchstrap') {
+    final moneyNeed = _jiejiCostalarchstrapLoosecostalarchstrapMoneyCost(seasonId)
+    final moneyHave = hero.materials['money'] ?? 0
+    if (moneyHave < moneyNeed) {
+      dialog.pushDialog('hint_jieji_costalarchstrap_loosecostalarchstrap_broke', interpolations: [moneyNeed])
+      await dialog.execute()
+    } else {
+      Player.exhaust('money', moneyNeed)
+      await Player.collect('herb', kJiejiCostalarchstrapLoosecostalarchstrapHerb, incurIncident: false)
+      final healed = Player.restoreLife(kJiejiCostalarchstrapLoosecostalarchstrapLife)
+      dialog.pushDialog('hint_jieji_costalarchstrap_loosecostalarchstrap_ok', interpolations: [kJiejiCostalarchstrapLoosecostalarchstrapHerb, healed])
+      await dialog.execute()
+    }
+  } else {
+    final lost = _jiejiCostalarchstrapCostLife(_jiejiCostalarchstrapBloodLifeCost(seasonId))
+    dialog.pushDialog('hint_jieji_costalarchstrap_bloodcostalarchstrap_ok', interpolations: [lost])
+    await dialog.execute()
+    final dropped = await tryDropGongfaShard(rate: kJiejiCostalarchstrapBloodGongfaRate)
+    if (dropped != true) {
+      await Player.collect('money', kJiejiCostalarchstrapBloodMoney, incurIncident: false)
+      dialog.pushDialog('hint_jieji_costalarchstrap_bloodcostalarchstrap_none', interpolations: [kJiejiCostalarchstrapBloodMoney])
+      await dialog.execute()
+    }
+  }
+
+  Game.updateUI()
+  return true
+}
+
+/// 赶路触发：教程锁与路遇相同；冷却 24 步；约 0.000000000003%。出过则返回 true。
+async function tryJiejiCostalarchstrapOnMove(terrain) {
+  if (hero == null) return false
+  if (_jiejiCostalarchstrapTutorialLocked()) return false
+
+  final jieji = ensureJiejiFlags()
+  final moves = jieji.worldMoves ?? 0
+  final last = jieji.lastCostalarchstrapMove ?? -999
+  if (moves - last < kJiejiCostalarchstrapMoveCooldown) return false
+
+  var rate = kJiejiCostalarchstrapBaseRate
+  if (rate < 0) rate = 0
+  if (random.nextDouble() > rate) return false
+
+  jieji.lastCostalarchstrapMove = moves
+  await playJiejiCostalarchstrapEvent(terrain)
+  return true
+}

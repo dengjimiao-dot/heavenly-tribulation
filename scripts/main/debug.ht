@@ -858,6 +858,8 @@ namespace debug {
       await playJiejiCostalstrapEvent(terrain)
     } else if (kind == 'floatingribstrap') {
       await playJiejiFloatingribstrapEvent(terrain)
+    } else if (kind == 'costalarchstrap') {
+      await playJiejiCostalarchstrapEvent(terrain)
     } else {
       await playJiejiThunderRoadEvent(terrain)
     }
