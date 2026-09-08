@@ -1,0 +1,152 @@
+/// 赶路「劫指革」三选：系指 / 解指 / 血指。隐藏、劫兆、野遇、赶路、行商、拾荒、扎营、残锋、残卷、雾灯、残鼓、汲泉、劫幡、劫铃、劫符、劫旌、劫烛、劫角、劫笛、劫笠、劫带、劫履、劫氅、劫扇、劫杖、劫伞、劫面、劫帔、劫手套、劫戒、劫镜、劫鼓、劫炬、劫梳、劫勺、劫碗、劫杯、劫罐、劫瓶、劫墨、劫袍、劫带、劫簪、劫笔、劫针、劫扣、劫绳、劫珠、劫钗、劫绦、劫穗、劫缎、劫缨、劫袖、劫领、劫缘、劫辫、劫翎、劫裹、劫轭、劫辔、劫缰、劫镫、劫鞦、劫勒、劫衔、劫绊、劫鞍、劫刺、劫绊索、劫蹄铁、劫鞍垫、劫肚带、劫尻带、劫额革、劫鼻革、劫咽革、劫颊革、劫顶革、劫面革、劫障革、劫笼革、劫套革、劫羁革、劫络革、劫鬃革、劫罗革、劫甩革、劫肚革、劫裙革、劫翼革、劫扣革、劫环革、劫胸革、劫颈革、劫肩革、劫背革、劫腰革、劫胯革、劫胁革、劫肋革、劫股革、劫膝革、劫胫革、劫踝革、劫踵革、劫足革、劫趾革、劫爪革、劫掌革、劫腕革、劫指革都没中时才滚。
+const kJiejiFingerstrapBaseRate = 0.0000000001
+const kJiejiFingerstrapMoveCooldown = 24
+const kJiejiFingerstrapTiefingerstrapHerb = 1
+const kJiejiFingerstrapTiefingerstrapLife = 1
+const kJiejiFingerstrapTiefingerstrapGongfaRate = 0.005
+const kJiejiFingerstrapLoosefingerstrapMoney = 1
+const kJiejiFingerstrapLoosefingerstrapMoneyThunder = 1
+const kJiejiFingerstrapLoosefingerstrapHerb = 1
+const kJiejiFingerstrapLoosefingerstrapLife = 1
+const kJiejiFingerstrapBloodLife = 1
+const kJiejiFingerstrapBloodLifeBlood = 2
+const kJiejiFingerstrapBloodGongfaRate = 0.03
+const kJiejiFingerstrapBloodMoney = 2
+
+function _jiejiFingerstrapSeasonId() {
+  if (game.jieji != null && game.jieji.seasonId != null) {
+    return game.jieji.seasonId
+  }
+  return null
+}
+
+function _jiejiFingerstrapTutorialLocked() {
+  return game.enableTutorial && game.flags.tutorial.bountyQuest != true
+}
+
+function _jiejiFingerstrapTiefingerstrapHerbCost(seasonId) {
+  if (seasonId == 'mist') return 0
+  return kJiejiFingerstrapTiefingerstrapHerb
+}
+
+function _jiejiFingerstrapLoosefingerstrapMoneyCost(seasonId) {
+  if (seasonId == 'thunder') return kJiejiFingerstrapLoosefingerstrapMoneyThunder
+  return kJiejiFingerstrapLoosefingerstrapMoney
+}
+
+function _jiejiFingerstrapBloodLifeCost(seasonId) {
+  if (seasonId == 'blood') return kJiejiFingerstrapBloodLifeBlood
+  return kJiejiFingerstrapBloodLife
+}
+
+function _jiejiFingerstrapCostLife(want) {
+  var lost = want
+  final life = hero.life ?? 1
+  if (life - lost < 1) lost = life - 1
+  if (lost < 0) lost = 0
+  if (lost > 0) {
+    Player.setLife(hero.life - lost)
+  }
+  return lost
+}
+
+function _jiejiFingerstrapNormalizeKind(kind) {
+  if (kind == 'tiefingerstrap' || kind == 'jieji_fingerstrap_tiefingerstrap') return 'tiefingerstrap'
+  if (kind == 'loosefingerstrap' || kind == 'jieji_fingerstrap_loosefingerstrap') return 'loosefingerstrap'
+  if (kind == 'bloodfingerstrap' || kind == 'jieji_fingerstrap_bloodfingerstrap') return 'bloodfingerstrap'
+  return null
+}
+
+function _jiejiFingerstrapChoices() {
+  return [
+    {
+      text: 'jieji_fingerstrap_tiefingerstrap',
+      description: 'hint_jieji_fingerstrap_tiefingerstrap',
+    },
+    {
+      text: 'jieji_fingerstrap_loosefingerstrap',
+      description: 'hint_jieji_fingerstrap_loosefingerstrap',
+    },
+    {
+      text: 'jieji_fingerstrap_bloodfingerstrap',
+      description: 'hint_jieji_fingerstrap_bloodfingerstrap',
+    },
+  ]
+}
+
+/// 赶路劫指革三选。debug.forceJiejiEvent('fingerstrap') / forceFingerstrap 直接走这里，仍弹出三选。
+async function playJiejiFingerstrapEvent(terrain) {
+  if (hero == null) return false
+
+  dialog.pushDialog('hint_jieji_fingerstrap')
+  dialog.pushSelection('jiejiFingerstrap', _jiejiFingerstrapChoices())
+  await dialog.execute()
+  final picked = dialog.checkSelected('jiejiFingerstrap')
+  var selected = _jiejiFingerstrapNormalizeKind(picked)
+  if (selected == null) {
+    selected = 'tiefingerstrap'
+  }
+
+  final seasonId = _jiejiFingerstrapSeasonId()
+  if (selected == 'tiefingerstrap') {
+    final herbNeed = _jiejiFingerstrapTiefingerstrapHerbCost(seasonId)
+    final herbHave = hero.materials['herb'] ?? 0
+    if (herbNeed > 0 && herbHave < herbNeed) {
+      dialog.pushDialog('hint_jieji_fingerstrap_tiefingerstrap_broke', interpolations: [herbNeed])
+      await dialog.execute()
+    } else {
+      if (herbNeed > 0) {
+        Player.exhaust('herb', herbNeed)
+      }
+      final healed = Player.restoreLife(kJiejiFingerstrapTiefingerstrapLife)
+      dialog.pushDialog('hint_jieji_fingerstrap_tiefingerstrap_ok', interpolations: [healed])
+      await dialog.execute()
+      await tryDropGongfaShard(rate: kJiejiFingerstrapTiefingerstrapGongfaRate)
+    }
+  } else if (selected == 'loosefingerstrap') {
+    final moneyNeed = _jiejiFingerstrapLoosefingerstrapMoneyCost(seasonId)
+    final moneyHave = hero.materials['money'] ?? 0
+    if (moneyHave < moneyNeed) {
+      dialog.pushDialog('hint_jieji_fingerstrap_loosefingerstrap_broke', interpolations: [moneyNeed])
+      await dialog.execute()
+    } else {
+      Player.exhaust('money', moneyNeed)
+      await Player.collect('herb', kJiejiFingerstrapLoosefingerstrapHerb, incurIncident: false)
+      final healed = Player.restoreLife(kJiejiFingerstrapLoosefingerstrapLife)
+      dialog.pushDialog('hint_jieji_fingerstrap_loosefingerstrap_ok', interpolations: [kJiejiFingerstrapLoosefingerstrapHerb, healed])
+      await dialog.execute()
+    }
+  } else {
+    final lost = _jiejiFingerstrapCostLife(_jiejiFingerstrapBloodLifeCost(seasonId))
+    dialog.pushDialog('hint_jieji_fingerstrap_bloodfingerstrap_ok', interpolations: [lost])
+    await dialog.execute()
+    final dropped = await tryDropGongfaShard(rate: kJiejiFingerstrapBloodGongfaRate)
+    if (dropped != true) {
+      await Player.collect('money', kJiejiFingerstrapBloodMoney, incurIncident: false)
+      dialog.pushDialog('hint_jieji_fingerstrap_bloodfingerstrap_none', interpolations: [kJiejiFingerstrapBloodMoney])
+      await dialog.execute()
+    }
+  }
+
+  Game.updateUI()
+  return true
+}
+
+/// 赶路触发：教程锁与路遇相同；冷却 24 步；约 0.00000001%。出过则返回 true。
+async function tryJiejiFingerstrapOnMove(terrain) {
+  if (hero == null) return false
+  if (_jiejiFingerstrapTutorialLocked()) return false
+
+  final jieji = ensureJiejiFlags()
+  final moves = jieji.worldMoves ?? 0
+  final last = jieji.lastFingerstrapMove ?? -999
+  if (moves - last < kJiejiFingerstrapMoveCooldown) return false
+
+  var rate = kJiejiFingerstrapBaseRate
+  if (rate < 0) rate = 0
+  if (random.nextDouble() > rate) return false
+
+  jieji.lastFingerstrapMove = moves
+  await playJiejiFingerstrapEvent(terrain)
+  return true
+}

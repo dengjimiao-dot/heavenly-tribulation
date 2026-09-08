@@ -301,6 +301,7 @@ async function onAfterMove(terrain) {
     if (await tryJiejiClawstrapOnMove(terrain)) return true
     if (await tryJiejiPalmstrapOnMove(terrain)) return true
     if (await tryJiejiWriststrapOnMove(terrain)) return true
+    if (await tryJiejiFingerstrapOnMove(terrain)) return true
   }
   return fought
 }
