@@ -1,0 +1,152 @@
+/// 赶路「劫尻带」三选：系尻 / 解尻 / 血尻。隐藏、劫兆、野遇、赶路、行商、拾荒、扎营、残锋、残卷、雾灯、残鼓、汲泉、劫幡、劫铃、劫符、劫旌、劫烛、劫角、劫笛、劫笠、劫带、劫履、劫氅、劫扇、劫杖、劫伞、劫面、劫帔、劫手套、劫戒、劫镜、劫鼓、劫炬、劫梳、劫勺、劫碗、劫杯、劫罐、劫瓶、劫墨、劫袍、劫带、劫簪、劫笔、劫针、劫扣、劫绳、劫珠、劫钗、劫绦、劫穗、劫缎、劫缨、劫袖、劫领、劫缘、劫辫、劫翎、劫裹、劫轭、劫辔、劫缰、劫镫、劫鞦、劫勒、劫衔、劫绊、劫鞍、劫刺、劫绊索、劫蹄铁、劫鞍垫、劫肚带都没中时才滚。
+const kJiejiCrupperBaseRate = 0.00001
+const kJiejiCrupperMoveCooldown = 24
+const kJiejiCrupperTiecrupperHerb = 1
+const kJiejiCrupperTiecrupperLife = 1
+const kJiejiCrupperTiecrupperGongfaRate = 0.006
+const kJiejiCrupperLoosecrupperMoney = 1
+const kJiejiCrupperLoosecrupperMoneyThunder = 1
+const kJiejiCrupperLoosecrupperHerb = 1
+const kJiejiCrupperLoosecrupperLife = 1
+const kJiejiCrupperBloodLife = 1
+const kJiejiCrupperBloodLifeBlood = 2
+const kJiejiCrupperBloodGongfaRate = 0.04
+const kJiejiCrupperBloodMoney = 2
+
+function _jiejiCrupperSeasonId() {
+  if (game.jieji != null && game.jieji.seasonId != null) {
+    return game.jieji.seasonId
+  }
+  return null
+}
+
+function _jiejiCrupperTutorialLocked() {
+  return game.enableTutorial && game.flags.tutorial.bountyQuest != true
+}
+
+function _jiejiCrupperTiecrupperHerbCost(seasonId) {
+  if (seasonId == 'mist') return 0
+  return kJiejiCrupperTiecrupperHerb
+}
+
+function _jiejiCrupperLoosecrupperMoneyCost(seasonId) {
+  if (seasonId == 'thunder') return kJiejiCrupperLoosecrupperMoneyThunder
+  return kJiejiCrupperLoosecrupperMoney
+}
+
+function _jiejiCrupperBloodLifeCost(seasonId) {
+  if (seasonId == 'blood') return kJiejiCrupperBloodLifeBlood
+  return kJiejiCrupperBloodLife
+}
+
+function _jiejiCrupperCostLife(want) {
+  var lost = want
+  final life = hero.life ?? 1
+  if (life - lost < 1) lost = life - 1
+  if (lost < 0) lost = 0
+  if (lost > 0) {
+    Player.setLife(hero.life - lost)
+  }
+  return lost
+}
+
+function _jiejiCrupperNormalizeKind(kind) {
+  if (kind == 'tiecrupper' || kind == 'jieji_crupper_tiecrupper') return 'tiecrupper'
+  if (kind == 'loosecrupper' || kind == 'jieji_crupper_loosecrupper') return 'loosecrupper'
+  if (kind == 'bloodcrupper' || kind == 'jieji_crupper_bloodcrupper') return 'bloodcrupper'
+  return null
+}
+
+function _jiejiCrupperChoices() {
+  return [
+    {
+      text: 'jieji_crupper_tiecrupper',
+      description: 'hint_jieji_crupper_tiecrupper',
+    },
+    {
+      text: 'jieji_crupper_loosecrupper',
+      description: 'hint_jieji_crupper_loosecrupper',
+    },
+    {
+      text: 'jieji_crupper_bloodcrupper',
+      description: 'hint_jieji_crupper_bloodcrupper',
+    },
+  ]
+}
+
+/// 赶路劫尻带三选。debug.forceJiejiEvent('crupper') / forceCrupper 直接走这里，仍弹出三选。
+async function playJiejiCrupperEvent(terrain) {
+  if (hero == null) return false
+
+  dialog.pushDialog('hint_jieji_crupper')
+  dialog.pushSelection('jiejiCrupper', _jiejiCrupperChoices())
+  await dialog.execute()
+  final picked = dialog.checkSelected('jiejiCrupper')
+  var selected = _jiejiCrupperNormalizeKind(picked)
+  if (selected == null) {
+    selected = 'tiecrupper'
+  }
+
+  final seasonId = _jiejiCrupperSeasonId()
+  if (selected == 'tiecrupper') {
+    final herbNeed = _jiejiCrupperTiecrupperHerbCost(seasonId)
+    final herbHave = hero.materials['herb'] ?? 0
+    if (herbNeed > 0 && herbHave < herbNeed) {
+      dialog.pushDialog('hint_jieji_crupper_tiecrupper_broke', interpolations: [herbNeed])
+      await dialog.execute()
+    } else {
+      if (herbNeed > 0) {
+        Player.exhaust('herb', herbNeed)
+      }
+      final healed = Player.restoreLife(kJiejiCrupperTiecrupperLife)
+      dialog.pushDialog('hint_jieji_crupper_tiecrupper_ok', interpolations: [healed])
+      await dialog.execute()
+      await tryDropGongfaShard(rate: kJiejiCrupperTiecrupperGongfaRate)
+    }
+  } else if (selected == 'loosecrupper') {
+    final moneyNeed = _jiejiCrupperLoosecrupperMoneyCost(seasonId)
+    final moneyHave = hero.materials['money'] ?? 0
+    if (moneyHave < moneyNeed) {
+      dialog.pushDialog('hint_jieji_crupper_loosecrupper_broke', interpolations: [moneyNeed])
+      await dialog.execute()
+    } else {
+      Player.exhaust('money', moneyNeed)
+      await Player.collect('herb', kJiejiCrupperLoosecrupperHerb, incurIncident: false)
+      final healed = Player.restoreLife(kJiejiCrupperLoosecrupperLife)
+      dialog.pushDialog('hint_jieji_crupper_loosecrupper_ok', interpolations: [kJiejiCrupperLoosecrupperHerb, healed])
+      await dialog.execute()
+    }
+  } else {
+    final lost = _jiejiCrupperCostLife(_jiejiCrupperBloodLifeCost(seasonId))
+    dialog.pushDialog('hint_jieji_crupper_bloodcrupper_ok', interpolations: [lost])
+    await dialog.execute()
+    final dropped = await tryDropGongfaShard(rate: kJiejiCrupperBloodGongfaRate)
+    if (dropped != true) {
+      await Player.collect('money', kJiejiCrupperBloodMoney, incurIncident: false)
+      dialog.pushDialog('hint_jieji_crupper_bloodcrupper_none', interpolations: [kJiejiCrupperBloodMoney])
+      await dialog.execute()
+    }
+  }
+
+  Game.updateUI()
+  return true
+}
+
+/// 赶路触发：教程锁与路遇相同；冷却 24 步；约 0.001%。出过则返回 true。
+async function tryJiejiCrupperOnMove(terrain) {
+  if (hero == null) return false
+  if (_jiejiCrupperTutorialLocked()) return false
+
+  final jieji = ensureJiejiFlags()
+  final moves = jieji.worldMoves ?? 0
+  final last = jieji.lastCrupperMove ?? -999
+  if (moves - last < kJiejiCrupperMoveCooldown) return false
+
+  var rate = kJiejiCrupperBaseRate
+  if (rate < 0) rate = 0
+  if (random.nextDouble() > rate) return false
+
+  jieji.lastCrupperMove = moves
+  await playJiejiCrupperEvent(terrain)
+  return true
+}

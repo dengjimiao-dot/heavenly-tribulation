@@ -4417,5 +4417,18 @@
   "hint_jieji_dungeon_sealtruss": "你花了 {0} 铜钱封住劫桁。生机回了 {1} 点，护身印挂上。",
   "hint_jieji_dungeon_sealtruss_broke": "封桁要 {0} 铜钱。袋里不够，封符自己落了。",
   "hint_jieji_dungeon_bloodtruss": "你割了 {0} 点生机以血启桁。业力入袖。",
-  "hint_jieji_dungeon_bloodtruss_none": "血启落下，残卷却散了。袋里多了 {0} 铜钱。"
+  "hint_jieji_dungeon_bloodtruss_none": "血启落下，残卷却散了。袋里多了 {0} 铜钱。",
+  "hint_jieji_crupper": "路遇一条劫尻带。你可以系尻、解尻，或以血染尻。",
+  "jieji_crupper_tiecrupper": "系尻",
+  "jieji_crupper_loosecrupper": "解尻",
+  "jieji_crupper_bloodcrupper": "血尻",
+  "hint_jieji_crupper_tiecrupper": "系尻：耗 1 药材（雾月不耗）。回 1 命，八毫摸残页。药材不够则空手。",
+  "hint_jieji_crupper_loosecrupper": "解尻：花 1 铜钱（雷月 1）。得 1 药材，并回 1 命。袋里不够则空手。",
+  "hint_jieji_crupper_bloodcrupper": "血尻：扣 1 点生机（至少留 1，血月 2）。四毫摸残页，不成则得 2 铜钱。",
+  "hint_jieji_crupper_tiecrupper_ok": "你系上劫尻带。生机回了 {0} 点。",
+  "hint_jieji_crupper_tiecrupper_broke": "系尻要 {0} 药材。你拿不出来。",
+  "hint_jieji_crupper_loosecrupper_ok": "你解开劫尻带。得了 {0} 药材，生机回了 {1} 点。",
+  "hint_jieji_crupper_loosecrupper_broke": "解尻要 {0} 铜钱。袋里不够。",
+  "hint_jieji_crupper_bloodcrupper_ok": "你割了 {0} 点生机去染劫尻带。",
+  "hint_jieji_crupper_bloodcrupper_none": "血尻下去，尻影却散了。袋里多了 {0} 铜钱。"
 }
