@@ -4434,5 +4434,17 @@
   "hint_jieji_blood_thread_extra": "血缕余纹入体。又采得 2 药材（或落下 40 铜钱），生机回了 4 点。",
   "hint_jieji_blood_thread_extra_blood": "血月血缕更黏。又多得了一点生机机缘。",
   "hint_jieji_mist_gauze_extra": "雾纱余纹入体。又采得 2 药材（或落下 40 铜钱），生机回了 4 点。",
-  "hint_jieji_mist_gauze_extra_mist": "雾月雾纱更薄。又多得了一点机缘。"
+  "hint_jieji_mist_gauze_extra_mist": "雾月雾纱更薄。又多得了一点机缘。",
+  "jieji_dungeon_next_jiejiPurlin": "劫檩",
+  "hint_jieji_dungeon_purlin_room": "厅梁架着一道劫檩。纹在檩身。你可以观檩、封檩，或以血启檩。",
+  "jieji_dungeon_readpurlin": "观檩",
+  "jieji_dungeon_sealpurlin": "封檩",
+  "jieji_dungeon_bloodpurlin": "血檩",
+  "hint_jieji_dungeon_readpurlin": "你耗了 {0} 药材观了劫檩。袖中多了一枚牌胚。",
+  "hint_jieji_dungeon_readpurlin_mist": "你耗了 {0} 药材观了劫檩。雾涎凝钱，袖中多了一枚牌胚，另落下 {1} 铜钱。",
+  "hint_jieji_dungeon_readpurlin_broke": "观檩要 {0} 药材。袋里不够，檩身劫纹自己暗了。",
+  "hint_jieji_dungeon_sealpurlin": "你花了 {0} 铜钱封住劫檩。生机回了 {1} 点，护身印挂上。",
+  "hint_jieji_dungeon_sealpurlin_broke": "封檩要 {0} 铜钱。袋里不够，封符自己落了。",
+  "hint_jieji_dungeon_bloodpurlin": "你割了 {0} 点生机以血启檩。业力入袖。",
+  "hint_jieji_dungeon_bloodpurlin_none": "血启落下，残卷却散了。袋里多了 {0} 铜钱。"
 }
