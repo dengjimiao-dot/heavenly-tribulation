@@ -405,6 +405,8 @@ namespace debug {
       questKind = 'hidden_mist_reed'
     } else if (kind == 'crevice') {
       questKind = 'hidden_thunder_crevice'
+    } else if (kind == 'cattail') {
+      questKind = 'hidden_mist_cattail'
     }
     final ctor = Quests[questKind]
     if (ctor == null) return false
