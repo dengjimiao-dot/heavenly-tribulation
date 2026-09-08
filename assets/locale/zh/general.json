@@ -4376,5 +4376,7 @@
   "hint_jieji_pad_loosepad_ok": "你抽走劫鞍垫。得了 {0} 药材，生机回了 {1} 点。",
   "hint_jieji_pad_loosepad_broke": "抽垫要 {0} 铜钱。袋里不够。",
   "hint_jieji_pad_bloodpad_ok": "你割了 {0} 点生机去染劫鞍垫。",
-  "hint_jieji_pad_bloodpad_none": "血垫下去，垫影却散了。袋里多了 {0} 铜钱。"
+  "hint_jieji_pad_bloodpad_none": "血垫下去，垫影却散了。袋里多了 {0} 铜钱。",
+  "hint_jieji_mist_brume_extra": "雾绡余纹入体。又采得 2 药材（或落下 40 铜钱），生机回了 4 点。",
+  "hint_jieji_mist_brume_extra_mist": "雾月雾绡更薄。又多得了一点机缘。"
 }
