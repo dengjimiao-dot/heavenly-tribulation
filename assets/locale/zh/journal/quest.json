@@ -632,5 +632,8 @@
   "quest_hidden_mist_hilum_complete": "「{0}」有了着落。你在{1}的雾珠脐边走了一遭。",
   "quest_hidden_blood_crag": "劫纹血巉",
   "quest_hidden_blood_crag_description": "行路听闻{0}城外有劫纹血巉。去走一遭，或可采得药材、拾得铜钱并回些生机。",
-  "quest_hidden_blood_crag_complete": "「{0}」有了着落。你在{1}的血巉边走了一遭。"
+  "quest_hidden_blood_crag_complete": "「{0}」有了着落。你在{1}的血巉边走了一遭。",
+  "quest_hidden_mist_raphe": "劫纹雾珠脊",
+  "quest_hidden_mist_raphe_description": "行路听闻{0}城外有劫纹雾珠脊。去走一遭，或可采得药材、拾得铜钱并回些生机。",
+  "quest_hidden_mist_raphe_complete": "「{0}」有了着落。你在{1}的雾珠脊边走了一遭。"
 }

@@ -537,6 +537,8 @@ namespace debug {
       questKind = 'hidden_mist_hilum'
     } else if (kind == 'crag') {
       questKind = 'hidden_blood_crag'
+    } else if (kind == 'raphe') {
+      questKind = 'hidden_mist_raphe'
     }
     final ctor = Quests[questKind]
     if (ctor == null) return false
