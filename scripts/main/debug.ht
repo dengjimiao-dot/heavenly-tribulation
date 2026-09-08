@@ -369,6 +369,8 @@ namespace debug {
       questKind = 'hidden_blood_soak'
     } else if (kind == 'crash') {
       questKind = 'hidden_thunder_crash'
+    } else if (kind == 'muslin') {
+      questKind = 'hidden_mist_muslin'
     }
     final ctor = Quests[questKind]
     if (ctor == null) return false
