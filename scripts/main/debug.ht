@@ -610,6 +610,8 @@ namespace debug {
       await playJiejiRomalEvent(terrain)
     } else if (kind == 'reata') {
       await playJiejiReataEvent(terrain)
+    } else if (kind == 'latigo') {
+      await playJiejiLatigoEvent(terrain)
     } else {
       await playJiejiThunderRoadEvent(terrain)
     }
