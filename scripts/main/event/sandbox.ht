@@ -274,6 +274,7 @@ async function onAfterMove(terrain) {
     if (await tryJiejiCavessonOnMove(terrain)) return true
     if (await tryJiejiHackamoreOnMove(terrain)) return true
     if (await tryJiejiBosalOnMove(terrain)) return true
+    if (await tryJiejiFiadorOnMove(terrain)) return true
   }
   return fought
 }
