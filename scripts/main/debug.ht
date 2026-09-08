@@ -399,6 +399,8 @@ namespace debug {
       questKind = 'hidden_thunder_fissure'
     } else if (kind == 'cress') {
       questKind = 'hidden_mist_cress'
+    } else if (kind == 'torrent') {
+      questKind = 'hidden_blood_torrent'
     }
     final ctor = Quests[questKind]
     if (ctor == null) return false
