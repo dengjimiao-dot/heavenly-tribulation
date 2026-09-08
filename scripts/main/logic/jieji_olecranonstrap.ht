@@ -1,0 +1,152 @@
+/// 赶路「劫鹰革」三选：系鹰 / 解鹰 / 血鹰。隐藏、劫兆、野遇、赶路、行商、拾荒、扎营、残锋、残卷、雾灯、残鼓、汲泉、劫幡、劫铃、劫符、劫旌、劫烛、劫角、劫笛、劫笠、劫带、劫履、劫氅、劫扇、劫杖、劫伞、劫面、劫帔、劫手套、劫戒、劫镜、劫鼓、劫炬、劫梳、劫勺、劫碗、劫杯、劫罐、劫瓶、劫墨、劫袍、劫带、劫簪、劫笔、劫针、劫扣、劫绳、劫珠、劫钗、劫绦、劫穗、劫缎、劫缨、劫袖、劫领、劫缘、劫辫、劫翎、劫裹、劫轭、劫辔、劫缰、劫镫、劫鞦、劫勒、劫衔、劫绊、劫鞍、劫刺、劫绊索、劫蹄铁、劫鞍垫、劫肚带、劫尻带、劫额革、劫鼻革、劫咽革、劫颊革、劫顶革、劫面革、劫障革、劫笼革、劫套革、劫羁革、劫络革、劫鬃革、劫罗革、劫甩革、劫肚革、劫裙革、劫翼革、劫扣革、劫环革、劫胸革、劫颈革、劫肩革、劫背革、劫腰革、劫胯革、劫胁革、劫肋革、劫股革、劫膝革、劫胫革、劫踝革、劫踵革、劫足革、劫趾革、劫爪革、劫掌革、劫腕革、劫指革、劫节革、劫甲革、劫拇革、劫肘革、劫肱革、劫膊革、劫桡革、劫鹰革、劫鹰革都没中时才滚。
+const kJiejiOlecranonstrapBaseRate = 0.000000000002
+const kJiejiOlecranonstrapMoveCooldown = 24
+const kJiejiOlecranonstrapTieolecranonstrapHerb = 1
+const kJiejiOlecranonstrapTieolecranonstrapLife = 1
+const kJiejiOlecranonstrapTieolecranonstrapGongfaRate = 0.005
+const kJiejiOlecranonstrapLooseolecranonstrapMoney = 1
+const kJiejiOlecranonstrapLooseolecranonstrapMoneyThunder = 1
+const kJiejiOlecranonstrapLooseolecranonstrapHerb = 1
+const kJiejiOlecranonstrapLooseolecranonstrapLife = 1
+const kJiejiOlecranonstrapBloodLife = 1
+const kJiejiOlecranonstrapBloodLifeBlood = 2
+const kJiejiOlecranonstrapBloodGongfaRate = 0.03
+const kJiejiOlecranonstrapBloodMoney = 2
+
+function _jiejiOlecranonstrapSeasonId() {
+  if (game.jieji != null && game.jieji.seasonId != null) {
+    return game.jieji.seasonId
+  }
+  return null
+}
+
+function _jiejiOlecranonstrapTutorialLocked() {
+  return game.enableTutorial && game.flags.tutorial.bountyQuest != true
+}
+
+function _jiejiOlecranonstrapTieolecranonstrapHerbCost(seasonId) {
+  if (seasonId == 'mist') return 0
+  return kJiejiOlecranonstrapTieolecranonstrapHerb
+}
+
+function _jiejiOlecranonstrapLooseolecranonstrapMoneyCost(seasonId) {
+  if (seasonId == 'thunder') return kJiejiOlecranonstrapLooseolecranonstrapMoneyThunder
+  return kJiejiOlecranonstrapLooseolecranonstrapMoney
+}
+
+function _jiejiOlecranonstrapBloodLifeCost(seasonId) {
+  if (seasonId == 'blood') return kJiejiOlecranonstrapBloodLifeBlood
+  return kJiejiOlecranonstrapBloodLife
+}
+
+function _jiejiOlecranonstrapCostLife(want) {
+  var lost = want
+  final life = hero.life ?? 1
+  if (life - lost < 1) lost = life - 1
+  if (lost < 0) lost = 0
+  if (lost > 0) {
+    Player.setLife(hero.life - lost)
+  }
+  return lost
+}
+
+function _jiejiOlecranonstrapNormalizeKind(kind) {
+  if (kind == 'tieolecranonstrap' || kind == 'jieji_olecranonstrap_tieolecranonstrap') return 'tieolecranonstrap'
+  if (kind == 'looseolecranonstrap' || kind == 'jieji_olecranonstrap_looseolecranonstrap') return 'looseolecranonstrap'
+  if (kind == 'bloodolecranonstrap' || kind == 'jieji_olecranonstrap_bloodolecranonstrap') return 'bloodolecranonstrap'
+  return null
+}
+
+function _jiejiOlecranonstrapChoices() {
+  return [
+    {
+      text: 'jieji_olecranonstrap_tieolecranonstrap',
+      description: 'hint_jieji_olecranonstrap_tieolecranonstrap',
+    },
+    {
+      text: 'jieji_olecranonstrap_looseolecranonstrap',
+      description: 'hint_jieji_olecranonstrap_looseolecranonstrap',
+    },
+    {
+      text: 'jieji_olecranonstrap_bloodolecranonstrap',
+      description: 'hint_jieji_olecranonstrap_bloodolecranonstrap',
+    },
+  ]
+}
+
+/// 赶路劫鹰革三选。debug.forceJiejiEvent('olecranonstrap') / forceOlecranonstrap 直接走这里，仍弹出三选。
+async function playJiejiOlecranonstrapEvent(terrain) {
+  if (hero == null) return false
+
+  dialog.pushDialog('hint_jieji_olecranonstrap')
+  dialog.pushSelection('jiejiOlecranonstrap', _jiejiOlecranonstrapChoices())
+  await dialog.execute()
+  final picked = dialog.checkSelected('jiejiOlecranonstrap')
+  var selected = _jiejiOlecranonstrapNormalizeKind(picked)
+  if (selected == null) {
+    selected = 'tieolecranonstrap'
+  }
+
+  final seasonId = _jiejiOlecranonstrapSeasonId()
+  if (selected == 'tieolecranonstrap') {
+    final herbNeed = _jiejiOlecranonstrapTieolecranonstrapHerbCost(seasonId)
+    final herbHave = hero.materials['herb'] ?? 0
+    if (herbNeed > 0 && herbHave < herbNeed) {
+      dialog.pushDialog('hint_jieji_olecranonstrap_tieolecranonstrap_broke', interpolations: [herbNeed])
+      await dialog.execute()
+    } else {
+      if (herbNeed > 0) {
+        Player.exhaust('herb', herbNeed)
+      }
+      final healed = Player.restoreLife(kJiejiOlecranonstrapTieolecranonstrapLife)
+      dialog.pushDialog('hint_jieji_olecranonstrap_tieolecranonstrap_ok', interpolations: [healed])
+      await dialog.execute()
+      await tryDropGongfaShard(rate: kJiejiOlecranonstrapTieolecranonstrapGongfaRate)
+    }
+  } else if (selected == 'looseolecranonstrap') {
+    final moneyNeed = _jiejiOlecranonstrapLooseolecranonstrapMoneyCost(seasonId)
+    final moneyHave = hero.materials['money'] ?? 0
+    if (moneyHave < moneyNeed) {
+      dialog.pushDialog('hint_jieji_olecranonstrap_looseolecranonstrap_broke', interpolations: [moneyNeed])
+      await dialog.execute()
+    } else {
+      Player.exhaust('money', moneyNeed)
+      await Player.collect('herb', kJiejiOlecranonstrapLooseolecranonstrapHerb, incurIncident: false)
+      final healed = Player.restoreLife(kJiejiOlecranonstrapLooseolecranonstrapLife)
+      dialog.pushDialog('hint_jieji_olecranonstrap_looseolecranonstrap_ok', interpolations: [kJiejiOlecranonstrapLooseolecranonstrapHerb, healed])
+      await dialog.execute()
+    }
+  } else {
+    final lost = _jiejiOlecranonstrapCostLife(_jiejiOlecranonstrapBloodLifeCost(seasonId))
+    dialog.pushDialog('hint_jieji_olecranonstrap_bloodolecranonstrap_ok', interpolations: [lost])
+    await dialog.execute()
+    final dropped = await tryDropGongfaShard(rate: kJiejiOlecranonstrapBloodGongfaRate)
+    if (dropped != true) {
+      await Player.collect('money', kJiejiOlecranonstrapBloodMoney, incurIncident: false)
+      dialog.pushDialog('hint_jieji_olecranonstrap_bloodolecranonstrap_none', interpolations: [kJiejiOlecranonstrapBloodMoney])
+      await dialog.execute()
+    }
+  }
+
+  Game.updateUI()
+  return true
+}
+
+/// 赶路触发：教程锁与路遇相同；冷却 24 步；约 0.0000000002%。出过则返回 true。
+async function tryJiejiOlecranonstrapOnMove(terrain) {
+  if (hero == null) return false
+  if (_jiejiOlecranonstrapTutorialLocked()) return false
+
+  final jieji = ensureJiejiFlags()
+  final moves = jieji.worldMoves ?? 0
+  final last = jieji.lastOlecranonstrapMove ?? -999
+  if (moves - last < kJiejiOlecranonstrapMoveCooldown) return false
+
+  var rate = kJiejiOlecranonstrapBaseRate
+  if (rate < 0) rate = 0
+  if (random.nextDouble() > rate) return false
+
+  jieji.lastOlecranonstrapMove = moves
+  await playJiejiOlecranonstrapEvent(terrain)
+  return true
+}
