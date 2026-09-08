@@ -661,12 +661,15 @@
   "quest_hidden_blood_mesa": "劫纹血峁",
   "quest_hidden_mist_embryo": "劫纹雾胚",
   "quest_hidden_thunder_dian": "劫纹雷甸",
+  "quest_hidden_mist_plumule": "劫纹雾胚芽",
   "quest_hidden_mist_endosperm_description": "行路听闻{0}城外有劫纹雾胚乳。去走一遭，或可采得药材、拾得铜钱并回些生机。",
   "quest_hidden_blood_mesa_description": "行路听闻{0}城外有劫纹血峁。去走一遭，或可采得药材、拾得铜钱并回些生机。",
   "quest_hidden_mist_embryo_description": "行路听闻{0}城外有劫纹雾胚。去走一遭，或可采得药材、拾得铜钱并回些生机。",
   "quest_hidden_thunder_dian_description": "行路听闻{0}城外有劫纹雷甸。去走一遭，或可采得药材、拾得铜钱并回些生机。",
+  "quest_hidden_mist_plumule_description": "行路听闻{0}城外有劫纹雾胚芽。去走一遭，或可采得药材、拾得铜钱并回些生机。",
   "quest_hidden_mist_endosperm_complete": "「{0}」有了着落。你在{1}的雾胚乳边走了一遭。",
   "quest_hidden_blood_mesa_complete": "「{0}」有了着落。你在{1}的血峁边走了一遭。",
   "quest_hidden_mist_embryo_complete": "「{0}」有了着落。你在{1}的雾胚边走了一遭。",
-  "quest_hidden_thunder_dian_complete": "「{0}」有了着落。你在{1}的雷甸边走了一遭。"
+  "quest_hidden_thunder_dian_complete": "「{0}」有了着落。你在{1}的雷甸边走了一遭。",
+  "quest_hidden_mist_plumule_complete": "「{0}」有了着落。你在{1}的雾胚芽边走了一遭。"
 }
