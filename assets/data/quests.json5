@@ -1655,5 +1655,14 @@
     rank: 0,
   },
 
+  {
+    id: "hidden_blood_promontory",
+    policy: null,
+    isBounty: false,
+    isHidden: true,
+    contribution: 11,
+    rank: 0,
+  },
+
 
 }
