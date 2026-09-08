@@ -634,6 +634,8 @@ namespace debug {
       await playJiejiFenderEvent(terrain)
     } else if (kind == 'billet') {
       await playJiejiBilletEvent(terrain)
+    } else if (kind == 'keeper') {
+      await playJiejiKeeperEvent(terrain)
     } else {
       await playJiejiThunderRoadEvent(terrain)
     }
