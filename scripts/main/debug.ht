@@ -507,6 +507,8 @@ namespace debug {
       questKind = 'hidden_mist_ovary'
     } else if (kind == 'headland') {
       questKind = 'hidden_blood_headland'
+    } else if (kind == 'ovule') {
+      questKind = 'hidden_mist_ovule'
     }
     final ctor = Quests[questKind]
     if (ctor == null) return false
