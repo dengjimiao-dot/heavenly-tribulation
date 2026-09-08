@@ -4459,5 +4459,7 @@
   "hint_jieji_martingale_loosemartingale_ok": "你解开劫攀胸。得了 {0} 药材，生机回了 {1} 点。",
   "hint_jieji_martingale_loosemartingale_broke": "解攀要 {0} 铜钱。袋里不够。",
   "hint_jieji_martingale_bloodmartingale_ok": "你割了 {0} 点生机去染劫攀胸。",
-  "hint_jieji_martingale_bloodmartingale_none": "血攀下去，攀影却散了。袋里多了 {0} 铜钱。"
+  "hint_jieji_martingale_bloodmartingale_none": "血攀下去，攀影却散了。袋里多了 {0} 铜钱。",
+  "hint_jieji_thunder_knell_extra": "雷铎余纹入体。又采得 2 药材（或落下 40 铜钱），生机回了 4 点。",
+  "hint_jieji_thunder_knell_extra_thunder": "雷月雷铎更烈。又多拣了一回。"
 }
