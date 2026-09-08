@@ -788,6 +788,9 @@ function _prepareMap() {
               },
               'jiejiJiaozhu': {
                 markJiejiDungeonEncounter('jiejiJiaozhu')
+              },
+              'jiejiZhongzhu': {
+                markJiejiDungeonEncounter('jiejiZhongzhu')
               }
             }
           }
