@@ -413,6 +413,8 @@ namespace debug {
       questKind = 'hidden_thunder_chasm'
     } else if (kind == 'watershield') {
       questKind = 'hidden_mist_watershield'
+    } else if (kind == 'abyss') {
+      questKind = 'hidden_blood_abyss'
     }
     final ctor = Quests[questKind]
     if (ctor == null) return false
