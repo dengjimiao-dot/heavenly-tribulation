@@ -6080,6 +6080,19 @@
   "hint_jieji_costalarchstrap_loosecostalarchstrap_ok": "你解开劫肋弓革。得了 {0} 药材，生机回了 {1} 点。",
   "hint_jieji_costalarchstrap_loosecostalarchstrap_broke": "解弓要 {0} 铜钱。袋里不够。",
   "hint_jieji_costalarchstrap_bloodcostalarchstrap_ok": "你割了 {0} 点生机去染劫肋弓革。",
-  "hint_jieji_costalarchstrap_bloodcostalarchstrap_none": "血弓下去，弓影却散了。袋里多了 {0} 铜钱。"
+  "hint_jieji_costalarchstrap_bloodcostalarchstrap_none": "血弓下去，弓影却散了。袋里多了 {0} 铜钱。",
+  "hint_jieji_intercostalstrap": "路遇一条劫肋间革。你可以系间、解间，或以血染间。",
+  "jieji_intercostalstrap_tieintercostalstrap": "系间",
+  "jieji_intercostalstrap_looseintercostalstrap": "解间",
+  "jieji_intercostalstrap_bloodintercostalstrap": "血间",
+  "hint_jieji_intercostalstrap_tieintercostalstrap": "系间：耗 1 药材（雾月不耗）。回 1 命，五毫摸残页。药材不够则空手。",
+  "hint_jieji_intercostalstrap_looseintercostalstrap": "解间：花 1 铜钱（雷月 1）。得 1 药材，并回 1 命。袋里不够则空手。",
+  "hint_jieji_intercostalstrap_bloodintercostalstrap": "血间：扣 1 点生机（至少留 1，血月 2）。三毫摸残页，不成则得 2 铜钱。",
+  "hint_jieji_intercostalstrap_tieintercostalstrap_ok": "你系上劫肋间革。生机回了 {0} 点。",
+  "hint_jieji_intercostalstrap_tieintercostalstrap_broke": "系间要 {0} 药材。你拿不出来。",
+  "hint_jieji_intercostalstrap_looseintercostalstrap_ok": "你解开劫肋间革。得了 {0} 药材，生机回了 {1} 点。",
+  "hint_jieji_intercostalstrap_looseintercostalstrap_broke": "解间要 {0} 铜钱。袋里不够。",
+  "hint_jieji_intercostalstrap_bloodintercostalstrap_ok": "你割了 {0} 点生机去染劫肋间革。",
+  "hint_jieji_intercostalstrap_bloodintercostalstrap_none": "血间下去，间影却散了。袋里多了 {0} 铜钱。"
 
 }
