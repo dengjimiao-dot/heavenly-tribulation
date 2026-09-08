@@ -1,0 +1,152 @@
+/// 赶路「劫面革」三选：系面 / 解面 / 血面。隐藏、劫兆、野遇、赶路、行商、拾荒、扎营、残锋、残卷、雾灯、残鼓、汲泉、劫幡、劫铃、劫符、劫旌、劫烛、劫角、劫笛、劫笠、劫带、劫履、劫氅、劫扇、劫杖、劫伞、劫面、劫帔、劫手套、劫戒、劫镜、劫鼓、劫炬、劫梳、劫勺、劫碗、劫杯、劫罐、劫瓶、劫墨、劫袍、劫带、劫簪、劫笔、劫针、劫扣、劫绳、劫珠、劫钗、劫绦、劫穗、劫缎、劫缨、劫袖、劫领、劫缘、劫辫、劫翎、劫裹、劫轭、劫辔、劫缰、劫镫、劫鞦、劫勒、劫衔、劫绊、劫鞍、劫刺、劫绊索、劫蹄铁、劫鞍垫、劫肚带、劫尻带、劫额革、劫鼻革、劫咽革、劫颊革、劫顶革、劫面革都没中时才滚。
+const kJiejiFrontletBaseRate = 0.000002
+const kJiejiFrontletMoveCooldown = 24
+const kJiejiFrontletTiefrontletHerb = 1
+const kJiejiFrontletTiefrontletLife = 1
+const kJiejiFrontletTiefrontletGongfaRate = 0.005
+const kJiejiFrontletLoosefrontletMoney = 1
+const kJiejiFrontletLoosefrontletMoneyThunder = 1
+const kJiejiFrontletLoosefrontletHerb = 1
+const kJiejiFrontletLoosefrontletLife = 1
+const kJiejiFrontletBloodLife = 1
+const kJiejiFrontletBloodLifeBlood = 2
+const kJiejiFrontletBloodGongfaRate = 0.03
+const kJiejiFrontletBloodMoney = 2
+
+function _jiejiFrontletSeasonId() {
+  if (game.jieji != null && game.jieji.seasonId != null) {
+    return game.jieji.seasonId
+  }
+  return null
+}
+
+function _jiejiFrontletTutorialLocked() {
+  return game.enableTutorial && game.flags.tutorial.bountyQuest != true
+}
+
+function _jiejiFrontletTiefrontletHerbCost(seasonId) {
+  if (seasonId == 'mist') return 0
+  return kJiejiFrontletTiefrontletHerb
+}
+
+function _jiejiFrontletLoosefrontletMoneyCost(seasonId) {
+  if (seasonId == 'thunder') return kJiejiFrontletLoosefrontletMoneyThunder
+  return kJiejiFrontletLoosefrontletMoney
+}
+
+function _jiejiFrontletBloodLifeCost(seasonId) {
+  if (seasonId == 'blood') return kJiejiFrontletBloodLifeBlood
+  return kJiejiFrontletBloodLife
+}
+
+function _jiejiFrontletCostLife(want) {
+  var lost = want
+  final life = hero.life ?? 1
+  if (life - lost < 1) lost = life - 1
+  if (lost < 0) lost = 0
+  if (lost > 0) {
+    Player.setLife(hero.life - lost)
+  }
+  return lost
+}
+
+function _jiejiFrontletNormalizeKind(kind) {
+  if (kind == 'tiefrontlet' || kind == 'jieji_frontlet_tiefrontlet') return 'tiefrontlet'
+  if (kind == 'loosefrontlet' || kind == 'jieji_frontlet_loosefrontlet') return 'loosefrontlet'
+  if (kind == 'bloodfrontlet' || kind == 'jieji_frontlet_bloodfrontlet') return 'bloodfrontlet'
+  return null
+}
+
+function _jiejiFrontletChoices() {
+  return [
+    {
+      text: 'jieji_frontlet_tiefrontlet',
+      description: 'hint_jieji_frontlet_tiefrontlet',
+    },
+    {
+      text: 'jieji_frontlet_loosefrontlet',
+      description: 'hint_jieji_frontlet_loosefrontlet',
+    },
+    {
+      text: 'jieji_frontlet_bloodfrontlet',
+      description: 'hint_jieji_frontlet_bloodfrontlet',
+    },
+  ]
+}
+
+/// 赶路劫面革三选。debug.forceJiejiEvent('frontlet') / forceFrontlet 直接走这里，仍弹出三选。
+async function playJiejiFrontletEvent(terrain) {
+  if (hero == null) return false
+
+  dialog.pushDialog('hint_jieji_frontlet')
+  dialog.pushSelection('jiejiFrontlet', _jiejiFrontletChoices())
+  await dialog.execute()
+  final picked = dialog.checkSelected('jiejiFrontlet')
+  var selected = _jiejiFrontletNormalizeKind(picked)
+  if (selected == null) {
+    selected = 'tiefrontlet'
+  }
+
+  final seasonId = _jiejiFrontletSeasonId()
+  if (selected == 'tiefrontlet') {
+    final herbNeed = _jiejiFrontletTiefrontletHerbCost(seasonId)
+    final herbHave = hero.materials['herb'] ?? 0
+    if (herbNeed > 0 && herbHave < herbNeed) {
+      dialog.pushDialog('hint_jieji_frontlet_tiefrontlet_broke', interpolations: [herbNeed])
+      await dialog.execute()
+    } else {
+      if (herbNeed > 0) {
+        Player.exhaust('herb', herbNeed)
+      }
+      final healed = Player.restoreLife(kJiejiFrontletTiefrontletLife)
+      dialog.pushDialog('hint_jieji_frontlet_tiefrontlet_ok', interpolations: [healed])
+      await dialog.execute()
+      await tryDropGongfaShard(rate: kJiejiFrontletTiefrontletGongfaRate)
+    }
+  } else if (selected == 'loosefrontlet') {
+    final moneyNeed = _jiejiFrontletLoosefrontletMoneyCost(seasonId)
+    final moneyHave = hero.materials['money'] ?? 0
+    if (moneyHave < moneyNeed) {
+      dialog.pushDialog('hint_jieji_frontlet_loosefrontlet_broke', interpolations: [moneyNeed])
+      await dialog.execute()
+    } else {
+      Player.exhaust('money', moneyNeed)
+      await Player.collect('herb', kJiejiFrontletLoosefrontletHerb, incurIncident: false)
+      final healed = Player.restoreLife(kJiejiFrontletLoosefrontletLife)
+      dialog.pushDialog('hint_jieji_frontlet_loosefrontlet_ok', interpolations: [kJiejiFrontletLoosefrontletHerb, healed])
+      await dialog.execute()
+    }
+  } else {
+    final lost = _jiejiFrontletCostLife(_jiejiFrontletBloodLifeCost(seasonId))
+    dialog.pushDialog('hint_jieji_frontlet_bloodfrontlet_ok', interpolations: [lost])
+    await dialog.execute()
+    final dropped = await tryDropGongfaShard(rate: kJiejiFrontletBloodGongfaRate)
+    if (dropped != true) {
+      await Player.collect('money', kJiejiFrontletBloodMoney, incurIncident: false)
+      dialog.pushDialog('hint_jieji_frontlet_bloodfrontlet_none', interpolations: [kJiejiFrontletBloodMoney])
+      await dialog.execute()
+    }
+  }
+
+  Game.updateUI()
+  return true
+}
+
+/// 赶路触发：教程锁与路遇相同；冷却 24 步；约 0.0002%。出过则返回 true。
+async function tryJiejiFrontletOnMove(terrain) {
+  if (hero == null) return false
+  if (_jiejiFrontletTutorialLocked()) return false
+
+  final jieji = ensureJiejiFlags()
+  final moves = jieji.worldMoves ?? 0
+  final last = jieji.lastFrontletMove ?? -999
+  if (moves - last < kJiejiFrontletMoveCooldown) return false
+
+  var rate = kJiejiFrontletBaseRate
+  if (rate < 0) rate = 0
+  if (random.nextDouble() > rate) return false
+
+  jieji.lastFrontletMove = moves
+  await playJiejiFrontletEvent(terrain)
+  return true
+}
