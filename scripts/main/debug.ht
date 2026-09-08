@@ -1041,6 +1041,9 @@ namespace debug {
     } else if (kind == 'xuanzhu') {
       game.flags.dungeon.pendingEncounter = 'jiejiXuanzhu'
       await playJiejiDungeonEncounter()
+    } else if (kind == 'yizhu') {
+      game.flags.dungeon.pendingEncounter = 'jiejiYizhu'
+      await playJiejiDungeonEncounter()
     } else if (kind == 'exit') {
       await playJiejiDungeonExitGift()
     } else {
