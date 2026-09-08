@@ -728,6 +728,8 @@ namespace debug {
       await playJiejiFootstrapEvent(terrain)
     } else if (kind == 'toestrap') {
       await playJiejiToestrapEvent(terrain)
+    } else if (kind == 'clawstrap') {
+      await playJiejiClawstrapEvent(terrain)
     } else {
       await playJiejiThunderRoadEvent(terrain)
     }
