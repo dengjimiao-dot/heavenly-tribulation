@@ -443,6 +443,8 @@ namespace debug {
       questKind = 'hidden_mist_shoot'
     } else if (kind == 'brook') {
       questKind = 'hidden_blood_brook'
+    } else if (kind == 'bud') {
+      questKind = 'hidden_mist_bud'
     }
     final ctor = Quests[questKind]
     if (ctor == null) return false
