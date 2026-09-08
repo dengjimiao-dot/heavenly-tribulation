@@ -323,6 +323,7 @@ async function onAfterMove(terrain) {
     if (await tryJiejiCostalarchstrapOnMove(terrain)) return true
     if (await tryJiejiIntercostalstrapOnMove(terrain)) return true
     if (await tryJiejiTrueribstrapOnMove(terrain)) return true
+    if (await tryJiejiFalseribstrapOnMove(terrain)) return true
   }
   return fought
 }

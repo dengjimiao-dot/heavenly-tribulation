@@ -876,6 +876,8 @@ namespace debug {
       await playJiejiIntercostalstrapEvent(terrain)
     } else if (kind == 'trueribstrap') {
       await playJiejiTrueribstrapEvent(terrain)
+    } else if (kind == 'falseribstrap') {
+      await playJiejiFalseribstrapEvent(terrain)
     } else {
       await playJiejiThunderRoadEvent(terrain)
     }
