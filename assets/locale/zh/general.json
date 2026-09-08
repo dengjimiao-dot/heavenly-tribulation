@@ -5022,7 +5022,6 @@
   "hint_jieji_dungeon_sealchongyanzhu_broke": "封重要 {0} 铜钱。袋里不够，封符自己落了。",
   "hint_jieji_dungeon_bloodchongyanzhu": "你割了 {0} 点生机以血启重。业力入袖。",
   "hint_jieji_dungeon_bloodchongyanzhu_none": "血启落下，残卷却散了。袋里多了 {0} 铜钱。",
-
   "hint_jieji_martingale": "路遇一条劫攀胸。你可以系攀、解攀，或以血染攀。",
   "jieji_martingale_tiemartingale": "系攀",
   "jieji_martingale_loosemartingale": "解攀",
@@ -5694,7 +5693,6 @@
   "hint_jieji_scapulastrap_loosescapulastrap_broke": "解胛要 {0} 铜钱。袋里不够。",
   "hint_jieji_scapulastrap_bloodscapulastrap_ok": "你割了 {0} 点生机去染劫肩胛革。",
   "hint_jieji_scapulastrap_bloodscapulastrap_none": "血胛下去，胛影却散了。袋里多了 {0} 铜钱。",
-
   "hint_jieji_mist_crepe_extra": "雾縠余纹入体。又采得 2 药材（或落下 40 铜钱），生机回了 4 点。",
   "hint_jieji_mist_crepe_extra_mist": "雾月雾縠更薄。又多得了一点机缘。",
   "hint_jieji_blood_drip_extra": "血滴余纹入体。又采得 2 药材（或落下 40 铜钱），生机回了 4 点。",
@@ -5886,5 +5884,7 @@
   "hint_jieji_mist_funicle_extra": "雾珠柄余纹入体。又采得 2 药材（或落下 40 铜钱），生机回了 4 点。",
   "hint_jieji_mist_funicle_extra_mist": "雾月雾珠柄更薄。又多得了一点机缘。",
   "hint_jieji_blood_cliff_extra": "血峭余纹入体。又采得 2 药材（或落下 40 铜钱），生机回了 4 点。",
-  "hint_jieji_blood_cliff_extra_blood": "血月血峭更黏。又多得了一点生机机缘。"
+  "hint_jieji_blood_cliff_extra_blood": "血月血峭更黏。又多得了一点生机机缘。",
+  "hint_jieji_thunder_qing_extra": "雷顷余纹入体。又采得 2 药材（或落下 40 铜钱），生机回了 4 点。",
+  "hint_jieji_thunder_qing_extra_thunder": "雷月雷顷更亮。又多得了一点机缘。"
 }
