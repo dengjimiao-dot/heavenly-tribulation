@@ -1,0 +1,152 @@
+/// 赶路「劫咽革」三选：系咽 / 解咽 / 血咽。隐藏、劫兆、野遇、赶路、行商、拾荒、扎营、残锋、残卷、雾灯、残鼓、汲泉、劫幡、劫铃、劫符、劫旌、劫烛、劫角、劫笛、劫笠、劫带、劫履、劫氅、劫扇、劫杖、劫伞、劫面、劫帔、劫手套、劫戒、劫镜、劫鼓、劫炬、劫梳、劫勺、劫碗、劫杯、劫罐、劫瓶、劫墨、劫袍、劫带、劫簪、劫笔、劫针、劫扣、劫绳、劫珠、劫钗、劫绦、劫穗、劫缎、劫缨、劫袖、劫领、劫缘、劫辫、劫翎、劫裹、劫轭、劫辔、劫缰、劫镫、劫鞦、劫勒、劫衔、劫绊、劫鞍、劫刺、劫绊索、劫蹄铁、劫鞍垫、劫肚带、劫尻带、劫额革、劫鼻革、劫咽革都没中时才滚。
+const kJiejiThroatlatchBaseRate = 0.000004
+const kJiejiThroatlatchMoveCooldown = 24
+const kJiejiThroatlatchTiethroatlatchHerb = 1
+const kJiejiThroatlatchTiethroatlatchLife = 1
+const kJiejiThroatlatchTiethroatlatchGongfaRate = 0.005
+const kJiejiThroatlatchLoosethroatlatchMoney = 1
+const kJiejiThroatlatchLoosethroatlatchMoneyThunder = 1
+const kJiejiThroatlatchLoosethroatlatchHerb = 1
+const kJiejiThroatlatchLoosethroatlatchLife = 1
+const kJiejiThroatlatchBloodLife = 1
+const kJiejiThroatlatchBloodLifeBlood = 2
+const kJiejiThroatlatchBloodGongfaRate = 0.03
+const kJiejiThroatlatchBloodMoney = 2
+
+function _jiejiThroatlatchSeasonId() {
+  if (game.jieji != null && game.jieji.seasonId != null) {
+    return game.jieji.seasonId
+  }
+  return null
+}
+
+function _jiejiThroatlatchTutorialLocked() {
+  return game.enableTutorial && game.flags.tutorial.bountyQuest != true
+}
+
+function _jiejiThroatlatchTiethroatlatchHerbCost(seasonId) {
+  if (seasonId == 'mist') return 0
+  return kJiejiThroatlatchTiethroatlatchHerb
+}
+
+function _jiejiThroatlatchLoosethroatlatchMoneyCost(seasonId) {
+  if (seasonId == 'thunder') return kJiejiThroatlatchLoosethroatlatchMoneyThunder
+  return kJiejiThroatlatchLoosethroatlatchMoney
+}
+
+function _jiejiThroatlatchBloodLifeCost(seasonId) {
+  if (seasonId == 'blood') return kJiejiThroatlatchBloodLifeBlood
+  return kJiejiThroatlatchBloodLife
+}
+
+function _jiejiThroatlatchCostLife(want) {
+  var lost = want
+  final life = hero.life ?? 1
+  if (life - lost < 1) lost = life - 1
+  if (lost < 0) lost = 0
+  if (lost > 0) {
+    Player.setLife(hero.life - lost)
+  }
+  return lost
+}
+
+function _jiejiThroatlatchNormalizeKind(kind) {
+  if (kind == 'tiethroatlatch' || kind == 'jieji_throatlatch_tiethroatlatch') return 'tiethroatlatch'
+  if (kind == 'loosethroatlatch' || kind == 'jieji_throatlatch_loosethroatlatch') return 'loosethroatlatch'
+  if (kind == 'bloodthroatlatch' || kind == 'jieji_throatlatch_bloodthroatlatch') return 'bloodthroatlatch'
+  return null
+}
+
+function _jiejiThroatlatchChoices() {
+  return [
+    {
+      text: 'jieji_throatlatch_tiethroatlatch',
+      description: 'hint_jieji_throatlatch_tiethroatlatch',
+    },
+    {
+      text: 'jieji_throatlatch_loosethroatlatch',
+      description: 'hint_jieji_throatlatch_loosethroatlatch',
+    },
+    {
+      text: 'jieji_throatlatch_bloodthroatlatch',
+      description: 'hint_jieji_throatlatch_bloodthroatlatch',
+    },
+  ]
+}
+
+/// 赶路劫咽革三选。debug.forceJiejiEvent('throatlatch') / forceThroatlatch 直接走这里，仍弹出三选。
+async function playJiejiThroatlatchEvent(terrain) {
+  if (hero == null) return false
+
+  dialog.pushDialog('hint_jieji_throatlatch')
+  dialog.pushSelection('jiejiThroatlatch', _jiejiThroatlatchChoices())
+  await dialog.execute()
+  final picked = dialog.checkSelected('jiejiThroatlatch')
+  var selected = _jiejiThroatlatchNormalizeKind(picked)
+  if (selected == null) {
+    selected = 'tiethroatlatch'
+  }
+
+  final seasonId = _jiejiThroatlatchSeasonId()
+  if (selected == 'tiethroatlatch') {
+    final herbNeed = _jiejiThroatlatchTiethroatlatchHerbCost(seasonId)
+    final herbHave = hero.materials['herb'] ?? 0
+    if (herbNeed > 0 && herbHave < herbNeed) {
+      dialog.pushDialog('hint_jieji_throatlatch_tiethroatlatch_broke', interpolations: [herbNeed])
+      await dialog.execute()
+    } else {
+      if (herbNeed > 0) {
+        Player.exhaust('herb', herbNeed)
+      }
+      final healed = Player.restoreLife(kJiejiThroatlatchTiethroatlatchLife)
+      dialog.pushDialog('hint_jieji_throatlatch_tiethroatlatch_ok', interpolations: [healed])
+      await dialog.execute()
+      await tryDropGongfaShard(rate: kJiejiThroatlatchTiethroatlatchGongfaRate)
+    }
+  } else if (selected == 'loosethroatlatch') {
+    final moneyNeed = _jiejiThroatlatchLoosethroatlatchMoneyCost(seasonId)
+    final moneyHave = hero.materials['money'] ?? 0
+    if (moneyHave < moneyNeed) {
+      dialog.pushDialog('hint_jieji_throatlatch_loosethroatlatch_broke', interpolations: [moneyNeed])
+      await dialog.execute()
+    } else {
+      Player.exhaust('money', moneyNeed)
+      await Player.collect('herb', kJiejiThroatlatchLoosethroatlatchHerb, incurIncident: false)
+      final healed = Player.restoreLife(kJiejiThroatlatchLoosethroatlatchLife)
+      dialog.pushDialog('hint_jieji_throatlatch_loosethroatlatch_ok', interpolations: [kJiejiThroatlatchLoosethroatlatchHerb, healed])
+      await dialog.execute()
+    }
+  } else {
+    final lost = _jiejiThroatlatchCostLife(_jiejiThroatlatchBloodLifeCost(seasonId))
+    dialog.pushDialog('hint_jieji_throatlatch_bloodthroatlatch_ok', interpolations: [lost])
+    await dialog.execute()
+    final dropped = await tryDropGongfaShard(rate: kJiejiThroatlatchBloodGongfaRate)
+    if (dropped != true) {
+      await Player.collect('money', kJiejiThroatlatchBloodMoney, incurIncident: false)
+      dialog.pushDialog('hint_jieji_throatlatch_bloodthroatlatch_none', interpolations: [kJiejiThroatlatchBloodMoney])
+      await dialog.execute()
+    }
+  }
+
+  Game.updateUI()
+  return true
+}
+
+/// 赶路触发：教程锁与路遇相同；冷却 24 步；约 0.0004%。出过则返回 true。
+async function tryJiejiThroatlatchOnMove(terrain) {
+  if (hero == null) return false
+  if (_jiejiThroatlatchTutorialLocked()) return false
+
+  final jieji = ensureJiejiFlags()
+  final moves = jieji.worldMoves ?? 0
+  final last = jieji.lastThroatlatchMove ?? -999
+  if (moves - last < kJiejiThroatlatchMoveCooldown) return false
+
+  var rate = kJiejiThroatlatchBaseRate
+  if (rate < 0) rate = 0
+  if (random.nextDouble() > rate) return false
+
+  jieji.lastThroatlatchMove = moves
+  await playJiejiThroatlatchEvent(terrain)
+  return true
+}
