@@ -4430,5 +4430,7 @@
   "hint_jieji_crupper_loosecrupper_ok": "你解开劫尻带。得了 {0} 药材，生机回了 {1} 点。",
   "hint_jieji_crupper_loosecrupper_broke": "解尻要 {0} 铜钱。袋里不够。",
   "hint_jieji_crupper_bloodcrupper_ok": "你割了 {0} 点生机去染劫尻带。",
-  "hint_jieji_crupper_bloodcrupper_none": "血尻下去，尻影却散了。袋里多了 {0} 铜钱。"
+  "hint_jieji_crupper_bloodcrupper_none": "血尻下去，尻影却散了。袋里多了 {0} 铜钱。",
+  "hint_jieji_blood_thread_extra": "血缕余纹入体。又采得 2 药材（或落下 40 铜钱），生机回了 4 点。",
+  "hint_jieji_blood_thread_extra_blood": "血月血缕更黏。又多得了一点生机机缘。"
 }

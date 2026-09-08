@@ -327,6 +327,8 @@ namespace debug {
       questKind = 'hidden_mist_brume'
     } else if (kind == 'toll') {
       questKind = 'hidden_thunder_toll'
+    } else if (kind == 'thread') {
+      questKind = 'hidden_blood_thread'
     }
     final ctor = Quests[questKind]
     if (ctor == null) return false
