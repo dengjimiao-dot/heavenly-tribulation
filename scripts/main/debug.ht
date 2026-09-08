@@ -423,6 +423,8 @@ namespace debug {
       questKind = 'hidden_blood_gulf'
     } else if (kind == 'caltrop') {
       questKind = 'hidden_mist_caltrop'
+    } else if (kind == 'ravine') {
+      questKind = 'hidden_thunder_ravine'
     }
     final ctor = Quests[questKind]
     if (ctor == null) return false
