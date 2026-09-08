@@ -387,6 +387,8 @@ namespace debug {
       questKind = 'hidden_mist_lichen'
     } else if (kind == 'deluge') {
       questKind = 'hidden_blood_deluge'
+    } else if (kind == 'algae') {
+      questKind = 'hidden_mist_algae'
     }
     final ctor = Quests[questKind]
     if (ctor == null) return false
