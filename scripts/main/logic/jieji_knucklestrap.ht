@@ -1,0 +1,152 @@
+/// 赶路「劫节革」三选：系节 / 解节 / 血节。隐藏、劫兆、野遇、赶路、行商、拾荒、扎营、残锋、残卷、雾灯、残鼓、汲泉、劫幡、劫铃、劫符、劫旌、劫烛、劫角、劫笛、劫笠、劫带、劫履、劫氅、劫扇、劫杖、劫伞、劫面、劫帔、劫手套、劫戒、劫镜、劫鼓、劫炬、劫梳、劫勺、劫碗、劫杯、劫罐、劫瓶、劫墨、劫袍、劫带、劫簪、劫笔、劫针、劫扣、劫绳、劫珠、劫钗、劫绦、劫穗、劫缎、劫缨、劫袖、劫领、劫缘、劫辫、劫翎、劫裹、劫轭、劫辔、劫缰、劫镫、劫鞦、劫勒、劫衔、劫绊、劫鞍、劫刺、劫绊索、劫蹄铁、劫鞍垫、劫肚带、劫尻带、劫额革、劫鼻革、劫咽革、劫颊革、劫顶革、劫面革、劫障革、劫笼革、劫套革、劫羁革、劫络革、劫鬃革、劫罗革、劫甩革、劫肚革、劫裙革、劫翼革、劫扣革、劫环革、劫胸革、劫颈革、劫肩革、劫背革、劫腰革、劫胯革、劫胁革、劫肋革、劫股革、劫膝革、劫胫革、劫踝革、劫踵革、劫足革、劫趾革、劫爪革、劫掌革、劫腕革、劫指革、劫节革都没中时才滚。
+const kJiejiKnucklestrapBaseRate = 0.00000000008
+const kJiejiKnucklestrapMoveCooldown = 24
+const kJiejiKnucklestrapTieknucklestrapHerb = 1
+const kJiejiKnucklestrapTieknucklestrapLife = 1
+const kJiejiKnucklestrapTieknucklestrapGongfaRate = 0.005
+const kJiejiKnucklestrapLooseknucklestrapMoney = 1
+const kJiejiKnucklestrapLooseknucklestrapMoneyThunder = 1
+const kJiejiKnucklestrapLooseknucklestrapHerb = 1
+const kJiejiKnucklestrapLooseknucklestrapLife = 1
+const kJiejiKnucklestrapBloodLife = 1
+const kJiejiKnucklestrapBloodLifeBlood = 2
+const kJiejiKnucklestrapBloodGongfaRate = 0.03
+const kJiejiKnucklestrapBloodMoney = 2
+
+function _jiejiKnucklestrapSeasonId() {
+  if (game.jieji != null && game.jieji.seasonId != null) {
+    return game.jieji.seasonId
+  }
+  return null
+}
+
+function _jiejiKnucklestrapTutorialLocked() {
+  return game.enableTutorial && game.flags.tutorial.bountyQuest != true
+}
+
+function _jiejiKnucklestrapTieknucklestrapHerbCost(seasonId) {
+  if (seasonId == 'mist') return 0
+  return kJiejiKnucklestrapTieknucklestrapHerb
+}
+
+function _jiejiKnucklestrapLooseknucklestrapMoneyCost(seasonId) {
+  if (seasonId == 'thunder') return kJiejiKnucklestrapLooseknucklestrapMoneyThunder
+  return kJiejiKnucklestrapLooseknucklestrapMoney
+}
+
+function _jiejiKnucklestrapBloodLifeCost(seasonId) {
+  if (seasonId == 'blood') return kJiejiKnucklestrapBloodLifeBlood
+  return kJiejiKnucklestrapBloodLife
+}
+
+function _jiejiKnucklestrapCostLife(want) {
+  var lost = want
+  final life = hero.life ?? 1
+  if (life - lost < 1) lost = life - 1
+  if (lost < 0) lost = 0
+  if (lost > 0) {
+    Player.setLife(hero.life - lost)
+  }
+  return lost
+}
+
+function _jiejiKnucklestrapNormalizeKind(kind) {
+  if (kind == 'tieknucklestrap' || kind == 'jieji_knucklestrap_tieknucklestrap') return 'tieknucklestrap'
+  if (kind == 'looseknucklestrap' || kind == 'jieji_knucklestrap_looseknucklestrap') return 'looseknucklestrap'
+  if (kind == 'bloodknucklestrap' || kind == 'jieji_knucklestrap_bloodknucklestrap') return 'bloodknucklestrap'
+  return null
+}
+
+function _jiejiKnucklestrapChoices() {
+  return [
+    {
+      text: 'jieji_knucklestrap_tieknucklestrap',
+      description: 'hint_jieji_knucklestrap_tieknucklestrap',
+    },
+    {
+      text: 'jieji_knucklestrap_looseknucklestrap',
+      description: 'hint_jieji_knucklestrap_looseknucklestrap',
+    },
+    {
+      text: 'jieji_knucklestrap_bloodknucklestrap',
+      description: 'hint_jieji_knucklestrap_bloodknucklestrap',
+    },
+  ]
+}
+
+/// 赶路劫节革三选。debug.forceJiejiEvent('knucklestrap') / forceKnucklestrap 直接走这里，仍弹出三选。
+async function playJiejiKnucklestrapEvent(terrain) {
+  if (hero == null) return false
+
+  dialog.pushDialog('hint_jieji_knucklestrap')
+  dialog.pushSelection('jiejiKnucklestrap', _jiejiKnucklestrapChoices())
+  await dialog.execute()
+  final picked = dialog.checkSelected('jiejiKnucklestrap')
+  var selected = _jiejiKnucklestrapNormalizeKind(picked)
+  if (selected == null) {
+    selected = 'tieknucklestrap'
+  }
+
+  final seasonId = _jiejiKnucklestrapSeasonId()
+  if (selected == 'tieknucklestrap') {
+    final herbNeed = _jiejiKnucklestrapTieknucklestrapHerbCost(seasonId)
+    final herbHave = hero.materials['herb'] ?? 0
+    if (herbNeed > 0 && herbHave < herbNeed) {
+      dialog.pushDialog('hint_jieji_knucklestrap_tieknucklestrap_broke', interpolations: [herbNeed])
+      await dialog.execute()
+    } else {
+      if (herbNeed > 0) {
+        Player.exhaust('herb', herbNeed)
+      }
+      final healed = Player.restoreLife(kJiejiKnucklestrapTieknucklestrapLife)
+      dialog.pushDialog('hint_jieji_knucklestrap_tieknucklestrap_ok', interpolations: [healed])
+      await dialog.execute()
+      await tryDropGongfaShard(rate: kJiejiKnucklestrapTieknucklestrapGongfaRate)
+    }
+  } else if (selected == 'looseknucklestrap') {
+    final moneyNeed = _jiejiKnucklestrapLooseknucklestrapMoneyCost(seasonId)
+    final moneyHave = hero.materials['money'] ?? 0
+    if (moneyHave < moneyNeed) {
+      dialog.pushDialog('hint_jieji_knucklestrap_looseknucklestrap_broke', interpolations: [moneyNeed])
+      await dialog.execute()
+    } else {
+      Player.exhaust('money', moneyNeed)
+      await Player.collect('herb', kJiejiKnucklestrapLooseknucklestrapHerb, incurIncident: false)
+      final healed = Player.restoreLife(kJiejiKnucklestrapLooseknucklestrapLife)
+      dialog.pushDialog('hint_jieji_knucklestrap_looseknucklestrap_ok', interpolations: [kJiejiKnucklestrapLooseknucklestrapHerb, healed])
+      await dialog.execute()
+    }
+  } else {
+    final lost = _jiejiKnucklestrapCostLife(_jiejiKnucklestrapBloodLifeCost(seasonId))
+    dialog.pushDialog('hint_jieji_knucklestrap_bloodknucklestrap_ok', interpolations: [lost])
+    await dialog.execute()
+    final dropped = await tryDropGongfaShard(rate: kJiejiKnucklestrapBloodGongfaRate)
+    if (dropped != true) {
+      await Player.collect('money', kJiejiKnucklestrapBloodMoney, incurIncident: false)
+      dialog.pushDialog('hint_jieji_knucklestrap_bloodknucklestrap_none', interpolations: [kJiejiKnucklestrapBloodMoney])
+      await dialog.execute()
+    }
+  }
+
+  Game.updateUI()
+  return true
+}
+
+/// 赶路触发：教程锁与路遇相同；冷却 24 步；约 0.000000008%。出过则返回 true。
+async function tryJiejiKnucklestrapOnMove(terrain) {
+  if (hero == null) return false
+  if (_jiejiKnucklestrapTutorialLocked()) return false
+
+  final jieji = ensureJiejiFlags()
+  final moves = jieji.worldMoves ?? 0
+  final last = jieji.lastKnucklestrapMove ?? -999
+  if (moves - last < kJiejiKnucklestrapMoveCooldown) return false
+
+  var rate = kJiejiKnucklestrapBaseRate
+  if (rate < 0) rate = 0
+  if (random.nextDouble() > rate) return false
+
+  jieji.lastKnucklestrapMove = moves
+  await playJiejiKnucklestrapEvent(terrain)
+  return true
+}
