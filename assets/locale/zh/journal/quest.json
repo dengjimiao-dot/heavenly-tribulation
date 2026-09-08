@@ -626,5 +626,8 @@
   "quest_hidden_blood_cliff_complete": "「{0}」有了着落。你在{1}的血峭边走了一遭。",
   "quest_hidden_thunder_qing": "劫纹雷顷",
   "quest_hidden_thunder_qing_description": "行路听闻{0}城外有劫纹雷顷。去走一遭，或可采得药材、拾得铜钱并回些生机。",
-  "quest_hidden_thunder_qing_complete": "「{0}」有了着落。你在{1}的雷顷边走了一遭。"
+  "quest_hidden_thunder_qing_complete": "「{0}」有了着落。你在{1}的雷顷边走了一遭。",
+  "quest_hidden_mist_hilum": "劫纹雾珠脐",
+  "quest_hidden_mist_hilum_description": "行路听闻{0}城外有劫纹雾珠脐。去走一遭，或可采得药材、拾得铜钱并回些生机。",
+  "quest_hidden_mist_hilum_complete": "「{0}」有了着落。你在{1}的雾珠脐边走了一遭。"
 }
