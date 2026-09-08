@@ -1,0 +1,152 @@
+/// 赶路「劫胸革」三选：系胸 / 解胸 / 血胸。隐藏、劫兆、野遇、赶路、行商、拾荒、扎营、残锋、残卷、雾灯、残鼓、汲泉、劫幡、劫铃、劫符、劫旌、劫烛、劫角、劫笛、劫笠、劫带、劫履、劫氅、劫扇、劫杖、劫伞、劫面、劫帔、劫手套、劫戒、劫镜、劫鼓、劫炬、劫梳、劫勺、劫碗、劫杯、劫罐、劫瓶、劫墨、劫袍、劫带、劫簪、劫笔、劫针、劫扣、劫绳、劫珠、劫钗、劫绦、劫穗、劫缎、劫缨、劫袖、劫领、劫缘、劫辫、劫翎、劫裹、劫轭、劫辔、劫缰、劫镫、劫鞦、劫勒、劫衔、劫绊、劫鞍、劫刺、劫绊索、劫蹄铁、劫鞍垫、劫肚带、劫尻带、劫额革、劫鼻革、劫咽革、劫颊革、劫顶革、劫面革、劫障革、劫笼革、劫套革、劫羁革、劫络革、劫鬃革、劫罗革、劫甩革、劫肚革、劫裙革、劫翼革、劫扣革、劫环革、劫胸革都没中时才滚。
+const kJiejiBreastcollarBaseRate = 0.00000008
+const kJiejiBreastcollarMoveCooldown = 24
+const kJiejiBreastcollarTiebreastcollarHerb = 1
+const kJiejiBreastcollarTiebreastcollarLife = 1
+const kJiejiBreastcollarTiebreastcollarGongfaRate = 0.005
+const kJiejiBreastcollarLoosebreastcollarMoney = 1
+const kJiejiBreastcollarLoosebreastcollarMoneyThunder = 1
+const kJiejiBreastcollarLoosebreastcollarHerb = 1
+const kJiejiBreastcollarLoosebreastcollarLife = 1
+const kJiejiBreastcollarBloodLife = 1
+const kJiejiBreastcollarBloodLifeBlood = 2
+const kJiejiBreastcollarBloodGongfaRate = 0.03
+const kJiejiBreastcollarBloodMoney = 2
+
+function _jiejiBreastcollarSeasonId() {
+  if (game.jieji != null && game.jieji.seasonId != null) {
+    return game.jieji.seasonId
+  }
+  return null
+}
+
+function _jiejiBreastcollarTutorialLocked() {
+  return game.enableTutorial && game.flags.tutorial.bountyQuest != true
+}
+
+function _jiejiBreastcollarTiebreastcollarHerbCost(seasonId) {
+  if (seasonId == 'mist') return 0
+  return kJiejiBreastcollarTiebreastcollarHerb
+}
+
+function _jiejiBreastcollarLoosebreastcollarMoneyCost(seasonId) {
+  if (seasonId == 'thunder') return kJiejiBreastcollarLoosebreastcollarMoneyThunder
+  return kJiejiBreastcollarLoosebreastcollarMoney
+}
+
+function _jiejiBreastcollarBloodLifeCost(seasonId) {
+  if (seasonId == 'blood') return kJiejiBreastcollarBloodLifeBlood
+  return kJiejiBreastcollarBloodLife
+}
+
+function _jiejiBreastcollarCostLife(want) {
+  var lost = want
+  final life = hero.life ?? 1
+  if (life - lost < 1) lost = life - 1
+  if (lost < 0) lost = 0
+  if (lost > 0) {
+    Player.setLife(hero.life - lost)
+  }
+  return lost
+}
+
+function _jiejiBreastcollarNormalizeKind(kind) {
+  if (kind == 'tiebreastcollar' || kind == 'jieji_breastcollar_tiebreastcollar') return 'tiebreastcollar'
+  if (kind == 'loosebreastcollar' || kind == 'jieji_breastcollar_loosebreastcollar') return 'loosebreastcollar'
+  if (kind == 'bloodbreastcollar' || kind == 'jieji_breastcollar_bloodbreastcollar') return 'bloodbreastcollar'
+  return null
+}
+
+function _jiejiBreastcollarChoices() {
+  return [
+    {
+      text: 'jieji_breastcollar_tiebreastcollar',
+      description: 'hint_jieji_breastcollar_tiebreastcollar',
+    },
+    {
+      text: 'jieji_breastcollar_loosebreastcollar',
+      description: 'hint_jieji_breastcollar_loosebreastcollar',
+    },
+    {
+      text: 'jieji_breastcollar_bloodbreastcollar',
+      description: 'hint_jieji_breastcollar_bloodbreastcollar',
+    },
+  ]
+}
+
+/// 赶路劫胸革三选。debug.forceJiejiEvent('breastcollar') / forceBreastcollar 直接走这里，仍弹出三选。
+async function playJiejiBreastcollarEvent(terrain) {
+  if (hero == null) return false
+
+  dialog.pushDialog('hint_jieji_breastcollar')
+  dialog.pushSelection('jiejiBreastcollar', _jiejiBreastcollarChoices())
+  await dialog.execute()
+  final picked = dialog.checkSelected('jiejiBreastcollar')
+  var selected = _jiejiBreastcollarNormalizeKind(picked)
+  if (selected == null) {
+    selected = 'tiebreastcollar'
+  }
+
+  final seasonId = _jiejiBreastcollarSeasonId()
+  if (selected == 'tiebreastcollar') {
+    final herbNeed = _jiejiBreastcollarTiebreastcollarHerbCost(seasonId)
+    final herbHave = hero.materials['herb'] ?? 0
+    if (herbNeed > 0 && herbHave < herbNeed) {
+      dialog.pushDialog('hint_jieji_breastcollar_tiebreastcollar_broke', interpolations: [herbNeed])
+      await dialog.execute()
+    } else {
+      if (herbNeed > 0) {
+        Player.exhaust('herb', herbNeed)
+      }
+      final healed = Player.restoreLife(kJiejiBreastcollarTiebreastcollarLife)
+      dialog.pushDialog('hint_jieji_breastcollar_tiebreastcollar_ok', interpolations: [healed])
+      await dialog.execute()
+      await tryDropGongfaShard(rate: kJiejiBreastcollarTiebreastcollarGongfaRate)
+    }
+  } else if (selected == 'loosebreastcollar') {
+    final moneyNeed = _jiejiBreastcollarLoosebreastcollarMoneyCost(seasonId)
+    final moneyHave = hero.materials['money'] ?? 0
+    if (moneyHave < moneyNeed) {
+      dialog.pushDialog('hint_jieji_breastcollar_loosebreastcollar_broke', interpolations: [moneyNeed])
+      await dialog.execute()
+    } else {
+      Player.exhaust('money', moneyNeed)
+      await Player.collect('herb', kJiejiBreastcollarLoosebreastcollarHerb, incurIncident: false)
+      final healed = Player.restoreLife(kJiejiBreastcollarLoosebreastcollarLife)
+      dialog.pushDialog('hint_jieji_breastcollar_loosebreastcollar_ok', interpolations: [kJiejiBreastcollarLoosebreastcollarHerb, healed])
+      await dialog.execute()
+    }
+  } else {
+    final lost = _jiejiBreastcollarCostLife(_jiejiBreastcollarBloodLifeCost(seasonId))
+    dialog.pushDialog('hint_jieji_breastcollar_bloodbreastcollar_ok', interpolations: [lost])
+    await dialog.execute()
+    final dropped = await tryDropGongfaShard(rate: kJiejiBreastcollarBloodGongfaRate)
+    if (dropped != true) {
+      await Player.collect('money', kJiejiBreastcollarBloodMoney, incurIncident: false)
+      dialog.pushDialog('hint_jieji_breastcollar_bloodbreastcollar_none', interpolations: [kJiejiBreastcollarBloodMoney])
+      await dialog.execute()
+    }
+  }
+
+  Game.updateUI()
+  return true
+}
+
+/// 赶路触发：教程锁与路遇相同；冷却 24 步；约 0.000008%。出过则返回 true。
+async function tryJiejiBreastcollarOnMove(terrain) {
+  if (hero == null) return false
+  if (_jiejiBreastcollarTutorialLocked()) return false
+
+  final jieji = ensureJiejiFlags()
+  final moves = jieji.worldMoves ?? 0
+  final last = jieji.lastBreastcollarMove ?? -999
+  if (moves - last < kJiejiBreastcollarMoveCooldown) return false
+
+  var rate = kJiejiBreastcollarBaseRate
+  if (rate < 0) rate = 0
+  if (random.nextDouble() > rate) return false
+
+  jieji.lastBreastcollarMove = moves
+  await playJiejiBreastcollarEvent(terrain)
+  return true
+}
