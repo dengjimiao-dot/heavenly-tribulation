@@ -143,6 +143,7 @@
   "quest_hidden_mist_rime": "劫纹雾凇",
   "quest_hidden_mist_wisp": "劫纹雾缕",
   "quest_hidden_thunder_peal": "劫纹雷弦",
+  "quest_hidden_blood_smear": "劫纹血丝",
   "quest_hidden_blood_fleck": "劫纹血点",
 
   "quest_hidden_ruins_explore_description": "行路听闻{0}附近有荒墟异象。亲自走一趟探明虚实。",
@@ -231,6 +232,7 @@
   "quest_hidden_mist_rime_description": "行路听闻{0}城外有劫纹雾凇。去走一遭，或可采得药材、拾得铜钱并回些生机。",
   "quest_hidden_mist_wisp_description": "行路听闻{0}城外有劫纹雾缕。去走一遭，或可采得药材、拾得铜钱并回些生机。",
   "quest_hidden_thunder_peal_description": "行路听闻{0}城外有劫纹雷弦。去走一遭，或可采得药材、拾得铜钱并回些生机。",
+  "quest_hidden_blood_smear_description": "行路听闻{0}城外有劫纹血丝。去走一遭，或可采得药材、拾得铜钱并回些生机。",
   "quest_hidden_blood_fleck_description": "行路听闻{0}城外有劫纹血点。去走一遭，或可采得药材、拾得铜钱并回些生机。",
 
   "quest_hidden_rumor": "路遇一位行色匆匆的修士，压低声音说：<yellow>{0}</>……去{1}看看。说完便隐入雾里。",
@@ -322,5 +324,6 @@
   "quest_hidden_mist_rime_complete": "「{0}」有了着落。你在{1}的雾凇边走了一遭。",
   "quest_hidden_mist_wisp_complete": "「{0}」有了着落。你在{1}的雾缕边走了一遭。",
   "quest_hidden_thunder_peal_complete": "「{0}」有了着落。你在{1}的雷弦边走了一遭。",
+  "quest_hidden_blood_smear_complete": "「{0}」有了着落。你在{1}的血丝边走了一遭。",
   "quest_hidden_blood_fleck_complete": "「{0}」有了着落。你在{1}的血点旁走了一遭。"
 }
