@@ -818,6 +818,8 @@ namespace debug {
       await playJiejiCoracoidstrapEvent(terrain)
     } else if (kind == 'acromionstrap') {
       await playJiejiAcromionstrapEvent(terrain)
+    } else if (kind == 'scapulastrap') {
+      await playJiejiScapulastrapEvent(terrain)
     } else {
       await playJiejiThunderRoadEvent(terrain)
     }
