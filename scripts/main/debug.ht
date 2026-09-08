@@ -764,6 +764,8 @@ namespace debug {
       await playJiejiKnucklestrapEvent(terrain)
     } else if (kind == 'nailstrap') {
       await playJiejiNailstrapEvent(terrain)
+    } else if (kind == 'thumbstrap') {
+      await playJiejiThumbstrapEvent(terrain)
     } else {
       await playJiejiThunderRoadEvent(terrain)
     }
