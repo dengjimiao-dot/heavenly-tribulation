@@ -929,5 +929,8 @@
   "quest_hidden_mist_sporangiophore_complete": "「{0}」有了着落。你在{1}的雾孢囊柄边走了一遭。",
   "quest_hidden_thunder_qu": "劫纹雷渠",
   "quest_hidden_thunder_qu_description": "行路听闻{0}城外有劫纹雷渠。去走一遭，或可采得药材、拾得铜钱并回些生机。",
-  "quest_hidden_thunder_qu_complete": "「{0}」有了着落。你在{1}的雷渠边走了一遭。"
+  "quest_hidden_thunder_qu_complete": "「{0}」有了着落。你在{1}的雷渠边走了一遭。",
+  "quest_hidden_mist_myceliumcord": "劫纹雾菌索",
+  "quest_hidden_mist_myceliumcord_description": "行路听闻{0}城外有劫纹雾菌索。去走一遭，或可采得药材、拾得铜钱并回些生机。",
+  "quest_hidden_mist_myceliumcord_complete": "「{0}」有了着落。你在{1}的雾菌索边走了一遭。"
 }
