@@ -914,6 +914,8 @@ namespace debug {
       questKind = 'hidden_mist_hyphalthread'
     } else if (kind == 'xuejing') {
       questKind = 'hidden_blood_xuejing'
+    } else if (kind == 'myceliumthread') {
+      questKind = 'hidden_mist_myceliumthread'
     }
     final ctor = Quests[questKind]
     if (ctor == null) return false
