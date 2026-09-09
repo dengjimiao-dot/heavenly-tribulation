@@ -855,6 +855,9 @@ namespace debug {
     } else if (kind == 'leilie') {
       questKind = 'hidden_thunder_leilie'
     }
+    } else if (kind == 'myceliumfan') {
+      questKind = 'hidden_mist_myceliumfan'
+    }
     final ctor = Quests[questKind]
     if (ctor == null) return false
     final quest = ctor(fromSite, difficulty: 0)
