@@ -924,6 +924,8 @@ namespace debug {
       await playJiejiRibcreststrapEvent(terrain)
     } else if (kind == 'ribshaftstrap') {
       await playJiejiRibshaftstrapEvent(terrain)
+    } else if (kind == 'costovertebralstrap') {
+      await playJiejiCostovertebralstrapEvent(terrain)
     } else {
       await playJiejiThunderRoadEvent(terrain)
     }
@@ -2161,6 +2163,11 @@ namespace debug {
   /// 忽略几率与冷却，仍弹出赶路劫肋体革三选。
   async function forceRibshaftstrap() {
     return await playJiejiRibshaftstrapEvent({ kind: 'plain' })
+  }
+
+  /// 忽略几率与冷却，仍弹出赶路劫肋椎革三选。
+  async function forceCostovertebralstrap() {
+    return await playJiejiCostovertebralstrapEvent({ kind: 'plain' })
   }
 
   /// 忽略冷却与花费，仍弹出幻术祭坛入幻三选。
