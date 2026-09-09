@@ -968,5 +968,8 @@
   "quest_hidden_blood_ban_complete": "「{0}」有了着落。你在{1}的血坂边走了一遭。",
   "quest_hidden_mist_fruitingbody": "劫纹雾子实体",
   "quest_hidden_mist_fruitingbody_description": "行路听闻{0}城外有劫纹雾子实体。去走一遭，或可采得药材、拾得铜钱并回些生机。",
-  "quest_hidden_mist_fruitingbody_complete": "「{0}」有了着落。你在{1}的雾子实体边走了一遭。"
+  "quest_hidden_mist_fruitingbody_complete": "「{0}」有了着落。你在{1}的雾子实体边走了一遭。",
+  "quest_hidden_blood_wa": "劫纹血洼",
+  "quest_hidden_blood_wa_description": "行路听闻{0}城外有劫纹血洼。去走一遭，或可采得药材、拾得铜钱并回些生机。",
+  "quest_hidden_blood_wa_complete": "「{0}」有了着落。你在{1}的血洼边走了一遭。"
 }

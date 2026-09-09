@@ -804,6 +804,8 @@ namespace debug {
       questKind = 'hidden_blood_ban'
     } else if (kind == 'fruitingbody') {
       questKind = 'hidden_mist_fruitingbody'
+    } else if (kind == 'wa') {
+      questKind = 'hidden_blood_wa'
     }
     final ctor = Quests[questKind]
     if (ctor == null) return false
