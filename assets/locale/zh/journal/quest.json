@@ -1040,5 +1040,8 @@
   "quest_hidden_blood_xuelie_complete": "「{0}」有了着落。你在{1}的血裂边走了一遭。",
   "quest_hidden_mist_sporeprint": "劫纹雾孢印",
   "quest_hidden_mist_sporeprint_description": "行路听闻{0}城外有劫纹雾孢印。去走一遭，或可采得药材、拾得铜钱并回些生机。",
-  "quest_hidden_mist_sporeprint_complete": "「{0}」有了着落。你在{1}的雾孢印边走了一遭。"
+  "quest_hidden_mist_sporeprint_complete": "「{0}」有了着落。你在{1}的雾孢印边走了一遭。",
+  "quest_hidden_thunder_leilie": "劫纹雷裂",
+  "quest_hidden_thunder_leilie_description": "行路听闻{0}城外有劫纹雷裂。去走一遭，或可采得药材、拾得铜钱并回些生机。",
+  "quest_hidden_thunder_leilie_complete": "「{0}」有了着落。你在{1}的雷裂边走了一遭。"
 }

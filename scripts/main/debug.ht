@@ -852,6 +852,8 @@ namespace debug {
       questKind = 'hidden_blood_xuelie'
     } else if (kind == 'sporeprint') {
       questKind = 'hidden_mist_sporeprint'
+    } else if (kind == 'leilie') {
+      questKind = 'hidden_thunder_leilie'
     }
     final ctor = Quests[questKind]
     if (ctor == null) return false
