@@ -733,6 +733,10 @@ namespace debug {
     } else if (kind == 'oidium') {
       questKind = 'hidden_mist_oidium'
     }
+    }
+    } else if (kind == 'yao') {
+      questKind = 'hidden_blood_yao'
+    }
     final ctor = Quests[questKind]
     if (ctor == null) return false
     final quest = ctor(fromSite, difficulty: 0)
