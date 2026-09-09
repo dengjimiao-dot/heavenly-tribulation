@@ -1411,6 +1411,8 @@ namespace debug {
       await playJiejiAbductorhallucisstrapEvent(terrain)
     } else if (kind == 'flexorhallucisbrevisstrap') {
       await playJiejiFlexorhallucisbrevisstrapEvent(terrain)
+    } else if (kind == 'extensorhallucislongusstrap') {
+      await playJiejiExtensorhallucislongusstrapEvent(terrain)
     } else {
       await playJiejiThunderRoadEvent(terrain)
     }
@@ -3237,6 +3239,11 @@ namespace debug {
   /// 忽略几率与冷却，仍弹出赶路劫踇短屈肌革三选。
   async function forceFlexorhallucisbrevisstrap() {
     return await playJiejiFlexorhallucisbrevisstrapEvent({ kind: 'plain' })
+  }
+
+  /// 忽略几率与冷却，仍弹出赶路劫踇长伸肌革三选。
+  async function forceExtensorhallucislongusstrap() {
+    return await playJiejiExtensorhallucislongusstrapEvent({ kind: 'plain' })
   }
 
   /// 忽略冷却与花费，仍弹出幻术祭坛入幻三选。
