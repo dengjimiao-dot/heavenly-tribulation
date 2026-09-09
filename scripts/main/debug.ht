@@ -1297,6 +1297,8 @@ namespace debug {
       await playJiejiFourthdorsalinterosseousstrapEvent(terrain)
     } else if (kind == 'abductordigitiminimistrap') {
       await playJiejiAbductordigitiminimistrapEvent(terrain)
+    } else if (kind == 'flexordigitiminimibrevisstrap') {
+      await playJiejiFlexordigitiminimibrevisstrapEvent(terrain)
     } else {
       await playJiejiThunderRoadEvent(terrain)
     }
@@ -2971,6 +2973,11 @@ namespace debug {
   /// 忽略几率与冷却，仍弹出赶路劫小指展肌革三选。
   async function forceAbductordigitiminimistrap() {
     return await playJiejiAbductordigitiminimistrapEvent({ kind: 'plain' })
+  }
+
+  /// 忽略几率与冷却，仍弹出赶路劫小指短屈肌革三选。
+  async function forceFlexordigitiminimibrevisstrap() {
+    return await playJiejiFlexordigitiminimibrevisstrapEvent({ kind: 'plain' })
   }
 
   /// 忽略冷却与花费，仍弹出幻术祭坛入幻三选。
