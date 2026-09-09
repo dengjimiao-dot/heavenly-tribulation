@@ -839,5 +839,8 @@
   "quest_hidden_mist_zygospore_complete": "「{0}」有了着落。你在{1}的雾接合孢子边走了一遭。",
   "quest_hidden_thunder_tan": "劫纹雷潭",
   "quest_hidden_thunder_tan_description": "行路听闻{0}城外有劫纹雷潭。去走一遭，或可采得药材、拾得铜钱并回些生机。",
-  "quest_hidden_thunder_tan_complete": "「{0}」有了着落。你在{1}的雷潭边走了一遭。"
+  "quest_hidden_thunder_tan_complete": "「{0}」有了着落。你在{1}的雷潭边走了一遭。",
+  "quest_hidden_blood_xue": "劫纹血穴",
+  "quest_hidden_blood_xue_description": "行路听闻{0}城外有劫纹血穴。去走一遭，或可采得药材、拾得铜钱并回些生机。",
+  "quest_hidden_blood_xue_complete": "「{0}」有了着落。你在{1}的血穴边走了一遭。"
 }
