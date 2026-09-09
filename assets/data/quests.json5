@@ -2604,4 +2604,14 @@
     rank: 0,
   },
 
+
+  {
+    id: "hidden_thunder_he",
+    policy: null,
+    isBounty: false,
+    isHidden: true,
+    contribution: 11,
+    rank: 0,
+  },
+
 }
