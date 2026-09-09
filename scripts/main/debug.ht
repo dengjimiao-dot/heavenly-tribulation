@@ -605,6 +605,8 @@ namespace debug {
       questKind = 'hidden_mist_cotyledon'
     } else if (kind == 'zhao') {
       questKind = 'hidden_thunder_zhao'
+    } else if (kind == 'suspensor') {
+      questKind = 'hidden_mist_suspensor'
     }
     final ctor = Quests[questKind]
     if (ctor == null) return false
