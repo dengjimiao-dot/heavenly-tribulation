@@ -962,6 +962,8 @@ namespace debug {
       await playJiejiManubriosternalstrapEvent(terrain)
     } else if (kind == 'sternalanglestrap') {
       await playJiejiSternalanglestrapEvent(terrain)
+    } else if (kind == 'xiphisternalstrap') {
+      await playJiejiXiphisternalstrapEvent(terrain)
     } else {
       await playJiejiThunderRoadEvent(terrain)
     }
@@ -2247,6 +2249,11 @@ namespace debug {
   /// 忽略几率与冷却，仍弹出赶路劫胸骨角革三选。
   async function forceSternalanglestrap() {
     return await playJiejiSternalanglestrapEvent({ kind: 'plain' })
+  }
+
+  /// 忽略几率与冷却，仍弹出赶路劫剑胸革三选。
+  async function forceXiphisternalstrap() {
+    return await playJiejiXiphisternalstrapEvent({ kind: 'plain' })
   }
 
   /// 忽略冷却与花费，仍弹出幻术祭坛入幻三选。
