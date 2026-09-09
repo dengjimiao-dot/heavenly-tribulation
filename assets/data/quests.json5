@@ -1939,6 +1939,16 @@
   },
 
 
+  {
+    id: "hidden_thunder_quan",
+    policy: null,
+    isBounty: false,
+    isHidden: true,
+    contribution: 11,
+    rank: 0,
+  },
+
+
 
 
 

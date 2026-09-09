@@ -575,6 +575,8 @@ namespace debug {
       questKind = 'hidden_blood_liang'
     } else if (kind == 'epicotyl') {
       questKind = 'hidden_mist_epicotyl'
+    } else if (kind == 'quan') {
+      questKind = 'hidden_thunder_quan'
     }
     final ctor = Quests[questKind]
     if (ctor == null) return false
