@@ -1123,6 +1123,8 @@ namespace debug {
       await playJiejiBrachialisstrapEvent(terrain)
     } else if (kind == 'tricepsstrap') {
       await playJiejiTricepsstrapEvent(terrain)
+    } else if (kind == 'anconeusstrap') {
+      await playJiejiAnconeusstrapEvent(terrain)
     } else {
       await playJiejiThunderRoadEvent(terrain)
     }
@@ -2608,6 +2610,11 @@ namespace debug {
   /// 忽略几率与冷却，仍弹出赶路劫肱三头肌革三选。
   async function forceTricepsstrap() {
     return await playJiejiTricepsstrapEvent({ kind: 'plain' })
+  }
+
+  /// 忽略几率与冷却，仍弹出赶路劫肘肌革三选。
+  async function forceAnconeusstrap() {
+    return await playJiejiAnconeusstrapEvent({ kind: 'plain' })
   }
 
   /// 忽略冷却与花费，仍弹出幻术祭坛入幻三选。
