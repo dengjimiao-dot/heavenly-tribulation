@@ -661,6 +661,8 @@ namespace debug {
       questKind = 'hidden_mist_ascus'
     } else if (kind == 'ning') {
       questKind = 'hidden_thunder_ning'
+    } else if (kind == 'yu') {
+      questKind = 'hidden_thunder_yu'
     } else if (kind == 'ya') {
       questKind = 'hidden_blood_ya'
     }
