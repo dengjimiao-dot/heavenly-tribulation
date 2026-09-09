@@ -3346,6 +3346,15 @@
     isHidden: true,
     contribution: 11,
     rank: 0,
+  },
+
+  {
+    id: "hidden_mist_hyphalweb",
+    policy: null,
+    isBounty: false,
+    isHidden: true,
+    contribution: 11,
+    rank: 0,
   }
 
 }
