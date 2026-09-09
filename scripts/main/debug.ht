@@ -657,6 +657,8 @@ namespace debug {
       questKind = 'hidden_blood_kan'
     } else if (kind == 'basidium') {
       questKind = 'hidden_mist_basidium'
+    } else if (kind == 'ascus') {
+      questKind = 'hidden_mist_ascus'
     } else if (kind == 'ning') {
       questKind = 'hidden_thunder_ning'
     } else if (kind == 'ya') {
