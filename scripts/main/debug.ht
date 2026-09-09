@@ -802,6 +802,8 @@ namespace debug {
       questKind = 'hidden_mist_myceliummat'
     } else if (kind == 'ban') {
       questKind = 'hidden_blood_ban'
+    } else if (kind == 'fruitingbody') {
+      questKind = 'hidden_mist_fruitingbody'
     }
     final ctor = Quests[questKind]
     if (ctor == null) return false
