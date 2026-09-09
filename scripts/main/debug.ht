@@ -777,6 +777,10 @@ namespace debug {
     } else if (kind == 'bei') {
       questKind = 'hidden_blood_bei'
     }
+    }
+    } else if (kind == 'sclerotium') {
+      questKind = 'hidden_mist_sclerotium'
+    }
     final ctor = Quests[questKind]
     if (ctor == null) return false
     final quest = ctor(fromSite, difficulty: 0)
