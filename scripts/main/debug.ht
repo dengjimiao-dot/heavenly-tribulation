@@ -1219,6 +1219,8 @@ namespace debug {
       await playJiejiAbductorpolicislongusstrapEvent(terrain)
     } else if (kind == 'extensorpolicisbrevisstrap') {
       await playJiejiExtensorpolicisbrevisstrapEvent(terrain)
+    } else if (kind == 'extensorpolicislongusstrap') {
+      await playJiejiExtensorpolicislongusstrapEvent(terrain)
     } else {
       await playJiejiThunderRoadEvent(terrain)
     }
@@ -2792,6 +2794,11 @@ namespace debug {
   /// 忽略几率与冷却，仍弹出赶路劫拇短伸肌革三选。
   async function forceExtensorpolicisbrevisstrap() {
     return await playJiejiExtensorpolicisbrevisstrapEvent({ kind: 'plain' })
+  }
+
+  /// 忽略几率与冷却，仍弹出赶路劫拇长伸肌革三选。
+  async function forceExtensorpolicislongusstrap() {
+    return await playJiejiExtensorpolicislongusstrapEvent({ kind: 'plain' })
   }
 
   /// 忽略冷却与花费，仍弹出幻术祭坛入幻三选。
