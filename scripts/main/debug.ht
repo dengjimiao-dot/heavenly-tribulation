@@ -655,6 +655,8 @@ namespace debug {
       questKind = 'hidden_thunder_gu'
     } else if (kind == 'kan') {
       questKind = 'hidden_blood_kan'
+    } else if (kind == 'basidium') {
+      questKind = 'hidden_mist_basidium'
     }
     final ctor = Quests[questKind]
     if (ctor == null) return false

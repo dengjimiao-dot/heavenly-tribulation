@@ -707,6 +707,7 @@
   "quest_hidden_mist_conidium": "劫纹雾分生孢子",
   "quest_hidden_thunder_gu": "劫纹雷沽",
   "quest_hidden_blood_kan": "劫纹血坎",
+  "quest_hidden_mist_basidium": "劫纹雾担子",
   "quest_hidden_mist_endosperm_description": "行路听闻{0}城外有劫纹雾胚乳。去走一遭，或可采得药材、拾得铜钱并回些生机。",
   "quest_hidden_blood_mesa_description": "行路听闻{0}城外有劫纹血峁。去走一遭，或可采得药材、拾得铜钱并回些生机。",
   "quest_hidden_mist_embryo_description": "行路听闻{0}城外有劫纹雾胚。去走一遭，或可采得药材、拾得铜钱并回些生机。",
@@ -757,6 +758,7 @@
   "quest_hidden_mist_conidium_description": "行路听闻{0}城外有劫纹雾分生孢子。去走一遭，或可采得药材、拾得铜钱并回些生机。",
   "quest_hidden_thunder_gu_description": "行路听闻{0}城外有劫纹雷沽。去走一遭，或可采得药材、拾得铜钱并回些生机。",
   "quest_hidden_blood_kan_description": "行路听闻{0}城外有劫纹血坎。去走一遭，或可采得药材、拾得铜钱并回些生机。",
+  "quest_hidden_mist_basidium_description": "行路听闻{0}城外有劫纹雾担子。去走一遭，或可采得药材、拾得铜钱并回些生机。",
   "quest_hidden_mist_endosperm_complete": "「{0}」有了着落。你在{1}的雾胚乳边走了一遭。",
   "quest_hidden_blood_mesa_complete": "「{0}」有了着落。你在{1}的血峁边走了一遭。",
   "quest_hidden_mist_embryo_complete": "「{0}」有了着落。你在{1}的雾胚边走了一遭。",
@@ -806,5 +808,6 @@
   "quest_hidden_blood_po_complete": "「{0}」有了着落。你在{1}的血坡边走了一遭。",
   "quest_hidden_mist_conidium_complete": "「{0}」有了着落。你在{1}的雾分生孢子边走了一遭。",
   "quest_hidden_thunder_gu_complete": "「{0}」有了着落。你在{1}的雷沽边走了一遭。",
-  "quest_hidden_blood_kan_complete": "「{0}」有了着落。你在{1}的血坎边走了一遭。"
+  "quest_hidden_blood_kan_complete": "「{0}」有了着落。你在{1}的血坎边走了一遭。",
+  "quest_hidden_mist_basidium_complete": "「{0}」有了着落。你在{1}的雾担子边走了一遭。"
 }
