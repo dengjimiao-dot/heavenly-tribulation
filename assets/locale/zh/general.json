@@ -6517,7 +6517,20 @@
   "hint_jieji_sternalanglestrap_loosesternalanglestrap_ok": "你解开劫胸骨角革。得了 {0} 药材，生机回了 {1} 点。",
   "hint_jieji_sternalanglestrap_loosesternalanglestrap_broke": "解胸骨角要 {0} 铜钱。袋里不够。",
   "hint_jieji_sternalanglestrap_bloodsternalanglestrap_ok": "你割了 {0} 点生机去染劫胸骨角革。",
-  "hint_jieji_sternalanglestrap_bloodsternalanglestrap_none": "血胸骨角下去，胸骨角影却散了。袋里多了 {0} 铜钱。"
+  "hint_jieji_sternalanglestrap_bloodsternalanglestrap_none": "血胸骨角下去，胸骨角影却散了。袋里多了 {0} 铜钱。",
+  "hint_jieji_xiphisternalstrap": "路遇一条劫剑胸革。你可以系剑胸、解剑胸，或以血染剑胸。",
+  "jieji_xiphisternalstrap_tiexiphisternalstrap": "系剑胸",
+  "jieji_xiphisternalstrap_loosexiphisternalstrap": "解剑胸",
+  "jieji_xiphisternalstrap_bloodxiphisternalstrap": "血剑胸",
+  "hint_jieji_xiphisternalstrap_tiexiphisternalstrap": "系剑胸：耗 1 药材（雾月不耗）。回 1 命，五毫摸残页。药材不够则空手。",
+  "hint_jieji_xiphisternalstrap_loosexiphisternalstrap": "解剑胸：花 1 铜钱（雷月 1）。得 1 药材，并回 1 命。袋里不够则空手。",
+  "hint_jieji_xiphisternalstrap_bloodxiphisternalstrap": "血剑胸：扣 1 点生机（至少留 1，血月 2）。三毫摸残页，不成则得 2 铜钱。",
+  "hint_jieji_xiphisternalstrap_tiexiphisternalstrap_ok": "你系上劫剑胸革。生机回了 {0} 点。",
+  "hint_jieji_xiphisternalstrap_tiexiphisternalstrap_broke": "系剑胸要 {0} 药材。你拿不出来。",
+  "hint_jieji_xiphisternalstrap_loosexiphisternalstrap_ok": "你解开劫剑胸革。得了 {0} 药材，生机回了 {1} 点。",
+  "hint_jieji_xiphisternalstrap_loosexiphisternalstrap_broke": "解剑胸要 {0} 铜钱。袋里不够。",
+  "hint_jieji_xiphisternalstrap_bloodxiphisternalstrap_ok": "你割了 {0} 点生机去染劫剑胸革。",
+  "hint_jieji_xiphisternalstrap_bloodxiphisternalstrap_none": "血剑胸下去，剑胸影却散了。袋里多了 {0} 铜钱。"
 
 
 }
