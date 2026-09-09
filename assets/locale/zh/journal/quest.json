@@ -935,5 +935,8 @@
   "quest_hidden_mist_myceliumcord_complete": "「{0}」有了着落。你在{1}的雾菌索边走了一遭。",
   "quest_hidden_thunder_duo": "劫纹雷垛",
   "quest_hidden_thunder_duo_description": "行路听闻{0}城外有劫纹雷垛。去走一遭，或可采得药材、拾得铜钱并回些生机。",
-  "quest_hidden_thunder_duo_complete": "「{0}」有了着落。你在{1}的雷垛边走了一遭。"
+  "quest_hidden_thunder_duo_complete": "「{0}」有了着落。你在{1}的雷垛边走了一遭。",
+  "quest_hidden_mist_rhizomorph": "劫纹雾根状菌索",
+  "quest_hidden_mist_rhizomorph_description": "行路听闻{0}城外有劫纹雾根状菌索。去走一遭，或可采得药材、拾得铜钱并回些生机。",
+  "quest_hidden_mist_rhizomorph_complete": "「{0}」有了着落。你在{1}的雾根状菌索边走了一遭。"
 }
