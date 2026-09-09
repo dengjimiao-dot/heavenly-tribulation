@@ -845,5 +845,9 @@
   "quest_hidden_blood_xue_complete": "「{0}」有了着落。你在{1}的血穴边走了一遭。",
   "quest_hidden_mist_oospore": "劫纹雾卵孢子",
   "quest_hidden_mist_oospore_description": "行路听闻{0}城外有劫纹雾卵孢子。去走一遭，或可采得药材、拾得铜钱并回些生机。",
-  "quest_hidden_mist_oospore_complete": "「{0}」有了着落。你在{1}的雾卵孢子边走了一遭。"
+  "quest_hidden_mist_oospore_complete": "「{0}」有了着落。你在{1}的雾卵孢子边走了一遭。",
+  "quest_hidden_thunder_hu": "劫纹雷湖",
+  "quest_hidden_thunder_hu_description": "行路听闻{0}城外有劫纹雷湖。去走一遭，或可采得药材、拾得铜钱并回些生机。",
+  "quest_hidden_thunder_hu_complete": "「{0}」有了着落。你在{1}的雷湖边走了一遭。"
+
 }
