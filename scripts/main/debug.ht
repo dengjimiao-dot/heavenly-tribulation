@@ -1333,6 +1333,8 @@ namespace debug {
       await playJiejiFlexordigitorumprofundusstrapEvent(terrain)
     } else if (kind == 'extensordigitorumcommunisstrap') {
       await playJiejiExtensordigitorumcommunisstrapEvent(terrain)
+    } else if (kind == 'extensorindicisstrap') {
+      await playJiejiExtensorindicisstrapEvent(terrain)
     } else {
       await playJiejiThunderRoadEvent(terrain)
     }
@@ -3058,6 +3060,11 @@ namespace debug {
   /// 忽略几率与冷却，仍弹出赶路劫指总伸肌革三选。
   async function forceExtensordigitorumcommunisstrap() {
     return await playJiejiExtensordigitorumcommunisstrapEvent({ kind: 'plain' })
+  }
+
+  /// 忽略几率与冷却，仍弹出赶路劫食指伸肌革三选。
+  async function forceExtensorindicisstrap() {
+    return await playJiejiExtensorindicisstrapEvent({ kind: 'plain' })
   }
 
   /// 忽略冷却与花费，仍弹出幻术祭坛入幻三选。
