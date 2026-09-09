@@ -1019,5 +1019,8 @@
   "quest_hidden_mist_stipe_complete": "「{0}」有了着落。你在{1}的雾菌柄边走了一遭。",
   "quest_hidden_blood_xuefeng": "劫纹血缝",
   "quest_hidden_blood_xuefeng_description": "行路听闻{0}城外有劫纹血缝。去走一遭，或可采得药材、拾得铜钱并回些生机。",
-  "quest_hidden_blood_xuefeng_complete": "「{0}」有了着落。你在{1}的血缝边走了一遭。"
+  "quest_hidden_blood_xuefeng_complete": "「{0}」有了着落。你在{1}的血缝边走了一遭。",
+  "quest_hidden_mist_pileus": "劫纹雾菌盖",
+  "quest_hidden_mist_pileus_description": "行路听闻{0}城外有劫纹雾菌盖。去走一遭，或可采得药材、拾得铜钱并回些生机。",
+  "quest_hidden_mist_pileus_complete": "「{0}」有了着落。你在{1}的雾菌盖边走了一遭。"
 }

@@ -838,6 +838,8 @@ namespace debug {
       questKind = 'hidden_mist_stipe'
     } else if (kind == 'xuefeng') {
       questKind = 'hidden_blood_xuefeng'
+    } else if (kind == 'pileus') {
+      questKind = 'hidden_mist_pileus'
     }
     final ctor = Quests[questKind]
     if (ctor == null) return false
