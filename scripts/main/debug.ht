@@ -1285,6 +1285,8 @@ namespace debug {
       await playJiejiSeconddorsalinterosseousstrapEvent(terrain)
     } else if (kind == 'thirddorsalinterosseousstrap') {
       await playJiejiThirddorsalinterosseousstrapEvent(terrain)
+    } else if (kind == 'fourthdorsalinterosseousstrap') {
+      await playJiejiFourthdorsalinterosseousstrapEvent(terrain)
     } else {
       await playJiejiThunderRoadEvent(terrain)
     }
@@ -2946,6 +2948,11 @@ namespace debug {
   /// 忽略几率与冷却，仍弹出赶路劫第三骨间背侧肌革三选。
   async function forceThirddorsalinterosseousstrap() {
     return await playJiejiThirddorsalinterosseousstrapEvent({ kind: 'plain' })
+  }
+
+  /// 忽略几率与冷却，仍弹出赶路劫第四骨间背侧肌革三选。
+  async function forceFourthdorsalinterosseousstrap() {
+    return await playJiejiFourthdorsalinterosseousstrapEvent({ kind: 'plain' })
   }
 
   /// 忽略冷却与花费，仍弹出幻术祭坛入幻三选。
