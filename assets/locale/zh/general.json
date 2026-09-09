@@ -6640,7 +6640,20 @@
   "hint_jieji_clavicularnotchstrap_looseclavicularnotchstrap_ok": "你解开劫锁骨切迹革。得了 {0} 药材，生机回了 {1} 点。",
   "hint_jieji_clavicularnotchstrap_looseclavicularnotchstrap_broke": "解锁骨切迹要 {0} 铜钱。袋里不够。",
   "hint_jieji_clavicularnotchstrap_bloodclavicularnotchstrap_ok": "你割了 {0} 点生机去染劫锁骨切迹革。",
-  "hint_jieji_clavicularnotchstrap_bloodclavicularnotchstrap_none": "血锁骨切迹下去，锁骨切迹影却散了。袋里多了 {0} 铜钱。"
+  "hint_jieji_clavicularnotchstrap_bloodclavicularnotchstrap_none": "血锁骨切迹下去，锁骨切迹影却散了。袋里多了 {0} 铜钱。",
+  "hint_jieji_costalcartilagestrap": "路遇一条劫肋软骨弓革。你可以系肋软骨弓、解肋软骨弓，或以血染肋软骨弓。",
+  "jieji_costalcartilagestrap_tiecostalcartilagestrap": "系肋软骨弓",
+  "jieji_costalcartilagestrap_loosecostalcartilagestrap": "解肋软骨弓",
+  "jieji_costalcartilagestrap_bloodcostalcartilagestrap": "血肋软骨弓",
+  "hint_jieji_costalcartilagestrap_tiecostalcartilagestrap": "系肋软骨弓：耗 1 药材（雾月不耗）。回 1 命，五毫摸残页。药材不够则空手。",
+  "hint_jieji_costalcartilagestrap_loosecostalcartilagestrap": "解肋软骨弓：花 1 铜钱（雷月 1）。得 1 药材，并回 1 命。袋里不够则空手。",
+  "hint_jieji_costalcartilagestrap_bloodcostalcartilagestrap": "血肋软骨弓：扣 1 点生机（至少留 1，血月 2）。三毫摸残页，不成则得 2 铜钱。",
+  "hint_jieji_costalcartilagestrap_tiecostalcartilagestrap_ok": "你系上劫肋软骨弓革。生机回了 {0} 点。",
+  "hint_jieji_costalcartilagestrap_tiecostalcartilagestrap_broke": "系肋软骨弓要 {0} 药材。你拿不出来。",
+  "hint_jieji_costalcartilagestrap_loosecostalcartilagestrap_ok": "你解开劫肋软骨弓革。得了 {0} 药材，生机回了 {1} 点。",
+  "hint_jieji_costalcartilagestrap_loosecostalcartilagestrap_broke": "解肋软骨弓要 {0} 铜钱。袋里不够。",
+  "hint_jieji_costalcartilagestrap_bloodcostalcartilagestrap_ok": "你割了 {0} 点生机去染劫肋软骨弓革。",
+  "hint_jieji_costalcartilagestrap_bloodcostalcartilagestrap_none": "血肋软骨弓下去，肋软骨弓影却散了。袋里多了 {0} 铜钱。"
 
 
 }
