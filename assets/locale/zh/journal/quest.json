@@ -899,5 +899,8 @@
   "quest_hidden_mist_blastospore_complete": "「{0}」有了着落。你在{1}的雾芽孢边走了一遭。",
   "quest_hidden_thunder_chuan": "劫纹雷川",
   "quest_hidden_thunder_chuan_description": "行路听闻{0}城外有劫纹雷川。去走一遭，或可采得药材、拾得铜钱并回些生机。",
-  "quest_hidden_thunder_chuan_complete": "「{0}」有了着落。你在{1}的雷川边走了一遭。"
+  "quest_hidden_thunder_chuan_complete": "「{0}」有了着落。你在{1}的雷川边走了一遭。",
+  "quest_hidden_mist_arthrospore": "劫纹雾节孢",
+  "quest_hidden_mist_arthrospore_description": "行路听闻{0}城外有劫纹雾节孢。去走一遭，或可采得药材、拾得铜钱并回些生机。",
+  "quest_hidden_mist_arthrospore_complete": "「{0}」有了着落。你在{1}的雾节孢边走了一遭。"
 }
