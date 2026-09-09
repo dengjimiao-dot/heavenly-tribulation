@@ -1375,6 +1375,8 @@ namespace debug {
       await playJiejiPalmarisbrevisstrapEvent(terrain)
     } else if (kind == 'flexorretinaculumstrap') {
       await playJiejiFlexorretinaculumstrapEvent(terrain)
+    } else if (kind == 'thenarstrap') {
+      await playJiejiThenarstrapEvent(terrain)
     } else {
       await playJiejiThunderRoadEvent(terrain)
     }
@@ -3153,6 +3155,11 @@ namespace debug {
   /// 忽略几率与冷却，仍弹出赶路劫屈肌支持带革三选。
   async function forceFlexorretinaculumstrap() {
     return await playJiejiFlexorretinaculumstrapEvent({ kind: 'plain' })
+  }
+
+  /// 忽略几率与冷却，仍弹出赶路劫大鱼际革三选。
+  async function forceThenarstrap() {
+    return await playJiejiThenarstrapEvent({ kind: 'plain' })
   }
 
   /// 忽略冷却与花费，仍弹出幻术祭坛入幻三选。
