@@ -601,6 +601,8 @@ namespace debug {
       questKind = 'hidden_mist_epiblast'
     } else if (kind == 'gang') {
       questKind = 'hidden_blood_gang'
+    } else if (kind == 'cotyledon') {
+      questKind = 'hidden_mist_cotyledon'
     }
     final ctor = Quests[questKind]
     if (ctor == null) return false
