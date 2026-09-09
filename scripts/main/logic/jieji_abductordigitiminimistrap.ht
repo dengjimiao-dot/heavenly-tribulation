@@ -1,0 +1,152 @@
+/// 赶路「劫小指展肌革」三选：系小指展肌 / 解小指展肌 / 血小指展肌。隐藏、劫兆、野遇、赶路、行商、拾荒、扎营、残锋、残卷、雾灯、残鼓、汲泉、劫幡、劫铃、劫符、劫旌、劫烛、劫角、劫笛、劫笠、劫带、劫履、劫氅、劫扇、劫杖、劫伞、劫面、劫帔、劫手套、劫戒、劫镜、劫鼓、劫炬、劫梳、劫勺、劫碗、劫杯、劫罐、劫瓶、劫墨、劫袍、劫带、劫簪、劫笔、劫针、劫扣、劫绳、劫珠、劫钗、劫绦、劫穗、劫缎、劫缨、劫袖、劫领、劫缘、劫辫、劫翎、劫裹、劫轭、劫辔、劫缰、劫镫、劫鞦、劫勒、劫衔、劫绊、劫鞍、劫刺、劫绊索、劫蹄铁、劫鞍垫、劫肚带、劫尻带、劫额革、劫鼻革、劫咽革、劫颊革、劫顶革、劫面革、劫障革、劫笼革、劫套革、劫羁革、劫络革、劫鬃革、劫罗革、劫甩革、劫肚革、劫裙革、劫翼革、劫扣革、劫环革、劫胸革、劫颈革、劫肩革、劫背革、劫腰革、劫胯革、劫胁革、劫肋革、劫股革、劫膝革、劫胫革、劫踝革、劫踵革、劫足革、劫趾革、劫爪革、劫掌革、劫腕革、劫指革、劫节革、劫甲革、劫拇革、劫肘革、劫肱革、劫膊革、劫桡革、劫鹰革、劫喙革、劫肩峰革、劫肩胛革、劫锁骨革、劫胸骨革、劫柄革、劫剑突革、劫肋软革、劫浮肋革、劫肋弓革、劫肋间革、劫真肋革、劫假肋革、劫肋头革、劫肋颈革、劫肋结节革、劫肋角革、劫肋沟革、劫肋脊革、劫肋体革、劫肋椎革、劫肋横突革、劫肋软骨结革、劫胸肋革、劫柄胸革、劫胸骨角革、劫剑胸革、劫肋胸革、劫颈静脉切迹革、劫锁骨切迹革、劫肋软骨弓革、劫肋下角革、劫胸骨体革、劫肋剑突革、劫锁间韧带革、劫肋软骨结合革、劫胸骨肌革、劫胸大肌革、劫前锯肌革、劫锁骨下肌革、劫背阔肌革、劫斜方肌革、劫三角肌革、劫冈下肌革、劫大圆肌革、劫小圆肌革、劫冈上肌革、劫肩胛下肌革、劫喙肱肌革、劫肱肌革、劫肱三头肌革、劫肘肌革、劫肱桡肌革、劫指伸肌革、劫尺侧腕屈肌革、劫掌长肌革、劫桡侧腕屈肌革、劫尺侧腕伸肌革、劫桡侧腕长伸肌革、劫桡侧腕短伸肌革、劫拇长展肌革、劫拇短伸肌革、劫拇长伸肌革、劫拇短展肌革、劫拇长屈肌革、劫拇短屈肌革、劫拇对掌肌革、劫拇收肌革、劫蚓状肌革、劫骨间掌侧肌革、劫第一骨间背侧肌革、劫第二骨间背侧肌革、劫第三骨间背侧肌革、劫第四骨间背侧肌革、劫小指展肌革都没中时才滚。
+const kJiejiAbductordigitiminimistrapBaseRate = 0.00000000000000008
+const kJiejiAbductordigitiminimistrapMoveCooldown = 24
+const kJiejiAbductordigitiminimistrapTieabductordigitiminimistrapHerb = 1
+const kJiejiAbductordigitiminimistrapTieabductordigitiminimistrapLife = 1
+const kJiejiAbductordigitiminimistrapTieabductordigitiminimistrapGongfaRate = 0.005
+const kJiejiAbductordigitiminimistrapLooseabductordigitiminimistrapMoney = 1
+const kJiejiAbductordigitiminimistrapLooseabductordigitiminimistrapMoneyThunder = 1
+const kJiejiAbductordigitiminimistrapLooseabductordigitiminimistrapHerb = 1
+const kJiejiAbductordigitiminimistrapLooseabductordigitiminimistrapLife = 1
+const kJiejiAbductordigitiminimistrapBloodLife = 1
+const kJiejiAbductordigitiminimistrapBloodLifeBlood = 2
+const kJiejiAbductordigitiminimistrapBloodGongfaRate = 0.03
+const kJiejiAbductordigitiminimistrapBloodMoney = 2
+
+function _jiejiAbductordigitiminimistrapSeasonId() {
+  if (game.jieji != null && game.jieji.seasonId != null) {
+    return game.jieji.seasonId
+  }
+  return null
+}
+
+function _jiejiAbductordigitiminimistrapTutorialLocked() {
+  return game.enableTutorial && game.flags.tutorial.bountyQuest != true
+}
+
+function _jiejiAbductordigitiminimistrapTieabductordigitiminimistrapHerbCost(seasonId) {
+  if (seasonId == 'mist') return 0
+  return kJiejiAbductordigitiminimistrapTieabductordigitiminimistrapHerb
+}
+
+function _jiejiAbductordigitiminimistrapLooseabductordigitiminimistrapMoneyCost(seasonId) {
+  if (seasonId == 'thunder') return kJiejiAbductordigitiminimistrapLooseabductordigitiminimistrapMoneyThunder
+  return kJiejiAbductordigitiminimistrapLooseabductordigitiminimistrapMoney
+}
+
+function _jiejiAbductordigitiminimistrapBloodLifeCost(seasonId) {
+  if (seasonId == 'blood') return kJiejiAbductordigitiminimistrapBloodLifeBlood
+  return kJiejiAbductordigitiminimistrapBloodLife
+}
+
+function _jiejiAbductordigitiminimistrapCostLife(want) {
+  var lost = want
+  final life = hero.life ?? 1
+  if (life - lost < 1) lost = life - 1
+  if (lost < 0) lost = 0
+  if (lost > 0) {
+    Player.setLife(hero.life - lost)
+  }
+  return lost
+}
+
+function _jiejiAbductordigitiminimistrapNormalizeKind(kind) {
+  if (kind == 'tieabductordigitiminimistrap' || kind == 'jieji_abductordigitiminimistrap_tieabductordigitiminimistrap') return 'tieabductordigitiminimistrap'
+  if (kind == 'looseabductordigitiminimistrap' || kind == 'jieji_abductordigitiminimistrap_looseabductordigitiminimistrap') return 'looseabductordigitiminimistrap'
+  if (kind == 'bloodabductordigitiminimistrap' || kind == 'jieji_abductordigitiminimistrap_bloodabductordigitiminimistrap') return 'bloodabductordigitiminimistrap'
+  return null
+}
+
+function _jiejiAbductordigitiminimistrapChoices() {
+  return [
+    {
+      text: 'jieji_abductordigitiminimistrap_tieabductordigitiminimistrap',
+      description: 'hint_jieji_abductordigitiminimistrap_tieabductordigitiminimistrap',
+    },
+    {
+      text: 'jieji_abductordigitiminimistrap_looseabductordigitiminimistrap',
+      description: 'hint_jieji_abductordigitiminimistrap_looseabductordigitiminimistrap',
+    },
+    {
+      text: 'jieji_abductordigitiminimistrap_bloodabductordigitiminimistrap',
+      description: 'hint_jieji_abductordigitiminimistrap_bloodabductordigitiminimistrap',
+    },
+  ]
+}
+
+/// 赶路劫小指展肌革三选。debug.forceJiejiEvent('abductordigitiminimistrap') / forceAbductordigitiminimistrap 直接走这里，仍弹出三选。
+async function playJiejiAbductordigitiminimistrapEvent(terrain) {
+  if (hero == null) return false
+
+  dialog.pushDialog('hint_jieji_abductordigitiminimistrap')
+  dialog.pushSelection('jiejiAbductordigitiminimistrap', _jiejiAbductordigitiminimistrapChoices())
+  await dialog.execute()
+  final picked = dialog.checkSelected('jiejiAbductordigitiminimistrap')
+  var selected = _jiejiAbductordigitiminimistrapNormalizeKind(picked)
+  if (selected == null) {
+    selected = 'tieabductordigitiminimistrap'
+  }
+
+  final seasonId = _jiejiAbductordigitiminimistrapSeasonId()
+  if (selected == 'tieabductordigitiminimistrap') {
+    final herbNeed = _jiejiAbductordigitiminimistrapTieabductordigitiminimistrapHerbCost(seasonId)
+    final herbHave = hero.materials['herb'] ?? 0
+    if (herbNeed > 0 && herbHave < herbNeed) {
+      dialog.pushDialog('hint_jieji_abductordigitiminimistrap_tieabductordigitiminimistrap_broke', interpolations: [herbNeed])
+      await dialog.execute()
+    } else {
+      if (herbNeed > 0) {
+        Player.exhaust('herb', herbNeed)
+      }
+      final healed = Player.restoreLife(kJiejiAbductordigitiminimistrapTieabductordigitiminimistrapLife)
+      dialog.pushDialog('hint_jieji_abductordigitiminimistrap_tieabductordigitiminimistrap_ok', interpolations: [healed])
+      await dialog.execute()
+      await tryDropGongfaShard(rate: kJiejiAbductordigitiminimistrapTieabductordigitiminimistrapGongfaRate)
+    }
+  } else if (selected == 'looseabductordigitiminimistrap') {
+    final moneyNeed = _jiejiAbductordigitiminimistrapLooseabductordigitiminimistrapMoneyCost(seasonId)
+    final moneyHave = hero.materials['money'] ?? 0
+    if (moneyHave < moneyNeed) {
+      dialog.pushDialog('hint_jieji_abductordigitiminimistrap_looseabductordigitiminimistrap_broke', interpolations: [moneyNeed])
+      await dialog.execute()
+    } else {
+      Player.exhaust('money', moneyNeed)
+      await Player.collect('herb', kJiejiAbductordigitiminimistrapLooseabductordigitiminimistrapHerb, incurIncident: false)
+      final healed = Player.restoreLife(kJiejiAbductordigitiminimistrapLooseabductordigitiminimistrapLife)
+      dialog.pushDialog('hint_jieji_abductordigitiminimistrap_looseabductordigitiminimistrap_ok', interpolations: [kJiejiAbductordigitiminimistrapLooseabductordigitiminimistrapHerb, healed])
+      await dialog.execute()
+    }
+  } else {
+    final lost = _jiejiAbductordigitiminimistrapCostLife(_jiejiAbductordigitiminimistrapBloodLifeCost(seasonId))
+    dialog.pushDialog('hint_jieji_abductordigitiminimistrap_bloodabductordigitiminimistrap_ok', interpolations: [lost])
+    await dialog.execute()
+    final dropped = await tryDropGongfaShard(rate: kJiejiAbductordigitiminimistrapBloodGongfaRate)
+    if (dropped != true) {
+      await Player.collect('money', kJiejiAbductordigitiminimistrapBloodMoney, incurIncident: false)
+      dialog.pushDialog('hint_jieji_abductordigitiminimistrap_bloodabductordigitiminimistrap_none', interpolations: [kJiejiAbductordigitiminimistrapBloodMoney])
+      await dialog.execute()
+    }
+  }
+
+  Game.updateUI()
+  return true
+}
+
+/// 赶路触发：教程锁与路遇相同；冷却 24 步；约 0.000000000000008%。出过则返回 true。
+async function tryJiejiAbductordigitiminimistrapOnMove(terrain) {
+  if (hero == null) return false
+  if (_jiejiAbductordigitiminimistrapTutorialLocked()) return false
+
+  final jieji = ensureJiejiFlags()
+  final moves = jieji.worldMoves ?? 0
+  final last = jieji.lastAbductordigitiminimistrapMove ?? -999
+  if (moves - last < kJiejiAbductordigitiminimistrapMoveCooldown) return false
+
+  var rate = kJiejiAbductordigitiminimistrapBaseRate
+  if (rate < 0) rate = 0
+  if (random.nextDouble() > rate) return false
+
+  jieji.lastAbductordigitiminimistrapMove = moves
+  await playJiejiAbductordigitiminimistrapEvent(terrain)
+  return true
+}

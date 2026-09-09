@@ -385,6 +385,7 @@ async function onAfterMove(terrain) {
     if (await tryJiejiSeconddorsalinterosseousstrapOnMove(terrain)) return true
     if (await tryJiejiThirddorsalinterosseousstrapOnMove(terrain)) return true
     if (await tryJiejiFourthdorsalinterosseousstrapOnMove(terrain)) return true
+    if (await tryJiejiAbductordigitiminimistrapOnMove(terrain)) return true
   }
   return fought
 }
