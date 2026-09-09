@@ -1079,5 +1079,8 @@
   "quest_hidden_mist_myceliumweb_complete": "「{0}」有了着落。你在{1}的雾菌织边走了一遭。",
   "quest_hidden_blood_xuedong": "劫纹血洞",
   "quest_hidden_blood_xuedong_description": "行路听闻{0}城外有劫纹血洞。去走一遭，或可采得药材、拾得铜钱并回些生机。",
-  "quest_hidden_blood_xuedong_complete": "「{0}」有了着落。你在{1}的血洞边走了一遭。"
+  "quest_hidden_blood_xuedong_complete": "「{0}」有了着落。你在{1}的血洞边走了一遭。",
+  "quest_hidden_mist_sporecloud": "劫纹雾孢云",
+  "quest_hidden_mist_sporecloud_description": "行路听闻{0}城外有劫纹雾孢云。去走一遭，或可采得药材、拾得铜钱并回些生机。",
+  "quest_hidden_mist_sporecloud_complete": "「{0}」有了着落。你在{1}的雾孢云边走了一遭。"
 }
