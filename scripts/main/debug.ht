@@ -1034,6 +1034,8 @@ namespace debug {
       await playJiejiSternalisstrapEvent(terrain)
     } else if (kind == 'pectoralisstrap') {
       await playJiejiPectoralisstrapEvent(terrain)
+    } else if (kind == 'serratusstrap') {
+      await playJiejiSerratusstrapEvent(terrain)
     } else {
       await playJiejiThunderRoadEvent(terrain)
     }
@@ -2415,6 +2417,11 @@ namespace debug {
   /// 忽略几率与冷却，仍弹出赶路劫胸大肌革三选。
   async function forcePectoralisstrap() {
     return await playJiejiPectoralisstrapEvent({ kind: 'plain' })
+  }
+
+  /// 忽略几率与冷却，仍弹出赶路劫前锯肌革三选。
+  async function forceSerratusstrap() {
+    return await playJiejiSerratusstrapEvent({ kind: 'plain' })
   }
 
   /// 忽略冷却与花费，仍弹出幻术祭坛入幻三选。
