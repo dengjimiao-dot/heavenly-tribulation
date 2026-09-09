@@ -757,6 +757,10 @@ namespace debug {
     } else if (kind == 'sporangiophore') {
       questKind = 'hidden_mist_sporangiophore'
     }
+    }
+    } else if (kind == 'qu') {
+      questKind = 'hidden_thunder_qu'
+    }
     final ctor = Quests[questKind]
     if (ctor == null) return false
     final quest = ctor(fromSite, difficulty: 0)
