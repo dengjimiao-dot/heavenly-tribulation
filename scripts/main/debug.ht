@@ -729,6 +729,10 @@ namespace debug {
     } else if (kind == 'jing') {
       questKind = 'hidden_thunder_jing'
     }
+    }
+    } else if (kind == 'oidium') {
+      questKind = 'hidden_mist_oidium'
+    }
     final ctor = Quests[questKind]
     if (ctor == null) return false
     final quest = ctor(fromSite, difficulty: 0)
