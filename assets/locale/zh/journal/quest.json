@@ -950,5 +950,8 @@
   "quest_hidden_blood_tu_complete": "「{0}」有了着落。你在{1}的血涂边走了一遭。",
   "quest_hidden_mist_stroma": "劫纹雾子座",
   "quest_hidden_mist_stroma_description": "行路听闻{0}城外有劫纹雾子座。去走一遭，或可采得药材、拾得铜钱并回些生机。",
-  "quest_hidden_mist_stroma_complete": "「{0}」有了着落。你在{1}的雾子座边走了一遭。"
+  "quest_hidden_mist_stroma_complete": "「{0}」有了着落。你在{1}的雾子座边走了一遭。",
+  "quest_hidden_blood_ping": "劫纹血坪",
+  "quest_hidden_blood_ping_description": "行路听闻{0}城外有劫纹血坪。去走一遭，或可采得药材、拾得铜钱并回些生机。",
+  "quest_hidden_blood_ping_complete": "「{0}」有了着落。你在{1}的血坪边走了一遭。"
 }

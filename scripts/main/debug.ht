@@ -789,6 +789,10 @@ namespace debug {
     } else if (kind == 'stroma') {
       questKind = 'hidden_mist_stroma'
     }
+    }
+    } else if (kind == 'ping') {
+      questKind = 'hidden_blood_ping'
+    }
     final ctor = Quests[questKind]
     if (ctor == null) return false
     final quest = ctor(fromSite, difficulty: 0)
