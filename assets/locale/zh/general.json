@@ -6500,7 +6500,21 @@
   "hint_jieji_manubriosternalstrap_loosemanubriosternalstrap_ok": "你解开劫柄胸革。得了 {0} 药材，生机回了 {1} 点。",
   "hint_jieji_manubriosternalstrap_loosemanubriosternalstrap_broke": "解柄胸要 {0} 铜钱。袋里不够。",
   "hint_jieji_manubriosternalstrap_bloodmanubriosternalstrap_ok": "你割了 {0} 点生机去染劫柄胸革。",
-  "hint_jieji_manubriosternalstrap_bloodmanubriosternalstrap_none": "血柄胸下去，柄胸影却散了。袋里多了 {0} 铜钱。"
+  "hint_jieji_manubriosternalstrap_bloodmanubriosternalstrap_none": "血柄胸下去，柄胸影却散了。袋里多了 {0} 铜钱。",
+  "hint_jieji_sternalanglestrap": "路遇一条劫胸骨角革。你可以系胸骨角、解胸骨角，或以血染胸骨角。",
+  "jieji_sternalanglestrap_tiesternalanglestrap": "系胸骨角",
+  "jieji_sternalanglestrap_loosesternalanglestrap": "解胸骨角",
+  "jieji_sternalanglestrap_bloodsternalanglestrap": "血胸骨角",
+  "hint_jieji_sternalanglestrap_tiesternalanglestrap": "系胸骨角：耗 1 药材（雾月不耗）。回 1 命，五毫摸残页。药材不够则空手。",
+  "hint_jieji_sternalanglestrap_loosesternalanglestrap": "解胸骨角：花 1 铜钱（雷月 1）。得 1 药材，并回 1 命。袋里不够则空手。",
+  "hint_jieji_sternalanglestrap_bloodsternalanglestrap": "血胸骨角：扣 1 点生机（至少留 1，血月 2）。三毫摸残页，不成则得 2 铜钱。",
+  "hint_jieji_sternalanglestrap_tiesternalanglestrap_ok": "你系上劫胸骨角革。生机回了 {0} 点。",
+  "hint_jieji_sternalanglestrap_tiesternalanglestrap_broke": "系胸骨角要 {0} 药材。你拿不出来。",
+  "hint_jieji_sternalanglestrap_loosesternalanglestrap_ok": "你解开劫胸骨角革。得了 {0} 药材，生机回了 {1} 点。",
+  "hint_jieji_sternalanglestrap_loosesternalanglestrap_broke": "解胸骨角要 {0} 铜钱。袋里不够。",
+  "hint_jieji_sternalanglestrap_bloodsternalanglestrap_ok": "你割了 {0} 点生机去染劫胸骨角革。",
+  "hint_jieji_sternalanglestrap_bloodsternalanglestrap_none": "血胸骨角下去，胸骨角影却散了。袋里多了 {0} 铜钱。"
+
 
 }
 
