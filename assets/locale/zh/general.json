@@ -6350,6 +6350,8 @@
   "hint_jieji_blood_kan_extra_blood": "血月血坎更黏。又多得了一点生机机缘。",
   "hint_jieji_mist_basidium_extra": "雾担子余纹入体。又采得 2 药材（或落下 40 铜钱），生机回了 4 点。",
   "hint_jieji_mist_basidium_extra_mist": "雾月雾担子更润。又多得了一点机缘。",
+  "hint_jieji_thunder_ning_extra": "雷泞余纹入体。又采得 2 药材（或落下 40 铜钱），生机回了 4 点。",
+  "hint_jieji_thunder_ning_extra_thunder": "雷月雷泞更亮。又多得了一点机缘。",
   "hint_jieji_claviclestrap": "路遇一条劫锁骨革。你可以系锁、解锁，或以血染锁。",
   "jieji_claviclestrap_tieclaviclestrap": "系锁",
   "jieji_claviclestrap_looseclaviclestrap": "解锁",
@@ -6766,7 +6768,4 @@
   "hint_jieji_interclavicularstrap_looseinterclavicularstrap_broke": "解锁间韧带要 {0} 铜钱。袋里不够。",
   "hint_jieji_interclavicularstrap_bloodinterclavicularstrap_ok": "你割了 {0} 点生机去染劫锁间韧带革。",
   "hint_jieji_interclavicularstrap_bloodinterclavicularstrap_none": "血锁间韧带下去，锁间韧带影却散了。袋里多了 {0} 铜钱。"
-
-
 }
-
