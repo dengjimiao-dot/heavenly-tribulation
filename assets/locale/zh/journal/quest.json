@@ -869,6 +869,9 @@
   "quest_hidden_thunder_yang_complete": "「{0}」有了着落。你在{1}的雷洋边走了一遭。",
   "quest_hidden_blood_qiao": "劫纹血窍",
   "quest_hidden_blood_qiao_description": "行路听闻{0}城外有劫纹血窍。去走一遭，或可采得药材、拾得铜钱并回些生机。",
-  "quest_hidden_blood_qiao_complete": "「{0}」有了着落。你在{1}的血窍边走了一遭。"
+  "quest_hidden_blood_qiao_complete": "「{0}」有了着落。你在{1}的血窍边走了一遭。",
+  "quest_hidden_mist_basidiospore": "劫纹雾担孢子",
+  "quest_hidden_mist_basidiospore_description": "行路听闻{0}城外有劫纹雾担孢子。去走一遭，或可采得药材、拾得铜钱并回些生机。",
+  "quest_hidden_mist_basidiospore_complete": "「{0}」有了着落。你在{1}的雾担孢子边走了一遭。"
 
 }

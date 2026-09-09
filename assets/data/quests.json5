@@ -2550,4 +2550,15 @@
   },
 
 
+
+  {
+    id: "hidden_mist_basidiospore",
+    policy: null,
+    isBounty: false,
+    isHidden: true,
+    contribution: 11,
+    rank: 0,
+  },
+
+
 }
