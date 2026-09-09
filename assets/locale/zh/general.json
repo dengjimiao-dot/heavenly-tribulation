@@ -6724,7 +6724,20 @@
   "hint_jieji_sternalbodystrap_loosesternalbodystrap_ok": "你解开劫胸骨体革。得了 {0} 药材，生机回了 {1} 点。",
   "hint_jieji_sternalbodystrap_loosesternalbodystrap_broke": "解胸骨体要 {0} 铜钱。袋里不够。",
   "hint_jieji_sternalbodystrap_bloodsternalbodystrap_ok": "你割了 {0} 点生机去染劫胸骨体革。",
-  "hint_jieji_sternalbodystrap_bloodsternalbodystrap_none": "血胸骨体下去，胸骨体影却散了。袋里多了 {0} 铜钱。"
+  "hint_jieji_sternalbodystrap_bloodsternalbodystrap_none": "血胸骨体下去，胸骨体影却散了。袋里多了 {0} 铜钱。",
+  "hint_jieji_costoxiphoidstrap": "路遇一条劫肋剑突革。你可以系肋剑突、解肋剑突，或以血染肋剑突。",
+  "jieji_costoxiphoidstrap_tiecostoxiphoidstrap": "系肋剑突",
+  "jieji_costoxiphoidstrap_loosecostoxiphoidstrap": "解肋剑突",
+  "jieji_costoxiphoidstrap_bloodcostoxiphoidstrap": "血肋剑突",
+  "hint_jieji_costoxiphoidstrap_tiecostoxiphoidstrap": "系肋剑突：耗 1 药材（雾月不耗）。回 1 命，五毫摸残页。药材不够则空手。",
+  "hint_jieji_costoxiphoidstrap_loosecostoxiphoidstrap": "解肋剑突：花 1 铜钱（雷月 1）。得 1 药材，并回 1 命。袋里不够则空手。",
+  "hint_jieji_costoxiphoidstrap_bloodcostoxiphoidstrap": "血肋剑突：扣 1 点生机（至少留 1，血月 2）。三毫摸残页，不成则得 2 铜钱。",
+  "hint_jieji_costoxiphoidstrap_tiecostoxiphoidstrap_ok": "你系上劫肋剑突革。生机回了 {0} 点。",
+  "hint_jieji_costoxiphoidstrap_tiecostoxiphoidstrap_broke": "系肋剑突要 {0} 药材。你拿不出来。",
+  "hint_jieji_costoxiphoidstrap_loosecostoxiphoidstrap_ok": "你解开劫肋剑突革。得了 {0} 药材，生机回了 {1} 点。",
+  "hint_jieji_costoxiphoidstrap_loosecostoxiphoidstrap_broke": "解肋剑突要 {0} 铜钱。袋里不够。",
+  "hint_jieji_costoxiphoidstrap_bloodcostoxiphoidstrap_ok": "你割了 {0} 点生机去染劫肋剑突革。",
+  "hint_jieji_costoxiphoidstrap_bloodcostoxiphoidstrap_none": "血肋剑突下去，肋剑突影却散了。袋里多了 {0} 铜钱。"
 
 
 }

@@ -344,6 +344,7 @@ async function onAfterMove(terrain) {
     if (await tryJiejiCostalcartilagestrapOnMove(terrain)) return true
     if (await tryJiejiInfrasternalanglestrapOnMove(terrain)) return true
     if (await tryJiejiSternalbodystrapOnMove(terrain)) return true
+    if (await tryJiejiCostoxiphoidstrapOnMove(terrain)) return true
   }
   return fought
 }
