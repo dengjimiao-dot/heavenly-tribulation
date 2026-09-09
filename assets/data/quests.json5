@@ -3472,6 +3472,14 @@
     isHidden: true,
     contribution: 11,
     rank: 0,
+  },
+  {
+    id: "hidden_blood_xuekeng",
+    policy: null,
+    isBounty: false,
+    isHidden: true,
+    contribution: 11,
+    rank: 0,
   }
 
 }
