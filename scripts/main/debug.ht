@@ -900,6 +900,8 @@ namespace debug {
       await playJiejiRibneckstrapEvent(terrain)
     } else if (kind == 'ribtuberclestrap') {
       await playJiejiRibtuberclestrapEvent(terrain)
+    } else if (kind == 'ribanglestrap') {
+      await playJiejiRibanglestrapEvent(terrain)
     } else {
       await playJiejiThunderRoadEvent(terrain)
     }
@@ -2101,6 +2103,12 @@ namespace debug {
   /// 忽略几率与冷却，仍弹出赶路劫咽革三选。
   async function forceThroatlatch() {
     return await playJiejiThroatlatchEvent({ kind: 'plain' })
+  }
+
+
+  /// 忽略几率与冷却，仍弹出赶路劫肋角革三选。
+  async function forceRibanglestrap() {
+    return await playJiejiRibanglestrapEvent({ kind: 'plain' })
   }
 
   /// 忽略冷却与花费，仍弹出幻术祭坛入幻三选。
