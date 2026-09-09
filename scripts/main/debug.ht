@@ -927,6 +927,8 @@ namespace debug {
     } else if (kind == 'xuetan') {
       questKind = 'hidden_blood_xuetan'
     }
+    } else if (kind == 'sporecord') {
+      questKind = 'hidden_mist_sporecord'
     final ctor = Quests[questKind]
     if (ctor == null) return false
     final quest = ctor(fromSite, difficulty: 0)
