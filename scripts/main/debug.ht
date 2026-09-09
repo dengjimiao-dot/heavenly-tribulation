@@ -846,6 +846,8 @@ namespace debug {
       questKind = 'hidden_mist_lamella'
     } else if (kind == 'leifeng') {
       questKind = 'hidden_thunder_leifeng'
+    } else if (kind == 'cystidium') {
+      questKind = 'hidden_mist_cystidium'
     }
     final ctor = Quests[questKind]
     if (ctor == null) return false

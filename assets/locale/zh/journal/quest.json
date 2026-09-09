@@ -1031,6 +1031,8 @@
   "quest_hidden_mist_lamella_complete": "「{0}」有了着落。你在{1}的雾菌褶边走了一遭。",
   "quest_hidden_thunder_leifeng": "劫纹雷缝",
   "quest_hidden_thunder_leifeng_description": "行路听闻{0}城外有劫纹雷缝。去走一遭，或可采得药材、拾得铜钱并回些生机。",
-  "quest_hidden_thunder_leifeng_complete": "「{0}」有了着落。你在{1}的雷缝边走了一遭。"
+  "quest_hidden_thunder_leifeng_complete": "「{0}」有了着落。你在{1}的雷缝边走了一遭。",
+  "quest_hidden_mist_cystidium": "劫纹雾囊状体",
+  "quest_hidden_mist_cystidium_description": "行路听闻{0}城外有劫纹雾囊状体。去走一遭，或可采得药材、拾得铜钱并回些生机。",
+  "quest_hidden_mist_cystidium_complete": "「{0}」有了着落。你在{1}的雾囊状体边走了一遭。"
 }
-
