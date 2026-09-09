@@ -705,6 +705,8 @@ namespace debug {
       questKind = 'hidden_mist_chlamydospore'
     } else if (kind == 'chi') {
       questKind = 'hidden_thunder_chi'
+    } else if (kind == 'aeciospore') {
+      questKind = 'hidden_mist_aeciospore'
     }
     final ctor = Quests[questKind]
     if (ctor == null) return false
