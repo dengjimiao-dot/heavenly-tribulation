@@ -926,11 +926,15 @@ namespace debug {
       questKind = 'hidden_mist_hyphalcord'
     } else if (kind == 'xuetan') {
       questKind = 'hidden_blood_xuetan'
-    }
     } else if (kind == 'sporecord') {
       questKind = 'hidden_mist_sporecord'
     } else if (kind == 'xuechi') {
       questKind = 'hidden_blood_xuechi'
+    } else if (kind == 'myceliumrope') {
+      questKind = 'hidden_mist_myceliumrope'
+    } else if (kind == 'leichi') {
+      questKind = 'hidden_thunder_leichi'
+    }
     final ctor = Quests[questKind]
     if (ctor == null) return false
     final quest = ctor(fromSite, difficulty: 0)
