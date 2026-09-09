@@ -992,6 +992,8 @@ namespace debug {
       await playJiejiClavicularnotchstrapEvent(terrain)
     } else if (kind == 'costalcartilagestrap') {
       await playJiejiCostalcartilagestrapEvent(terrain)
+    } else if (kind == 'infrasternalanglestrap') {
+      await playJiejiInfrasternalanglestrapEvent(terrain)
     } else {
       await playJiejiThunderRoadEvent(terrain)
     }
@@ -2317,6 +2319,11 @@ namespace debug {
   /// 忽略几率与冷却，仍弹出赶路劫肋软骨弓革三选。
   async function forceCostalcartilagestrap() {
     return await playJiejiCostalcartilagestrapEvent({ kind: 'plain' })
+  }
+
+  /// 忽略几率与冷却，仍弹出赶路劫肋下角革三选。
+  async function forceInfrasternalanglestrap() {
+    return await playJiejiInfrasternalanglestrapEvent({ kind: 'plain' })
   }
 
   /// 忽略冷却与花费，仍弹出幻术祭坛入幻三选。
