@@ -765,6 +765,10 @@ namespace debug {
     } else if (kind == 'myceliumcord') {
       questKind = 'hidden_mist_myceliumcord'
     }
+    }
+    } else if (kind == 'duo') {
+      questKind = 'hidden_thunder_duo'
+    }
     final ctor = Quests[questKind]
     if (ctor == null) return false
     final quest = ctor(fromSite, difficulty: 0)
