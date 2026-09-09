@@ -904,6 +904,8 @@ namespace debug {
       questKind = 'hidden_thunder_leikuang'
     } else if (kind == 'hyphallace') {
       questKind = 'hidden_mist_hyphallace'
+    } else if (kind == 'xuekuang') {
+      questKind = 'hidden_blood_xuekuang'
     }
     final ctor = Quests[questKind]
     if (ctor == null) return false
