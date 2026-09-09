@@ -6405,7 +6405,20 @@
   "hint_jieji_ribtransversestrap_looseribtransversestrap_ok": "你解开劫肋横突革。得了 {0} 药材，生机回了 {1} 点。",
   "hint_jieji_ribtransversestrap_looseribtransversestrap_broke": "解横要 {0} 铜钱。袋里不够。",
   "hint_jieji_ribtransversestrap_bloodribtransversestrap_ok": "你割了 {0} 点生机去染劫肋横突革。",
-  "hint_jieji_ribtransversestrap_bloodribtransversestrap_none": "血横下去，横影却散了。袋里多了 {0} 铜钱。"
+  "hint_jieji_ribtransversestrap_bloodribtransversestrap_none": "血横下去，横影却散了。袋里多了 {0} 铜钱。",
+  "hint_jieji_costochondralstrap": "路遇一条劫肋软骨结革。你可以系软、解软，或以血染软。",
+  "jieji_costochondralstrap_tiecostochondralstrap": "系软",
+  "jieji_costochondralstrap_loosecostochondralstrap": "解软",
+  "jieji_costochondralstrap_bloodcostochondralstrap": "血软",
+  "hint_jieji_costochondralstrap_tiecostochondralstrap": "系软：耗 1 药材（雾月不耗）。回 1 命，五毫摸残页。药材不够则空手。",
+  "hint_jieji_costochondralstrap_loosecostochondralstrap": "解软：花 1 铜钱（雷月 1）。得 1 药材，并回 1 命。袋里不够则空手。",
+  "hint_jieji_costochondralstrap_bloodcostochondralstrap": "血软：扣 1 点生机（至少留 1，血月 2）。三毫摸残页，不成则得 2 铜钱。",
+  "hint_jieji_costochondralstrap_tiecostochondralstrap_ok": "你系上劫肋软骨结革。生机回了 {0} 点。",
+  "hint_jieji_costochondralstrap_tiecostochondralstrap_broke": "系软要 {0} 药材。你拿不出来。",
+  "hint_jieji_costochondralstrap_loosecostochondralstrap_ok": "你解开劫肋软骨结革。得了 {0} 药材，生机回了 {1} 点。",
+  "hint_jieji_costochondralstrap_loosecostochondralstrap_broke": "解软要 {0} 铜钱。袋里不够。",
+  "hint_jieji_costochondralstrap_bloodcostochondralstrap_ok": "你割了 {0} 点生机去染劫肋软骨结革。",
+  "hint_jieji_costochondralstrap_bloodcostochondralstrap_none": "血软下去，软影却散了。袋里多了 {0} 铜钱。"
 
 }
 
