@@ -1058,5 +1058,8 @@
   "quest_hidden_blood_xueque_complete": "「{0}」有了着落。你在{1}的血阙边走了一遭。",
   "quest_hidden_mist_myceliumveil": "劫纹雾菌幕",
   "quest_hidden_mist_myceliumveil_description": "行路听闻{0}城外有劫纹雾菌幕。去走一遭，或可采得药材、拾得铜钱并回些生机。",
-  "quest_hidden_mist_myceliumveil_complete": "「{0}」有了着落。你在{1}的雾菌幕边走了一遭。"
+  "quest_hidden_mist_myceliumveil_complete": "「{0}」有了着落。你在{1}的雾菌幕边走了一遭。",
+  "quest_hidden_thunder_leiyao": "劫纹雷窈",
+  "quest_hidden_thunder_leiyao_description": "行路听闻{0}城外有劫纹雷窈。去走一遭，或可采得药材、拾得铜钱并回些生机。",
+  "quest_hidden_thunder_leiyao_complete": "「{0}」有了着落。你在{1}的雷窈边走了一遭。"
 }
