@@ -1255,6 +1255,8 @@ namespace debug {
       await playJiejiOpponenspolicisstrapEvent(terrain)
     } else if (kind == 'adductorpolicisstrap') {
       await playJiejiAdductorpolicisstrapEvent(terrain)
+    } else if (kind == 'lumbricalstrap') {
+      await playJiejiLumbricalstrapEvent(terrain)
     } else {
       await playJiejiThunderRoadEvent(terrain)
     }
@@ -2873,6 +2875,11 @@ namespace debug {
   /// 忽略几率与冷却，仍弹出赶路劫拇收肌革三选。
   async function forceAdductorpolicisstrap() {
     return await playJiejiAdductorpolicisstrapEvent({ kind: 'plain' })
+  }
+
+  /// 忽略几率与冷却，仍弹出赶路劫蚓状肌革三选。
+  async function forceLumbricalstrap() {
+    return await playJiejiLumbricalstrapEvent({ kind: 'plain' })
   }
 
   /// 忽略冷却与花费，仍弹出幻术祭坛入幻三选。
