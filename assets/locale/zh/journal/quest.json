@@ -1034,5 +1034,8 @@
   "quest_hidden_thunder_leifeng_complete": "「{0}」有了着落。你在{1}的雷缝边走了一遭。",
   "quest_hidden_mist_cystidium": "劫纹雾囊状体",
   "quest_hidden_mist_cystidium_description": "行路听闻{0}城外有劫纹雾囊状体。去走一遭，或可采得药材、拾得铜钱并回些生机。",
-  "quest_hidden_mist_cystidium_complete": "「{0}」有了着落。你在{1}的雾囊状体边走了一遭。"
+  "quest_hidden_mist_cystidium_complete": "「{0}」有了着落。你在{1}的雾囊状体边走了一遭。",
+  "quest_hidden_blood_xuelie": "劫纹血裂",
+  "quest_hidden_blood_xuelie_description": "行路听闻{0}城外有劫纹血裂。去走一遭，或可采得药材、拾得铜钱并回些生机。",
+  "quest_hidden_blood_xuelie_complete": "「{0}」有了着落。你在{1}的血裂边走了一遭。"
 }
