@@ -635,6 +635,8 @@ namespace debug {
       questKind = 'hidden_mist_rhizoid'
     } else if (kind == 'wan') {
       questKind = 'hidden_thunder_wan'
+    } else if (kind == 'dui') {
+      questKind = 'hidden_blood_dui'
     }
     final ctor = Quests[questKind]
     if (ctor == null) return false

@@ -2219,6 +2219,17 @@
     rank: 0,
   },
 
+  {
+    id: "hidden_blood_dui",
+    policy: null,
+    isBounty: false,
+    isHidden: true,
+    contribution: 11,
+    rank: 0,
+  },
+
+
+
 
 
 
