@@ -934,6 +934,10 @@ namespace debug {
       questKind = 'hidden_mist_myceliumrope'
     } else if (kind == 'leichi') {
       questKind = 'hidden_thunder_leichi'
+    } else if (kind == 'hyphalrope') {
+      questKind = 'hidden_mist_hyphalrope'
+    } else if (kind == 'xuewan') {
+      questKind = 'hidden_blood_xuewan'
     }
     final ctor = Quests[questKind]
     if (ctor == null) return false

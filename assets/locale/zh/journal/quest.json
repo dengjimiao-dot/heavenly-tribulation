@@ -1163,5 +1163,11 @@
   "quest_hidden_mist_myceliumrope_complete": "「{0}」有了着落。你在{1}的雾菌绳边走了一遭。",
   "quest_hidden_thunder_leichi": "劫纹雷池",
   "quest_hidden_thunder_leichi_description": "行路听闻{0}城外有劫纹雷池。去走一遭，或可采得药材、拾得铜钱并回些生机。",
-  "quest_hidden_thunder_leichi_complete": "「{0}」有了着落。你在{1}的雷池边走了一遭。"
+  "quest_hidden_thunder_leichi_complete": "「{0}」有了着落。你在{1}的雷池边走了一遭。",
+  "quest_hidden_mist_hyphalrope": "劫纹雾丝绳",
+  "quest_hidden_mist_hyphalrope_description": "行路听闻{0}城外有劫纹雾丝绳。去走一遭，或可采得药材、拾得铜钱并回些生机。",
+  "quest_hidden_mist_hyphalrope_complete": "「{0}」有了着落。你在{1}的雾丝绳边走了一遭。",
+  "quest_hidden_blood_xuewan": "劫纹血湾",
+  "quest_hidden_blood_xuewan_description": "行路听闻{0}城外有劫纹血湾。去走一遭，或可采得药材、拾得铜钱并回些生机。",
+  "quest_hidden_blood_xuewan_complete": "「{0}」有了着落。你在{1}的血湾边走了一遭。"
 }
