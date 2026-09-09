@@ -6265,7 +6265,20 @@
   "hint_jieji_ribanglestrap_looseribanglestrap_ok": "你解开劫肋角革。得了 {0} 药材，生机回了 {1} 点。",
   "hint_jieji_ribanglestrap_looseribanglestrap_broke": "解角要 {0} 铜钱。袋里不够。",
   "hint_jieji_ribanglestrap_bloodribanglestrap_ok": "你割了 {0} 点生机去染劫肋角革。",
-  "hint_jieji_ribanglestrap_bloodribanglestrap_none": "血角下去，角影却散了。袋里多了 {0} 铜钱。"
+  "hint_jieji_ribanglestrap_bloodribanglestrap_none": "血角下去，角影却散了。袋里多了 {0} 铜钱。",
+  "hint_jieji_ribgroovestrap": "路遇一条劫肋沟革。你可以系沟、解沟，或以血染沟。",
+  "jieji_ribgroovestrap_tieribgroovestrap": "系沟",
+  "jieji_ribgroovestrap_looseribgroovestrap": "解沟",
+  "jieji_ribgroovestrap_bloodribgroovestrap": "血沟",
+  "hint_jieji_ribgroovestrap_tieribgroovestrap": "系沟：耗 1 药材（雾月不耗）。回 1 命，五毫摸残页。药材不够则空手。",
+  "hint_jieji_ribgroovestrap_looseribgroovestrap": "解沟：花 1 铜钱（雷月 1）。得 1 药材，并回 1 命。袋里不够则空手。",
+  "hint_jieji_ribgroovestrap_bloodribgroovestrap": "血沟：扣 1 点生机（至少留 1，血月 2）。三毫摸残页，不成则得 2 铜钱。",
+  "hint_jieji_ribgroovestrap_tieribgroovestrap_ok": "你系上劫肋沟革。生机回了 {0} 点。",
+  "hint_jieji_ribgroovestrap_tieribgroovestrap_broke": "系沟要 {0} 药材。你拿不出来。",
+  "hint_jieji_ribgroovestrap_looseribgroovestrap_ok": "你解开劫肋沟革。得了 {0} 药材，生机回了 {1} 点。",
+  "hint_jieji_ribgroovestrap_looseribgroovestrap_broke": "解沟要 {0} 铜钱。袋里不够。",
+  "hint_jieji_ribgroovestrap_bloodribgroovestrap_ok": "你割了 {0} 点生机去染劫肋沟革。",
+  "hint_jieji_ribgroovestrap_bloodribgroovestrap_none": "血沟下去，沟影却散了。袋里多了 {0} 铜钱。"
 
 }
 
