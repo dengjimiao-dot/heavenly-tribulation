@@ -710,6 +710,9 @@ namespace debug {
     } else if (kind == 'he') {
       questKind = 'hidden_thunder_he'
     }
+    } else if (kind == 'zoospore') {
+      questKind = 'hidden_mist_zoospore'
+    }
     final ctor = Quests[questKind]
     if (ctor == null) return false
     final quest = ctor(fromSite, difficulty: 0)
