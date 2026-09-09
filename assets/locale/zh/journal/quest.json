@@ -1104,4 +1104,7 @@
   "quest_hidden_blood_xueshi": "劫纹血石",
   "quest_hidden_blood_xueshi_description": "行路听闻{0}城外有劫纹血石。去走一遭，或可采得药材、拾得铜钱并回些生机。",
   "quest_hidden_blood_xueshi_complete": "「{0}」有了着落。你在{1}的血石边走了一遭。",
+  "quest_hidden_mist_sporeveil": "劫纹雾孢幕",
+  "quest_hidden_mist_sporeveil_description": "行路听闻{0}城外有劫纹雾孢幕。去走一遭，或可采得药材、拾得铜钱并回些生机。",
+  "quest_hidden_mist_sporeveil_complete": "「{0}」有了着落。你在{1}的雾孢幕边走了一遭。",
 }
