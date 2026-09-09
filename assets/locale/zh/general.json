@@ -6349,7 +6349,20 @@
   "hint_jieji_ribshaftstrap_looseribshaftstrap_ok": "你解开劫肋体革。得了 {0} 药材，生机回了 {1} 点。",
   "hint_jieji_ribshaftstrap_looseribshaftstrap_broke": "解体要 {0} 铜钱。袋里不够。",
   "hint_jieji_ribshaftstrap_bloodribshaftstrap_ok": "你割了 {0} 点生机去染劫肋体革。",
-  "hint_jieji_ribshaftstrap_bloodribshaftstrap_none": "血体下去，体影却散了。袋里多了 {0} 铜钱。"
+  "hint_jieji_ribshaftstrap_bloodribshaftstrap_none": "血体下去，体影却散了。袋里多了 {0} 铜钱。",
+  "hint_jieji_costovertebralstrap": "路遇一条劫肋椎革。你可以系椎、解椎，或以血染椎。",
+  "jieji_costovertebralstrap_tiecostovertebralstrap": "系椎",
+  "jieji_costovertebralstrap_loosecostovertebralstrap": "解椎",
+  "jieji_costovertebralstrap_bloodcostovertebralstrap": "血椎",
+  "hint_jieji_costovertebralstrap_tiecostovertebralstrap": "系椎：耗 1 药材（雾月不耗）。回 1 命，五毫摸残页。药材不够则空手。",
+  "hint_jieji_costovertebralstrap_loosecostovertebralstrap": "解椎：花 1 铜钱（雷月 1）。得 1 药材，并回 1 命。袋里不够则空手。",
+  "hint_jieji_costovertebralstrap_bloodcostovertebralstrap": "血椎：扣 1 点生机（至少留 1，血月 2）。三毫摸残页，不成则得 2 铜钱。",
+  "hint_jieji_costovertebralstrap_tiecostovertebralstrap_ok": "你系上劫肋椎革。生机回了 {0} 点。",
+  "hint_jieji_costovertebralstrap_tiecostovertebralstrap_broke": "系椎要 {0} 药材。你拿不出来。",
+  "hint_jieji_costovertebralstrap_loosecostovertebralstrap_ok": "你解开劫肋椎革。得了 {0} 药材，生机回了 {1} 点。",
+  "hint_jieji_costovertebralstrap_loosecostovertebralstrap_broke": "解椎要 {0} 铜钱。袋里不够。",
+  "hint_jieji_costovertebralstrap_bloodcostovertebralstrap_ok": "你割了 {0} 点生机去染劫肋椎革。",
+  "hint_jieji_costovertebralstrap_bloodcostovertebralstrap_none": "血椎下去，椎影却散了。袋里多了 {0} 铜钱。"
 
 }
 
