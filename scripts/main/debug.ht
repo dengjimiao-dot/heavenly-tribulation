@@ -918,6 +918,8 @@ namespace debug {
       questKind = 'hidden_mist_myceliumthread'
     } else if (kind == 'leikeng') {
       questKind = 'hidden_thunder_leikeng'
+    } else if (kind == 'sporethread') {
+      questKind = 'hidden_mist_sporethread'
     }
     final ctor = Quests[questKind]
     if (ctor == null) return false
