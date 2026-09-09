@@ -1143,6 +1143,8 @@ namespace debug {
       await playJiejiAnconeusstrapEvent(terrain)
     } else if (kind == 'brachioradialisstrap') {
       await playJiejiBrachioradialisstrapEvent(terrain)
+    } else if (kind == 'extensordigitorumstrap') {
+      await playJiejiExtensordigitorumstrapEvent(terrain)
     } else {
       await playJiejiThunderRoadEvent(terrain)
     }
@@ -2644,6 +2646,11 @@ namespace debug {
   /// 忽略几率与冷却，仍弹出赶路劫肱桡肌革三选。
   async function forceBrachioradialisstrap() {
     return await playJiejiBrachioradialisstrapEvent({ kind: 'plain' })
+  }
+
+  /// 忽略几率与冷却，仍弹出赶路劫指伸肌革三选。
+  async function forceExtensordigitorumstrap() {
+    return await playJiejiExtensordigitorumstrapEvent({ kind: 'plain' })
   }
 
   /// 忽略冷却与花费，仍弹出幻术祭坛入幻三选。
