@@ -6293,7 +6293,20 @@
   "hint_jieji_ribgroovestrap_looseribgroovestrap_ok": "你解开劫肋沟革。得了 {0} 药材，生机回了 {1} 点。",
   "hint_jieji_ribgroovestrap_looseribgroovestrap_broke": "解沟要 {0} 铜钱。袋里不够。",
   "hint_jieji_ribgroovestrap_bloodribgroovestrap_ok": "你割了 {0} 点生机去染劫肋沟革。",
-  "hint_jieji_ribgroovestrap_bloodribgroovestrap_none": "血沟下去，沟影却散了。袋里多了 {0} 铜钱。"
+  "hint_jieji_ribgroovestrap_bloodribgroovestrap_none": "血沟下去，沟影却散了。袋里多了 {0} 铜钱。",
+  "hint_jieji_ribcreststrap": "路遇一条劫肋脊革。你可以系脊、解脊，或以血染脊。",
+  "jieji_ribcreststrap_tieribcreststrap": "系脊",
+  "jieji_ribcreststrap_looseribcreststrap": "解脊",
+  "jieji_ribcreststrap_bloodribcreststrap": "血脊",
+  "hint_jieji_ribcreststrap_tieribcreststrap": "系脊：耗 1 药材（雾月不耗）。回 1 命，五毫摸残页。药材不够则空手。",
+  "hint_jieji_ribcreststrap_looseribcreststrap": "解脊：花 1 铜钱（雷月 1）。得 1 药材，并回 1 命。袋里不够则空手。",
+  "hint_jieji_ribcreststrap_bloodribcreststrap": "血脊：扣 1 点生机（至少留 1，血月 2）。三毫摸残页，不成则得 2 铜钱。",
+  "hint_jieji_ribcreststrap_tieribcreststrap_ok": "你系上劫肋脊革。生机回了 {0} 点。",
+  "hint_jieji_ribcreststrap_tieribcreststrap_broke": "系脊要 {0} 药材。你拿不出来。",
+  "hint_jieji_ribcreststrap_looseribcreststrap_ok": "你解开劫肋脊革。得了 {0} 药材，生机回了 {1} 点。",
+  "hint_jieji_ribcreststrap_looseribcreststrap_broke": "解脊要 {0} 铜钱。袋里不够。",
+  "hint_jieji_ribcreststrap_bloodribcreststrap_ok": "你割了 {0} 点生机去染劫肋脊革。",
+  "hint_jieji_ribcreststrap_bloodribcreststrap_none": "血脊下去，脊影却散了。袋里多了 {0} 铜钱。"
 
 }
 
