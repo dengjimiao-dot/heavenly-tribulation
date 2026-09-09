@@ -950,6 +950,8 @@ namespace debug {
       await playJiejiCostochondralstrapEvent(terrain)
     } else if (kind == 'sternocostalstrap') {
       await playJiejiSternocostalstrapEvent(terrain)
+    } else if (kind == 'manubriosternalstrap') {
+      await playJiejiManubriosternalstrapEvent(terrain)
     } else {
       await playJiejiThunderRoadEvent(terrain)
     }
@@ -2219,6 +2221,11 @@ namespace debug {
   /// 忽略几率与冷却，仍弹出赶路劫胸肋革三选。
   async function forceSternocostalstrap() {
     return await playJiejiSternocostalstrapEvent({ kind: 'plain' })
+  }
+
+  /// 忽略几率与冷却，仍弹出赶路劫柄胸革三选。
+  async function forceManubriosternalstrap() {
+    return await playJiejiManubriosternalstrapEvent({ kind: 'plain' })
   }
 
   /// 忽略冷却与花费，仍弹出幻术祭坛入幻三选。
