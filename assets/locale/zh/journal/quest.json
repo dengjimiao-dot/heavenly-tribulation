@@ -971,5 +971,8 @@
   "quest_hidden_mist_fruitingbody_complete": "「{0}」有了着落。你在{1}的雾子实体边走了一遭。",
   "quest_hidden_blood_wa": "劫纹血洼",
   "quest_hidden_blood_wa_description": "行路听闻{0}城外有劫纹血洼。去走一遭，或可采得药材、拾得铜钱并回些生机。",
-  "quest_hidden_blood_wa_complete": "「{0}」有了着落。你在{1}的血洼边走了一遭。"
+  "quest_hidden_blood_wa_complete": "「{0}」有了着落。你在{1}的血洼边走了一遭。",
+  "quest_hidden_mist_basidiocarp": "劫纹雾担子果",
+  "quest_hidden_mist_basidiocarp_description": "行路听闻{0}城外有劫纹雾担子果。去走一遭，或可采得药材、拾得铜钱并回些生机。",
+  "quest_hidden_mist_basidiocarp_complete": "「{0}」有了着落。你在{1}的雾担子果边走了一遭。"
 }
