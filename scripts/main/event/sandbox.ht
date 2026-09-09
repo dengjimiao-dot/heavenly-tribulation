@@ -405,6 +405,7 @@ async function onAfterMove(terrain) {
     if (await tryJiejiAdductorhallucisstrapOnMove(terrain)) return true
     if (await tryJiejiAbductorhallucisstrapOnMove(terrain)) return true
     if (await tryJiejiFlexorhallucisbrevisstrapOnMove(terrain)) return true
+    if (await tryJiejiExtensorhallucislongusstrapOnMove(terrain)) return true
   }
   return fought
 }
