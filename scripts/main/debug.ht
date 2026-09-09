@@ -793,6 +793,9 @@ namespace debug {
     } else if (kind == 'ping') {
       questKind = 'hidden_blood_ping'
     }
+    } else if (kind == 'hyphacable') {
+      questKind = 'hidden_mist_hyphacable'
+    }
     final ctor = Quests[questKind]
     if (ctor == null) return false
     final quest = ctor(fromSite, difficulty: 0)
