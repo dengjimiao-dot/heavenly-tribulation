@@ -667,6 +667,8 @@ namespace debug {
       questKind = 'hidden_blood_ya'
     } else if (kind == 'ao') {
       questKind = 'hidden_blood_ao'
+    } else if (kind == 'sporangium') {
+      questKind = 'hidden_mist_sporangium'
     }
     final ctor = Quests[questKind]
     if (ctor == null) return false
