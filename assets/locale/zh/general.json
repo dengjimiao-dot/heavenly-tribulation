@@ -6825,5 +6825,18 @@
   "hint_jieji_sternalisstrap_loosesternalisstrap_ok": "你解开劫胸骨肌革。得了 {0} 药材，生机回了 {1} 点。",
   "hint_jieji_sternalisstrap_loosesternalisstrap_broke": "解胸骨肌要 {0} 铜钱。袋里不够。",
   "hint_jieji_sternalisstrap_bloodsternalisstrap_ok": "你割了 {0} 点生机去染劫胸骨肌革。",
-  "hint_jieji_sternalisstrap_bloodsternalisstrap_none": "血胸骨肌下去，胸骨肌影却散了。袋里多了 {0} 铜钱。"
+  "hint_jieji_sternalisstrap_bloodsternalisstrap_none": "血胸骨肌下去，胸骨肌影却散了。袋里多了 {0} 铜钱。",
+  "hint_jieji_pectoralisstrap": "路遇一条劫胸大肌革。你可以系胸大肌、解胸大肌，或以血染胸大肌。",
+  "jieji_pectoralisstrap_tiepectoralisstrap": "系胸大肌",
+  "jieji_pectoralisstrap_loosepectoralisstrap": "解胸大肌",
+  "jieji_pectoralisstrap_bloodpectoralisstrap": "血胸大肌",
+  "hint_jieji_pectoralisstrap_tiepectoralisstrap": "系胸大肌：耗 1 药材（雾月不耗）。回 1 命，五毫摸残页。药材不够则空手。",
+  "hint_jieji_pectoralisstrap_loosepectoralisstrap": "解胸大肌：花 1 铜钱（雷月 1）。得 1 药材，并回 1 命。袋里不够则空手。",
+  "hint_jieji_pectoralisstrap_bloodpectoralisstrap": "血胸大肌：扣 1 点生机（至少留 1，血月 2）。三毫摸残页，不成则得 2 铜钱。",
+  "hint_jieji_pectoralisstrap_tiepectoralisstrap_ok": "你系上劫胸大肌革。生机回了 {0} 点。",
+  "hint_jieji_pectoralisstrap_tiepectoralisstrap_broke": "系胸大肌要 {0} 药材。你拿不出来。",
+  "hint_jieji_pectoralisstrap_loosepectoralisstrap_ok": "你解开劫胸大肌革。得了 {0} 药材，生机回了 {1} 点。",
+  "hint_jieji_pectoralisstrap_loosepectoralisstrap_broke": "解胸大肌要 {0} 铜钱。袋里不够。",
+  "hint_jieji_pectoralisstrap_bloodpectoralisstrap_ok": "你割了 {0} 点生机去染劫胸大肌革。",
+  "hint_jieji_pectoralisstrap_bloodpectoralisstrap_none": "血胸大肌下去，胸大肌影却散了。袋里多了 {0} 铜钱。"
 }
