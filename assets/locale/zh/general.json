@@ -6752,7 +6752,20 @@
   "hint_jieji_costoxiphoidstrap_loosecostoxiphoidstrap_ok": "你解开劫肋剑突革。得了 {0} 药材，生机回了 {1} 点。",
   "hint_jieji_costoxiphoidstrap_loosecostoxiphoidstrap_broke": "解肋剑突要 {0} 铜钱。袋里不够。",
   "hint_jieji_costoxiphoidstrap_bloodcostoxiphoidstrap_ok": "你割了 {0} 点生机去染劫肋剑突革。",
-  "hint_jieji_costoxiphoidstrap_bloodcostoxiphoidstrap_none": "血肋剑突下去，肋剑突影却散了。袋里多了 {0} 铜钱。"
+  "hint_jieji_costoxiphoidstrap_bloodcostoxiphoidstrap_none": "血肋剑突下去，肋剑突影却散了。袋里多了 {0} 铜钱。",
+  "hint_jieji_interclavicularstrap": "路遇一条劫锁间韧带革。你可以系锁间韧带、解锁间韧带，或以血染锁间韧带。",
+  "jieji_interclavicularstrap_tieinterclavicularstrap": "系锁间韧带",
+  "jieji_interclavicularstrap_looseinterclavicularstrap": "解锁间韧带",
+  "jieji_interclavicularstrap_bloodinterclavicularstrap": "血锁间韧带",
+  "hint_jieji_interclavicularstrap_tieinterclavicularstrap": "系锁间韧带：耗 1 药材（雾月不耗）。回 1 命，五毫摸残页。药材不够则空手。",
+  "hint_jieji_interclavicularstrap_looseinterclavicularstrap": "解锁间韧带：花 1 铜钱（雷月 1）。得 1 药材，并回 1 命。袋里不够则空手。",
+  "hint_jieji_interclavicularstrap_bloodinterclavicularstrap": "血锁间韧带：扣 1 点生机（至少留 1，血月 2）。三毫摸残页，不成则得 2 铜钱。",
+  "hint_jieji_interclavicularstrap_tieinterclavicularstrap_ok": "你系上劫锁间韧带革。生机回了 {0} 点。",
+  "hint_jieji_interclavicularstrap_tieinterclavicularstrap_broke": "系锁间韧带要 {0} 药材。你拿不出来。",
+  "hint_jieji_interclavicularstrap_looseinterclavicularstrap_ok": "你解开劫锁间韧带革。得了 {0} 药材，生机回了 {1} 点。",
+  "hint_jieji_interclavicularstrap_looseinterclavicularstrap_broke": "解锁间韧带要 {0} 铜钱。袋里不够。",
+  "hint_jieji_interclavicularstrap_bloodinterclavicularstrap_ok": "你割了 {0} 点生机去染劫锁间韧带革。",
+  "hint_jieji_interclavicularstrap_bloodinterclavicularstrap_none": "血锁间韧带下去，锁间韧带影却散了。袋里多了 {0} 铜钱。"
 
 
 }
