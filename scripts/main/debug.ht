@@ -773,6 +773,10 @@ namespace debug {
     } else if (kind == 'rhizomorph') {
       questKind = 'hidden_mist_rhizomorph'
     }
+    }
+    } else if (kind == 'bei') {
+      questKind = 'hidden_blood_bei'
+    }
     final ctor = Quests[questKind]
     if (ctor == null) return false
     final quest = ctor(fromSite, difficulty: 0)
