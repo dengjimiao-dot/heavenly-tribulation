@@ -880,6 +880,8 @@ namespace debug {
       questKind = 'hidden_blood_xuedong'
     } else if (kind == 'sporecloud') {
       questKind = 'hidden_mist_sporecloud'
+    } else if (kind == 'leidong') {
+      questKind = 'hidden_thunder_leidong'
     }
     final ctor = Quests[questKind]
     if (ctor == null) return false
