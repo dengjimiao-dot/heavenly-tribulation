@@ -611,6 +611,9 @@ namespace debug {
     } else if (kind == 'bo') {
       questKind = 'hidden_thunder_bo'
     }
+    } else if (kind == 'qiu') {
+      questKind = 'hidden_blood_qiu'
+    }
     final ctor = Quests[questKind]
     if (ctor == null) return false
     final quest = ctor(fromSite, difficulty: 0)
