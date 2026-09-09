@@ -686,6 +686,7 @@
   "quest_hidden_mist_suspensor": "劫纹雾胚柄",
   "quest_hidden_thunder_bo": "劫纹雷泊",
   "quest_hidden_blood_qiu": "劫纹血丘",
+  "quest_hidden_mist_haustorium": "劫纹雾吸器",
   "quest_hidden_mist_endosperm_description": "行路听闻{0}城外有劫纹雾胚乳。去走一遭，或可采得药材、拾得铜钱并回些生机。",
   "quest_hidden_blood_mesa_description": "行路听闻{0}城外有劫纹血峁。去走一遭，或可采得药材、拾得铜钱并回些生机。",
   "quest_hidden_mist_embryo_description": "行路听闻{0}城外有劫纹雾胚。去走一遭，或可采得药材、拾得铜钱并回些生机。",
@@ -715,6 +716,7 @@
   "quest_hidden_mist_suspensor_description": "行路听闻{0}城外有劫纹雾胚柄。去走一遭，或可采得药材、拾得铜钱并回些生机。",
   "quest_hidden_thunder_bo_description": "行路听闻{0}城外有劫纹雷泊。去走一遭，或可采得药材、拾得铜钱并回些生机。",
   "quest_hidden_blood_qiu_description": "行路听闻{0}城外有劫纹血丘。去走一遭，或可采得药材、拾得铜钱并回些生机。",
+  "quest_hidden_mist_haustorium_description": "行路听闻{0}城外有劫纹雾吸器。去走一遭，或可采得药材、拾得铜钱并回些生机。",
   "quest_hidden_mist_endosperm_complete": "「{0}」有了着落。你在{1}的雾胚乳边走了一遭。",
   "quest_hidden_blood_mesa_complete": "「{0}」有了着落。你在{1}的血峁边走了一遭。",
   "quest_hidden_mist_embryo_complete": "「{0}」有了着落。你在{1}的雾胚边走了一遭。",
@@ -743,5 +745,6 @@
   "quest_hidden_thunder_zhao_complete": "「{0}」有了着落。你在{1}的雷沼边走了一遭。",
   "quest_hidden_mist_suspensor_complete": "「{0}」有了着落。你在{1}的雾胚柄边走了一遭。",
   "quest_hidden_thunder_bo_complete": "「{0}」有了着落。你在{1}的雷泊边走了一遭。",
-  "quest_hidden_blood_qiu_complete": "「{0}」有了着落。你在{1}的血丘边走了一遭。"
+  "quest_hidden_blood_qiu_complete": "「{0}」有了着落。你在{1}的血丘边走了一遭。",
+  "quest_hidden_mist_haustorium_complete": "「{0}」有了着落。你在{1}的雾吸器边走了一遭。"
 }

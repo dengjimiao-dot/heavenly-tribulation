@@ -613,6 +613,8 @@ namespace debug {
     }
     } else if (kind == 'qiu') {
       questKind = 'hidden_blood_qiu'
+    } else if (kind == 'haustorium') {
+      questKind = 'hidden_mist_haustorium'
     }
     final ctor = Quests[questKind]
     if (ctor == null) return false
