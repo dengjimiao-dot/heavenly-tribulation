@@ -1201,6 +1201,8 @@ namespace debug {
       await playJiejiExtensorcarpiulnarisstrapEvent(terrain)
     } else if (kind == 'extensorcarpiradialislongusstrap') {
       await playJiejiExtensorcarpiradialislongusstrapEvent(terrain)
+    } else if (kind == 'extensorcarpiradialisbrevisstrap') {
+      await playJiejiExtensorcarpiradialisbrevisstrapEvent(terrain)
     } else {
       await playJiejiThunderRoadEvent(terrain)
     }
@@ -2747,6 +2749,11 @@ namespace debug {
   /// 忽略几率与冷却，仍弹出赶路劫桡侧腕长伸肌革三选。
   async function forceExtensorcarpiradialislongusstrap() {
     return await playJiejiExtensorcarpiradialislongusstrapEvent({ kind: 'plain' })
+  }
+
+  /// 忽略几率与冷却，仍弹出赶路劫桡侧腕短伸肌革三选。
+  async function forceExtensorcarpiradialisbrevisstrap() {
+    return await playJiejiExtensorcarpiradialisbrevisstrapEvent({ kind: 'plain' })
   }
 
   /// 忽略冷却与花费，仍弹出幻术祭坛入幻三选。
