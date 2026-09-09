@@ -1073,5 +1073,8 @@
   "quest_hidden_mist_hyphalveil_complete": "「{0}」有了着落。你在{1}的雾丝幕边走了一遭。",
   "quest_hidden_thunder_leiku": "劫纹雷窟",
   "quest_hidden_thunder_leiku_description": "行路听闻{0}城外有劫纹雷窟。去走一遭，或可采得药材、拾得铜钱并回些生机。",
-  "quest_hidden_thunder_leiku_complete": "「{0}」有了着落。你在{1}的雷窟边走了一遭。"
+  "quest_hidden_thunder_leiku_complete": "「{0}」有了着落。你在{1}的雷窟边走了一遭。",
+  "quest_hidden_mist_myceliumweb": "劫纹雾菌织",
+  "quest_hidden_mist_myceliumweb_description": "行路听闻{0}城外有劫纹雾菌织。去走一遭，或可采得药材、拾得铜钱并回些生机。",
+  "quest_hidden_mist_myceliumweb_complete": "「{0}」有了着落。你在{1}的雾菌织边走了一遭。"
 }
