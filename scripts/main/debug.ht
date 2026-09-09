@@ -892,6 +892,8 @@ namespace debug {
       questKind = 'hidden_thunder_leiyan'
     } else if (kind == 'hyphalweb') {
       questKind = 'hidden_mist_hyphalweb'
+    } else if (kind == 'xueshi') {
+      questKind = 'hidden_blood_xueshi'
     }
     final ctor = Quests[questKind]
     if (ctor == null) return false
