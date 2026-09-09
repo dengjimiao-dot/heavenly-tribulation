@@ -884,6 +884,8 @@ namespace debug {
       questKind = 'hidden_thunder_leidong'
     } else if (kind == 'hyphalnet') {
       questKind = 'hidden_mist_hyphalnet'
+    } else if (kind == 'xueyan') {
+      questKind = 'hidden_blood_xueyan'
     }
     final ctor = Quests[questKind]
     if (ctor == null) return false
