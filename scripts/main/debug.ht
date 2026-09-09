@@ -796,6 +796,9 @@ namespace debug {
     } else if (kind == 'hyphacable') {
       questKind = 'hidden_mist_hyphacable'
     }
+    } else if (kind == 'tuo') {
+      questKind = 'hidden_thunder_tuo'
+    }
     final ctor = Quests[questKind]
     if (ctor == null) return false
     final quest = ctor(fromSite, difficulty: 0)
