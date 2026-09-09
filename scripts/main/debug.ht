@@ -1357,6 +1357,8 @@ namespace debug {
       await playJiejiSupinatorstrapEvent(terrain)
     } else if (kind == 'pronatorteresstrap') {
       await playJiejiPronatorteresstrapEvent(terrain)
+    } else if (kind == 'pronatorquadratusstrap') {
+      await playJiejiPronatorquadratusstrapEvent(terrain)
     } else {
       await playJiejiThunderRoadEvent(terrain)
     }
@@ -3114,6 +3116,11 @@ namespace debug {
   /// 忽略几率与冷却，仍弹出赶路劫旋前圆肌革三选。
   async function forcePronatorteresstrap() {
     return await playJiejiPronatorteresstrapEvent({ kind: 'plain' })
+  }
+
+  /// 忽略几率与冷却，仍弹出赶路劫旋前方肌革三选。
+  async function forcePronatorquadratusstrap() {
+    return await playJiejiPronatorquadratusstrapEvent({ kind: 'plain' })
   }
 
   /// 忽略冷却与花费，仍弹出幻术祭坛入幻三选。
