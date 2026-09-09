@@ -2956,4 +2956,15 @@
     rank: 0,
   },
 
+
+
+  {
+    id: "hidden_mist_ascocarp",
+    policy: null,
+    isBounty: false,
+    isHidden: true,
+    contribution: 11,
+    rank: 0,
+  },
+
 }
