@@ -6192,7 +6192,20 @@
   "hint_jieji_ribheadstrap_looseribheadstrap_ok": "你解开劫肋头革。得了 {0} 药材，生机回了 {1} 点。",
   "hint_jieji_ribheadstrap_looseribheadstrap_broke": "解头要 {0} 铜钱。袋里不够。",
   "hint_jieji_ribheadstrap_bloodribheadstrap_ok": "你割了 {0} 点生机去染劫肋头革。",
-  "hint_jieji_ribheadstrap_bloodribheadstrap_none": "血头下去，头影却散了。袋里多了 {0} 铜钱。"
+  "hint_jieji_ribheadstrap_bloodribheadstrap_none": "血头下去，头影却散了。袋里多了 {0} 铜钱。",
+  "hint_jieji_ribneckstrap": "路遇一条劫肋颈革。你可以系颈、解颈，或以血染颈。",
+  "jieji_ribneckstrap_tieribneckstrap": "系颈",
+  "jieji_ribneckstrap_looseribneckstrap": "解颈",
+  "jieji_ribneckstrap_bloodribneckstrap": "血颈",
+  "hint_jieji_ribneckstrap_tieribneckstrap": "系颈：耗 1 药材（雾月不耗）。回 1 命，五毫摸残页。药材不够则空手。",
+  "hint_jieji_ribneckstrap_looseribneckstrap": "解颈：花 1 铜钱（雷月 1）。得 1 药材，并回 1 命。袋里不够则空手。",
+  "hint_jieji_ribneckstrap_bloodribneckstrap": "血颈：扣 1 点生机（至少留 1，血月 2）。三毫摸残页，不成则得 2 铜钱。",
+  "hint_jieji_ribneckstrap_tieribneckstrap_ok": "你系上劫肋颈革。生机回了 {0} 点。",
+  "hint_jieji_ribneckstrap_tieribneckstrap_broke": "系颈要 {0} 药材。你拿不出来。",
+  "hint_jieji_ribneckstrap_looseribneckstrap_ok": "你解开劫肋颈革。得了 {0} 药材，生机回了 {1} 点。",
+  "hint_jieji_ribneckstrap_looseribneckstrap_broke": "解颈要 {0} 铜钱。袋里不够。",
+  "hint_jieji_ribneckstrap_bloodribneckstrap_ok": "你割了 {0} 点生机去染劫肋颈革。",
+  "hint_jieji_ribneckstrap_bloodribneckstrap_none": "血颈下去，颈影却散了。袋里多了 {0} 铜钱."
 
 }
 
