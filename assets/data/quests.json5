@@ -2059,6 +2059,16 @@
   },
 
 
+  {
+    id: "hidden_blood_gang",
+    policy: null,
+    isBounty: false,
+    isHidden: true,
+    contribution: 11,
+    rank: 0,
+  },
+
+
 
 
 
