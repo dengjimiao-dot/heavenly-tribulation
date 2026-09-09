@@ -368,6 +368,7 @@ async function onAfterMove(terrain) {
     if (await tryJiejiFlexorcarpiulnarisstrapOnMove(terrain)) return true
     if (await tryJiejiPalmarislongusstrapOnMove(terrain)) return true
     if (await tryJiejiFlexorcarpiradialisstrapOnMove(terrain)) return true
+    if (await tryJiejiExtensorcarpiulnarisstrapOnMove(terrain)) return true
   }
   return fought
 }
