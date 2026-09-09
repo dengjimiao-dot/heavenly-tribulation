@@ -959,5 +959,8 @@
   "quest_hidden_mist_hyphacable_complete": "「{0}」有了着落。你在{1}的雾丝缆边走了一遭。",
   "quest_hidden_thunder_tuo": "劫纹雷坨",
   "quest_hidden_thunder_tuo_description": "行路听闻{0}城外有劫纹雷坨。去走一遭，或可采得药材、拾得铜钱并回些生机。",
-  "quest_hidden_thunder_tuo_complete": "「{0}」有了着落。你在{1}的雷坨边走了一遭。"
+  "quest_hidden_thunder_tuo_complete": "「{0}」有了着落。你在{1}的雷坨边走了一遭。",
+  "quest_hidden_mist_myceliummat": "劫纹雾菌毡",
+  "quest_hidden_mist_myceliummat_description": "行路听闻{0}城外有劫纹雾菌毡。去走一遭，或可采得药材、拾得铜钱并回些生机。",
+  "quest_hidden_mist_myceliummat_complete": "「{0}」有了着落。你在{1}的雾菌毡边走了一遭。"
 }

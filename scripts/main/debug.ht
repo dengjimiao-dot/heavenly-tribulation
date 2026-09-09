@@ -798,6 +798,8 @@ namespace debug {
     }
     } else if (kind == 'tuo') {
       questKind = 'hidden_thunder_tuo'
+    } else if (kind == 'myceliummat') {
+      questKind = 'hidden_mist_myceliummat'
     }
     final ctor = Quests[questKind]
     if (ctor == null) return false
