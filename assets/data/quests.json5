@@ -2530,4 +2530,14 @@
   },
 
 
+  {
+    id: "hidden_thunder_yang",
+    policy: null,
+    isBounty: false,
+    isHidden: true,
+    contribution: 11,
+    rank: 0,
+  },
+
+
 }
