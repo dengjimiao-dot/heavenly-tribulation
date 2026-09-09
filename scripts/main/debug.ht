@@ -741,6 +741,10 @@ namespace debug {
     } else if (kind == 'aleuriospore') {
       questKind = 'hidden_mist_aleuriospore'
     }
+    }
+    } else if (kind == 'di') {
+      questKind = 'hidden_blood_di'
+    }
     final ctor = Quests[questKind]
     if (ctor == null) return false
     final quest = ctor(fromSite, difficulty: 0)
