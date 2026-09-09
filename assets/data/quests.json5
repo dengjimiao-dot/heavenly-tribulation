@@ -2019,6 +2019,16 @@
   },
 
 
+  {
+    id: "hidden_blood_luan",
+    policy: null,
+    isBounty: false,
+    isHidden: true,
+    contribution: 11,
+    rank: 0,
+  },
+
+
 
 
 
