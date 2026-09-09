@@ -6220,7 +6220,20 @@
   "hint_jieji_ribneckstrap_looseribneckstrap_ok": "你解开劫肋颈革。得了 {0} 药材，生机回了 {1} 点。",
   "hint_jieji_ribneckstrap_looseribneckstrap_broke": "解颈要 {0} 铜钱。袋里不够。",
   "hint_jieji_ribneckstrap_bloodribneckstrap_ok": "你割了 {0} 点生机去染劫肋颈革。",
-  "hint_jieji_ribneckstrap_bloodribneckstrap_none": "血颈下去，颈影却散了。袋里多了 {0} 铜钱."
+  "hint_jieji_ribneckstrap_bloodribneckstrap_none": "血颈下去，颈影却散了。袋里多了 {0} 铜钱.",
+  "hint_jieji_ribtuberclestrap": "路遇一条劫肋结节革。你可以系结、解结，或以血染结。",
+  "jieji_ribtuberclestrap_tieribtuberclestrap": "系结",
+  "jieji_ribtuberclestrap_looseribtuberclestrap": "解结",
+  "jieji_ribtuberclestrap_bloodribtuberclestrap": "血结",
+  "hint_jieji_ribtuberclestrap_tieribtuberclestrap": "系结：耗 1 药材（雾月不耗）。回 1 命，五毫摸残页。药材不够则空手。",
+  "hint_jieji_ribtuberclestrap_looseribtuberclestrap": "解结：花 1 铜钱（雷月 1）。得 1 药材，并回 1 命。袋里不够则空手。",
+  "hint_jieji_ribtuberclestrap_bloodribtuberclestrap": "血结：扣 1 点生机（至少留 1，血月 2）。三毫摸残页，不成则得 2 铜钱。",
+  "hint_jieji_ribtuberclestrap_tieribtuberclestrap_ok": "你系上劫肋结节革。生机回了 {0} 点。",
+  "hint_jieji_ribtuberclestrap_tieribtuberclestrap_broke": "系结要 {0} 药材。你拿不出来。",
+  "hint_jieji_ribtuberclestrap_looseribtuberclestrap_ok": "你解开劫肋结节革。得了 {0} 药材，生机回了 {1} 点。",
+  "hint_jieji_ribtuberclestrap_looseribtuberclestrap_broke": "解结要 {0} 铜钱。袋里不够。",
+  "hint_jieji_ribtuberclestrap_bloodribtuberclestrap_ok": "你割了 {0} 点生机去染劫肋结节革。",
+  "hint_jieji_ribtuberclestrap_bloodribtuberclestrap_none": "血结下去，结影却散了。袋里多了 {0} 铜钱。"
 
 }
 
