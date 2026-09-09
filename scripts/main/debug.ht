@@ -1082,6 +1082,8 @@ namespace debug {
       await playJiejiTeresmajorstrapEvent(terrain)
     } else if (kind == 'teresminorstrap') {
       await playJiejiTeresminorstrapEvent(terrain)
+    } else if (kind == 'supraspinatusstrap') {
+      await playJiejiSupraspinatusstrapEvent(terrain)
     } else {
       await playJiejiThunderRoadEvent(terrain)
     }
@@ -2527,6 +2529,11 @@ namespace debug {
   /// 忽略几率与冷却，仍弹出赶路劫小圆肌革三选。
   async function forceTeresminorstrap() {
     return await playJiejiTeresminorstrapEvent({ kind: 'plain' })
+  }
+
+  /// 忽略几率与冷却，仍弹出赶路劫冈上肌革三选。
+  async function forceSupraspinatusstrap() {
+    return await playJiejiSupraspinatusstrapEvent({ kind: 'plain' })
   }
 
   /// 忽略冷却与花费，仍弹出幻术祭坛入幻三选。
