@@ -808,6 +808,8 @@ namespace debug {
       questKind = 'hidden_blood_wa'
     } else if (kind == 'basidiocarp') {
       questKind = 'hidden_mist_basidiocarp'
+    } else if (kind == 'xu') {
+      questKind = 'hidden_blood_xu'
     }
     final ctor = Quests[questKind]
     if (ctor == null) return false
