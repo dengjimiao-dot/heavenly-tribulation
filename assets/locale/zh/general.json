@@ -6248,7 +6248,20 @@
   "hint_jieji_ribtuberclestrap_looseribtuberclestrap_ok": "你解开劫肋结节革。得了 {0} 药材，生机回了 {1} 点。",
   "hint_jieji_ribtuberclestrap_looseribtuberclestrap_broke": "解结要 {0} 铜钱。袋里不够。",
   "hint_jieji_ribtuberclestrap_bloodribtuberclestrap_ok": "你割了 {0} 点生机去染劫肋结节革。",
-  "hint_jieji_ribtuberclestrap_bloodribtuberclestrap_none": "血结下去，结影却散了。袋里多了 {0} 铜钱。"
+  "hint_jieji_ribtuberclestrap_bloodribtuberclestrap_none": "血结下去，结影却散了。袋里多了 {0} 铜钱。",
+  "hint_jieji_ribanglestrap": "路遇一条劫肋角革。你可以系角、解角，或以血染角。",
+  "jieji_ribanglestrap_tieribanglestrap": "系角",
+  "jieji_ribanglestrap_looseribanglestrap": "解角",
+  "jieji_ribanglestrap_bloodribanglestrap": "血角",
+  "hint_jieji_ribanglestrap_tieribanglestrap": "系角：耗 1 药材（雾月不耗）。回 1 命，五毫摸残页。药材不够则空手。",
+  "hint_jieji_ribanglestrap_looseribanglestrap": "解角：花 1 铜钱（雷月 1）。得 1 药材，并回 1 命。袋里不够则空手。",
+  "hint_jieji_ribanglestrap_bloodribanglestrap": "血角：扣 1 点生机（至少留 1，血月 2）。三毫摸残页，不成则得 2 铜钱。",
+  "hint_jieji_ribanglestrap_tieribanglestrap_ok": "你系上劫肋角革。生机回了 {0} 点。",
+  "hint_jieji_ribanglestrap_tieribanglestrap_broke": "系角要 {0} 药材。你拿不出来。",
+  "hint_jieji_ribanglestrap_looseribanglestrap_ok": "你解开劫肋角革。得了 {0} 药材，生机回了 {1} 点。",
+  "hint_jieji_ribanglestrap_looseribanglestrap_broke": "解角要 {0} 铜钱。袋里不够。",
+  "hint_jieji_ribanglestrap_bloodribanglestrap_ok": "你割了 {0} 点生机去染劫肋角革。",
+  "hint_jieji_ribanglestrap_bloodribanglestrap_none": "血角下去，角影却散了。袋里多了 {0} 铜钱。"
 
 }
 
