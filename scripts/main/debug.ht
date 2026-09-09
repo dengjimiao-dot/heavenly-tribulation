@@ -857,6 +857,8 @@ namespace debug {
     }
     } else if (kind == 'myceliumfan') {
       questKind = 'hidden_mist_myceliumfan'
+    } else if (kind == 'xueyao') {
+      questKind = 'hidden_blood_xueyao'
     }
     final ctor = Quests[questKind]
     if (ctor == null) return false

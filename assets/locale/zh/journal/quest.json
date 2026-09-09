@@ -1046,5 +1046,8 @@
   "quest_hidden_thunder_leilie_complete": "「{0}」有了着落。你在{1}的雷裂边走了一遭。",
   "quest_hidden_mist_myceliumfan": "劫纹雾菌扇",
   "quest_hidden_mist_myceliumfan_description": "行路听闻{0}城外有劫纹雾菌扇。去走一遭，或可采得药材、拾得铜钱并回些生机。",
-  "quest_hidden_mist_myceliumfan_complete": "「{0}」有了着落。你在{1}的雾菌扇边走了一遭。"
+  "quest_hidden_mist_myceliumfan_complete": "「{0}」有了着落。你在{1}的雾菌扇边走了一遭。",
+  "quest_hidden_blood_xueyao": "劫纹血窈",
+  "quest_hidden_blood_xueyao_description": "行路听闻{0}城外有劫纹血窈。去走一遭，或可采得药材、拾得铜钱并回些生机。",
+  "quest_hidden_blood_xueyao_complete": "「{0}」有了着落。你在{1}的血窈边走了一遭。"
 }
