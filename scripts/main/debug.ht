@@ -608,6 +608,9 @@ namespace debug {
     } else if (kind == 'suspensor') {
       questKind = 'hidden_mist_suspensor'
     }
+    } else if (kind == 'bo') {
+      questKind = 'hidden_thunder_bo'
+    }
     final ctor = Quests[questKind]
     if (ctor == null) return false
     final quest = ctor(fromSite, difficulty: 0)
