@@ -673,6 +673,8 @@ namespace debug {
       questKind = 'hidden_thunder_ni'
     } else if (kind == 'wo') {
       questKind = 'hidden_blood_wo'
+    } else if (kind == 'zygospore') {
+      questKind = 'hidden_mist_zygospore'
     }
     final ctor = Quests[questKind]
     if (ctor == null) return false
