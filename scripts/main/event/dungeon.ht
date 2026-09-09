@@ -329,6 +329,7 @@ const _kEncounterKinds = [
   'jiejiZengjinzhu',
   'jiejiFujinzhu',
   'jiejiLiijinzhu',
+  'jiejiJianjinzhu',
 ]
 
 function _addEncampment() {
@@ -1271,6 +1272,9 @@ function _prepareMap() {
               },
               'jiejiLiijinzhu': {
                 markJiejiDungeonEncounter('jiejiLiijinzhu')
+              },
+              'jiejiJianjinzhu': {
+                markJiejiDungeonEncounter('jiejiJianjinzhu')
               }
             }
           }
