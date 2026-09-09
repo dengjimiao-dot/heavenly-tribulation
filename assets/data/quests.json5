@@ -1949,6 +1949,16 @@
   },
 
 
+  {
+    id: "hidden_mist_coleoptile",
+    policy: null,
+    isBounty: false,
+    isHidden: true,
+    contribution: 11,
+    rank: 0,
+  },
+
+
 
 
 
