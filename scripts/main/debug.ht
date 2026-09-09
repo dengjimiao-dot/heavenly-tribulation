@@ -828,6 +828,8 @@ namespace debug {
       questKind = 'hidden_blood_xuejian'
     } else if (kind == 'volva') {
       questKind = 'hidden_mist_volva'
+    } else if (kind == 'leique') {
+      questKind = 'hidden_thunder_leique'
     }
     final ctor = Quests[questKind]
     if (ctor == null) return false
