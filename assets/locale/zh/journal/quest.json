@@ -983,8 +983,11 @@
   "quest_hidden_mist_ascocarp_complete": "「{0}」有了着落。你在{1}的雾子囊果边走了一遭。",
   "quest_hidden_mist_sporocarp": "劫纹雾孢子果",
   "quest_hidden_mist_gleba": "劫纹雾产孢体",
+  "quest_hidden_blood_xueze": "劫纹血泽",
   "quest_hidden_mist_sporocarp_description": "行路听闻{0}城外有劫纹雾孢子果。去走一遭，或可采得药材、拾得铜钱并回些生机。",
   "quest_hidden_mist_gleba_description": "行路听闻{0}城外有劫纹雾产孢体。去走一遭，或可采得药材、拾得铜钱并回些生机。",
+  "quest_hidden_blood_xueze_description": "行路听闻{0}城外有劫纹血泽。去走一遭，或可采得药材、拾得铜钱并回些生机。",
   "quest_hidden_mist_sporocarp_complete": "「{0}」有了着落。你在{1}的雾孢子果边走了一遭。",
-  "quest_hidden_mist_gleba_complete": "「{0}」有了着落。你在{1}的雾产孢体边走了一遭。"
+  "quest_hidden_mist_gleba_complete": "「{0}」有了着落。你在{1}的雾产孢体边走了一遭。",
+  "quest_hidden_blood_xueze_complete": "「{0}」有了着落。你在{1}的血泽边走了一遭。"
 }
