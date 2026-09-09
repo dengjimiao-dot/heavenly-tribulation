@@ -391,6 +391,7 @@ async function onAfterMove(terrain) {
     if (await tryJiejiAbductorindicisstrapOnMove(terrain)) return true
     if (await tryJiejiFlexordigitorumsuperficialisstrapOnMove(terrain)) return true
     if (await tryJiejiFlexordigitorumprofundusstrapOnMove(terrain)) return true
+    if (await tryJiejiExtensordigitorumcommunisstrapOnMove(terrain)) return true
   }
   return fought
 }
