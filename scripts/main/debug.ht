@@ -854,11 +854,12 @@ namespace debug {
       questKind = 'hidden_mist_sporeprint'
     } else if (kind == 'leilie') {
       questKind = 'hidden_thunder_leilie'
-    }
     } else if (kind == 'myceliumfan') {
       questKind = 'hidden_mist_myceliumfan'
     } else if (kind == 'xueyao') {
       questKind = 'hidden_blood_xueyao'
+    } else if (kind == 'hyphalmat') {
+      questKind = 'hidden_mist_hyphalmat'
     }
     final ctor = Quests[questKind]
     if (ctor == null) return false
