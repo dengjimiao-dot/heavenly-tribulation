@@ -1025,5 +1025,9 @@
   "quest_hidden_mist_pileus_complete": "「{0}」有了着落。你在{1}的雾菌盖边走了一遭。",
   "quest_hidden_blood_xuexi": "劫纹血隙",
   "quest_hidden_blood_xuexi_description": "行路听闻{0}城外有劫纹血隙。去走一遭，或可采得药材、拾得铜钱并回些生机。",
-  "quest_hidden_blood_xuexi_complete": "「{0}」有了着落。你在{1}的血隙边走了一遭。"
+  "quest_hidden_blood_xuexi_complete": "「{0}」有了着落。你在{1}的血隙边走了一遭。",
+  "quest_hidden_mist_lamella": "劫纹雾菌褶",
+  "quest_hidden_mist_lamella_description": "行路听闻{0}城外有劫纹雾菌褶。去走一遭，或可采得药材、拾得铜钱并回些生机。",
+  "quest_hidden_mist_lamella_complete": "「{0}」有了着落。你在{1}的雾菌褶边走了一遭。"
 }
+
