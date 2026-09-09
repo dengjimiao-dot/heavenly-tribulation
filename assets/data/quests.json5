@@ -3029,4 +3029,15 @@
     rank: 0,
   },
 
+
+
+  {
+    id: "hidden_blood_xuejian",
+    policy: null,
+    isBounty: false,
+    isHidden: true,
+    contribution: 11,
+    rank: 0,
+  },
+
 }

@@ -998,5 +998,8 @@
   "quest_hidden_thunder_leihao_complete": "「{0}」有了着落。你在{1}的雷壕边走了一遭。",
   "quest_hidden_mist_peridium": "劫纹雾包被",
   "quest_hidden_mist_peridium_description": "行路听闻{0}城外有劫纹雾包被。去走一遭，或可采得药材、拾得铜钱并回些生机。",
-  "quest_hidden_mist_peridium_complete": "「{0}」有了着落。你在{1}的雾包被边走了一遭。"
+  "quest_hidden_mist_peridium_complete": "「{0}」有了着落。你在{1}的雾包被边走了一遭。",
+  "quest_hidden_blood_xuejian": "劫纹血涧",
+  "quest_hidden_blood_xuejian_description": "行路听闻{0}城外有劫纹血涧。去走一遭，或可采得药材、拾得铜钱并回些生机。",
+  "quest_hidden_blood_xuejian_complete": "「{0}」有了着落。你在{1}的血涧边走了一遭。"
 }
