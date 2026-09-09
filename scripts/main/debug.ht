@@ -749,6 +749,10 @@ namespace debug {
     } else if (kind == 'conidiophore') {
       questKind = 'hidden_mist_conidiophore'
     }
+    }
+    } else if (kind == 'ba') {
+      questKind = 'hidden_blood_ba'
+    }
     final ctor = Quests[questKind]
     if (ctor == null) return false
     final quest = ctor(fromSite, difficulty: 0)
