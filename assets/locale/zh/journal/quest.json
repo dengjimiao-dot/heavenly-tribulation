@@ -827,5 +827,8 @@
   "quest_hidden_thunder_yu_complete": "「{0}」有了着落。你在{1}的雷淤边走了一遭。",
   "quest_hidden_blood_ya_complete": "「{0}」有了着落。你在{1}的血垭边走了一遭。",
   "quest_hidden_blood_ao_complete": "「{0}」有了着落。你在{1}的血坳边走了一遭。",
-  "quest_hidden_mist_sporangium_complete": "「{0}」有了着落。你在{1}的雾孢子囊边走了一遭。"
+  "quest_hidden_mist_sporangium_complete": "「{0}」有了着落。你在{1}的雾孢子囊边走了一遭。",
+  "quest_hidden_thunder_ni": "劫纹雷泥",
+  "quest_hidden_thunder_ni_description": "行路听闻{0}城外有劫纹雷泥。去走一遭，或可采得药材、拾得铜钱并回些生机。",
+  "quest_hidden_thunder_ni_complete": "「{0}」有了着落。你在{1}的雷泥边走了一遭。"
 }
