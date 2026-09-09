@@ -872,6 +872,8 @@ namespace debug {
       questKind = 'hidden_blood_xueku'
     } else if (kind == 'hyphalveil') {
       questKind = 'hidden_mist_hyphalveil'
+    } else if (kind == 'leiku') {
+      questKind = 'hidden_thunder_leiku'
     }
     final ctor = Quests[questKind]
     if (ctor == null) return false
