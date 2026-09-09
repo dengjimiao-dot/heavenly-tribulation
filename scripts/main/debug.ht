@@ -2015,6 +2015,9 @@ namespace debug {
     } else if (kind == 'zunjinzhu') {
       game.flags.dungeon.pendingEncounter = 'jiejiZunjinzhu'
       await playJiejiDungeonEncounter()
+    } else if (kind == 'juejinzhu') {
+      game.flags.dungeon.pendingEncounter = 'jiejiJuejinzhu'
+      await playJiejiDungeonEncounter()
     } else if (kind == 'exit') {
       await playJiejiDungeonExitGift()
     } else {
