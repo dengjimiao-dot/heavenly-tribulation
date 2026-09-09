@@ -911,5 +911,8 @@
   "quest_hidden_mist_oidium_complete": "「{0}」有了着落。你在{1}的雾粉孢边走了一遭。",
   "quest_hidden_blood_yao": "劫纹血窑",
   "quest_hidden_blood_yao_description": "行路听闻{0}城外有劫纹血窑。去走一遭，或可采得药材、拾得铜钱并回些生机。",
-  "quest_hidden_blood_yao_complete": "「{0}」有了着落。你在{1}的血窑边走了一遭。"
+  "quest_hidden_blood_yao_complete": "「{0}」有了着落。你在{1}的血窑边走了一遭。",
+  "quest_hidden_mist_aleuriospore": "劫纹雾厚壁孢",
+  "quest_hidden_mist_aleuriospore_description": "行路听闻{0}城外有劫纹雾厚壁孢。去走一遭，或可采得药材、拾得铜钱并回些生机。",
+  "quest_hidden_mist_aleuriospore_complete": "「{0}」有了着落。你在{1}的雾厚壁孢边走了一遭。"
 }
