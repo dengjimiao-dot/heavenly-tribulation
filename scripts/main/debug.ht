@@ -812,6 +812,8 @@ namespace debug {
       questKind = 'hidden_blood_xu'
     } else if (kind == 'ascocarp') {
       questKind = 'hidden_mist_ascocarp'
+    } else if (kind == 'sporocarp') {
+      questKind = 'hidden_mist_sporocarp'
     }
     final ctor = Quests[questKind]
     if (ctor == null) return false
