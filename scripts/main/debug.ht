@@ -716,6 +716,9 @@ namespace debug {
     } else if (kind == 'xuan') {
       questKind = 'hidden_blood_xuan'
     }
+    } else if (kind == 'blastospore') {
+      questKind = 'hidden_mist_blastospore'
+    }
     final ctor = Quests[questKind]
     if (ctor == null) return false
     final quest = ctor(fromSite, difficulty: 0)
