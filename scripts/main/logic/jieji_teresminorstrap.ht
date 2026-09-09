@@ -1,0 +1,152 @@
+/// 赶路「劫小圆肌革」三选：系小圆肌 / 解小圆肌 / 血小圆肌。隐藏、劫兆、野遇、赶路、行商、拾荒、扎营、残锋、残卷、雾灯、残鼓、汲泉、劫幡、劫铃、劫符、劫旌、劫烛、劫角、劫笛、劫笠、劫带、劫履、劫氅、劫扇、劫杖、劫伞、劫面、劫帔、劫手套、劫戒、劫镜、劫鼓、劫炬、劫梳、劫勺、劫碗、劫杯、劫罐、劫瓶、劫墨、劫袍、劫带、劫簪、劫笔、劫针、劫扣、劫绳、劫珠、劫钗、劫绦、劫穗、劫缎、劫缨、劫袖、劫领、劫缘、劫辫、劫翎、劫裹、劫轭、劫辔、劫缰、劫镫、劫鞦、劫勒、劫衔、劫绊、劫鞍、劫刺、劫绊索、劫蹄铁、劫鞍垫、劫肚带、劫尻带、劫额革、劫鼻革、劫咽革、劫颊革、劫顶革、劫面革、劫障革、劫笼革、劫套革、劫羁革、劫络革、劫鬃革、劫罗革、劫甩革、劫肚革、劫裙革、劫翼革、劫扣革、劫环革、劫胸革、劫颈革、劫肩革、劫背革、劫腰革、劫胯革、劫胁革、劫肋革、劫股革、劫膝革、劫胫革、劫踝革、劫踵革、劫足革、劫趾革、劫爪革、劫掌革、劫腕革、劫指革、劫节革、劫甲革、劫拇革、劫肘革、劫肱革、劫膊革、劫桡革、劫鹰革、劫喙革、劫肩峰革、劫肩胛革、劫锁骨革、劫胸骨革、劫柄革、劫剑突革、劫肋软革、劫浮肋革、劫肋弓革、劫肋间革、劫真肋革、劫假肋革、劫肋头革、劫肋颈革、劫肋结节革、劫肋角革、劫肋沟革、劫肋脊革、劫肋体革、劫肋椎革、劫肋横突革、劫肋软骨结革、劫胸肋革、劫柄胸革、劫胸骨角革、劫剑胸革、劫肋胸革、劫颈静脉切迹革、劫锁骨切迹革、劫肋软骨弓革、劫肋下角革、劫胸骨体革、劫肋剑突革、劫锁间韧带革、劫肋软骨结合革、劫胸骨肌革、劫胸大肌革、劫前锯肌革、劫锁骨下肌革、劫背阔肌革、劫斜方肌革、劫三角肌革、劫冈下肌革、劫大圆肌革、劫小圆肌革都没中时才滚。
+const kJiejiTeresminorstrapBaseRate = 0.00000000000000008
+const kJiejiTeresminorstrapMoveCooldown = 24
+const kJiejiTeresminorstrapTieteresminorstrapHerb = 1
+const kJiejiTeresminorstrapTieteresminorstrapLife = 1
+const kJiejiTeresminorstrapTieteresminorstrapGongfaRate = 0.005
+const kJiejiTeresminorstrapLooseteresminorstrapMoney = 1
+const kJiejiTeresminorstrapLooseteresminorstrapMoneyThunder = 1
+const kJiejiTeresminorstrapLooseteresminorstrapHerb = 1
+const kJiejiTeresminorstrapLooseteresminorstrapLife = 1
+const kJiejiTeresminorstrapBloodLife = 1
+const kJiejiTeresminorstrapBloodLifeBlood = 2
+const kJiejiTeresminorstrapBloodGongfaRate = 0.03
+const kJiejiTeresminorstrapBloodMoney = 2
+
+function _jiejiTeresminorstrapSeasonId() {
+  if (game.jieji != null && game.jieji.seasonId != null) {
+    return game.jieji.seasonId
+  }
+  return null
+}
+
+function _jiejiTeresminorstrapTutorialLocked() {
+  return game.enableTutorial && game.flags.tutorial.bountyQuest != true
+}
+
+function _jiejiTeresminorstrapTieteresminorstrapHerbCost(seasonId) {
+  if (seasonId == 'mist') return 0
+  return kJiejiTeresminorstrapTieteresminorstrapHerb
+}
+
+function _jiejiTeresminorstrapLooseteresminorstrapMoneyCost(seasonId) {
+  if (seasonId == 'thunder') return kJiejiTeresminorstrapLooseteresminorstrapMoneyThunder
+  return kJiejiTeresminorstrapLooseteresminorstrapMoney
+}
+
+function _jiejiTeresminorstrapBloodLifeCost(seasonId) {
+  if (seasonId == 'blood') return kJiejiTeresminorstrapBloodLifeBlood
+  return kJiejiTeresminorstrapBloodLife
+}
+
+function _jiejiTeresminorstrapCostLife(want) {
+  var lost = want
+  final life = hero.life ?? 1
+  if (life - lost < 1) lost = life - 1
+  if (lost < 0) lost = 0
+  if (lost > 0) {
+    Player.setLife(hero.life - lost)
+  }
+  return lost
+}
+
+function _jiejiTeresminorstrapNormalizeKind(kind) {
+  if (kind == 'tieteresminorstrap' || kind == 'jieji_teresminorstrap_tieteresminorstrap') return 'tieteresminorstrap'
+  if (kind == 'looseteresminorstrap' || kind == 'jieji_teresminorstrap_looseteresminorstrap') return 'looseteresminorstrap'
+  if (kind == 'bloodteresminorstrap' || kind == 'jieji_teresminorstrap_bloodteresminorstrap') return 'bloodteresminorstrap'
+  return null
+}
+
+function _jiejiTeresminorstrapChoices() {
+  return [
+    {
+      text: 'jieji_teresminorstrap_tieteresminorstrap',
+      description: 'hint_jieji_teresminorstrap_tieteresminorstrap',
+    },
+    {
+      text: 'jieji_teresminorstrap_looseteresminorstrap',
+      description: 'hint_jieji_teresminorstrap_looseteresminorstrap',
+    },
+    {
+      text: 'jieji_teresminorstrap_bloodteresminorstrap',
+      description: 'hint_jieji_teresminorstrap_bloodteresminorstrap',
+    },
+  ]
+}
+
+/// 赶路劫小圆肌革三选。debug.forceJiejiEvent('teresminorstrap') / forceTeresminorstrap 直接走这里，仍弹出三选。
+async function playJiejiTeresminorstrapEvent(terrain) {
+  if (hero == null) return false
+
+  dialog.pushDialog('hint_jieji_teresminorstrap')
+  dialog.pushSelection('jiejiTeresminorstrap', _jiejiTeresminorstrapChoices())
+  await dialog.execute()
+  final picked = dialog.checkSelected('jiejiTeresminorstrap')
+  var selected = _jiejiTeresminorstrapNormalizeKind(picked)
+  if (selected == null) {
+    selected = 'tieteresminorstrap'
+  }
+
+  final seasonId = _jiejiTeresminorstrapSeasonId()
+  if (selected == 'tieteresminorstrap') {
+    final herbNeed = _jiejiTeresminorstrapTieteresminorstrapHerbCost(seasonId)
+    final herbHave = hero.materials['herb'] ?? 0
+    if (herbNeed > 0 && herbHave < herbNeed) {
+      dialog.pushDialog('hint_jieji_teresminorstrap_tieteresminorstrap_broke', interpolations: [herbNeed])
+      await dialog.execute()
+    } else {
+      if (herbNeed > 0) {
+        Player.exhaust('herb', herbNeed)
+      }
+      final healed = Player.restoreLife(kJiejiTeresminorstrapTieteresminorstrapLife)
+      dialog.pushDialog('hint_jieji_teresminorstrap_tieteresminorstrap_ok', interpolations: [healed])
+      await dialog.execute()
+      await tryDropGongfaShard(rate: kJiejiTeresminorstrapTieteresminorstrapGongfaRate)
+    }
+  } else if (selected == 'looseteresminorstrap') {
+    final moneyNeed = _jiejiTeresminorstrapLooseteresminorstrapMoneyCost(seasonId)
+    final moneyHave = hero.materials['money'] ?? 0
+    if (moneyHave < moneyNeed) {
+      dialog.pushDialog('hint_jieji_teresminorstrap_looseteresminorstrap_broke', interpolations: [moneyNeed])
+      await dialog.execute()
+    } else {
+      Player.exhaust('money', moneyNeed)
+      await Player.collect('herb', kJiejiTeresminorstrapLooseteresminorstrapHerb, incurIncident: false)
+      final healed = Player.restoreLife(kJiejiTeresminorstrapLooseteresminorstrapLife)
+      dialog.pushDialog('hint_jieji_teresminorstrap_looseteresminorstrap_ok', interpolations: [kJiejiTeresminorstrapLooseteresminorstrapHerb, healed])
+      await dialog.execute()
+    }
+  } else {
+    final lost = _jiejiTeresminorstrapCostLife(_jiejiTeresminorstrapBloodLifeCost(seasonId))
+    dialog.pushDialog('hint_jieji_teresminorstrap_bloodteresminorstrap_ok', interpolations: [lost])
+    await dialog.execute()
+    final dropped = await tryDropGongfaShard(rate: kJiejiTeresminorstrapBloodGongfaRate)
+    if (dropped != true) {
+      await Player.collect('money', kJiejiTeresminorstrapBloodMoney, incurIncident: false)
+      dialog.pushDialog('hint_jieji_teresminorstrap_bloodteresminorstrap_none', interpolations: [kJiejiTeresminorstrapBloodMoney])
+      await dialog.execute()
+    }
+  }
+
+  Game.updateUI()
+  return true
+}
+
+/// 赶路触发：教程锁与路遇相同；冷却 24 步；约 0.000000000000008%。出过则返回 true。
+async function tryJiejiTeresminorstrapOnMove(terrain) {
+  if (hero == null) return false
+  if (_jiejiTeresminorstrapTutorialLocked()) return false
+
+  final jieji = ensureJiejiFlags()
+  final moves = jieji.worldMoves ?? 0
+  final last = jieji.lastTeresminorstrapMove ?? -999
+  if (moves - last < kJiejiTeresminorstrapMoveCooldown) return false
+
+  var rate = kJiejiTeresminorstrapBaseRate
+  if (rate < 0) rate = 0
+  if (random.nextDouble() > rate) return false
+
+  jieji.lastTeresminorstrapMove = moves
+  await playJiejiTeresminorstrapEvent(terrain)
+  return true
+}
