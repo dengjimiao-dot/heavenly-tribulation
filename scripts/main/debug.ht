@@ -1052,6 +1052,8 @@ namespace debug {
       await playJiejiSubclaviusstrapEvent(terrain)
     } else if (kind == 'latissimusstrap') {
       await playJiejiLatissimusstrapEvent(terrain)
+    } else if (kind == 'trapeziusstrap') {
+      await playJiejiTrapeziusstrapEvent(terrain)
     } else {
       await playJiejiThunderRoadEvent(terrain)
     }
@@ -2457,6 +2459,11 @@ namespace debug {
   /// 忽略几率与冷却，仍弹出赶路劫背阔肌革三选。
   async function forceLatissimusstrap() {
     return await playJiejiLatissimusstrapEvent({ kind: 'plain' })
+  }
+
+  /// 忽略几率与冷却，仍弹出赶路劫斜方肌革三选。
+  async function forceTrapeziusstrap() {
+    return await playJiejiTrapeziusstrapEvent({ kind: 'plain' })
   }
 
   /// 忽略冷却与花费，仍弹出幻术祭坛入幻三选。
