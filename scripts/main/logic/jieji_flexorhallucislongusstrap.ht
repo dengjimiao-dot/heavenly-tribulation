@@ -1,0 +1,152 @@
+/// 赶路「劫踇长屈肌革」三选：系踇长屈肌 / 解踇长屈肌 / 血踇长屈肌。隐藏、劫兆、野遇、赶路、行商、拾荒、扎营、残锋、残卷、雾灯、残鼓、汲泉、劫幡、劫铃、劫符、劫旌、劫烛、劫角、劫笛、劫笠、劫带、劫履、劫氅、劫扇、劫杖、劫伞、劫面、劫帔、劫手套、劫戒、劫镜、劫鼓、劫炬、劫梳、劫勺、劫碗、劫杯、劫罐、劫瓶、劫墨、劫袍、劫带、劫簪、劫笔、劫针、劫扣、劫绳、劫珠、劫钗、劫绦、劫穗、劫缎、劫缨、劫袖、劫领、劫缘、劫辫、劫翎、劫裹、劫轭、劫辔、劫缰、劫镫、劫鞦、劫勒、劫衔、劫绊、劫鞍、劫刺、劫绊索、劫蹄铁、劫鞍垫、劫肚带、劫尻带、劫额革、劫鼻革、劫咽革、劫颊革、劫顶革、劫面革、劫障革、劫笼革、劫套革、劫羁革、劫络革、劫鬃革、劫罗革、劫甩革、劫肚革、劫裙革、劫翼革、劫扣革、劫环革、劫胸革、劫颈革、劫肩革、劫背革、劫腰革、劫胯革、劫胁革、劫肋革、劫股革、劫膝革、劫胫革、劫踝革、劫踵革、劫足革、劫趾革、劫爪革、劫掌革、劫腕革、劫指革、劫节革、劫甲革、劫拇革、劫肘革、劫肱革、劫膊革、劫桡革、劫鹰革、劫喙革、劫肩峰革、劫肩胛革、劫锁骨革、劫胸骨革、劫柄革、劫剑突革、劫肋软革、劫浮肋革、劫肋弓革、劫肋间革、劫真肋革、劫假肋革、劫肋头革、劫肋颈革、劫肋结节革、劫肋角革、劫肋沟革、劫肋脊革、劫肋体革、劫肋椎革、劫肋横突革、劫肋软骨结革、劫胸肋革、劫柄胸革、劫胸骨角革、劫剑胸革、劫肋胸革、劫颈静脉切迹革、劫锁骨切迹革、劫肋软骨弓革、劫肋下角革、劫胸骨体革、劫肋剑突革、劫锁间韧带革、劫肋软骨结合革、劫胸骨肌革、劫胸大肌革、劫前锯肌革、劫锁骨下肌革、劫背阔肌革、劫斜方肌革、劫三角肌革、劫冈下肌革、劫大圆肌革、劫小圆肌革、劫冈上肌革、劫肩胛下肌革、劫喙肱肌革、劫肱肌革、劫肱三头肌革、劫肘肌革、劫肱桡肌革、劫指伸肌革、劫尺侧腕屈肌革、劫掌长肌革、劫桡侧腕屈肌革、劫尺侧腕伸肌革、劫桡侧腕长伸肌革、劫桡侧腕短伸肌革、劫拇长展肌革、劫拇短伸肌革、劫拇长伸肌革、劫拇短展肌革、劫拇长屈肌革、劫拇短屈肌革、劫拇对掌肌革、劫拇收肌革、劫蚓状肌革、劫骨间掌侧肌革、劫第一骨间背侧肌革、劫第二骨间背侧肌革、劫第三骨间背侧肌革、劫第四骨间背侧肌革、劫小指展肌革、劫小指短屈肌革、劫小指对掌肌革、劫食指展肌革、劫指浅屈肌革、劫指深屈肌革、劫指总伸肌革、劫食指伸肌革、劫小指伸肌革、劫旋后肌革、劫旋前圆肌革、劫旋前方肌革、劫掌短肌革、劫屈肌支持带革、劫大鱼际革、劫小鱼际革、劫伸肌支持带革、劫踇收肌革、劫踇展肌革、劫踇短屈肌革、劫踇长伸肌革、劫踇长屈肌革都没中时才滚。
+const kJiejiFlexorhallucislongusstrapBaseRate = 0.00000000000000007
+const kJiejiFlexorhallucislongusstrapMoveCooldown = 24
+const kJiejiFlexorhallucislongusstrapTieflexorhallucislongusstrapHerb = 1
+const kJiejiFlexorhallucislongusstrapTieflexorhallucislongusstrapLife = 1
+const kJiejiFlexorhallucislongusstrapTieflexorhallucislongusstrapGongfaRate = 0.005
+const kJiejiFlexorhallucislongusstrapLooseflexorhallucislongusstrapMoney = 1
+const kJiejiFlexorhallucislongusstrapLooseflexorhallucislongusstrapMoneyThunder = 1
+const kJiejiFlexorhallucislongusstrapLooseflexorhallucislongusstrapHerb = 1
+const kJiejiFlexorhallucislongusstrapLooseflexorhallucislongusstrapLife = 1
+const kJiejiFlexorhallucislongusstrapBloodLife = 1
+const kJiejiFlexorhallucislongusstrapBloodLifeBlood = 2
+const kJiejiFlexorhallucislongusstrapBloodGongfaRate = 0.03
+const kJiejiFlexorhallucislongusstrapBloodMoney = 2
+
+function _jiejiFlexorhallucislongusstrapSeasonId() {
+  if (game.jieji != null && game.jieji.seasonId != null) {
+    return game.jieji.seasonId
+  }
+  return null
+}
+
+function _jiejiFlexorhallucislongusstrapTutorialLocked() {
+  return game.enableTutorial && game.flags.tutorial.bountyQuest != true
+}
+
+function _jiejiFlexorhallucislongusstrapTieflexorhallucislongusstrapHerbCost(seasonId) {
+  if (seasonId == 'mist') return 0
+  return kJiejiFlexorhallucislongusstrapTieflexorhallucislongusstrapHerb
+}
+
+function _jiejiFlexorhallucislongusstrapLooseflexorhallucislongusstrapMoneyCost(seasonId) {
+  if (seasonId == 'thunder') return kJiejiFlexorhallucislongusstrapLooseflexorhallucislongusstrapMoneyThunder
+  return kJiejiFlexorhallucislongusstrapLooseflexorhallucislongusstrapMoney
+}
+
+function _jiejiFlexorhallucislongusstrapBloodLifeCost(seasonId) {
+  if (seasonId == 'blood') return kJiejiFlexorhallucislongusstrapBloodLifeBlood
+  return kJiejiFlexorhallucislongusstrapBloodLife
+}
+
+function _jiejiFlexorhallucislongusstrapCostLife(want) {
+  var lost = want
+  final life = hero.life ?? 1
+  if (life - lost < 1) lost = life - 1
+  if (lost < 0) lost = 0
+  if (lost > 0) {
+    Player.setLife(hero.life - lost)
+  }
+  return lost
+}
+
+function _jiejiFlexorhallucislongusstrapNormalizeKind(kind) {
+  if (kind == 'tieflexorhallucislongusstrap' || kind == 'jieji_flexorhallucislongusstrap_tieflexorhallucislongusstrap') return 'tieflexorhallucislongusstrap'
+  if (kind == 'looseflexorhallucislongusstrap' || kind == 'jieji_flexorhallucislongusstrap_looseflexorhallucislongusstrap') return 'looseflexorhallucislongusstrap'
+  if (kind == 'bloodflexorhallucislongusstrap' || kind == 'jieji_flexorhallucislongusstrap_bloodflexorhallucislongusstrap') return 'bloodflexorhallucislongusstrap'
+  return null
+}
+
+function _jiejiFlexorhallucislongusstrapChoices() {
+  return [
+    {
+      text: 'jieji_flexorhallucislongusstrap_tieflexorhallucislongusstrap',
+      description: 'hint_jieji_flexorhallucislongusstrap_tieflexorhallucislongusstrap',
+    },
+    {
+      text: 'jieji_flexorhallucislongusstrap_looseflexorhallucislongusstrap',
+      description: 'hint_jieji_flexorhallucislongusstrap_looseflexorhallucislongusstrap',
+    },
+    {
+      text: 'jieji_flexorhallucislongusstrap_bloodflexorhallucislongusstrap',
+      description: 'hint_jieji_flexorhallucislongusstrap_bloodflexorhallucislongusstrap',
+    },
+  ]
+}
+
+/// 赶路劫踇长屈肌革三选。debug.forceJiejiEvent('flexorhallucislongusstrap') / forceFlexorhallucislongusstrap 直接走这里，仍弹出三选。
+async function playJiejiFlexorhallucislongusstrapEvent(terrain) {
+  if (hero == null) return false
+
+  dialog.pushDialog('hint_jieji_flexorhallucislongusstrap')
+  dialog.pushSelection('jiejiFlexorhallucislongusstrap', _jiejiFlexorhallucislongusstrapChoices())
+  await dialog.execute()
+  final picked = dialog.checkSelected('jiejiFlexorhallucislongusstrap')
+  var selected = _jiejiFlexorhallucislongusstrapNormalizeKind(picked)
+  if (selected == null) {
+    selected = 'tieflexorhallucislongusstrap'
+  }
+
+  final seasonId = _jiejiFlexorhallucislongusstrapSeasonId()
+  if (selected == 'tieflexorhallucislongusstrap') {
+    final herbNeed = _jiejiFlexorhallucislongusstrapTieflexorhallucislongusstrapHerbCost(seasonId)
+    final herbHave = hero.materials['herb'] ?? 0
+    if (herbNeed > 0 && herbHave < herbNeed) {
+      dialog.pushDialog('hint_jieji_flexorhallucislongusstrap_tieflexorhallucislongusstrap_broke', interpolations: [herbNeed])
+      await dialog.execute()
+    } else {
+      if (herbNeed > 0) {
+        Player.exhaust('herb', herbNeed)
+      }
+      final healed = Player.restoreLife(kJiejiFlexorhallucislongusstrapTieflexorhallucislongusstrapLife)
+      dialog.pushDialog('hint_jieji_flexorhallucislongusstrap_tieflexorhallucislongusstrap_ok', interpolations: [healed])
+      await dialog.execute()
+      await tryDropGongfaShard(rate: kJiejiFlexorhallucislongusstrapTieflexorhallucislongusstrapGongfaRate)
+    }
+  } else if (selected == 'looseflexorhallucislongusstrap') {
+    final moneyNeed = _jiejiFlexorhallucislongusstrapLooseflexorhallucislongusstrapMoneyCost(seasonId)
+    final moneyHave = hero.materials['money'] ?? 0
+    if (moneyHave < moneyNeed) {
+      dialog.pushDialog('hint_jieji_flexorhallucislongusstrap_looseflexorhallucislongusstrap_broke', interpolations: [moneyNeed])
+      await dialog.execute()
+    } else {
+      Player.exhaust('money', moneyNeed)
+      await Player.collect('herb', kJiejiFlexorhallucislongusstrapLooseflexorhallucislongusstrapHerb, incurIncident: false)
+      final healed = Player.restoreLife(kJiejiFlexorhallucislongusstrapLooseflexorhallucislongusstrapLife)
+      dialog.pushDialog('hint_jieji_flexorhallucislongusstrap_looseflexorhallucislongusstrap_ok', interpolations: [kJiejiFlexorhallucislongusstrapLooseflexorhallucislongusstrapHerb, healed])
+      await dialog.execute()
+    }
+  } else {
+    final lost = _jiejiFlexorhallucislongusstrapCostLife(_jiejiFlexorhallucislongusstrapBloodLifeCost(seasonId))
+    dialog.pushDialog('hint_jieji_flexorhallucislongusstrap_bloodflexorhallucislongusstrap_ok', interpolations: [lost])
+    await dialog.execute()
+    final dropped = await tryDropGongfaShard(rate: kJiejiFlexorhallucislongusstrapBloodGongfaRate)
+    if (dropped != true) {
+      await Player.collect('money', kJiejiFlexorhallucislongusstrapBloodMoney, incurIncident: false)
+      dialog.pushDialog('hint_jieji_flexorhallucislongusstrap_bloodflexorhallucislongusstrap_none', interpolations: [kJiejiFlexorhallucislongusstrapBloodMoney])
+      await dialog.execute()
+    }
+  }
+
+  Game.updateUI()
+  return true
+}
+
+/// 赶路触发：教程锁与路遇相同；冷却 24 步；约 0.000000000000007%。出过则返回 true。
+async function tryJiejiFlexorhallucislongusstrapOnMove(terrain) {
+  if (hero == null) return false
+  if (_jiejiFlexorhallucislongusstrapTutorialLocked()) return false
+
+  final jieji = ensureJiejiFlags()
+  final moves = jieji.worldMoves ?? 0
+  final last = jieji.lastFlexorhallucislongusstrapMove ?? -999
+  if (moves - last < kJiejiFlexorhallucislongusstrapMoveCooldown) return false
+
+  var rate = kJiejiFlexorhallucislongusstrapBaseRate
+  if (rate < 0) rate = 0
+  if (random.nextDouble() > rate) return false
+
+  jieji.lastFlexorhallucislongusstrapMove = moves
+  await playJiejiFlexorhallucislongusstrapEvent(terrain)
+  return true
+}
